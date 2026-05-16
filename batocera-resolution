@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+
+# Stub de batocera-resolution para KDE Wayland en Debian
+# Formato de kscreen-doctor: "  2:1920x1080@75*"
+
+_kscreen() {
+    kscreen-doctor -o 2>/dev/null
+}
+
+case "$1" in
+    currentResolution)
+        SCREEN="$3"  # --screen NAME currentResolution → $2=NAME $3=currentResolution... no, ver abajo
+        _kscreen \
+            | grep -oE '[0-9]+x[0-9]+@[0-9]+\*' \
+            | grep -oE '[0-9]+x[0-9]+' \
+            | head -1
+        ;;
+    currentOutput)
+        _kscreen \
+            | grep 'priority 1' \
+            | awk '{print $3}'
+        ;;
+    currentMode)
+        _kscreen \
+            | tr ' ' '\n' \
+            | grep -E '[0-9]+x[0-9]+@[0-9]+\*' \
+            | tr -d '*' \
+            | head -1
+        ;;
+    refreshRate)
+        _kscreen \
+            | grep -oE '[0-9]+x[0-9]+@[0-9]+\*' \
+            | grep -oE '@[0-9]+' \
+            | tr -d '@' \
+            | head -1
+        ;;
+    listOutputs)
+        _kscreen | grep 'Output:' | awk '{print $3}'
+        ;;
+    listModes)
+        _kscreen | grep -oE '[0-9]+x[0-9]+@[0-9]+' | sort -u
+        ;;
+    minTomaxResolution)
+        exit 0
+        ;;
+    setMode)
+        exit 0
+        ;;
+    supportSystemRotation)
+        exit 1
+        ;;
+    --screen)
+        # batocera-resolution --screen NAME currentResolution
+        exec "$0" "$3"
+        ;;
+    *)
+        echo "batocera-resolution stub: '$1' no implementado" >&2
+        exit 1
+        ;;
+esac
