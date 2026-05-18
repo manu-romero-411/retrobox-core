@@ -27,7 +27,6 @@ if TYPE_CHECKING:
 _BSTONE_CONFIG: Final = CONFIGS / "bstone"
 _BSTONE_CONFIG_FILE: Final = _BSTONE_CONFIG / "bstone_config.txt"
 
-
 def _update_or_create_config(gameResolution: Resolution, config: SystemConfig, /) -> None:
     config_lines: list[str] = []
 
@@ -65,7 +64,6 @@ def _update_or_create_config(gameResolution: Resolution, config: SystemConfig, /
         # Create new file with all config lines
         with _BSTONE_CONFIG_FILE.open("w") as f:
             f.writelines(config_lines)
-
 
 class BstoneGenerator(Generator):
 

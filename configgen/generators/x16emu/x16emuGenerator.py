@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from ... import Command
-from ...batoceraPaths import CONFIGS
+from ...batoceraPaths import CONFIGS, USERDATA
 from ...controller import generate_sdl_game_controller_config
 from ..Generator import Generator
 
@@ -11,7 +11,6 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from ...types import HotkeysContext
-
 
 class X16emuGenerator(Generator):
 
@@ -29,7 +28,7 @@ class X16emuGenerator(Generator):
         # default options
         commandArray: list[str | Path] = [
             "x16emu",
-            "-rom", "/userdata/bios/commanderx16/rom.bin", # bios
+            "-rom", f"{USERDATA}/bios/commanderx16/rom.bin", # bios
             "-fsroot", romdir, # file system
             "-ram", "2048", # specify 2MB of RAM by default
             "-rtc", # realtime clock

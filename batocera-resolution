@@ -1,60 +1,72 @@
-#!/usr/bin/env bash
-
-# Stub de batocera-resolution para KDE Wayland en Debian
-# Formato de kscreen-doctor: "  2:1920x1080@75*"
-
-_kscreen() {
-    kscreen-doctor -o 2>/dev/null
-}
+#!/bin/bash
+# batocera-resolution — wrapper para Debian/KDE Wayland
+# Implementa solo los subcomandos que usa configgen
 
 case "$1" in
-    currentResolution)
-        SCREEN="$3"  # --screen NAME currentResolution → $2=NAME $3=currentResolution... no, ver abajo
-        _kscreen \
-            | grep -oE '[0-9]+x[0-9]+@[0-9]+\*' \
-            | grep -oE '[0-9]+x[0-9]+' \
-            | head -1
-        ;;
-    currentOutput)
-        _kscreen \
-            | grep 'priority 1' \
-            | awk '{print $3}'
-        ;;
     currentMode)
-        _kscreen \
-            | tr ' ' '\n' \
-            | grep -E '[0-9]+x[0-9]+@[0-9]+\*' \
-            | tr -d '*' \
-            | head -1
+        # 1. KDE Wayland via kscreen-doctor
+        if command -v kscreen-doctor &>/dev/null && [ -n "$WAYLAND_DISPLAY" ]; then
+            MODE=$(kscreen-doctor -o 2>/dev/null \
+                | grep -E "Mode:.*\*" \
+                | awk '{print $2}' \
+                | head -1 \
+                | cut -d@ -f1)
+            if [ -n "$MODE" ]; then
+                echo "$MODE"
+                exit 0
+            fi
+        fi
+
+        # 2. wlr-randr (compositors wlroots: sway, hyprland...)
+        if command -v wlr-randr &>/dev/null && [ -n "$WAYLAND_DISPLAY" ]; then
+            MODE=$(wlr-randr 2>/dev/null \
+                | grep -E "^\s+[0-9]+x[0-9]+" \
+                | grep "current" \
+                | awk '{print $1}' \
+                | head -1)
+            if [ -n "$MODE" ]; then
+                echo "$MODE"
+                exit 0
+            fi
+        fi
+
+        # 3. X11 fallback
+        if command -v xrandr &>/dev/null && [ -n "$DISPLAY" ]; then
+            MODE=$(xrandr 2>/dev/null \
+                | grep '\*' \
+                | awk '{print $1}' \
+                | head -1)
+            if [ -n "$MODE" ]; then
+                echo "$MODE"
+                exit 0
+            fi
+        fi
+
+        # 4. Último recurso: leer desde /sys (no depende de nada)
+        if [ -f /sys/class/drm/card*/modes ]; then
+            head -1 /sys/class/drm/card*/modes 2>/dev/null | head -1
+            exit 0
+        fi
+
+        echo "1920x1080"  # fallback hardcodeado
         ;;
-    refreshRate)
-        _kscreen \
-            | grep -oE '[0-9]+x[0-9]+@[0-9]+\*' \
-            | grep -oE '@[0-9]+' \
-            | tr -d '@' \
-            | head -1
-        ;;
-    listOutputs)
-        _kscreen | grep 'Output:' | awk '{print $3}'
-        ;;
-    listModes)
-        _kscreen | grep -oE '[0-9]+x[0-9]+@[0-9]+' | sort -u
-        ;;
+
     minTomaxResolution)
-        exit 0
+        # batocera usa esto para ajustar resolución mínima/máxima
+        # en Debian lo dejamos como no-op (devuelve la actual)
+        "$0" currentMode
         ;;
+
     setMode)
+        # Cambio de resolución — no-op por ahora
+        # Si en el futuro se necesita: kscreen-doctor output.1.mode.$2
         exit 0
         ;;
-    supportSystemRotation)
-        exit 1
-        ;;
-    --screen)
-        # batocera-resolution --screen NAME currentResolution
-        exec "$0" "$3"
+    currentResolution)
+        "$0" currentMode
         ;;
     *)
-        echo "batocera-resolution stub: '$1' no implementado" >&2
-        exit 1
+        # Subcomandos desconocidos — no-op silencioso
+        exit 0
         ;;
 esac

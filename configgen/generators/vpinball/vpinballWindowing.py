@@ -9,7 +9,6 @@ if TYPE_CHECKING:
     from ...types import Resolution, ScreenInfo
     from ...utils.configparser import CaseSensitiveConfigParser
 
-
 def configureWindowing(vpinballSettings: CaseSensitiveConfigParser, system: Emulator, gameResolution: Resolution, hasDmd: bool) -> None:
     screens = videoMode.getScreensInfos(system.config)
 

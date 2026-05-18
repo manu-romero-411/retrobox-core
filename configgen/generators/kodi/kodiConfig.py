@@ -13,7 +13,6 @@ if TYPE_CHECKING:
 
 _KODI_USERDATA: Final = HOME / '.kodi' / 'userdata'
 
-
 def writeKodiConfigs(kodiJoystick: Path, currentControllers: Controllers, provider: str):
     kodihatspositions    = {1: 'up', 2: 'right', 4: 'down', 8: 'left'}
     kodireversepositions = {'joystick1up': 'joystick1down', 'joystick1left': 'joystick1right', 'joystick2up': 'joystick2down', 'joystick2left': 'joystick2right' }

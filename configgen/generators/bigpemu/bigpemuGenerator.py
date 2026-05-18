@@ -13,30 +13,23 @@ if TYPE_CHECKING:
     from ...input import Input
     from ...types import HotkeysContext
 
-
 bigPemuConfig = CONFIGS / "bigpemu" / "BigPEmuConfig.bigpcfg"
-
 
 class _ButtonSequence(TypedDict):
     button: str
     keyboard: NotRequired[str]
 
-
 class _ButtonComboSequence(TypedDict):
     buttons: tuple[str, str]
     keyboard: NotRequired[str]
 
-
 class _KeyboardSequence(TypedDict):
     keyboard: str
-
 
 class _BlankSequence(TypedDict):
     blank: None
 
-
 type _ControllerSequence = _ButtonSequence | _ButtonComboSequence | _KeyboardSequence | _BlankSequence
-
 
 # BigPEmu controller sequence, P1 only requires keyboard inputs
 # default standard bindings
@@ -135,12 +128,10 @@ P2_BINDINGS_SEQUENCE: dict[str, _ControllerSequence] = {
     "Extra-D": {"blank": None}
 }
 
-
 class _Binding(TypedDict):
     Triggers: list[dict[str, bool | float | str]]
 
 type _Bindings = list[_Binding]
-
 
 def _generate_button_binding(binding_info: _ButtonSequence, device_id: str, input: Input, /, *, button_value: float | None = None) -> _Binding:
     device_id = device_id.upper()

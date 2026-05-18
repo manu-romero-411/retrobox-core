@@ -2,14 +2,12 @@ from __future__ import annotations
 
 from typing import ClassVar
 
-
 class BaseBatoceraException(Exception):
     EXIT_CODE: ClassVar = 1
 
     @property
     def exit_code(self) -> int:
         return self.EXIT_CODE
-
 
 class BatoceraException(BaseBatoceraException):
     @property

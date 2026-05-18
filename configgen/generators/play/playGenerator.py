@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Final, cast
 import evdev
 
 from ... import Command
-from ...batoceraPaths import CACHE, CONFIGS, SAVES, configure_emulator, mkdir_if_not_exists
+from ...batoceraPaths import CACHE, CONFIGS, SAVES, USERDATA, configure_emulator, mkdir_if_not_exists
 from ..Generator import Generator
 
 if TYPE_CHECKING:
@@ -37,7 +37,7 @@ class PlayGenerator(Generator):
 
         # Dictionary of preferences and defaults
         preferences = {
-            'ps2.arcaderoms.directory': {'Type': 'path', 'Value': '/userdata/roms/namco2x6'},
+            'ps2.arcaderoms.directory': {'Type': 'path', 'Value': f'{USERDATA}/roms/namco2x6'},
             'ui.showexitconfirmation': {'Type': 'boolean', 'Value': 'false'},
             'ui.pausewhenfocuslost': {'Type': 'boolean', 'Value': 'false'},
             'ui.showeecpuusage': {'Type': 'boolean', 'Value': 'false'},

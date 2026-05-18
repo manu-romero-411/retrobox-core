@@ -4,7 +4,6 @@ import ctypes.util
 import math
 from typing import Final, cast
 
-
 class _XSetWindowAttributes(ctypes.Structure):
     _fields_ = [
         ("background_pixmap", ctypes.c_ulong),

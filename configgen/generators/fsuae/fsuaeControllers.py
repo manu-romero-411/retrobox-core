@@ -9,7 +9,6 @@ if TYPE_CHECKING:
     from ...controller import Controllers
     from ...Emulator import Emulator
 
-
 def _build_long_config_name(name, buttons, axes, hats):
     # e.g.: "Xbox Wireless Controller", 11, 6, 1 → "xbox_wireless_controller_11_6_1_0_linux"
     name = name.split('#')[0].lower().strip()

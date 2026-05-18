@@ -27,7 +27,7 @@ from typing import IO, TYPE_CHECKING, Any, ClassVar, Final, Literal
 from evdev import ecodes
 
 from ... import Command
-from ...batoceraPaths import SAVES, mkdir_if_not_exists
+from ...batoceraPaths import _USER_HOME, SAVES, USERDATA, mkdir_if_not_exists
 from ...controller import Controller, Controllers, generate_sdl_game_controller_config
 from ...exceptions import BatoceraException, InvalidConfiguration
 from ...utils import bezels as bezelsUtil, hotkeygen
@@ -168,7 +168,7 @@ class LindberghGenerator(Generator):
                 "LD_PRELOAD": f"{source_dir}/lindbergh.so",
                 # Graphics
                 "GST_PLUGIN_SYSTEM_PATH_1_0": "/lib32/gstreamer-1.0:/usr/lib/gstreamer-1.0",
-                "GST_REGISTRY_1_0": "/userdata/system/.cache/gstreamer-1.0/registry..bin:/userdata/system/.cache/gstreamer-1.0/registry.x86_64.bin",
+                "GST_REGISTRY_1_0": f"{_USER_HOME}/.cache/gstreamer-1.0/registry..bin:{_USER_HOME}/.cache/gstreamer-1.0/registry.x86_64.bin",
                 "LIBGL_DRIVERS_PATH": "/lib32/dri:/usr/lib/dri",
                 # Audio
                 "SPA_PLUGIN_DIR": "/lib32/spa-0.2:/usr/lib/spa-0.2",
@@ -180,8 +180,8 @@ class LindberghGenerator(Generator):
             }
 
         # Run command - Use -c * -o for ini files and -g for the game folder
-        config_file = "/userdata/system/configs/lindbergh/lindbergh.ini"
-        controller_file = "/userdata/system/configs/lindbergh/controls.ini"
+        config_file = f"{USERDATA}/system/configs/lindbergh/lindbergh.ini"
+        controller_file = f"{USERDATA}/system/configs/lindbergh/controls.ini"
         commandArray: list[str | Path] = [str(source_dir / "lindbergh"), "-c", config_file, "-o", controller_file, "-g", str(romDir)]
 
         if system.config.get_bool("lindbergh_zink"):
@@ -435,7 +435,6 @@ class LindberghGenerator(Generator):
             input_mode = 1
         else:
             input_mode = 2
-
 
         shortRomName = Path(romName.lower()).stem
 
@@ -1072,8 +1071,8 @@ class LindberghGenerator(Generator):
         romName: str,
         /,
     ) -> None:
-        LINDBERGH_CONFIG_FILE = Path("/userdata/system/configs/lindbergh/lindbergh.ini")
-        LINDBERGH_CONTROLS_FILE = Path("/userdata/system/configs/lindbergh/controls.ini")
+        LINDBERGH_CONFIG_FILE = Path(f"{USERDATA}/system/configs/lindbergh/lindbergh.ini")
+        LINDBERGH_CONTROLS_FILE = Path(f"{USERDATA}/system/configs/lindbergh/controls.ini")
         mkdir_if_not_exists(LINDBERGH_CONFIG_FILE.parent)
 
         # get an initial version if no version is here - Sync lindbergh.ini

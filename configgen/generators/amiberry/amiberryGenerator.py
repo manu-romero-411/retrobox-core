@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Final
 
 from ... import Command
-from ...batoceraPaths import CONFIGS, mkdir_if_not_exists
+from ...batoceraPaths import CONFIGS, USERDATA, mkdir_if_not_exists
 from ...controller import generate_sdl_game_controller_config, write_sdl_controller_db
 from ...settings.unixSettings import UnixSettings
 from ..Generator import Generator
@@ -23,10 +23,10 @@ _RETROARCH_CUSTOM: Final = _CONFIG_DIR / 'retroarch' / 'overlay.cfg'
 _RETROARCH_INPUTS_DIR: Final = _CONFIG_DIR / 'retroarch' / 'inputs'
 _AMIBERRY_PLUGINS: Final = _CONFIG_DIR / 'plugins'
 _WHDBOOT_DIR: Final = _CONFIG_DIR / 'whdboot'
-_SAVES_DIR: Final = Path('/userdata/saves/amiga')
-_SCREENSHOTS_DIR: Final = Path('/userdata/screenshots')
-_BIOS_DIR: Final = Path('/userdata/bios/amiga')
-_LOG_FILE: Final = Path('/userdata/system/logs/amiberry.log')
+_SAVES_DIR: Final = Path(f'{USERDATA}/saves/amiga')
+_SCREENSHOTS_DIR: Final = Path(f'{USERDATA}/screenshots')
+_BIOS_DIR: Final = Path(f'{USERDATA}/bios/amiga')
+_LOG_FILE: Final = Path(f'{USERDATA}/system/logs/amiberry.log')
 _AMIBERRY_BIN: Final = Path('/usr/bin/amiberry')
 _AMIBERRY_DATA: Final = Path('/usr/share/amiberry/data')
 

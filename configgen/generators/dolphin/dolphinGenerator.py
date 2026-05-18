@@ -6,12 +6,13 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from ... import Command
-from ...batoceraPaths import CACHE, CONFIGS, SAVES, mkdir_if_not_exists
+from ...batoceraPaths import CACHE, CONFIGS, SAVES, USERDATA, mkdir_if_not_exists
 from ...utils import vulkan
 from ...utils.configparser import CaseSensitiveConfigParser
 from ..Generator import Generator
 from . import dolphinControllers, dolphinSYSCONF
 from .dolphinPaths import (
+    DOLPHIN_BIN,
     DOLPHIN_BIOS,
     DOLPHIN_CONFIG,
     DOLPHIN_GFX_INI,
@@ -77,8 +78,8 @@ class DolphinGenerator(Generator):
 
         # Define default games path
         if "ISOPaths" not in dolphinSettings["General"]:
-            dolphinSettings.set("General", "ISOPath0", "/userdata/roms/wii")
-            dolphinSettings.set("General", "ISOPath1", "/userdata/roms/gamecube")
+            dolphinSettings.set("General", "ISOPath0", f"{USERDATA}/roms/wii")
+            dolphinSettings.set("General", "ISOPath1", f"{USERDATA}/roms/gamecube")
             dolphinSettings.set("General", "ISOPaths", "2")
 
         # increment savestates
@@ -418,9 +419,12 @@ class DolphinGenerator(Generator):
             pass # don't fail in case of SYSCONF update
 
         # Check what version we've got
-        if Path("/usr/bin/dolphin-emu").is_file():
+        print("========================================================================")
+        print(DOLPHIN_BIN)
+        print("========================================================================")
+        if Path(DOLPHIN_BIN).is_file():
             # use the -b 'batch' option for nicer exit
-            commandArray = ["dolphin-emu", "-b", "-e", rom]
+            commandArray = [DOLPHIN_BIN, "-b", "-e", rom]
         else:
             commandArray = ["dolphin-emu-nogui", "-e", rom]
 
@@ -430,11 +434,15 @@ class DolphinGenerator(Generator):
 
         return Command.Command(
             array=commandArray,
-            env={
-                "XDG_CONFIG_HOME": CONFIGS,
-                "XDG_DATA_HOME": SAVES,
-                "XDG_CACHE_HOME": CACHE
-            }
+            env = {
+                "XDG_CONFIG_HOME": Path.home() / '.config',
+                "XDG_DATA_HOME":   Path.home() / '.local' / 'share',
+                "XDG_CACHE_HOME":  Path.home() / '.cache',
+                "SDL_JOYSTICK_HIDAPI": "1",
+                "SDL_JOYSTICK_HIDAPI_SWITCH": "1",
+                "SDL_JOYSTICK_HIDAPI_PRO": "1",
+                "SDL_JOYSTICK_ALLOW_BACKGROUND_EVENTS": "1",
+            }          
         )
 
     def getInGameRatio(self, config, gameResolution, rom):

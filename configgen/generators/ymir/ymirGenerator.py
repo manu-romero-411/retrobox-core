@@ -20,7 +20,7 @@ from typing import TYPE_CHECKING, TypedDict, cast
 import toml
 
 from ... import Command
-from ...batoceraPaths import CONFIGS, SCREENSHOTS, mkdir_if_not_exists
+from ...batoceraPaths import CONFIGS, SCREENSHOTS, USERDATA, mkdir_if_not_exists
 from ...controller import write_sdl_controller_db
 from ..Generator import Generator
 
@@ -29,11 +29,9 @@ if TYPE_CHECKING:
 
 _logger = logging.getLogger(__name__)
 
-
 class _BindData(TypedDict):
     sdl_map: dict[str, list[str]]
     keyboard_map: dict[int, dict[str, list[str]]]
-
 
 # Mappings based on stock Ymir.toml
 PERIPHERAL_BINDS: dict[str, _BindData] = {
@@ -138,13 +136,13 @@ class YmirGenerator(Generator):
         # Set the paths using Path objects
         configPath = CONFIGS / "ymir"
         toml_file = configPath / "Ymir.toml"
-        savesPath = Path("/userdata/saves/ymir")
+        savesPath = Path(f"{USERDATA}/saves/ymir")
         backupPath = savesPath / "backup"
         exportedPath = backupPath / "exported"
         dumpsPath = savesPath / "dumps"
         screenshotPath = SCREENSHOTS / "ymir"
-        romDir = Path("/userdata/roms/saturn")
-        iplDir = Path("/userdata/bios")
+        romDir = Path(f"{USERDATA}/roms/saturn")
+        iplDir = Path(f"{USERDATA}/bios")
 
         # Create all necessary directories
         for path in [configPath, savesPath, backupPath, exportedPath, dumpsPath, screenshotPath]:

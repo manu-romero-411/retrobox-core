@@ -5,7 +5,7 @@ import subprocess
 from typing import TYPE_CHECKING
 
 from ... import Command
-from ...batoceraPaths import CONFIGS, mkdir_if_not_exists
+from ...batoceraPaths import BIOS, CONFIGS, mkdir_if_not_exists
 from ...controller import generate_sdl_game_controller_config
 from ..Generator import Generator
 
@@ -29,7 +29,7 @@ class XroarGenerator(Generator):
         # Write the configuration file
         with confFile.open("w") as f:
             # BIOS search paths
-            f.write("rompath /userdata/bios/xroar\n")
+            f.write(f"rompath {BIOS}/xroar\n")
 
             # Machine Selection
             default_machines = {'mc10': 'mc10', 'dragon64': 'dragon64'}
@@ -85,7 +85,6 @@ class XroarGenerator(Generator):
 
             except Exception as error:
                 print(f"7z error: {error}")
-
 
         commandArray = ["xroar", "-c", str(confFile), rom_path]
 

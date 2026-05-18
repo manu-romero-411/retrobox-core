@@ -13,7 +13,6 @@ if TYPE_CHECKING:
 _UQM_SAVES: Final = SAVES / 'uqm'
 _UQM_ROMS: Final = ROMS / 'uqm'
 
-
 class UqmGenerator(Generator):
 
     def getHotkeysContext(self) -> HotkeysContext:

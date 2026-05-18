@@ -9,7 +9,6 @@ from . import kodiConfig
 if TYPE_CHECKING:
     from ...types import HotkeysContext
 
-
 class KodiGenerator(Generator):
 
     # Main entry of the module

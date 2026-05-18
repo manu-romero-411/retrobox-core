@@ -19,7 +19,6 @@ def _find_iname(directory: Path, filename: str) -> Path | None:
     return next((f for f in directory.iterdir()
                  if f.is_file() and f.name.lower() == lower_filename), None)
 
-
 class DosBoxStagingGenerator(Generator):
     # Main entry of the module
     # Returns a populated Command object
@@ -78,10 +77,8 @@ class DosBoxStagingGenerator(Generator):
 
         return Command.Command(array=commandArray)
 
-
     def getMouseMode(self, config, rom):
         return True
-
 
     def getHotkeysContext(self) -> HotkeysContext:
         return {

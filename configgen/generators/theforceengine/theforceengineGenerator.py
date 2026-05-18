@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from ... import Command
-from ...batoceraPaths import CONFIGS, ensure_parents_and_open, mkdir_if_not_exists
+from ...batoceraPaths import CONFIGS, USERDATA, ensure_parents_and_open, mkdir_if_not_exists
 from ...controller import generate_sdl_game_controller_config
 from ...utils.configparser import CaseSensitiveConfigParser
 from ..Generator import Generator
@@ -122,7 +122,7 @@ class TheForceEngineGenerator(Generator):
         if not forceConfig.has_section("Dark_Forces"):
             forceConfig.add_section("Dark_Forces")
         # currently use this directory
-        forceConfig.set("Dark_Forces", "sourcePath", '"/userdata/roms/theforceengine/Star Wars - Dark Forces/"')
+        forceConfig.set("Dark_Forces", "sourcePath", f'"{USERDATA}/roms/theforceengine/Star Wars - Dark Forces/"')
 
         forceConfig.set("Dark_Forces", "disableFightMusic", system.config.get_bool("force_fight_music", return_values=("true", "false")))
         forceConfig.set("Dark_Forces", "enableAutoaim", system.config.get_bool("force_auto_aim", True, return_values=("true", "false")))

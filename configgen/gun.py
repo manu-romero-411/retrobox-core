@@ -17,24 +17,20 @@ _logger = logging.getLogger(__name__)
 _input_re: Final = re.compile(r'^/dev/input/event([0-9]*)$')
 _PRECALIBRATION_DIR: Final = BATOCERA_SHARE_DIR / 'guns-precalibrations'
 
-
 def _copy_file(src: Path, dst: Path) -> None:
     if src.exists() and not dst.exists():
         mkdir_if_not_exists(dst.parent)
         shutil.copyfile(src, dst)
-
 
 def _copy_dir(src: Path, dst: Path) -> None:
     if src.exists() and not dst.exists():
         mkdir_if_not_exists(dst.parent)
         shutil.copytree(src, dst)
 
-
 def _copy_files_in_dir(srcdir: Path, dstdir: Path, startWith: str, endWith: str) -> None:
     for src in srcdir.iterdir():
         if src.name.startswith(startWith):  # and src.endswith(endswith):
             _copy_file(src, dstdir / src.name)
-
 
 @dataclass(slots=True, kw_only=True)
 class Gun:
@@ -195,14 +191,12 @@ class Gun:
 
         return cls.get_all()
 
-
 def guns_need_crosses(guns: Guns) -> bool:
     # no gun, enable the cross for joysticks, mouses...
     if not guns:
         return True
 
     return any(gun.needs_cross for gun in guns)
-
 
 type Guns = Sequence[Gun]
 type GunList = list[Gun]

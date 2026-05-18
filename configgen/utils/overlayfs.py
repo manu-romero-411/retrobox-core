@@ -17,7 +17,6 @@ _logger = logging.getLogger(__name__)
 
 _OVERLAY_BASE_DIR: Final = OVERLAY_BASE_DIR
 
-
 def _unmount_and_remove(mount_point: Path):
     if mount_point.is_mount():
         result = subprocess.run(["umount", str(mount_point)], capture_output=True, text=True)
@@ -30,7 +29,6 @@ def _unmount_and_remove(mount_point: Path):
             return
 
     shutil.rmtree(mount_point, ignore_errors=True)
-
 
 def _mount(read_only_dir: Path, writable_upper_dir: Path, writable_work_dir: Path, mount_point: Path) -> bool:
 
@@ -48,7 +46,6 @@ def _mount(read_only_dir: Path, writable_upper_dir: Path, writable_work_dir: Pat
                       mount_point, components, result.returncode, result.stderr.strip())
 
     return result.returncode == 0
-
 
 @contextmanager
 def mount_overlayfs(read_only_dir: Path, writable_dir: Path, /) -> Iterator[Path]:

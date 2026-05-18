@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 from xml.dom import minidom
 
-from ...batoceraPaths import BIOS, CONFIGS, DEFAULTS_DIR, MAME_ARTWORK_DIR, ROMS, SAVES, USER_DECORATIONS, mkdir_if_not_exists
+from ...batoceraPaths import BIOS, CONFIGS, DEFAULTS_DIR, MAME_ARTWORK_DIR, MAME_SOFTWARE_DIR, ROMS, SAVES, USER_DECORATIONS, mkdir_if_not_exists
 from ..mame.mameCommon import is_atom_floppy
 
 if TYPE_CHECKING:
@@ -75,7 +75,7 @@ def generateMAMEConfigs(playersControllers: Controllers, system: Emulator, rom: 
         else:
             commandLine += [ romDrivername ]
         commandLine += [ '-cfg_directory', f'"{cfgPath}"' ]
-        commandLine += [ '-rompath', f'"{rom.parent};/userdata/bios/mame/;/userdata/bios/"' ]
+        commandLine += [ '-rompath', f'"{rom.parent};{BIOS}/mame/;{BIOS}"' ]
         pluginsToLoad: list[str] = []
         if system.config.get_bool("hiscoreplugin", True):
             pluginsToLoad += [ "hiscore" ]
@@ -128,7 +128,7 @@ def generateMAMEConfigs(playersControllers: Controllers, system: Emulator, rom: 
             mkdir_if_not_exists(cfgPath)
             commandLine += [ romDrivername ]
             commandLine += [ '-cfg_directory', f'"{cfgPath}"' ]
-            commandLine += [ '-rompath', f'"{rom.parent};/userdata/bios/"' ]
+            commandLine += [ '-rompath', f'"{rom.parent};{BIOS}"' ]
         else:
             # Command line for MESS consoles/computers
             # TI-99 32k RAM expansion & speech modules
@@ -194,7 +194,7 @@ def generateMAMEConfigs(playersControllers: Controllers, system: Emulator, rom: 
                     commandLine += [ rom.parent.name ]
                 else:
                     commandLine += [ romDrivername ]
-                commandLine += [ "-rompath", f'"{softDir};/userdata/bios/"' ]
+                commandLine += [ "-rompath", f'"{softDir};{BIOS}"' ]
                 commandLine += [ "-swpath", f'"{softDir}"' ]
                 commandLine += [ "-verbose" ]
             else:
@@ -253,17 +253,17 @@ def generateMAMEConfigs(playersControllers: Controllers, system: Emulator, rom: 
                             commandLine += [ "-" + messRomType[messMode] ]
                 # Use the full filename for MESS non-softlist ROMs
                 commandLine += [ f'"{rom}"' ]
-                commandLine += [ "-rompath", f'"{rom.parent};/userdata/bios/"' ]
+                commandLine += [ "-rompath", f'"{rom.parent};{BIOS}/"' ]
 
                 # Boot disk for Macintosh
                 # Will use Floppy 1 or Hard Drive, depending on the disk.
                 if system.name == "macintosh" and boot_disk:
                     if system.config["bootdisk"] in [ "macos30", "macos608", "macos701", "macos75" ]:
                         bootType = "-flop1"
-                        bootDisk = '"/userdata/bios/' + boot_disk + '.img"'
+                        bootDisk = f'"{BIOS}/' + boot_disk + '.img"'
                     else:
                         bootType = "-hard"
-                        bootDisk = '"/userdata/bios/' + boot_disk + '.chd"'
+                        bootDisk = f'"{BIOS}/' + boot_disk + '.chd"'
                     commandLine += [ bootType, bootDisk ]
 
                 # Create & add a blank disk if needed, insert into drive 2
@@ -761,7 +761,6 @@ def generateMAMEPadConfig(
                     elif thisControl['type'] == 'combo':
                         xml_input_alt.appendChild(generateComboPortElement(pad, config_alt, thisControl['tag'], pad.index, thisControl['key'], thisControl['kbMapping'], thisControl['mapping'], \
                             retroPad[mappings_use[thisControl['useMapping']]], thisControl['reversed'], thisControl['mask'], thisControl['default']))
-
 
         # save the config file
         #mameXml = open(configFile, "w")

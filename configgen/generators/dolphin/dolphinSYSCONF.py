@@ -17,7 +17,6 @@ if TYPE_CHECKING:
     from ...config import SystemConfig
     from ...types import Resolution
 
-
 _logger = logging.getLogger(__name__)
 
 def readBEInt16(f: BinaryIO):

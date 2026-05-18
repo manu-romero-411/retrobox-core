@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from ... import Command
-from ...batoceraPaths import BIOS, CONFIGS, ensure_parents_and_open
+from ...batoceraPaths import BIOS, CONFIGS, USERDATA, ensure_parents_and_open
 from ...controller import generate_sdl_game_controller_config, write_sdl_controller_db
 from ...exceptions import BatoceraException
 from ...utils.configparser import CaseSensitiveConfigParser
@@ -13,7 +13,6 @@ from ..Generator import Generator
 
 if TYPE_CHECKING:
     from ...types import HotkeysContext
-
 
 class DuckstationLegacyGenerator(Generator):
 
@@ -99,7 +98,7 @@ class DuckstationLegacyGenerator(Generator):
         ## [BIOS]
         if not settings.has_section("BIOS"):
             settings.add_section("BIOS")
-        settings.set("BIOS", "SearchDirectory", "/userdata/bios")
+        settings.set("BIOS", "SearchDirectory", f"{USERDATA}/bios")
         # Boot Logo
         settings.set("BIOS", "PatchFastBoot", system.config.get("duckstation_PatchFastBoot", "false"))
         # Find & populate BIOS
@@ -217,7 +216,7 @@ class DuckstationLegacyGenerator(Generator):
         ## [GameList]
         if not settings.has_section("GameList"):
             settings.add_section("GameList")
-        settings.set("GameList" , "RecursivePaths", "/userdata/roms/psx")
+        settings.set("GameList" , "RecursivePaths", f"{USERDATA}/roms/psx")
 
         ## [Cheevos]
         if not settings.has_section("Cheevos"):

@@ -150,7 +150,6 @@ for i, line in enumerate(_DEFAULT_PLAYER_CONFIG_TEMPLATE):
         # Use the first word (key)
         _DEFAULT_TEMPLATE_LINE_MAP[parts[0]] = i
 
-
 class OpenJKDF2Generator(Generator):
     def getHotkeysContext(self) -> HotkeysContext:
         return {

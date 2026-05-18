@@ -5,7 +5,7 @@ from os import environ
 from typing import TYPE_CHECKING, Final
 
 from ... import Command
-from ...batoceraPaths import CACHE, CONFIGS, SAVES, ensure_parents_and_open, mkdir_if_not_exists
+from ...batoceraPaths import CACHE, CONFIGS, SAVES, USERDATA, ensure_parents_and_open, mkdir_if_not_exists
 from ...utils import vulkan
 from ...utils.configparser import CaseSensitiveRawConfigParser
 from ..Generator import Generator
@@ -109,12 +109,12 @@ class CitronGenerator(Generator):
         citronConfig.set("UI", "Paths\\gamedirs\\1\\deep_scan\\default", "false")
         citronConfig.set("UI", "Paths\\gamedirs\\1\\expanded", "true")
         citronConfig.set("UI", "Paths\\gamedirs\\1\\expanded\\default", "false")
-        citronConfig.set("UI", "Paths\\gamedirs\\1\\path", "/userdata/roms/switch")
+        citronConfig.set("UI", "Paths\\gamedirs\\1\\path", f"{USERDATA}/roms/switch")
         citronConfig.set("UI", "Paths\\gamedirs\\size", "1")
 
         citronConfig.set("UI", "Screenshots\\enable_screenshot_save_as", "true")
         citronConfig.set("UI", "Screenshots\\enable_screenshot_save_as\\default", "false")
-        citronConfig.set("UI", "Screenshots\\screenshot_path", "/userdata/screenshots")
+        citronConfig.set("UI", "Screenshots\\screenshot_path", f"{USERDATA}/screenshots")
         citronConfig.set("UI", "Screenshots\\screenshot_path\\default", "false")
 
         # Change controller exit
@@ -124,19 +124,19 @@ class CitronGenerator(Generator):
         # Data Storage section
         if not citronConfig.has_section("Data%20Storage"):
             citronConfig.add_section("Data%20Storage")
-        citronConfig.set("Data%20Storage", "dump_directory", "/userdata/system/configs/citron/dump")
+        citronConfig.set("Data%20Storage", "dump_directory", f"{USERDATA}/system/configs/citron/dump")
         citronConfig.set("Data%20Storage", "dump_directory\\default", "false")
 
-        citronConfig.set("Data%20Storage", "load_directory", "/userdata/system/configs/citron/load")
+        citronConfig.set("Data%20Storage", "load_directory", f"{USERDATA}/system/configs/citron/load")
         citronConfig.set("Data%20Storage", "load_directory\\default", "false")
 
-        citronConfig.set("Data%20Storage", "nand_directory", "/userdata/system/configs/citron/nand")
+        citronConfig.set("Data%20Storage", "nand_directory", f"{USERDATA}/system/configs/citron/nand")
         citronConfig.set("Data%20Storage", "nand_directory\\default", "false")
 
-        citronConfig.set("Data%20Storage", "sdmc_directory", "/userdata/system/configs/citron/sdmc")
+        citronConfig.set("Data%20Storage", "sdmc_directory", f"{USERDATA}/system/configs/citron/sdmc")
         citronConfig.set("Data%20Storage", "sdmc_directory\\default", "false")
 
-        citronConfig.set("Data%20Storage", "tas_directory", "/userdata/system/configs/citron/tas")
+        citronConfig.set("Data%20Storage", "tas_directory", f"{USERDATA}/system/configs/citron/tas")
         citronConfig.set("Data%20Storage", "tas_directory\\default", "false")
 
         citronConfig.set("Data%20Storage", "use_virtual_sd", "true")

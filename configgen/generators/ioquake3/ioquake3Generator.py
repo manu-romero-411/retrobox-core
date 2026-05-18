@@ -13,7 +13,6 @@ from .ioquake3Paths import IOQUAKE3_ROMS
 if TYPE_CHECKING:
     from ...types import HotkeysContext
 
-
 class IOQuake3Generator(Generator):
 
     def generate(self, system, rom, playersControllers, metadata, guns, wheels, gameResolution):
@@ -27,7 +26,7 @@ class IOQuake3Generator(Generator):
         if not destination_file.is_file() or source_file.stat().st_mtime > destination_file.stat().st_mtime:
             shutil.copytree(source_dir, IOQUAKE3_ROMS, dirs_exist_ok=True)
 
-        commandArray = ["/userdata/roms/quake3/ioquake3"]
+        commandArray = [f"{USERDATA}/roms/quake3/ioquake3"]
 
         # get the game / mod to launch
         with rom.open("r") as file:

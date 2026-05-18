@@ -16,7 +16,6 @@ from . import vpinballOptions, vpinballWindowing
 if TYPE_CHECKING:
     from ...types import HotkeysContext
 
-
 _logger = logging.getLogger(__name__)
 
 class VPinballGenerator(Generator):

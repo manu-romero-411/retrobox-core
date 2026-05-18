@@ -15,7 +15,6 @@ from .moonlightPaths import MOONLIGHT_GAME_LIST, MOONLIGHT_STAGING_CONFIG
 if TYPE_CHECKING:
     from ...types import HotkeysContext
 
-
 class MoonlightGenerator(Generator):
 
     def getHotkeysContext(self) -> HotkeysContext:

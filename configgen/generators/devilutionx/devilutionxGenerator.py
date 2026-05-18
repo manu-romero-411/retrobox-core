@@ -4,13 +4,12 @@ import configparser
 from typing import TYPE_CHECKING
 
 from ... import Command
-from ...batoceraPaths import CONFIGS, SAVES
+from ...batoceraPaths import CONFIGS, SAVES, USERDATA
 from ...controller import generate_sdl_game_controller_config
 from ..Generator import Generator
 
 if TYPE_CHECKING:
     from ...types import HotkeysContext
-
 
 class DevilutionXGenerator(Generator):
 
@@ -38,7 +37,7 @@ class DevilutionXGenerator(Generator):
             config.write(file)
 
         commandArray = [
-            'devilutionx', '--data-dir', '/userdata/roms/devilutionx',
+            'devilutionx', '--data-dir', f'{USERDATA}/roms/devilutionx',
             '--config-dir', configDir, '--save-dir', saveDir
         ]
         if rom.name.endswith('hellfire.mpq'):

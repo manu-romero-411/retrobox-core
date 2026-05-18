@@ -8,7 +8,6 @@ from ..exceptions import BatoceraException
 if TYPE_CHECKING:
     from .Generator import Generator
 
-
 _LEGACY_GENERATOR_MAP: Final[dict[str, dict[str, tuple[str, str]]]] = {
     'duckstation': {
         'duckstation-legacy': ('duckstation_legacy.duckstationLegacyGenerator', 'DuckstationLegacyGenerator'),
@@ -73,6 +72,10 @@ _GENERATOR_MAP: Final[dict[str, tuple[str, str]]] = {
     'ymir': ('ymir.ymirGenerator', 'YmirGenerator'),
     'yquake2': ('yquake2.yquake2Generator', 'YQuake2Generator'),
     'tic80': ('tic80.tic80Generator', 'tic80Generator'),
+    'eden': ('eden.edenGenerator', 'EdenGenerator'),
+    'eden-emu': ('eden.edenGenerator', 'EdenGenerator'),
+    'ryujinx': ('ryujinx.ryujinxGenerator', 'RyujinxGenerator'),
+    'ryujinx-emu': ('ryujinx.ryujinxGenerator', 'RyujinxGenerator'),
 }
 
 def get_generator(emulator: str, core: str) -> Generator:

@@ -5,7 +5,7 @@ from os import environ
 from typing import TYPE_CHECKING
 
 from ... import Command
-from ...batoceraPaths import CACHE, CONFIGS, SAVES, ensure_parents_and_open
+from ...batoceraPaths import CACHE, CONFIGS, SAVES, USERDATA, ensure_parents_and_open
 from ...controller import Controller, generate_sdl_game_controller_config
 from ...utils import vulkan
 from ...utils.configparser import CaseSensitiveRawConfigParser
@@ -18,7 +18,6 @@ if TYPE_CHECKING:
     from ...Emulator import Emulator
     from ...input import InputMapping
     from ...types import HotkeysContext
-
 
 _logger = logging.getLogger(__name__)
 
@@ -134,7 +133,7 @@ class AzaharGenerator(Generator):
         azaharConfig.set("UI", r"confirmClose\default", "false")
 
         # screenshots
-        azaharConfig.set("UI", r"Paths\screenshotPath", "/userdata/screenshots")
+        azaharConfig.set("UI", r"Paths\screenshotPath", f"{USERDATA}/screenshots")
         azaharConfig.set("UI", r"Paths\screenshotPath\default", "false")
 
         ## [MISCELLANEOUS]

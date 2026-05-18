@@ -7,8 +7,7 @@ from typing import Final
 
 _logger: Final = logging.getLogger(__name__)
 
-_BATOCERA_VULKAN: Final = Path('/usr/bin/batocera-vulkan')
-
+_BATOCERA_VULKAN: Final = Path('/home/manuel/proyectos/batocera-configgen/batocera-vulkan')
 
 def is_available() -> bool:
     try:
@@ -18,7 +17,6 @@ def is_available() -> bool:
 
     return False
 
-
 def has_discrete_gpu() -> bool:
     try:
         return subprocess.check_output([_BATOCERA_VULKAN, 'hasDiscrete'], text=True).strip() == 'true'
@@ -26,7 +24,6 @@ def has_discrete_gpu() -> bool:
         _logger.exception('Error checking for discrete GPU.')
 
     return False
-
 
 def get_discrete_gpu_index() -> str | None:
     try:
@@ -36,7 +33,6 @@ def get_discrete_gpu_index() -> str | None:
 
     return None
 
-
 def get_discrete_gpu_name() -> str | None:
     try:
         return subprocess.check_output([_BATOCERA_VULKAN, 'discreteName'], text=True).strip() or None
@@ -44,7 +40,6 @@ def get_discrete_gpu_name() -> str | None:
         _logger.exception('Error getting discrete GPU Name')
 
     return None
-
 
 def get_default_gpu_name() -> str | None:
     try:
@@ -54,7 +49,6 @@ def get_default_gpu_name() -> str | None:
 
     return None
 
-
 def get_discrete_gpu_uuid() -> str | None:
     try:
         return subprocess.check_output([_BATOCERA_VULKAN, 'discreteUUID'], text=True).strip() or None
@@ -62,7 +56,6 @@ def get_discrete_gpu_uuid() -> str | None:
         _logger.exception('Error getting discrete GPU UUID')
 
     return None
-
 
 def get_version() -> str:
     try:

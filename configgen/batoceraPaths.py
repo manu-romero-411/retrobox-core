@@ -13,17 +13,21 @@ if TYPE_CHECKING:
 # ---------------------------------------------------------------------------
 # Helpers XDG
 # ---------------------------------------------------------------------------
-_XDG_DATA:   Final = Path(os.environ.get('XDG_DATA_HOME',  Path.home() / '.local' / 'share'))
-_XDG_CACHE:  Final = Path(os.environ.get('XDG_CACHE_HOME', Path.home() / '.cache'))
-_XDG_CONFIG: Final = Path(os.environ.get('XDG_CONFIG_HOME', Path.home() / '.config'))
+_USER_HOME:   Final = Path.home()
+_XDG_DATA:   Final = Path.home() / '.local' / 'share'
+_XDG_CACHE:  Final = Path.home() / '.cache'
+_XDG_CONFIG: Final = Path.home() / '.config'
+_SYSTEM_LOCAL_BIN: Final = Path('/usr/local/bin')
+_SYSTEM_LOCAL_SHARE: Final = Path('/usr/local/share')
 
 # ---------------------------------------------------------------------------
 # Paths de instalación del sistema (igual que en batocera)
 # ---------------------------------------------------------------------------
-BATOCERA_SHARE_DIR:  Final = Path('/usr/share/batocera')
+BATOCERA_ROOT:  Final = _XDG_DATA / 'batocera'
+BATOCERA_SHARE_DIR:  Final = BATOCERA_ROOT / 'resources'
 DATAINIT_DIR:        Final = BATOCERA_SHARE_DIR / 'datainit'
 BATOCERA_ES_DIR:     Final = Path('/home/manuel/proyectos/batocera-emulationstation/appimage/es')
-CONFIGGEN_DATA_DIR:  Final = Path('/usr/share/batocera/configgen/data')
+CONFIGGEN_DATA_DIR:  Final = BATOCERA_SHARE_DIR / "configgen/data"
 DEFAULTS_DIR: Final = Path('/home/manuel/proyectos/batocera-configgen')
 
 HOME_INIT:  Final = DATAINIT_DIR / 'system'
@@ -32,7 +36,7 @@ CONF_INIT:  Final = HOME_INIT / 'configs'
 # ---------------------------------------------------------------------------
 # "userdata" → $HOME
 # ---------------------------------------------------------------------------
-USERDATA: Final = Path.home()
+USERDATA: Final = BATOCERA_ROOT
 ROMS:     Final = USERDATA / 'roms'          # ajusta si los tienes en otro sitio
 
 # ---------------------------------------------------------------------------
@@ -51,25 +55,19 @@ USER_SCRIPTS:  Final = HOME / 'scripts'
 CONFIGS: Final = _XDG_CONFIG
 EVMAPY:  Final = CONFIGS / 'evmapy'
 
-# ---------------------------------------------------------------------------
-# RetroArch (instalado "normal" → ~/.config/retroarch)
-# ---------------------------------------------------------------------------
-_RETROARCH: Final = Path.home() / '.config' / 'retroarch'
+SAVES:       Final = USERDATA / 'saves'
+SCREENSHOTS: Final = USERDATA / 'screenshots'
+RECORDINGS:  Final = USERDATA / 'recordings'
+BIOS:        Final = USERDATA / 'bios'       # "system directory" de retroarch
+OVERLAYS:    Final = USERDATA / 'overlay'
+CHEATS:      Final = USERDATA / 'cheats'
 
-SAVES:       Final = _RETROARCH / 'saves'
-SCREENSHOTS: Final = _RETROARCH / 'screenshots'
-RECORDINGS:  Final = _RETROARCH / 'recordings'
-BIOS:        Final = _RETROARCH / 'system'       # "system directory" de retroarch
-OVERLAYS:    Final = _RETROARCH / 'overlay'
-CHEATS:      Final = _RETROARCH / 'cheats'
-
-USER_SHADERS:    Final = _RETROARCH / 'shaders'
-USER_DECORATIONS: Final = _RETROARCH / 'overlay'  # mismo sitio que overlays
-
+USER_SHADERS:    Final = USERDATA / 'shaders'
+USER_DECORATIONS:  Final = USERDATA / 'decorations'
 # ---------------------------------------------------------------------------
 # EmulationStation → ~/.emulationstation  (ES lo fija, no es configurable)
 # ---------------------------------------------------------------------------
-USER_ES_DIR: Final = Path.home() / '.emulationstation'
+USER_ES_DIR: Final = USERDATA / '.emulationstation'
 ES_SETTINGS: Final = USER_ES_DIR / 'es_settings.cfg'
 
 # ---------------------------------------------------------------------------

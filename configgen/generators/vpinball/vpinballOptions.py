@@ -6,7 +6,6 @@ if TYPE_CHECKING:
     from ...Emulator import Emulator
     from ...utils.configparser import CaseSensitiveConfigParser
 
-
 def configureOptions(vpinballSettings: CaseSensitiveConfigParser, system: Emulator) -> None:
     # Tables are organised by folders containing the vpx file, and sub-folders with the roms, altcolor, altsound,...
     # We keep a switch to allow users with the old unique pinmame to be able to continue using vpinball (switchon)

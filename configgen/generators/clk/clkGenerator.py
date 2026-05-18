@@ -21,7 +21,6 @@ _SVIDEO_SYSTEMS: Final = { "colecovision", "mastersystem" }
 _RGB_SYSTEMS: Final = { "amstradcpc", "atarist", "electron", "enterprise", "msx1", "msx2",
     "oricatmos", "zxspectrum" }
 
-
 def _openzip_file(file_path: Path, /) -> Path | None:
     if not file_path.is_file():
         return None
@@ -48,7 +47,6 @@ def _openzip_file(file_path: Path, /) -> Path | None:
         return None # if no files, just directories
 
     return file_path
-
 
 class ClkGenerator(Generator):
 

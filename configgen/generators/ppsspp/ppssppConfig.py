@@ -11,7 +11,6 @@ from .ppssppPaths import PPSSPP_PSP_SYSTEM_DIR
 if TYPE_CHECKING:
     from ...Emulator import Emulator
 
-
 _logger = logging.getLogger(__name__)
 
 ppssppConfig: Final   = PPSSPP_PSP_SYSTEM_DIR / 'ppsspp.ini'
@@ -35,7 +34,6 @@ def writeRetroAchievements(token: str):
     if token:
         with ensure_parents_and_open(ppssppRetroach, 'w') as retroach_file:
             retroach_file.write(token)
-
 
 def createPPSSPPConfig(iniConfig: CaseSensitiveConfigParser, system: Emulator):
 

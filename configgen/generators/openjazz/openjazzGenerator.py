@@ -23,35 +23,27 @@ _CONFIG: Final = CONFIGS / 'openjazz' / 'openjazz.cfg'
 _STRING_LENGTH: Final = 32  # Max character length for `characterName`
 _CONTROLS: Final = 19  # Number of control settings
 
-
 _char = struct.Struct('B')
 _short = struct.Struct('<H')
 _int = struct.Struct('<i')
 
-
 def _read_char(reader: IO[bytes], /) -> int:
     return _char.unpack(reader.read(1))[0]
-
 
 def _write_char(writer: IO[bytes], data: int, /) -> None:
     writer.write(_char.pack(data))
 
-
 def _read_short(reader: IO[bytes]) -> int:
     return _short.unpack(reader.read(2))[0]
-
 
 def _write_short(writer: IO[bytes], data: int, /) -> None:
     writer.write(_short.pack(data))
 
-
 def _read_int(reader: IO[bytes]) -> int:
     return _int.unpack(reader.read(4))[0]
 
-
 def _write_int(writer: IO[bytes], data: int, /) -> None:
     writer.write(_int.pack(data))
-
 
 @dataclass(slots=True)
 class _OpenJazzConfig:
@@ -260,7 +252,6 @@ class _OpenJazzConfig:
             _logger.exception('Error loading configuration')
             _logger.info('Creating new default configuration')
             return cls.create_default(path)
-
 
 class OpenJazzGenerator(Generator):
     def getHotkeysContext(self) -> HotkeysContext:

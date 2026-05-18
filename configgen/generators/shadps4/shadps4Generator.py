@@ -22,7 +22,7 @@ from typing import TYPE_CHECKING
 import toml
 
 from ... import Command
-from ...batoceraPaths import CONFIGS, configure_emulator, mkdir_if_not_exists
+from ...batoceraPaths import CONFIGS, USERDATA, configure_emulator, mkdir_if_not_exists
 from ...controller import generate_sdl_game_controller_config
 from ...utils import vulkan
 from ..Generator import Generator
@@ -46,8 +46,8 @@ class shadPS4Generator(Generator):
         configPath = CONFIGS / "shadps4"
         userConfigPath = configPath / "user"
         toml_file = userConfigPath / "config.toml"
-        savesPath = Path("/userdata/saves/shadps4")
-        romDir = Path("/userdata/roms/ps4")
+        savesPath = Path(f"{USERDATA}/saves/shadps4")
+        romDir = Path(f"{USERDATA}/roms/ps4")
         dlcPath = romDir / "DLC"
 
         mkdir_if_not_exists(userConfigPath)

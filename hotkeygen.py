@@ -18,6 +18,8 @@ import evdev
 import pyudev
 from evdev import ecodes
 
+from configgen.batoceraPaths import _XDG_DATA, CONFIGS
+
 if TYPE_CHECKING:
     from collections.abc import Mapping
     from types import FrameType
@@ -26,11 +28,9 @@ if TYPE_CHECKING:
         name: str
         keys: dict[str, list[int] | int | str]
 
-
     class JsonHotkeysContext(TypedDict):
         name: str
         keys: dict[str, list[str] | str]
-
 
 DEVICE_NAME: Final   = "batocera hotkeys"
 import os
@@ -39,22 +39,20 @@ from pathlib import Path
 # ---------------------------------------------------------------------------
 # Rutas relocalizadas (sin /etc ni /var/run hardcodeados)
 # ---------------------------------------------------------------------------
-_XDG_CONFIG: Final = Path(os.environ.get('XDG_CONFIG_HOME', Path.home() / '.config'))
-_XDG_DATA:   Final = Path(os.environ.get('XDG_DATA_HOME',  Path.home() / '.local' / 'share'))
 _RUNTIME_DIR: Final = Path(os.environ.get('HOTKEYGEN_RUNTIME_DIR', '/tmp/batocera-run'))
 
 # Sistema (antes /etc/hotkeygen y /usr/share/hotkeygen)
 GSYSTEM_DIR:           Final = _XDG_DATA   / 'hotkeygen'
-GDEFAULTCONTEXT_FILE:  Final = _XDG_CONFIG / 'hotkeygen' / 'default_context.conf'
-GCOMMONCONTEXT_FILE:   Final = _XDG_CONFIG / 'hotkeygen' / 'common_context.conf'
-GDEFAULTMAPPING_FILE:  Final = _XDG_CONFIG / 'hotkeygen' / 'default_mapping.conf'
+GDEFAULTCONTEXT_FILE:  Final = CONFIGS / 'hotkeygen' / 'default_context.conf'
+GCOMMONCONTEXT_FILE:   Final = CONFIGS / 'hotkeygen' / 'common_context.conf'
+GDEFAULTMAPPING_FILE:  Final = CONFIGS / 'hotkeygen' / 'default_mapping.conf'
 
 # Runtime (antes /var/run)
 GCONTEXT_FILE: Final = _RUNTIME_DIR / 'hotkeygen.context'
 GPID_FILE:     Final = _RUNTIME_DIR / 'hotkeygen.pid'
 
 # Usuario (antes /userdata/system/configs/hotkeygen)
-GUSER_DIR:                  Final = _XDG_CONFIG / 'hotkeygen' / 'user'
+GUSER_DIR:                  Final = CONFIGS / 'hotkeygen' / 'user'
 GUSERCOMMONCONTEXT_FILE:    Final = GUSER_DIR / 'common_context.conf'
 GUSERDEFAULTMAPPING_FILE:   Final = GUSER_DIR / 'default_mapping.conf'
 
@@ -250,7 +248,6 @@ def print_mapping(
                 else:
                     print(f"  {ECODES_NAMES[k]:-<15}-> {associations[k]:15}")
 
-
 def send_keys(target: evdev.UInput, keys: int | list[int] | str, begin: bool) -> None:
     if begin:
         n = 1
@@ -342,9 +339,11 @@ def do_new_context(context_name: str | None = None, context_json: str | None = N
         if GCONTEXT_FILE.exists():
             GCONTEXT_FILE.unlink()
 
-    # inform the process
-    pid = int(read_pid())
-    os.kill(pid, signal.SIGHUP)
+    try:
+        pid = int(read_pid())
+        os.kill(pid, signal.SIGHUP)
+    except (FileNotFoundError, ProcessLookupError, ValueError):
+        pass  # daemon no corriendo, ignorar
 
 def do_reload_devices_config():
     # inform the process

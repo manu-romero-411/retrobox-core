@@ -23,6 +23,7 @@ from ...batoceraPaths import (
     SAVES,
     SCREENSHOTS,
     USER_DECORATIONS,
+    USERDATA,
     mkdir_if_not_exists,
 )
 from ...exceptions import BatoceraException
@@ -38,7 +39,6 @@ if TYPE_CHECKING:
     from .mameTypes import MameControlScheme
 
 _logger = logging.getLogger(__name__)
-
 
 class MameGenerator(Generator):
 
@@ -375,10 +375,10 @@ class MameGenerator(Generator):
                 if system.name == "macintosh" and boot_disk:
                     if boot_disk in [ "macos30", "macos608", "macos701", "macos75" ]:
                         bootType = "-flop1"
-                        bootDisk = f"/userdata/bios/{boot_disk}.img"
+                        bootDisk = f"{USERDATA}/bios/{boot_disk}.img"
                     else:
                         bootType = "-hard"
-                        bootDisk = f"/userdata/bios/{boot_disk}.chd"
+                        bootDisk = f"{USERDATA}/bios/{boot_disk}.chd"
                     commandArray += [ bootType, bootDisk ]
 
                 # Alternate ROM type for systems with mutiple media (ie cassette & floppy)

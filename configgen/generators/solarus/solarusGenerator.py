@@ -16,7 +16,6 @@ if TYPE_CHECKING:
     from ...input import Input
     from ...types import HotkeysContext
 
-
 _CONFIG_DIR: Final = CONFIGS / "solarus"
 
 class SolarusGenerator(Generator):

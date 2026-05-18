@@ -106,7 +106,6 @@ _EMULATOR_MAPPING: Final = {
     },
 }
 
-
 @contextmanager
 def configure_wheels(
     controllers: ControllerList, system: Emulator, metadata: dict[str, str], /
@@ -277,7 +276,6 @@ def configure_wheels(
             _logger.error("hum, unable to reset wheel controllers !")
             # don't fail
 
-
 def _reconfigure_angle_rotation(
     controller: Controller, rotation_angle: int, wanted_rotation_angle: int, wanted_deadzone: int, wanted_midzone: int
 ) -> tuple[str, subprocess.Popen[bytes]] | None:
@@ -350,7 +348,6 @@ def _reconfigure_angle_rotation(
         raise
 
     return new_dev, proc
-
 
 def _reset_controllers(wheel_processes: Iterable[subprocess.Popen[bytes]]) -> None:
     for proc in wheel_processes:

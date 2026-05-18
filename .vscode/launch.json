@@ -1,0 +1,223 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "configgen: Switch eden-emu (ROM genérica)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "configgen.emulatorlauncher",
+            "cwd": "${workspaceFolder}",
+            "args": [
+                "-p1index",
+                "0",
+                "-p1guid",
+                "03004e526f0e0000a802000023020000",
+                "-p1name",
+                "PDP Xbox One Arctic White",
+                "-p1nbbuttons",
+                "11",
+                "-p1nbhats",
+                "1",
+                "-p1nbaxes",
+                "6",
+                "-system",
+                "switch",
+                "-rom",
+                "/penguintb/juegos/roms/switch/Donkey Kong Country Returns HD [01009D901BC56000][v0][US](nsw2u.com).nsp",
+                "-gameinfoxml",
+                "/tmp/game.xml",
+                "-systemname",
+                "Nintendo Switch"
+            ],
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}",
+                "PATH": "/home/manuel/proyectos/batocera-configgen:/home/manuel/.local/bin:/usr/local/bin:/usr/bin:/bin",
+                "SDL_JOYSTICK_HIDAPI": "1",
+                "SDL_JOYSTICK_HIDAPI_SWITCH": "1",
+                "SDL_JOYSTICK_HIDAPI_XBOX": "1",
+            },
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "configgen: GameCube (Mario Kart Double Dash) - 2 mandos",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "configgen.emulatorlauncher",
+            "cwd": "${workspaceFolder}",
+            "args": [
+                "-p1index", "0",
+                "-p1guid", "03004e526f0e0000a802000023020000",
+                "-p1name", "PDP Xbox One Arctic White",
+                "-p1nbbuttons", "11",
+                "-p1nbhats", "1",
+                "-p1nbaxes", "6",
+                "-p2index", "1",
+                "-p2guid", "0500d71f7e0500000920000001800000",
+                "-p2name", "Pro Controller",
+                "-p2nbbuttons", "14",
+                "-p2nbhats", "1",
+                "-p2nbaxes", "4",
+                "-wheel", 
+                "-system", "gamecube",
+                "-rom", "/penguintb/juegos/roms/gamecube/Mario Kart - Double Dash!! (Europe) (En,Fr,De,Es,It).rvz",
+                "-gameinfoxml", "/tmp/game.xml",
+                "-systemname", "GameCube"
+            ],
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}",
+                "PATH": "/home/manuel/proyectos/batocera-configgen:/home/manuel/.local/bin:/usr/local/bin:/usr/bin:/bin"
+            },
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "configgen: PSP (Pac-Man Championship)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "configgen.emulatorlauncher",
+            "cwd": "${workspaceFolder}",
+            "args": [
+                "-p1index", "0",
+                "-p1guid", "03004e526f0e0000a802000023020000",
+                "-p1name", "PDP Xbox One Arctic White",
+                "-p1nbbuttons", "11",
+                "-p1nbhats", "1",
+                "-p1nbaxes", "6",
+                "-system", "psp",
+                "-rom", "/penguintb/juegos/roms/psp/Pac-Man Championship Edition (Spain) (Minis).iso",
+                "-gameinfoxml", "/tmp/game.xml",
+                "-systemname", "PlayStation Portable"
+            ],
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}",
+                "PATH": "/home/manuel/proyectos/batocera-configgen:/home/manuel/.local/bin:/usr/local/bin:/usr/bin:/bin"
+            },
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "configgen: GameCube (Mario Kart Double Dash)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "configgen.emulatorlauncher",
+            "cwd": "${workspaceFolder}",
+            "args": [
+                "-p1index", "0",
+                "-p1guid", "03004e526f0e0000a802000023020000",
+                "-p1name", "PDP Xbox One Arctic White",
+                "-p1nbbuttons", "11",
+                "-p1nbhats", "1",
+                "-p1nbaxes", "6",
+                "-system", "gamecube",
+                "-rom", "/penguintb/juegos/roms/gamecube/Mario Kart - Double Dash!! (Europe) (En,Fr,De,Es,It).rvz",
+                "-gameinfoxml", "/tmp/game.xml",
+                "-systemname", "GameCube"
+            ],
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}",
+                "PATH": "/home/manuel/proyectos/batocera-configgen:/home/manuel/.local/bin:/usr/local/bin:/usr/bin:/bin"
+            },
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "configgen: N64 (Banjo-Kazooie)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "configgen.emulatorlauncher",
+            "cwd": "${workspaceFolder}",
+            "args": [
+                "-p1index", "0",
+                "-p1guid", "03004e526f0e0000a802000023020000",
+                "-p1name", "PDP Xbox One Arctic White",
+                "-p1nbbuttons", "11",
+                "-p1nbhats", "1",
+                "-p1nbaxes", "6",
+                "-system", "n64",
+                "-rom", "/penguintb/juegos/roms/n64/Banjo-Kazooie (USA) (Rev 1).z64",
+                "-gameinfoxml", "/tmp/game.xml",
+                "-systemname", "Nintendo 64"
+            ],
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}",
+                "PATH": "/home/manuel/proyectos/batocera-configgen:/home/manuel/.local/bin:/usr/local/bin:/usr/bin:/bin"
+            },
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },    
+        {
+            "name": "configgen: PS2 (Dragon Quest VIII)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "configgen.emulatorlauncher",
+            "cwd": "${workspaceFolder}",
+            "args": [
+                "-p1index", "0",
+                "-p1guid", "03004e526f0e0000a802000023020000",
+                "-p1name", "PDP Xbox One Arctic White",
+                "-p1nbbuttons", "11",
+                "-p1nbhats", "1",
+                "-p1nbaxes", "6",
+                "-system", "ps2",
+                "-rom", "/penguintb/juegos/roms/ps2/Dragon Quest - The Journey of the Cursed King (Europe, Australia) (En,Fr,De,Es,It).chd",
+                "-gameinfoxml", "/tmp/game.xml",
+                "-systemname", "PlayStation 2"
+            ],
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}",
+                "PATH": "/home/manuel/proyectos/batocera-configgen:/home/manuel/.local/bin:/usr/local/bin:/usr/bin:/bin"
+            },
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "configgen: Mega Drive (ROM genérica)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "configgen.emulatorlauncher",
+            "cwd": "${workspaceFolder}",
+            "args": [
+                "-p1index", "0",
+                "-p1guid", "03004e526f0e0000a802000023020000",
+                "-p1name", "PDP Xbox One Arctic White",
+                "-p1nbbuttons", "11",
+                "-p1nbhats", "1",
+                "-p1nbaxes", "6",
+                "-system", "megadrive",
+                "-rom", "/penguintb/juegos/roms/megadrive/Sonic & Knuckles + Sonic The Hedgehog (USA, Europe) (Lock-on Combination).zip",
+                "-gameinfoxml", "/tmp/game.xml",
+                "-systemname", "Mega Drive"
+            ],
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            },
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "configgen: Game Boy (ROM genérica)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "configgen.emulatorlauncher",
+            "cwd": "${workspaceFolder}",
+            "args": [
+                "-p1index", "0",
+                "-p1guid", "03004e526f0e0000a802000023020000",
+                "-p1name", "PDP Xbox One Arctic White",
+                "-p1nbbuttons", "11",
+                "-p1nbhats", "1",
+                "-p1nbaxes", "6",
+                "-system", "gb",
+                "-rom", "/penguintb/juegos/roms/gb/A-mazing Tater (USA).zip",
+                "-gameinfoxml", "/tmp/game.xml",
+                "-systemname", "Game Boy"
+            ],
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            },
+            "console": "integratedTerminal",
+            "justMyCode": false
+        }
+    ]
+}

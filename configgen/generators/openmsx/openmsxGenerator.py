@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Final, cast
 
 from ... import Command
-from ...batoceraPaths import CONFIGS, SCREENSHOTS, mkdir_if_not_exists
+from ...batoceraPaths import BIOS, CONFIGS, SCREENSHOTS, USERDATA, mkdir_if_not_exists
 from ..Generator import Generator
 
 if TYPE_CHECKING:
@@ -85,8 +85,8 @@ class OpenmsxGenerator(Generator):
 
         # set the tcl file options - we can add other options later
         with settings_tcl.open("a") as file:
-            file.write("filepool add -path /userdata/bios/Machines -types system_rom -position 1\n")
-            file.write("filepool add -path /userdata/bios/openmsx -types system_rom -position 2\n")
+            file.write(f"filepool add -path {BIOS}/Machines -types system_rom -position 1\n")
+            file.write(f"filepool add -path {BIOS}/openmsx -types system_rom -position 2\n")
             # get the rom name (no extension) for the savestate name
             save_name = rom.stem
             # simplify the rom name, remove content between brackets () & []
@@ -98,7 +98,7 @@ class OpenmsxGenerator(Generator):
             # set the screenshot
             file.write("\n")
             file.write("# -= Screenshots =-\n")
-            file.write('bind F5 {screenshot [utils::get_next_numbered_filename /userdata/screenshots/openmsx "[guess_title] " ".png"]}\n')
+            file.write('bind F5 {screenshot [utils::get_next_numbered_filename ' + f"{USERDATA}" + '/screenshots/openmsx "[guess_title] " ".png"]}\n')
             # setup the controller
             file.write("\n")
             file.write("# -= Controller config =-\n")

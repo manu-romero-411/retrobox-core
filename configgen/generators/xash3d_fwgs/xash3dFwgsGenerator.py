@@ -13,33 +13,26 @@ from ..Generator import Generator
 if TYPE_CHECKING:
     from ...types import HotkeysContext
 
-
 _CONFIG_DIR: Final = CONFIGS / 'xash3d_fwgs'
 _ROMS_DIR: Final = ROMS / 'halflife'
 _SAVES_DIR: Final = SAVES / 'xash3d_fwgs'
 _HLSDK_LIBS_DIR: Final = Path('/usr/lib/xash3d/hlsdk')
 _DEFAULT_SERVER_LIB: Final = 'hl'
 
-
 def _rom_dir(game: str) -> Path:
     return _ROMS_DIR / game
-
 
 def _config_dir(game: str) -> Path:
     return _CONFIG_DIR / game
 
-
 def _save_dir(game: str) -> Path:
     return _SAVES_DIR / game
-
 
 def _client_lib_path(server_lib: str, arch_suffix: str) -> Path:
     return _HLSDK_LIBS_DIR / server_lib / 'cl_dlls' / f'client{arch_suffix}.so'
 
-
 def _server_lib_path(server_lib: str, arch_suffix: str) -> Path:
     return _HLSDK_LIBS_DIR / server_lib / 'dlls' / f'{server_lib}{arch_suffix}.so'
-
 
 def _get_server_lib_basename_from_liblist_gam(game: str) -> str | None:
     """Gets the base name of the server library from liblist.gam in the game directory."""
@@ -54,7 +47,6 @@ def _get_server_lib_basename_from_liblist_gam(game: str) -> str | None:
                 return m.group(1)
     return None
 
-
 def _find_server_lib(server_lib: str | None, arch_suffix: str) -> Path:
     """Finds and returns the server library.
 
@@ -66,7 +58,6 @@ def _find_server_lib(server_lib: str | None, arch_suffix: str) -> Path:
             return path
 
     return _server_lib_path(_DEFAULT_SERVER_LIB, arch_suffix)
-
 
 def _find_client_lib(server_lib: str | None, arch_suffix: str) -> Path:
     """Finds and returns the client library.
@@ -80,12 +71,10 @@ def _find_client_lib(server_lib: str | None, arch_suffix: str) -> Path:
 
     return _client_lib_path(_DEFAULT_SERVER_LIB, arch_suffix)
 
-
 def _get_arch_suffix() -> str:
     """Returns the architecture suffix, e.g. _amd64, based on a known server library."""
     path_prefix = _HLSDK_LIBS_DIR / 'hl' / 'dlls'
     return next(path_prefix.glob('hl*.so')).stem[2:]
-
 
 class Xash3dFwgsGenerator(Generator):
 

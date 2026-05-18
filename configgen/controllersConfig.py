@@ -18,7 +18,6 @@ def dev2int(dev: str) -> int | None:
         return None
     return int(matches.group(1))
 
-
 class _Device(TypedDict):
     node: str
     sysfs_path: str

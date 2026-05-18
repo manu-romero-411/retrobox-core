@@ -18,12 +18,10 @@ if TYPE_CHECKING:
     from ..controller import Controller, Controllers
     from ..gun import Gun, Guns
 
-
 _logger = logging.getLogger(__name__)
 
 _EVMAPY_SHARE_DIR: Final = Path('/usr/share/evmapy')
 _EVMAPY_RUN_DIR: Final = EVMAPY_RUN_DIR
-
 
 class _EvmapyAction(TypedDict):
     trigger: str | list[str]
@@ -32,16 +30,13 @@ class _EvmapyAction(TypedDict):
     mode: NotRequired[Literal['all', 'sequence', 'any']]
     hold: NotRequired[float]
 
-
 class _EvmapyButton(TypedDict):
     name: str
     code: int
 
-
 class _EvmapyAxis(_EvmapyButton):
     min: float
     max: float
-
 
 class _EvmapyConfig(TypedDict):
     actions: list[_EvmapyAction]
@@ -49,30 +44,24 @@ class _EvmapyConfig(TypedDict):
     axes: NotRequired[list[_EvmapyAxis]]
     buttons: NotRequired[list[_EvmapyButton]]
 
-
 class _KeysActionBase(TypedDict):
     trigger: str | list[str]
     mode: NotRequired[Literal['all', 'sequence', 'any']]
     hold: NotRequired[float]
     description: NotRequired[str]
 
-
 class _KeysAction(_KeysActionBase):
     type: Literal['exec', 'key']
     target: str | list[str]
 
-
 class _KeysMouseAction(_KeysActionBase):
     type: Literal['mouse']
-
 
 type _KeysActions = list[_KeysAction | _KeysMouseAction]
 type _KeysConfig = dict[str, _KeysActions]
 
-
 def _keys_action_to_evmapy_action(keys_action: _KeysAction, /) -> _EvmapyAction:
     return cast('_EvmapyAction', {key: value for key, value in keys_action.items() if key != 'description'})
-
 
 def _keys_mouse_action_to_evmapy_action(
     keys_action: _KeysMouseAction, /, *, trigger: str, target: str
@@ -85,7 +74,6 @@ def _keys_mouse_action_to_evmapy_action(
             'target': target,
         },
     )
-
 
 @dataclass(slots=True)
 class evmapy(AbstractContextManager[None, None]):

@@ -14,7 +14,6 @@ from .flycastPaths import FLYCAST_BIOS, FLYCAST_CONFIG, FLYCAST_SAVES, FLYCAST_V
 if TYPE_CHECKING:
     from ...types import HotkeysContext
 
-
 class FlycastGenerator(Generator):
 
     def getHotkeysContext(self) -> HotkeysContext:

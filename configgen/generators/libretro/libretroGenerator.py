@@ -11,12 +11,14 @@ from ... import Command
 from ...batoceraPaths import (
     BATOCERA_SHADERS,
     BIOS,
+    CMDFILES_DIR,
     CONFIGS,
     HOME,
     OVERLAYS,
     ROMS,
     SAVES,
     USER_SHADERS,
+    USERDATA,
     mkdir_if_not_exists,
 )
 from ...exceptions import BatoceraException, MissingCore
@@ -225,8 +227,8 @@ class LibretroGenerator(Generator):
                 GBMultiScript.write("       if [ $2 = 'gb2players' ] || [ $2 = 'gbc2players' ]\n")
                 GBMultiScript.write("       then\n")
                 for x in range(len(GBMultiSave)):
-                    saveFile = "/userdata/saves/" + GBMultiSys[x] + "/" + GBMultiSave[x]
-                    newSaveFile = "/userdata/saves/" + system.name + "/" + GBMultiSave[x]
+                    saveFile = f"{USERDATA}/saves/" + GBMultiSys[x] + "/" + GBMultiSave[x]
+                    newSaveFile = f"{USERDATA}/saves/" + system.name + "/" + GBMultiSave[x]
                     GBMultiScript.write('           cp "' + newSaveFile + '" "' + saveFile + '"\n')
                 GBMultiScript.write("       fi\n")
                 # Deletes itself after running
@@ -259,25 +261,25 @@ class LibretroGenerator(Generator):
         # tyrquake - set directory
         elif system.name == 'quake':
             if "scourge" in rom.name.lower():
-                rom = Path('/userdata/roms/quake/hipnotic/pak0.pak')
+                rom = Path(f'{USERDATA}/roms/quake/hipnotic/pak0.pak')
             elif "dissolution" in rom.name.lower():
-                rom = Path('/userdata/roms/quake/rogue/pak0.pak')
+                rom = Path(f'{USERDATA}/roms/quake/rogue/pak0.pak')
             else:
-                rom = Path('/userdata/roms/quake/id1/pak0.pak')
+                rom = Path(f'{USERDATA}/roms/quake/id1/pak0.pak')
             commandArray = [RETROARCH_BIN, "-L", retroarchCore, "--config", system.config['configfile']]
         # vitaquake2 - choose core based on directory
         elif system.name == 'quake2':
             if "reckoning" in rom.name.lower():
                 system.config['core'] = "vitaquake2-xatrix"
-                rom = Path('/userdata/roms/quake2/xatrix/pak0.pak')
+                rom = Path(f'{USERDATA}/roms/quake2/xatrix/pak0.pak')
             elif "zero" in rom.name.lower():
                 system.config['core'] = "vitaquake2-rogue"
-                rom = Path('/userdata/roms/quake2/rogue/pak0.pak')
+                rom = Path(f'{USERDATA}/roms/quake2/rogue/pak0.pak')
             elif "zaero" in rom.name.lower():
                 system.config['core'] = "vitaquake2-zaero"
-                rom = Path('/userdata/roms/quake2/zaero/pak0.pak')
+                rom = Path(f'{USERDATA}/roms/quake2/zaero/pak0.pak')
             else:
-                rom = Path('/userdata/roms/quake2/baseq2/pak0.pak')
+                rom = Path(f'{USERDATA}/roms/quake2/baseq2/pak0.pak')
             # set the updated core name
             retroarchCore = RETROARCH_CORES / f"{system.config.core}_libretro.so"
             commandArray = [RETROARCH_BIN, "-L", retroarchCore, "--config", system.config['configfile']]

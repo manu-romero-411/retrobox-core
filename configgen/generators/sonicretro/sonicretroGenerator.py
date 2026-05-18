@@ -15,17 +15,14 @@ if TYPE_CHECKING:
 
     from ...types import HotkeysContext
 
-
 @cache
 def _get_resolved_path_md5(path: Path) -> str:
     return hashlib.md5(path.read_bytes()).hexdigest()
-
 
 # @cache is not used on this function because the digest should be cached by
 # resolved path and we don't want the caller to have to remember to call .resolve()
 def _get_path_md5(path: Path) -> str:
     return _get_resolved_path_md5(path.resolve())
-
 
 class SonicRetroGenerator(Generator):
 

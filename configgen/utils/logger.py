@@ -10,7 +10,6 @@ from typing import TYPE_CHECKING, TextIO
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-
 class EpipeTolerantStreamHandler(logging.StreamHandler):
     def emit(self, record: logging.LogRecord) -> None:
         try:
@@ -31,7 +30,6 @@ class EpipeTolerantStreamHandler(logging.StreamHandler):
             if e.errno == errno.EPIPE:
                 return
             raise
-
 
 class EpipeTolerantTextIO(io.TextIOBase):
     _raw: TextIO
@@ -85,7 +83,6 @@ class EpipeTolerantTextIO(io.TextIOBase):
     @property
     def closed(self) -> bool:
         return self._raw.closed
-
 
 @contextmanager
 def setup_logging() -> Iterator[None]:

@@ -131,13 +131,28 @@ def minTomaxResolution() -> None:
 
 def getCurrentResolution(name: str | None = None) -> Resolution:
     if name is None:
-        proc = subprocess.Popen(["batocera-resolution currentResolution"], stdout=subprocess.PIPE, shell=True)
+        cmd = "batocera-resolution currentResolution"
     else:
-        proc = subprocess.Popen([f"batocera-resolution --screen {name} currentResolution"], stdout=subprocess.PIPE, shell=True)
-
+        cmd = f"batocera-resolution --screen {name} currentResolution"
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
     (out, _) = proc.communicate()
-    vals = out.decode().split("x")
-    return { "width": int(vals[0]), "height": int(vals[1]) }
+    result = out.decode().strip()
+    if not result or 'x' not in result:
+        # fallback: kscreen-doctor directo desde Python
+        try:
+            import subprocess as sp
+            out2 = sp.check_output(
+                "kscreen-doctor -o 2>/dev/null | grep -E 'Mode:.*\\*' | awk '{print $2}' | head -1 | cut -d@ -f1",
+                shell=True
+            ).decode().strip()
+            if out2 and 'x' in out2:
+                vals = out2.split("x")
+                return {"width": int(vals[0]), "height": int(vals[1])}
+        except Exception:
+            pass
+        return {"width": 1920, "height": 1080}  # último recurso
+    vals = result.split("x")
+    return {"width": int(vals[0]), "height": int(vals[1])}
 
 def getCurrentOutput() -> str:
     proc = subprocess.Popen(["batocera-resolution currentOutput"], stdout=subprocess.PIPE, shell=True)

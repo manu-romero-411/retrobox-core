@@ -14,7 +14,6 @@ if TYPE_CHECKING:
     from ..gun import Guns
     from ..types import DeviceInfoMapping, HotkeysContext, Resolution
 
-
 class Generator(metaclass=ABCMeta):
     @abstractmethod
     def generate(

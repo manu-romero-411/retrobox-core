@@ -13,9 +13,7 @@ if TYPE_CHECKING:
 
 _logger = logging.getLogger(__name__)
 
-
 class DownloadException(BatoceraException): ...
-
 
 @contextmanager
 def download(url: str, directory: Path, /) -> Iterator[IO[bytes]]:

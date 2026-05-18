@@ -14,7 +14,6 @@ if TYPE_CHECKING:
     from ...controller import Controllers
     from ...types import HotkeysContext
 
-
 class EasyRPGGenerator(Generator):
 
     def getHotkeysContext(self) -> HotkeysContext:

@@ -18,7 +18,6 @@ from ..Generator import Generator
 if TYPE_CHECKING:
     from ...types import HotkeysContext
 
-
 _logger = logging.getLogger(__name__)
 
 MODEL2_ROMS: Final = ROMS / "model2"
@@ -181,7 +180,6 @@ class Model2EmuGenerator(Generator):
 
         # now run the emulator
         return Command.Command(array=commandArray, env=environment)
-
 
 def modify_lua_widescreen(file_path: Path, condition: bool) -> None:
     with file_path.open('r') as lua_file:

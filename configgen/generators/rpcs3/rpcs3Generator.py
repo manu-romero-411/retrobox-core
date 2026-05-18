@@ -195,7 +195,6 @@ class Rpcs3Generator(Generator):
         # Write Depth Buffer
         rpcs3ymlconfig["Video"]["Write Depth Buffer"] = system.config.get_bool("rpcs3_write_depth_buffers")
 
-
         # -= [Audio] =-
         # defaults
         rpcs3ymlconfig["Audio"]["Renderer"] = "Cubeb"

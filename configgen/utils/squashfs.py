@@ -16,7 +16,6 @@ _logger = logging.getLogger(__name__)
 
 _SQUASHFS_DIR: Final = SQUASHFS_DIR
 
-
 @contextmanager
 def mount_squashfs(rom: Path, /) -> Iterator[Path]:
     _logger.debug("mount_squashfs(%s)", rom)

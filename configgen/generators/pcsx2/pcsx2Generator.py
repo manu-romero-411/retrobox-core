@@ -14,6 +14,10 @@ from ...batoceraPaths import (
     CONFIGS,
     DATAINIT_DIR,
     ROMS,
+    SAVES,
+    SCREENSHOTS,
+    LOGS,
+    CHEATS,
     configure_emulator,
     ensure_parents_and_open,
     mkdir_if_not_exists,
@@ -34,10 +38,11 @@ if TYPE_CHECKING:
 
 _logger = logging.getLogger(__name__)
 
-_PCSX2_BIN_DIR: Final = Path("/usr/pcsx2/bin")
+_PCSX2_BIN_DIR:       Final = Path("/opt/pcsx2")
+_PCSX2_BIN:           Final = Path("/usr/local/bin/pcsx2")        # symlink al AppImage
 _PCSX2_RESOURCES_DIR: Final = _PCSX2_BIN_DIR / "resources"
-_PCSX2_CONFIG: Final = CONFIGS / "PCSX2"
-_PCSX2_BIOS: Final = BIOS / "ps2"
+_PCSX2_CONFIG:        Final = Path.home() / '.config' / 'PCSX2'
+_PCSX2_BIOS:          Final = BIOS / "pcsx2" / "bios"
 
 class Pcsx2Generator(Generator):
 
@@ -103,23 +108,23 @@ class Pcsx2Generator(Generator):
         playingWithWheel = Pcsx2Generator.isPlayingWithWheel(system, wheels)
 
         # Config files
-        configureReg(_PCSX2_CONFIG)
+        #configureReg(_PCSX2_CONFIG)
         configureINI(_PCSX2_CONFIG, _PCSX2_BIOS, system, rom, playersControllers, metadata, guns, wheels, playingWithWheel)
-        configureAudio(_PCSX2_CONFIG)
+        #configureAudio(_PCSX2_CONFIG)
 
         # write our own game_controller_db.txt file before launching the game
         dbfile = _PCSX2_CONFIG / "game_controller_db.txt"
         write_sdl_controller_db(playersControllers, dbfile)
 
-        commandArray = ["/usr/pcsx2/bin/pcsx2-qt"] if configure_emulator(rom) else \
-              ["/usr/pcsx2/bin/pcsx2-qt", "-nogui", rom]
-
+        commandArray = [str(_PCSX2_BIN)] if configure_emulator(rom) else \
+               [str(_PCSX2_BIN), "-nogui", "-batch", str(rom)]
+        
         with Path("/proc/cpuinfo").open() as cpuinfo:
             if not re.search(r'^flags\s*:.*\ssse4_1\W', cpuinfo.read(), re.MULTILINE):
                 _logger.warning("CPU does not support SSE4.1 which is required by pcsx2.  The emulator will likely crash with SIGILL (illegal instruction).")
 
         envcmd: dict[str, str | Path] = {
-            "XDG_CONFIG_HOME": CONFIGS
+            "XDG_CONFIG_HOME": str(Path.home() / '.config')
         }
 
         # wheels won't work correctly when SDL_GAMECONTROLLERCONFIG is set. excluding wheels from SDL_GAMECONTROLLERCONFIG doesn't fix too.
@@ -130,15 +135,19 @@ class Pcsx2Generator(Generator):
         # ensure we have the patches.zip file to avoid message.
         mkdir_if_not_exists(pcsx2Patches.parent)
         if not pcsx2Patches.exists():
-            shutil.copy(DATAINIT_DIR / "bios" / "ps2" / "patches.zip", pcsx2Patches)
-
+            patch_src = DATAINIT_DIR / "bios" / "ps2" / "patches.zip"
+            if patch_src.exists():
+                shutil.copy(patch_src, pcsx2Patches)
+            else:
+                _logger.debug("patches.zip not found in datainit, skipping")
+       
         # state_slot option
         if state_filename := system.config.get('state_filename'):
             commandArray.extend(["-statefile", state_filename])
 
         if state_slot := system.config.get_str('state_slot'):
             commandArray.extend(["-stateindex", state_slot])
-
+        _logger.warning("DEBUG pcsx2 command: %s env: %s", commandArray, envcmd)
         return Command.Command(
             array=commandArray,
             env=envcmd
@@ -246,19 +255,16 @@ def configureINI(config_directory: Path, bios_directory: Path, system: Emulator,
     pcsx2INIConfig.remove_option("Folders", "SaveStates")
 
     # set the folders we want
-    pcsx2INIConfig.set("Folders", "Bios", "../../../bios/ps2")
-    pcsx2INIConfig.set("Folders", "Snapshots", "../../../screenshots")
-    pcsx2INIConfig.set("Folders", "Savestates", "../../../saves/ps2/pcsx2/sstates")
-    pcsx2INIConfig.set("Folders", "MemoryCards", "../../../saves/ps2/pcsx2")
-    pcsx2INIConfig.set("Folders", "Logs", "../../logs")
-    pcsx2INIConfig.set("Folders", "Cheats", "../../../cheats/ps2")
-    pcsx2INIConfig.set("Folders", "CheatsWS", "../../../cheats/ps2/cheats_ws")
-    pcsx2INIConfig.set("Folders", "CheatsNI", "../../../cheats/ps2/cheats_ni")
-    pcsx2INIConfig.set("Folders", "Cache", "../../cache/ps2")
-    pcsx2INIConfig.set("Folders", "Textures", "textures")
-    pcsx2INIConfig.set("Folders", "InputProfiles", "inputprofiles")
-    pcsx2INIConfig.set("Folders", "Videos", "../../../saves/ps2/pcsx2/videos")
-
+    pcsx2INIConfig.set("Folders", "Bios",        str(_PCSX2_BIOS))
+    pcsx2INIConfig.set("Folders", "Snapshots",   str(SCREENSHOTS))
+    pcsx2INIConfig.set("Folders", "Savestates",  str(SAVES / "ps2" / "sstates"))
+    pcsx2INIConfig.set("Folders", "MemoryCards", str(SAVES / "ps2" / "memcards"))
+    pcsx2INIConfig.set("Folders", "Logs",        str(LOGS))
+    pcsx2INIConfig.set("Folders", "Cheats",      str(CHEATS / "ps2"))
+    pcsx2INIConfig.set("Folders", "Cache",       str(CACHE / "ps2"))
+    pcsx2INIConfig.set("Folders", "Textures",    str(_PCSX2_CONFIG / "textures"))
+    pcsx2INIConfig.set("Folders", "InputProfiles", str(_PCSX2_CONFIG / "inputprofiles"))
+    pcsx2INIConfig.set("Folders", "Videos",      str(SAVES / "ps2" / "videos"))
     # create cache folder
     mkdir_if_not_exists(CACHE / "ps2")
 

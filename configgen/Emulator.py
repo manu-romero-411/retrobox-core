@@ -38,7 +38,6 @@ def _dict_merge(destination: dict[str, Any], source: Mapping[str, Any]) -> None:
         else:
             destination[key] = value
 
-
 def _load_defaults(system_name: str, default_yml: Path, default_arch_yml: Path, /) -> dict[str, Any]:
     try:
         defaults = yaml.load(default_yml.read_text(), Loader=yaml.CLoader)
@@ -67,7 +66,6 @@ def _load_defaults(system_name: str, default_yml: Path, default_arch_yml: Path, 
 
     return config
 
-
 def _load_system_config(system_name: str, /) -> dict[str, Any]:
     defaults = _load_defaults(
         system_name,
@@ -83,7 +81,6 @@ def _load_system_config(system_name: str, /) -> dict[str, Any]:
         _dict_merge(data, defaults['options'])
 
     return data
-
 
 @dataclass(slots=True)
 class Emulator:

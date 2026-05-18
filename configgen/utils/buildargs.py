@@ -5,12 +5,10 @@ from pathlib import Path
 
 """Argument parsing helper functions for launching Build Engine source ports Eduke32 and Raze"""
 
-
 @dataclass()
 class ParseError:
     line_no: int
     message: str
-
 
 @dataclass()
 class Result:
@@ -25,13 +23,11 @@ class Result:
     def error(message: str):
         return Result(False, message)
 
-
 @dataclass()
 class BuildEngineArg:
     arg_key: str
     cli_opt: str
     only_one_allowed: bool
-
 
 def parse_args(launch_args: list[str | Path], rom_path: Path) -> Result:
     # These arguments are all shared by EDuke32 and Raze, with noted differences

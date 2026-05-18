@@ -16,23 +16,19 @@ if TYPE_CHECKING:
 
 _profile: Profile | None = None
 
-
 if os.path.exists('/var/run/emulatorlauncher.perf'):  # noqa: PTH110
     import cProfile
 
     _profile = cProfile.Profile()
 
-
 def start() -> None:
     if _profile:
         _profile.enable()
-
 
 def stop() -> None:
     if _profile:
         _profile.disable()
         _profile.dump_stats('/var/run/emulatorlauncher.prof')
-
 
 @contextmanager
 def pause() -> Iterator[None]:

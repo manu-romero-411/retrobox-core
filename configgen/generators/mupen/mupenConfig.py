@@ -11,7 +11,6 @@ if TYPE_CHECKING:
     from ...types import Resolution
     from ...utils.configparser import CaseSensitiveConfigParser
 
-
 def setMupenConfig(iniConfig: CaseSensitiveConfigParser, system: Emulator, controllers: Controllers, gameResolution: Resolution):
 
     # Hotkeys
@@ -191,7 +190,6 @@ def setMupenConfig(iniConfig: CaseSensitiveConfigParser, system: Emulator, contr
     else:
         iniConfig.set("64DD", "IPL-ROM", "")
     iniConfig.set("64DD", "Disk", "")
-
 
     # Display FPS
     if system.config.show_fps:

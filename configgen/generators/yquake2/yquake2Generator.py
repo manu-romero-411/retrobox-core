@@ -85,7 +85,6 @@ def createDefault():
         for key, value in options_to_set.items():
             config_file.write(f"{key} \"{value}\"\n")
 
-
 class YQuake2Generator(Generator):
 
     def getHotkeysContext(self) -> HotkeysContext:

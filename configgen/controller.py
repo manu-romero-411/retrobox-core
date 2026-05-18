@@ -13,7 +13,6 @@ from .input import Input, InputDict, InputMapping
 if TYPE_CHECKING:
     from argparse import Namespace
 
-
 """Default mapping of Batocera keys to SDL_GAMECONTROLLERCONFIG keys."""
 _DEFAULT_SDL_MAPPING: Final = {
     'b': 'a',
@@ -38,7 +37,6 @@ _DEFAULT_SDL_MAPPING: Final = {
     'joystick2left': 'rightx',
     'hotkey': 'guide'
 }
-
 
 def _key_to_sdl_game_controller_config(keyname: str, input: Input, /) -> str | None:
     """
@@ -73,7 +71,6 @@ def _key_to_sdl_game_controller_config(keyname: str, input: Input, /) -> str | N
 
     raise BatoceraException(f'Unknown controller input type: {input.type!r}')
 
-
 def _find_input_config(roots: Iterable[ET.Element], name: str, guid: str, /) -> ET.Element:
     path = './inputConfig'
 
@@ -94,11 +91,9 @@ def _find_input_config(roots: Iterable[ET.Element], name: str, guid: str, /) -> 
 
     raise BatoceraException(f'Could not find controller data for "{name}" with GUID "{guid}"')
 
-
 class _RelaxedDict(TypedDict):
     centered: bool
     reversed: bool
-
 
 class _ControllerChanges(TypedDict, total=False):
     guid: str
@@ -111,7 +106,6 @@ class _ControllerChanges(TypedDict, total=False):
     axis_count: int
     physical_device_path: str | None
     physical_index: int | None
-
 
 @dataclass(slots=True, kw_only=True)
 class Controller:
@@ -258,10 +252,8 @@ class Controller:
 
         return None
 
-
 def generate_sdl_game_controller_config(controllers: Controllers, /, ignore_buttons: list[str] | None = None) -> str:
     return "\n".join(controller.generate_sdl_game_db_line(ignore_buttons = ignore_buttons) for controller in controllers)
-
 
 def write_sdl_controller_db(
     controllers: Controllers, outputFile: str | Path = "/tmp/gamecontrollerdb.txt", /,
@@ -272,7 +264,6 @@ def write_sdl_controller_db(
         text_file.write(generate_sdl_game_controller_config(controllers))
 
     return outputFile
-
 
 type Controllers = Sequence[Controller]
 type ControllerList = list[Controller]

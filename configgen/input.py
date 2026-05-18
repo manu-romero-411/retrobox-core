@@ -7,14 +7,12 @@ from typing import TYPE_CHECKING, Self, TypedDict, Unpack, cast
 if TYPE_CHECKING:
     import xml.etree.ElementTree as ET
 
-
 class _InputChanges(TypedDict, total=False):
     name: str
     type: str
     id: str
     value: str
     code: str | None
-
 
 @dataclass(slots=True, kw_only=True)
 class Input:
@@ -42,7 +40,6 @@ class Input:
         for element in parent_element.iterfind('./input'):
             input = cls.from_element(element)
             yield input.name, input
-
 
 type InputMapping = Mapping[str, Input]
 type InputDict = dict[str, Input]

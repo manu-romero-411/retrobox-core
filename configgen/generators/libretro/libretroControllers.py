@@ -11,7 +11,6 @@ if TYPE_CHECKING:
     from ...input import Input
     from ...settings.unixSettings import UnixSettings
 
-
 # Map an emulationstation direction to the corresponding retroarch
 retroarchdirs = {'up': 'up', 'down': 'down', 'left': 'left', 'right': 'right'}
 
@@ -215,7 +214,6 @@ def generateControllerConfig(
         # dont touch to it when there are connected lightguns
         config[f'input_player{controller.player_number}_mouse_index'] = mouseIndex
     return config
-
 
 # Returns the value to write in retroarch config file, depending on the type
 def getConfigValue(input: Input, /) -> str | None:

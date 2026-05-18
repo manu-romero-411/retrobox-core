@@ -8,7 +8,6 @@ from .utils.missing import MISSING, MissingType
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-
 @dataclass(slots=True)
 class Config:
     TRUE_VALUES: ClassVar[set[Literal['1', 'true', 'on', 'enabled', True]]] = {'1', 'true', 'on', 'enabled', True}
@@ -124,7 +123,6 @@ class Config:
 
     def values(self):
         return self.data.values()
-
 
 @dataclass
 class SystemConfig(Config):

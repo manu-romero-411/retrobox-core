@@ -12,6 +12,7 @@ from ...batoceraPaths import (
     CONFIGS,
     SAVES,
     SCREENSHOTS,
+    USERDATA,
     ensure_parents_and_open,
     mkdir_if_not_exists,
 )
@@ -24,7 +25,6 @@ if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
     from ...types import HotkeysContext
-
 
 class DuckstationGenerator(Generator):
 
@@ -111,11 +111,10 @@ class DuckstationGenerator(Generator):
         # Enable Cheats
         settings.set("Console", "EnableCheats", system.config.get("duckstation_cheats", "False"))
 
-
         ## [BIOS]
         if not settings.has_section("BIOS"):
             settings.add_section("BIOS")
-        settings.set("BIOS", "SearchDirectory", "/userdata/bios")
+        settings.set("BIOS", "SearchDirectory", f"{USERDATA}/bios")
         # Boot Logo
         settings.set("BIOS", "PatchFastBoot", system.config.get("duckstation_PatchFastBoot", "false"))
         # Find & populate BIOS
@@ -220,7 +219,7 @@ class DuckstationGenerator(Generator):
         ## [GameList]
         if not settings.has_section("GameList"):
             settings.add_section("GameList")
-        settings.set("GameList" , "RecursivePaths", "/userdata/roms/psx")
+        settings.set("GameList" , "RecursivePaths", f"{USERDATA}/roms/psx")
 
         ## [Cheevos]
         if not settings.has_section("Cheevos"):

@@ -10,10 +10,8 @@ from ..Generator import Generator
 if TYPE_CHECKING:
     from ...types import HotkeysContext
 
-
 _IORTCW_CONFIG: Final = ROMS / "rtcw"
 _IORTCW_CONFIG_FILE: Final = _IORTCW_CONFIG / "main" / "wolfconfig.cfg"
-
 
 class IORTCWGenerator(Generator):
 

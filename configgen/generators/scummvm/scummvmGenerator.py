@@ -5,7 +5,7 @@ import re
 from typing import TYPE_CHECKING, Final
 
 from ... import Command
-from ...batoceraPaths import BIOS, CACHE, CONFIGS, SAVES, SCREENSHOTS, ensure_parents_and_open, mkdir_if_not_exists
+from ...batoceraPaths import BIOS, CACHE, CONFIGS, SAVES, SCREENSHOTS, USERDATA, ensure_parents_and_open, mkdir_if_not_exists
 from ...controller import Controller, generate_sdl_game_controller_config
 from ...utils.configparser import CaseSensitiveConfigParser
 from ..Generator import Generator
@@ -96,7 +96,7 @@ class ScummVMGenerator(Generator):
             commandArray.extend(["-q", f"{language}"])
 
         # logging
-        commandArray.append("--logfile=/userdata/system/logs/scummvm.log")
+        commandArray.append(f"--logfile={USERDATA}/logs/scummvm.log")
 
         commandArray.extend(
             [f"--joystick={id}",

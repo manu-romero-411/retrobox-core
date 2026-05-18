@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 from configgen.utils.configparser import CaseSensitiveRawConfigParser
 
 from ... import Command
-from ...batoceraPaths import BIOS, SAVES, mkdir_if_not_exists
+from ...batoceraPaths import BIOS, SAVES, USERDATA, mkdir_if_not_exists
 from ...utils import vulkan, wine
 from ..Generator import Generator
 
@@ -116,14 +116,14 @@ class DemulGenerator(Generator):
         roms0_path_win = PureWindowsPath(roms0)
 
         # Specific rom paths
-        roms1 = Path("/userdata/roms/hikaru")
+        roms1 = Path(f"{USERDATA}/roms/hikaru")
         roms1_path_win = PureWindowsPath(roms1)
-        roms2 = Path("/userdata/roms/gaelco")
+        roms2 = Path(f"{USERDATA}/roms/gaelco")
         roms2_path_win = PureWindowsPath(roms2)
-        roms3 = Path("/userdata/roms/cave3rd")
+        roms3 = Path(f"{USERDATA}/roms/cave3rd")
         roms3_path_win = PureWindowsPath(roms3)
 
-        plugins = Path("/userdata/saves/demul/demul/plugins/")
+        plugins = Path(f"{USERDATA}/saves/demul/demul/plugins/")
         # If user plugins don't exist, point to emu plugins
         if not plugins.exists():
              plugins = emupath / "plugins"

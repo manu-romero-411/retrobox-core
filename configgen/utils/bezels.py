@@ -36,7 +36,6 @@ class BezelInfos(TypedDict):
     mamezip: Path
     specific_to_game: bool
 
-
 def getBezelInfos(rom: str | Path, bezel: str, systemName: str, emulator: str) -> BezelInfos | None:
     # by order choose :
     # rom name in the system subfolder of the user directory (gb/mario.png)

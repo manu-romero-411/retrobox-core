@@ -17,7 +17,6 @@ _logger = logging.getLogger(__name__)
 
 _RPCS3_INPUT_DIR: Final = RPCS3_CONFIG_DIR / "input_configs" / "global"
 
-
 class _InputMapping(TypedDict):
     config_name: str
     event_variations: list[tuple[str, str]]

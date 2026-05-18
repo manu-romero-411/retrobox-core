@@ -20,7 +20,6 @@ vitaConfigFile = vitaConfig / 'config.yml'
 
 class Vita3kGenerator(Generator):
 
-
     def getHotkeysContext(self) -> HotkeysContext:
         return {
             "name": "vita3k",

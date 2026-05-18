@@ -5,7 +5,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 def get_cpu_speed() -> int:
     try:
         if not Path("/usr/bin/lscpu").exists():

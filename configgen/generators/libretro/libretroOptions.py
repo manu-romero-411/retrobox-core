@@ -15,18 +15,14 @@ if TYPE_CHECKING:
     from ...settings.unixSettings import UnixSettings
     from ...types import DeviceInfoMapping
 
-
 def _set(settings: UnixSettings, settings_name: str, value: Any) -> None:
     settings.save(settings_name, '' if value is None else f'"{value}"')
-
 
 def _set_from_system(settings: UnixSettings, settings_name: str, system: Emulator, option_name: str | None = None, *, default: Any = '') -> None:
     _set(settings, settings_name, system.config.get(option_name or settings_name, default))
 
-
 def _set_from_system_bool(settings: UnixSettings, settings_name: str, system: Emulator, option_name: str | None = None, *, default: bool = False, values: tuple[Any, Any]) -> None:
     _set(settings, settings_name, system.config.get_bool(option_name or settings_name, default, return_values=values))
-
 
 # Amstrad CPC / GX4000
 def _cap32_options(
@@ -48,7 +44,6 @@ def _cap32_options(
 
     # language
     _set_from_system(coreSettings, 'cap32_lang_layout', system, "cap32_language", default="english")
-
 
 # Atari 800 and 5200
 def _atari800_options(
@@ -139,7 +134,6 @@ def _virtualjaguar_options(
 
     # Doom Res Hack
     _set_from_system(coreSettings, 'virtualjaguar_doom_res_hack', system, 'doom_res_hack', default="disabled")
-
 
 # Atari Lynx
 def _handy_options(
@@ -242,7 +236,6 @@ def _vice_x64_options(
     # Keyboard Pass-through for Pad2Key
     _set_from_system(coreSettings, 'vice_physical_keyboard_pass_through', system, 'vice_keyboard_pass_through', default="disabled")
 
-
 # Commodore 128
 def _vice_x128_options(
     coreSettings: UnixSettings, system: Emulator, rom: Path, guns: Guns, wheels: DeviceInfoMapping, /,
@@ -287,7 +280,6 @@ def _vice_x128_options(
     # Keyboard Pass-through for Pad2Key
     _set_from_system(coreSettings, 'vice_physical_keyboard_pass_through', system, 'vice_keyboard_pass_through', default="disabled")
 
-
 # Commodore Plus/4
 def _vice_xplus4_options(
     coreSettings: UnixSettings, system: Emulator, rom: Path, guns: Guns, wheels: DeviceInfoMapping, /,
@@ -329,7 +321,6 @@ def _vice_xplus4_options(
 
     # Keyboard Pass-through for Pad2Key
     _set_from_system(coreSettings, 'vice_physical_keyboard_pass_through', system, 'vice_keyboard_pass_through', default="disabled")
-
 
 # Commodore VIC-20
 def _vice_xvic_options(
@@ -373,7 +364,6 @@ def _vice_xvic_options(
     # Keyboard Pass-through for Pad2Key
     _set_from_system(coreSettings, 'vice_physical_keyboard_pass_through', system, 'vice_keyboard_pass_through', default="disabled")
 
-
 # Commodore PET
 def _vice_xpet_options(
     coreSettings: UnixSettings, system: Emulator, rom: Path, guns: Guns, wheels: DeviceInfoMapping, /,
@@ -415,7 +405,6 @@ def _vice_xpet_options(
 
     # Keyboard Pass-through for Pad2Key
     _set_from_system(coreSettings, 'vice_physical_keyboard_pass_through', system, 'vice_keyboard_pass_through', default="disabled")
-
 
 # Commodore AMIGA
 def _puae_options(
@@ -559,7 +548,6 @@ def _puae_options(
         # Jump on A (Blue)
         _set_from_system(coreSettings, 'puae_cd32pad_options', system, default="disabled")
 
-
 # DICE
 def _dice_options(
     coreSettings: UnixSettings, system: Emulator, rom: Path, guns: Guns, wheels: DeviceInfoMapping, /,
@@ -593,7 +581,6 @@ def _dice_options(
     _set_from_system(coreSettings, 'dice_dipswitch16_1', system, 'ttl_dipswitch16_1', default='-1')
     _set_from_system(coreSettings, 'dice_dipswitch16_2', system, 'ttl_dipswitch16_2', default='-1')
 
-
 # Dolpin Wii
 def _dolphin_options(
     coreSettings: UnixSettings, system: Emulator, rom: Path, guns: Guns, wheels: DeviceInfoMapping, /,
@@ -625,14 +612,12 @@ def _dolphin_options(
     else:
         _set(coreSettings, 'dolphin_ir_mode', '1')
 
-
 # Epoch - Cassette Vision
 def _pd777_options(
     coreSettings: UnixSettings, system: Emulator, rom: Path, guns: Guns, wheels: DeviceInfoMapping, /,
 ) -> None:
     # Course selection switch visual feedback
     _set_from_system(coreSettings, 'pd777_announce_course_switch', system, 'cassettevision_announce_course_switch', default='enabled')
-
 
 # Magnavox - Odyssey2 / Phillips Videopac+
 def _o2em_options(
@@ -661,7 +646,6 @@ def _o2em_options(
     low_pass_range = system.config.get('o2em_low_pass_range', '0')
     _set(coreSettings, 'o2em_low_pass_filter', 'disabled' if low_pass_range == '0' else 'enabled')
     _set(coreSettings, 'o2em_low_pass_range', low_pass_range)
-
 
 # MAME/MESS/MAMEVirtual
 def _mame_options(
@@ -695,7 +679,6 @@ def _mame_options(
     # Activate mouse for Mac & Archimedes
     _set(coreSettings, 'mame_mouse_enable', 'enabled' if system.name in [ 'macintosh', 'archimedes' ] else 'disabled')
 
-
 # SAME_CDI
 def _same_cdi_options(
     coreSettings: UnixSettings, system: Emulator, rom: Path, guns: Guns, wheels: DeviceInfoMapping, /,
@@ -723,7 +706,6 @@ def _same_cdi_options(
     _set(coreSettings, 'same_cdi_boot_from_cli', 'enabled')
     # Activate mouse
     _set(coreSettings, 'same_cdi_mouse_enable', 'enabled')
-
 
 # MAME 2003 Plus
 def _mame078plus_options(
@@ -754,7 +736,6 @@ def _mame078plus_options(
     # gun cross
     _set_from_system(coreSettings, 'mame2003-plus_crosshair_enabled', system, 'mame2003-plus_crosshair_enabled', default='enabled' if guns_need_crosses(guns) else 'disabled')
 
-
 # TODO: Add CORE options for MAME / iMame4all
 
 # MB Vectrex
@@ -763,7 +744,6 @@ def _vecx_options(
 ) -> None:
     # Res Multiplier
     _set_from_system(coreSettings, 'vecx_res_multi', system, 'res_multi', default='1')
-
 
 # Microsoft DOS
 def _dosbox_pure_options(
@@ -842,7 +822,6 @@ def _bk_options(
     # Keyboard type: poll, callback
     _set_from_system(coreSettings, 'bk_keyboard_type', system, default='poll')
 
-
 # Microsoft MSX and Colecovision
 def _bluemsx_options(
     coreSettings: UnixSettings, system: Emulator, rom: Path, guns: Guns, wheels: DeviceInfoMapping, /,
@@ -868,14 +847,12 @@ def _bluemsx_options(
     # Zoom, Hide Video Border
     _set_from_system(coreSettings, 'bluemsx_overscan', system, default='MSX2')
 
-
 # Nec PC Engine / CD
 def _pce_options(
     coreSettings: UnixSettings, system: Emulator, rom: Path, guns: Guns, wheels: DeviceInfoMapping, /,
 ) -> None:
     # Remove 16-sprites-per-scanline hardware limit
     _set_from_system(coreSettings, 'pce_nospritelimit', system, 'pce_nospritelimit', default='enabled')
-
 
 # Nec PC-8800
 def _quasi88_options(
@@ -889,7 +866,6 @@ def _quasi88_options(
 
     # Use PCG-8100
     _set_from_system(coreSettings, 'q88_pcg-8100', system, default='disabled')
-
 
 # Nec PC-9800
 def _np2kai_options(
@@ -939,14 +915,12 @@ def _np2kai_options(
     # Joypad to Keyboard Mapping
     _set_from_system(coreSettings, 'np2kai_joymode', system, 'np2kai_joymode', default='Arrows')
 
-
 # Nec PC Engine SuperGrafx
 def _mednafen_supergrafx_options(
     coreSettings: UnixSettings, system: Emulator, rom: Path, guns: Guns, wheels: DeviceInfoMapping, /,
 ) -> None:
     # Remove 16-sprites-per-scanline hardware limit
     _set_from_system(coreSettings, 'sgx_nospritelimit', system, 'sgx_nospritelimit', default='enabled')
-
 
 # Nec PC-FX
 def _pcfx_options(
@@ -1033,7 +1007,6 @@ def _mupen64plus_next_options(
     # Joystick sensitivity
     _set_from_system(coreSettings, 'mupen64plus-astick-sensitivity', system, 'mupen64plus-sensitivity', default='100')
 
-
 def _parallel_n64_options(
     coreSettings: UnixSettings, system: Emulator, rom: Path, guns: Guns, wheels: DeviceInfoMapping, /,
 ) -> None:
@@ -1093,7 +1066,6 @@ def _parallel_n64_options(
         # Boot device
         _set(coreSettings, 'parallel-n64-boot-device',   '64DD IPL')
 
-
 # Nintendo DS
 def _desmume_options(
     coreSettings: UnixSettings, system: Emulator, rom: Path, guns: Guns, wheels: DeviceInfoMapping, /,
@@ -1118,7 +1090,6 @@ def _desmume_options(
 
     # Screen Layout
     _set_from_system(coreSettings, 'desmume_screens_layout', system, 'screens_layout', default='top/bottom')
-
 
 def _melonds_options(
     coreSettings: UnixSettings, system: Emulator, rom: Path, guns: Guns, wheels: DeviceInfoMapping, /,
@@ -1164,7 +1135,6 @@ def _melonds_options(
     _set(coreSettings, 'melonds_screen_layout', layout)
     _set(coreSettings, 'melonds_hybrid_ratio', hybrid_ratio)
 
-
 def _melondsds_options(
     coreSettings: UnixSettings, system: Emulator, rom: Path, guns: Guns, wheels: DeviceInfoMapping, /,
 ) -> None:
@@ -1201,7 +1171,6 @@ def _melondsds_options(
     _set_from_system(coreSettings, 'melonds_show_camera_state', system, 'melondsds_show_camera', default='disabled')
     _set_from_system(coreSettings, 'melonds_show_lid_state', system, 'melondsds_show_lid', default='disabled')
 
-
 # Nintendo Gameboy (Dual Screen) / GB Color (Dual Screen)
 def _tgbdual_options(
     coreSettings: UnixSettings, system: Emulator, rom: Path, guns: Guns, wheels: DeviceInfoMapping, /,
@@ -1216,7 +1185,6 @@ def _tgbdual_options(
     _set(coreSettings, 'tgbdual_audio_output',     'Game Boy #1')
     # Switches the player screens
     _set(coreSettings, 'tgbdual_switch_screens',   'normal')
-
 
 # Nintendo Gameboy / GB Color / GB Advance
 def _gambatte_options(
@@ -1259,7 +1227,6 @@ def _gambatte_options(
         _set(coreSettings, 'gambatte_gb_colorization', colorization)
         _set(coreSettings, 'gambatte_gb_internal_palette', palette)
 
-
 def _mgba_options(
     coreSettings: UnixSettings, system: Emulator, rom: Path, guns: Guns, wheels: DeviceInfoMapping, /,
 ) -> None:
@@ -1294,7 +1261,6 @@ def _mgba_options(
         _set_from_system_bool(coreSettings, 'mgba_sgb_borders', system, 'sgb_borders', default=True, values=('ON', 'OFF'))
     else:
         _set(coreSettings, 'mgba_gb_model', 'Autodetect')
-
 
 def _vba_m_options(
     coreSettings: UnixSettings, system: Emulator, rom: Path, guns: Guns, wheels: DeviceInfoMapping, /,
@@ -1337,7 +1303,6 @@ def _vba_m_options(
 
         # GBA: Sensor Sensitivity (Tilt) (%)
         _set_from_system(coreSettings, 'vbam_tilt_sensitivity', system, 'tilt_sensitivity', default='10')
-
 
 # Nintendo NES / Famicom Disk System
 def _nestopia_options(
@@ -1384,7 +1349,6 @@ def _nestopia_options(
     adapter = system.config.get('nestopia_select_adapter', 'automatic')
     _set(coreSettings, 'nestopia_select_adapter', 'auto' if adapter == 'automatic' else adapter)
 
-
 def _fceumm_options(
     coreSettings: UnixSettings, system: Emulator, rom: Path, guns: Guns, wheels: DeviceInfoMapping, /,
 ) -> None:
@@ -1428,7 +1392,6 @@ def _fceumm_options(
     # PPU Overclocking
     _set_from_system(coreSettings, 'fceumm_overclocking', system, 'fceumm_overclocking', default='disabled')
 
-
 def _mesen_options(
     coreSettings: UnixSettings, system: Emulator, rom: Path, guns: Guns, wheels: DeviceInfoMapping, /,
 ) -> None:
@@ -1464,7 +1427,6 @@ def _mesen_options(
     # Overclocking type (compatibility)
     _set_from_system(coreSettings, 'mesen_overclock_type', system, 'mesen_overclock_type', default='Before NMI (Recommended)')
 
-
 # Nintendo Pokemon Mini
 def _pokemini_options(
     coreSettings: UnixSettings, system: Emulator, rom: Path, guns: Guns, wheels: DeviceInfoMapping, /,
@@ -1474,7 +1436,6 @@ def _pokemini_options(
 
     # LCD Ghosting Effects
     _set_from_system(coreSettings, 'pokemini_lcdmode', system, 'pokemini_lcdmode', default='analog')
-
 
 # Nintendo SNES
 def _snes9x_options(
@@ -1505,7 +1466,6 @@ def _snes9x_options(
     if system.config.use_guns and guns:
         _set(coreSettings, 'snes9x_superscope_reverse_buttons', 'disabled')
 
-
 def _snes9x_next_options(
     coreSettings: UnixSettings, system: Emulator, rom: Path, guns: Guns, wheels: DeviceInfoMapping, /,
 ) -> None:
@@ -1524,7 +1484,6 @@ def _snes9x_next_options(
     # Crosshair
     _set_from_system(coreSettings, 'snes9x_2010_superscope_crosshair', system, 'superscope_crosshair', default='2' if guns_need_crosses(guns) else 'disabled')
 
-
 # TODO: Add CORE options for BSnes and PocketSNES
 def _bsnes_options(
     coreSettings: UnixSettings, system: Emulator, rom: Path, guns: Guns, wheels: DeviceInfoMapping, /,
@@ -1534,7 +1493,6 @@ def _bsnes_options(
 
     # Video Filters
     _set_from_system(coreSettings, 'bsnes_video_filter', system, 'bsnes_video_filter', default='disabled')
-
 
 # Nintendo SNES/GB/GBC/SGB
 def _mesen_s_options(
@@ -1574,7 +1532,6 @@ def _mesen_s_options(
     # SuperFX Overclock
     _set_from_system(coreSettings, 'mesen-s_superfx_overclock', system, 'mesen-s_superfx_overclock', default='100%')
 
-
 # Nintendo Virtual Boy
 def _vb_options(
     coreSettings: UnixSettings, system: Emulator, rom: Path, guns: Guns, wheels: DeviceInfoMapping, /,
@@ -1584,7 +1541,6 @@ def _vb_options(
 
     # 3D Glasses Color Mode
     _set_from_system(coreSettings, 'vb_anaglyph_preset', system, '3d_color_mode', default='disabled')
-
 
 # Panasonic 3DO
 def _opera_options(
@@ -1632,7 +1588,6 @@ def _opera_options(
 
     _set(coreSettings, 'opera_nvram_storage', storage)
 
-
 # Rick Dangerous
 def _xrick_options(
     coreSettings: UnixSettings, system: Emulator, rom: Path, guns: Guns, wheels: DeviceInfoMapping, /,
@@ -1649,7 +1604,6 @@ def _xrick_options(
     # Cheat 3 (Expose Mode)
     _set_from_system_bool(coreSettings, 'xrick_cheat3', system, values=('enabled', 'disabled'))
 
-
 # ScummVM CORE Options
 def _scummvm_options(
     coreSettings: UnixSettings, system: Emulator, rom: Path, guns: Guns, wheels: DeviceInfoMapping, /,
@@ -1662,7 +1616,6 @@ def _scummvm_options(
 
     # Speed Hack (safe)
     _set_from_system(coreSettings, 'scummvm_speed_hack', system, 'scummvm_speed_hack', default='enabled')
-
 
 # Sega Dreamcast / Atomiswave / Naomi
 def _flycast_options(
@@ -1755,7 +1708,6 @@ def _flycast_options(
     # wheel
     _set(coreSettings, 'reicast_analog_stick_deadzone', '0%' if system.config.use_wheels and wheels else '15%')  # 15% = default value
 
-
 # Sega SG1000 / Master System / Game Gear / Megadrive / Mega CD
 def _genesisplusgx_options(
     coreSettings: UnixSettings, system: Emulator, rom: Path, guns: Guns, wheels: DeviceInfoMapping, /,
@@ -1819,7 +1771,6 @@ def _genesisplusgx_options(
     if system.config.use_guns and guns:
         coreSettings.save('genesis_plus_gx_gun_input', '"lightgun"')
 
-
 # Sega 32X (Sega Megadrive / MegaCD / Master System)
 def _picodrive_options(
     coreSettings: UnixSettings, system: Emulator, rom: Path, guns: Guns, wheels: DeviceInfoMapping, /,
@@ -1839,7 +1790,6 @@ def _picodrive_options(
     # Sega MegaCD
     # Emulate the Backup RAM Cartridge for games save (ex: Shining Force CD)
     _set(coreSettings, 'picodrive_ramcart', 'enabled' if system.name == 'megacd' else 'disabled')
-
 
 # Sega Saturn
 def _yabasanshiro_options(
@@ -1866,7 +1816,6 @@ def _yabasanshiro_options(
 
     # Language
     _set_from_system(coreSettings, 'yabasanshiro_system_language', system, 'yabasanshiro_language', default='english')
-
 
 def _kronos_options(
     coreSettings: UnixSettings, system: Emulator, rom: Path, guns: Guns, wheels: DeviceInfoMapping, /,
@@ -1905,7 +1854,6 @@ def _kronos_options(
     # BIOS langauge
     _set_from_system(coreSettings, 'kronos_language_id', system, 'kronos_language_id', default='English')
 
-
 def _beetle_saturn_options(
     coreSettings: UnixSettings, system: Emulator, rom: Path, guns: Guns, wheels: DeviceInfoMapping, /,
 ) -> None:
@@ -1915,7 +1863,6 @@ def _beetle_saturn_options(
 
     # wheel
     _set(coreSettings, 'beetle_saturn_analog_stick_deadzone', '0%' if system.config.use_wheels and wheels else '15%')
-
 
 # Sharp X68000
 def _px68k_options(
@@ -1948,7 +1895,6 @@ def _px68k_options(
     _set(coreSettings, 'px68k_joytype1', joytype)
     _set(coreSettings, 'px68k_joytype2', joytype)
 
-
 # Sinclair ZX81
 def _81_options(
     coreSettings: UnixSettings, system: Emulator, rom: Path, guns: Guns, wheels: DeviceInfoMapping, /,
@@ -1974,7 +1920,6 @@ def _81_options(
     else:
         _set(coreSettings, '81_highres', 'WRX')
 
-
 # Sinclair ZX Spectrum
 def _fuse_options(
     coreSettings: UnixSettings, system: Emulator, rom: Path, guns: Guns, wheels: DeviceInfoMapping, /,
@@ -1984,7 +1929,6 @@ def _fuse_options(
 
     # Zoom, Hide Video Border
     _set_from_system(coreSettings, 'fuse_hide_border', system, 'fuse_hide_border', default='disabled')
-
 
 # SNK Neogeo AES MVS / Neogeo CD
 def _fbneo_options(
@@ -2029,7 +1973,6 @@ def _fbneo_options(
         # Memory card mode
         _set_from_system(coreSettings, 'fbneo-memcard-mode', system, 'fbneo-memcard-mode', default='per-game')
 
-
 # SNK Neogeo CD
 def _neocd_options(
     coreSettings: UnixSettings, system: Emulator, rom: Path, guns: Guns, wheels: DeviceInfoMapping, /,
@@ -2043,13 +1986,11 @@ def _neocd_options(
     # Per-Game saves
     _set_from_system_bool(coreSettings, 'neocd_per_content_saves', system, default=True, values=('On', 'Off'))
 
-
 # Sony PSP
 def _ppsspp_options(
     coreSettings: UnixSettings, system: Emulator, rom: Path, guns: Guns, wheels: DeviceInfoMapping, /,
 ) -> None:
     _set_from_system(coreSettings, 'ppsspp_internal_resolution', system, 'ppsspp_resolution', default='480x272')
-
 
 # Sony PSX
 def _mednafen_psx_options(
@@ -2097,7 +2038,6 @@ def _mednafen_psx_options(
             _set(coreSettings, 'beetle_psx_hw_enable_multitap_port1', 'disabled')
             _set(coreSettings, 'beetle_psx_hw_enable_multitap_port2', 'disabled')
 
-
 def _duckstation_options(
     coreSettings: UnixSettings, system: Emulator, rom: Path, guns: Guns, wheels: DeviceInfoMapping, /,
 ) -> None:
@@ -2144,7 +2084,6 @@ def _duckstation_options(
     # Gun crosshairs
     _set_from_system(coreSettings, 'swanstation_Controller_ShowCrosshair', system, 'swanstation_Controller_ShowCrosshair', default='true' if guns_need_crosses(guns) else 'false')
 
-
 def _pcsx2_options(
     coreSettings: UnixSettings, system: Emulator, rom: Path, guns: Guns, wheels: DeviceInfoMapping, /,
 ) -> None:
@@ -2186,7 +2125,6 @@ def _pcsx2_options(
         _set(coreSettings, 'pcsx2_widescreen_hint', 'enabled (32:9)')
     else:
         _set(coreSettings, 'pcsx2_widescreen_hint', 'disabled')
-
 
 def _pcsx_rearmed_options(
     coreSettings: UnixSettings, system: Emulator, rom: Path, guns: Guns, wheels: DeviceInfoMapping, /,
@@ -2254,14 +2192,12 @@ def _pcsx_rearmed_options(
     for player, color in enumerate(["red", "blue"], start=1):
         _set_from_system(coreSettings, f'pcsx_rearmed_crosshair{player}', system, f'pcsx_rearmed_crosshair{player}', default=color if need_crosses else 'disabled')
 
-
 # Thomson MO5 / TO7
 def _theodore_options(
     coreSettings: UnixSettings, system: Emulator, rom: Path, guns: Guns, wheels: DeviceInfoMapping, /,
 ) -> None:
     # Auto run games
     _set(coreSettings, 'theodore_autorun',   'enabled')
-
 
 # Watara SuperVision
 def _potator_options(
@@ -2273,7 +2209,6 @@ def _potator_options(
     # Watara Ghosting
     _set_from_system(coreSettings, 'potator_lcd_ghosting', system, 'watara_ghosting', default='0')
 
-
 ## PORTs
 
 # DOOM
@@ -2282,7 +2217,6 @@ def _prboom_options(
 ) -> None:
     # Internal resolution
     _set_from_system(coreSettings, 'prboom-resolution', system, 'prboom-resolution', default='320x200')
-
 
 # QUAKE
 def _tyrquake_options(
@@ -2298,14 +2232,12 @@ def _tyrquake_options(
     # Rumble
     _set_from_system(coreSettings, 'tyrquake_rumble', system, 'tyrquake_rumble', default='disabled')
 
-
 # BOMBERMAN
 def _mrboom_options(
     coreSettings: UnixSettings, system: Emulator, rom: Path, guns: Guns, wheels: DeviceInfoMapping, /,
 ) -> None:
     # Team mode
     _set_from_system(coreSettings, 'mrboom-aspect', system, 'mrboom-aspect', default='Native')
-
 
 # HatariB
 def _hatarib_options(
@@ -2414,7 +2346,6 @@ def _ep128emu_core_options(
     # User 1 Autofire repeat delay
     _set_from_system(coreSettings, 'ep128emu_afsp', system, default='1')
 
-
 _option_functions: dict[str, Callable[[UnixSettings, Emulator, Path, Guns, DeviceInfoMapping], None]] = {
     'cap32': _cap32_options,
     'atari800': _atari800_options,
@@ -2498,7 +2429,6 @@ _option_functions: dict[str, Callable[[UnixSettings, Emulator, Path, Guns, Devic
     'gearcoleco': _gearcoleco_options,
     'ep128emu-core': _ep128emu_core_options,
 }
-
 
 def generateCoreSettings(
     coreSettings: UnixSettings, system: Emulator, rom: Path, guns: Guns, wheels: DeviceInfoMapping, /,

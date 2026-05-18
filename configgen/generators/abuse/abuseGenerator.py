@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from configgen.batoceraPaths import USERDATA
+
 from ... import Command
 from ...controller import generate_sdl_game_controller_config
 from ..Generator import Generator
@@ -9,11 +11,10 @@ from ..Generator import Generator
 if TYPE_CHECKING:
     from ...types import HotkeysContext
 
-
 class AbuseGenerator(Generator):
 
     def generate(self, system, rom, playersControllers, metadata, guns, wheels, gameResolution):
-        commandArray = ["abuse", "-datadir", "/userdata/roms/abuse/abuse_data"]
+        commandArray = ["abuse", "-datadir", f"{USERDATA}/roms/abuse/abuse_data"]
 
         return Command.Command(
             array=commandArray,

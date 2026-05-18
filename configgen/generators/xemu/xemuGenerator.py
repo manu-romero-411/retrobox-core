@@ -15,7 +15,6 @@ if TYPE_CHECKING:
 
     from ...types import HotkeysContext
 
-
 class XemuGenerator(Generator):
 
     # Main entry of the module

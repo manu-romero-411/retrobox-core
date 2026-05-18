@@ -6,7 +6,7 @@ from shutil import copyfile
 from typing import TYPE_CHECKING, Final
 
 from ... import Command
-from ...batoceraPaths import CONFIGS, SAVES, ensure_parents_and_open, mkdir_if_not_exists
+from ...batoceraPaths import CONFIGS, SAVES, USERDATA, ensure_parents_and_open, mkdir_if_not_exists
 from ...controller import generate_sdl_game_controller_config
 from ...gun import Guns, guns_need_crosses
 from ...utils.configparser import CaseSensitiveConfigParser
@@ -16,11 +16,9 @@ if TYPE_CHECKING:
     from ...Emulator import Emulator
     from ...types import HotkeysContext
 
-
 SUPERMODEL_SHARE: Final = Path('/usr/share/supermodel')
 SUPERMODEL_CONFIG: Final = CONFIGS / 'supermodel'
 SUPERMODEL_SAVES: Final = SAVES / 'supermodel'
-
 
 class SupermodelGenerator(Generator):
 
@@ -81,7 +79,7 @@ class SupermodelGenerator(Generator):
         commandArray.append(f"-res={gameResolution['width']},{gameResolution['height']}")
 
         # logs
-        commandArray.extend(["-log-output=/userdata/system/logs/Supermodel.log", rom])
+        commandArray.extend([f"-log-output={USERDATA}/logs/Supermodel.log", rom])
 
         # copy nvram files
         copy_nvram_files()

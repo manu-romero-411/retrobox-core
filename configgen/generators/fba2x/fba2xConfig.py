@@ -7,7 +7,6 @@ if TYPE_CHECKING:
     from ...Emulator import Emulator
     from ...utils.configparser import CaseSensitiveConfigParser
 
-
 # return true if the option is considered defined
 def defined(key: str, dict: dict[str, Any] | SystemConfig) -> bool:
     return key in dict and isinstance(dict[key], str) and len(dict[key]) > 0

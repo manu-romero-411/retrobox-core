@@ -13,7 +13,6 @@ if TYPE_CHECKING:
     from ...Emulator import Emulator
     from ...gun import Guns
 
-
 _SYSTEM_CORE_MAP: Final = {
     'x64': 'C64',
     'x64dtv': 'C64DTV',
@@ -22,7 +21,6 @@ _SYSTEM_CORE_MAP: Final = {
     'xvic': 'VIC20',
     'xpet': 'PET',
 }
-
 
 def setViceConfig(vice_config_dir: Path, system: Emulator, metadata: Mapping[str, str], guns: Guns, rom: Path) -> None:
 

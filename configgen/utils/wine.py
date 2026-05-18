@@ -22,7 +22,6 @@ _WINE_BOTTLES: Final = HOME / 'wine-bottles'
 type RunnerNames = Literal['wine-tkg', 'wine-proton']
 _DEFAULT_WINE_RUNNER: Final[RunnerNames] = 'wine-tkg'
 
-
 @dataclass
 class Runner:
     name: InitVar[RunnerNames]

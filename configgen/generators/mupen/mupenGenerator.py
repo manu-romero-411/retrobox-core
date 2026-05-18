@@ -14,7 +14,6 @@ if TYPE_CHECKING:
 
     from ...types import HotkeysContext
 
-
 class MupenGenerator(Generator):
 
     def getHotkeysContext(self) -> HotkeysContext:

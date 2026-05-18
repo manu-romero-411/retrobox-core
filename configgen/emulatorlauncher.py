@@ -26,7 +26,7 @@ from typing import TYPE_CHECKING, Any, cast
 import pyudev
 import sdl2
 
-from .batoceraPaths import BATOCERA_SHARE_DIR, ES_GAMES_METADATA, SAVES, SYSTEM_SCRIPTS, USER_SCRIPTS, GUN_OVERLAYS_DIR, HOTKEYGEN_BIN
+from .batoceraPaths import BATOCERA_SHARE_DIR, ES_GAMES_METADATA, SAVES, SYSTEM_SCRIPTS, USER_SCRIPTS, GUN_OVERLAYS_DIR, HOTKEYGEN_BIN, HUD_CONFIG_FILE
 from .controller import Controller
 from .Emulator import Emulator
 from .exceptions import BadCommandLineArguments, BaseBatoceraException, BatoceraException, UnexpectedEmulatorExit
@@ -188,8 +188,8 @@ def start_rom(args: argparse.Namespace, maxnbplayers: int, rom: Path, original_r
                                 f.write(hudconfig)
                             cmd.env["MANGOHUD_CONFIGFILE"] = hud_config_file
                             if not generator.hasInternalMangoHUDCall():
+                                cmd.array.insert(0, "--dlsym")
                                 cmd.array.insert(0, "mangohud")
-
                     # generate the gun help
                     try:
                         default_gun_help_dir = GUN_OVERLAYS_DIR
@@ -485,7 +485,6 @@ def _reconfigure_evmapy_on_the_fly():
         subprocess.call(['batocera-evmapy', 'start'])
 
         _logger.info(">>> --- EVMAPY RECONFIGURATION COMPLETE ---")
-
 
 def _controller_monitor_thread():
     # Runs in the background, watching for controller add/remove events.

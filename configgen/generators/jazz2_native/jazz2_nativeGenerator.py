@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from ... import Command
-from ...batoceraPaths import CACHE, CONFIGS
+from ...batoceraPaths import CACHE, CONFIGS, USERDATA
 from ...controller import generate_sdl_game_controller_config, write_sdl_controller_db
 from ..Generator import Generator
 
@@ -31,7 +31,7 @@ class Jazz2_NativeGenerator(Generator):
             env={
                 "XDG_CONFIG_HOME": CONFIGS,
                 "XDG_CACHE_HOME": CACHE,
-                "XDG_DATA_HOME": "/userdata/roms/jazz2",
+                "XDG_DATA_HOME": f"{USERDATA}/roms/jazz2",
                 "SDL_GAMECONTROLLERCONFIG": generate_sdl_game_controller_config(playersControllers),
                 "SDL_JOYSTICK_HIDAPI": "0"
             }

@@ -15,7 +15,6 @@ if TYPE_CHECKING:
 
     from ...types import HotkeysContext
 
-
 class EDuke32Generator(Generator):
 
     def getHotkeysContext(self) -> HotkeysContext:

@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, NotRequired, TypedDict, cast
 
 from ... import controllersConfig
-from ...batoceraPaths import DEFAULTS_DIR, ES_GAMES_METADATA, SAVES, mkdir_if_not_exists
+from ...batoceraPaths import DEFAULTS_DIR, ES_GAMES_METADATA, SAVES, mkdir_if_not_exists, USERDATA
 from ...controller import Controller
 from ...settings.unixSettings import UnixSettings
 from ...utils import bezels as bezelsUtil, esSettings, metadata as metadataUtils, videoMode, vulkan
@@ -32,7 +32,6 @@ if TYPE_CHECKING:
 
 _logger = logging.getLogger(__name__)
 
-
 class _GunMappingItem(TypedDict):
     device: NotRequired[int]
     p1: NotRequired[int]
@@ -41,11 +40,9 @@ class _GunMappingItem(TypedDict):
     p4: NotRequired[int]
     gameDependant: NotRequired[list[dict[str, Any]]]
 
-
 # return true if the option is considered defined
 def defined(key: str, dict: Mapping[str, Any] | SystemConfig, /) -> bool:
     return key in dict and isinstance(dict[key], str) and len(dict[key]) > 0
-
 
 # Warning the values in the array must be exactly at the same index than
 # https://github.com/libretro/RetroArch/blob/master/gfx/video_driver.c#L188
@@ -277,7 +274,7 @@ def createLibretroConfig(
 
     ## AMIGA BIOS files are in /userdata/bios/amiga
     if system.config.core == 'puae' or system.config.core == 'puae2021' or system.config.core == 'uae4arm':
-        retroarchConfig['system_directory'] = '"/userdata/bios/amiga/"'
+        retroarchConfig['system_directory'] = USERDATA / 'bios' / 'amiga'
 
     ## AMIGA OCS-ECS/AGA/CD32
     if system.config.core == 'puae' or system.config.core == 'puae2021':
@@ -497,7 +494,6 @@ def createLibretroConfig(
 
             for btn, value in remap_values.items():
                 retroarchConfig[f'input_player{controller_number}_{btn}'] = value
-
 
         if system.config.core == 'mupen64plus-next':
             option = 'mupen64plus'
@@ -1115,9 +1111,10 @@ def writeBezelConfig(
         if bezel is None:
             return
         bz_infos = bezelsUtil.getBezelInfos(rom, bezel, system.name, 'retroarch')
-        if bz_infos is None:
-            return
-
+    if bz_infos is None:
+        _logger.debug("getBezelInfos devolvió None para bezel=%s system=%s rom=%s", bezel, system.name, rom)
+        return
+    
     overlay_info_file: Path = cast("Path", bz_infos["info"])
     overlay_png_file: Path  = cast("Path", bz_infos["png"])
     bezel_game: bool  = cast("bool", bz_infos["specific_to_game"])
@@ -1174,7 +1171,6 @@ def writeBezelConfig(
             if defined('ratio', system.config) and system.config['ratio'] in ratioIndexes:
                 retroarchConfig['aspect_ratio_index'] = ratioIndexes.index(system.config['ratio'])
                 retroarchConfig['video_aspect_ratio_auto'] = 'false'
-
 
     if not shaderBezel:
         retroarchConfig['input_overlay_enable']       = "true"

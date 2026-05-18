@@ -12,7 +12,6 @@ if TYPE_CHECKING:
 
 _logger = logging.getLogger(__name__)
 
-
 _flycast_input_mappings: Final = {
     'dreamcast': {
         # Directions
@@ -65,7 +64,6 @@ _flycast_input_mappings: Final = {
         'select':         {'button': 'btn_d'}
     },
 }
-
 
 flycastMapping = { # Directions
                    # The DPAD can be an axis (for gpio sticks for example) or a hat

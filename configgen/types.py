@@ -3,11 +3,9 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from typing import NotRequired, TypedDict
 
-
 class Resolution(TypedDict):
     width: int
     height: int
-
 
 class BezelInfo(TypedDict):
     width: int
@@ -20,13 +18,11 @@ class BezelInfo(TypedDict):
     messagex: NotRequired[float]
     messagey: NotRequired[float]
 
-
 class ScreenInfo(TypedDict):
     width: int
     height: int
     x: int
     y: int
-
 
 class DeviceInfo(TypedDict):
     eventId: int
@@ -39,10 +35,8 @@ class DeviceInfo(TypedDict):
     mouse_index: int | None
     wheel_rotation: NotRequired[int]
 
-
 type DeviceInfoMapping = Mapping[str, DeviceInfo]
 type DeviceInfoDict = dict[str, DeviceInfo]
-
 
 class HotkeysContext(TypedDict):
     name: str

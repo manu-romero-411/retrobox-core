@@ -344,7 +344,6 @@ def generateControllerConfig_realwiimotes(filename: str, anyDefKey: str) -> None
             nplayer += 1
         f.write("[BalanceBoard]\nSource = 2\n")
 
-
 def generateControllerConfig_guns(filename: str, anyDefKey: str, metadata: Mapping[str, str], guns: Guns) -> None:
     configFileName = DOLPHIN_CONFIG / filename
 
@@ -426,7 +425,7 @@ def generateControllerConfig_guns(filename: str, anyDefKey: str, metadata: Mappi
                     double_pads[gundevname.strip()] = nsamepad+1
 
                 f.write(f"[{anyDefKey}{nplayer}]\n")
-                f.write(f"Device = evdev/{str(nsamepad).strip()}/{gundevname.strip()}\n")
+                f.write(f"Device = SDL/{str(nsamepad).strip()}/{gundevname.strip()}\n")
 
                 buttons = guns[nplayer-1].buttons
                 _logger.debug("Gun : %s", buttons)
@@ -489,7 +488,6 @@ def generateControllerConfig_guns(filename: str, anyDefKey: str, metadata: Mappi
                         f.write(f"{specifics[spe]} = {metadata[f'gun_{spe}']}\n")
             nplayer += 1
 
-
 def get_AltMapping(system: Emulator, nplayer: int, anyMapping: Mapping[str, str | None]) -> dict[str, str | None]:
     mapping = dict(anyMapping)
     # Fixes default gamecube style controller mapping for ES from es_input (gc A confirm/gc B cancel)
@@ -520,7 +518,7 @@ def generateControllerConfig_any(system: Emulator, playersControllers: Controlle
             double_pads[pad.real_name.strip()] = nsamepad+1
 
             f.write(f"[{anyDefKey}{nplayer}]\n")
-            f.write(f"Device = evdev/{str(nsamepad).strip()}/{pad.real_name.strip()}\n")
+            f.write(f"Device = SDL/{str(nsamepad).strip()}/{pad.real_name.strip()}\n")
 
             if system.config.get_bool("use_pad_profiles"):
                 if not generateControllerConfig_any_from_profiles(f, pad, system):
@@ -532,7 +530,6 @@ def generateControllerConfig_any(system: Emulator, playersControllers: Controlle
                     generateControllerConfig_wheel(f, pad, nplayer)
                 else:
                     generateControllerConfig_any_auto(f, pad, anyMapping, anyReverseAxes, anyReplacements, extraOptions, system, nplayer, nsamepad)
-
 
 def generateControllerConfig_wheel(f: codecs.StreamReaderWriter, pad: Controller, nplayer: int) -> None:
     wheelMapping = {
@@ -566,7 +563,6 @@ def generateControllerConfig_wheel(f: codecs.StreamReaderWriter, pad: Controller
             write_key(f, wheelMapping[input.name], input.type, input.id, input.value, pad.axis_count, False, None, None)
             if input.name == "joystick1left" and "joystick1right" in wheelMapping:
                 write_key(f, wheelMapping["joystick1right"], input.type, input.id, input.value, pad.axis_count, True, None, None)
-
 
 def generateControllerConfig_any_auto(f: codecs.StreamReaderWriter, pad: Controller, anyMapping: Mapping[str, str | None], anyReverseAxes: Mapping[str | None, str], anyReplacements: Mapping[str, str] | None, extraOptions: Mapping[str, str], system: Emulator, nplayer: int, nsamepad: int) -> None:
     for opt in extraOptions:
@@ -610,21 +606,30 @@ def generateControllerConfig_any_auto(f: codecs.StreamReaderWriter, pad: Control
         # Write the 2nd part
         if input.name in { "joystick1up", "joystick1left", "joystick2up", "joystick2left"} and keyname is not None:
             write_key(f, anyReverseAxes[keyname], input.type, input.id, input.value, pad.axis_count, True, None, None)
-        # DualShock Motion control
+        
+        # DualShock / Nintendo Pro Controller Motion control
         if system.config.get_bool("dsmotion"):
-            f.write(f"IMUGyroscope/Pitch Up = `evdev/{str(nsamepad).strip()}/{pad.real_name.strip()} Motion Sensors:Gyro X-`\n")
-            f.write(f"IMUGyroscope/Pitch Down = `evdev/{str(nsamepad).strip()}/{pad.real_name.strip()} Motion Sensors:Gyro X+`\n")
-            f.write(f"IMUGyroscope/Roll Left = `evdev/{str(nsamepad).strip()}/{pad.real_name.strip()} Motion Sensors:Gyro Z-`\n")
-            f.write(f"IMUGyroscope/Roll Right = `evdev/{str(nsamepad).strip()}/{pad.real_name.strip()} Motion Sensors:Gyro Z+`\n")
-            f.write(f"IMUGyroscope/Yaw Left = `evdev/{str(nsamepad).strip()}/{pad.real_name.strip()} Motion Sensors:Gyro Y-`\n")
-            f.write(f"IMUGyroscope/Yaw Right = `evdev/{str(nsamepad).strip()}/{pad.real_name.strip()} Motion Sensors:Gyro Y+`\n")
+            # Detectamos el sufijo correcto según el mando
+            clean_name = pad.real_name.strip()
+            if clean_name == "Pro Controller":
+                motion_suffix = " (IMU)"
+            else:
+                motion_suffix = " Motion Sensors"
+
+            f.write(f"IMUGyroscope/Pitch Up = `SDL/{str(nsamepad).strip()}/{clean_name}{motion_suffix}:Gyro X-`\n")
+            f.write(f"IMUGyroscope/Pitch Down = `SDL/{str(nsamepad).strip()}/{clean_name}{motion_suffix}:Gyro X+`\n")
+            f.write(f"IMUGyroscope/Roll Left = `SDL/{str(nsamepad).strip()}/{clean_name}{motion_suffix}:Gyro Z-`\n")
+            f.write(f"IMUGyroscope/Roll Right = `SDL/{str(nsamepad).strip()}/{clean_name}{motion_suffix}:Gyro Z+`\n")
+            f.write(f"IMUGyroscope/Yaw Left = `SDL/{str(nsamepad).strip()}/{clean_name}{motion_suffix}:Gyro Y-`\n")
+            f.write(f"IMUGyroscope/Yaw Right = `SDL/{str(nsamepad).strip()}/{clean_name}{motion_suffix}:Gyro Y+`\n")
             f.write("IMUIR/Recenter = `Button 10`\n")
-            f.write(f"IMUAccelerometer/Left = `evdev/{str(nsamepad).strip()}/{pad.real_name.strip()} Motion Sensors:Accel X-`\n")
-            f.write(f"IMUAccelerometer/Right = `evdev/{str(nsamepad).strip()}/{pad.real_name.strip()} Motion Sensors:Accel X+`\n")
-            f.write(f"IMUAccelerometer/Forward = `evdev/{str(nsamepad).strip()}/{pad.real_name.strip()} Motion Sensors:Accel Z-`\n")
-            f.write(f"IMUAccelerometer/Backward = `evdev/{str(nsamepad).strip()}/{pad.real_name.strip()} Motion Sensors:Accel Z+`\n")
-            f.write(f"IMUAccelerometer/Up = `evdev/{str(nsamepad).strip()}/{pad.real_name.strip()} Motion Sensors:Accel Y-`\n")
-            f.write(f"IMUAccelerometer/Down = `evdev/{str(nsamepad).strip()}/{pad.real_name.strip()} Motion Sensors:Accel Y+`\n")
+            f.write(f"IMUAccelerometer/Left = `SDL/{str(nsamepad).strip()}/{clean_name}{motion_suffix}:Accel X-`\n")
+            f.write(f"IMUAccelerometer/Right = `SDL/{str(nsamepad).strip()}/{clean_name}{motion_suffix}:Accel X+`\n")
+            f.write(f"IMUAccelerometer/Forward = `SDL/{str(nsamepad).strip()}/{clean_name}{motion_suffix}:Accel Z-`\n")
+            f.write(f"IMUAccelerometer/Backward = `SDL/{str(nsamepad).strip()}/{clean_name}{motion_suffix}:Accel Z+`\n")
+            f.write(f"IMUAccelerometer/Up = `SDL/{str(nsamepad).strip()}/{clean_name}{motion_suffix}:Accel Y-`\n")
+            f.write(f"IMUAccelerometer/Down = `SDL/{str(nsamepad).strip()}/{clean_name}{motion_suffix}:Accel Y+`\n")
+            
         # Mouse to emulate Wiimote
         if system.config.get_bool("mouseir"):
             f.write("IR/Up = `Cursor Y-`\n")
@@ -666,7 +671,7 @@ def generateControllerConfig_any_from_profiles(f: codecs.StreamReaderWriter, pad
             _logger.debug("Profile device : %s", profileDevice)
 
             deviceVals = re.match("^([^/]*)/[0-9]*/(.*)$", profileDevice)
-            if deviceVals is not None and deviceVals.group(1) == "evdev" and deviceVals.group(2).strip() == pad.real_name.strip():
+            if deviceVals is not None and deviceVals.group(1) in ("evdev", "SDL") and deviceVals.group(2).strip() == pad.real_name.strip():
                 _logger.debug("Eligible profile device found")
                 for key, val in profileConfig.items("Profile"):
                     if key != "Device":

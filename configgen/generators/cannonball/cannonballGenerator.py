@@ -11,7 +11,6 @@ from ..Generator import Generator
 if TYPE_CHECKING:
     from ...types import HotkeysContext
 
-
 class CannonballGenerator(Generator):
 
     def getHotkeysContext(self) -> HotkeysContext:

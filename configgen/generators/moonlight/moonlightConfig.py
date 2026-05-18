@@ -10,7 +10,6 @@ from .moonlightPaths import MOONLIGHT_CONFIG, MOONLIGHT_CONFIG_DIR, MOONLIGHT_ST
 if TYPE_CHECKING:
     from ...Emulator import Emulator
 
-
 def generateMoonlightConfig(system: Emulator):
 
     mkdir_if_not_exists(MOONLIGHT_STAGING_DIR)
