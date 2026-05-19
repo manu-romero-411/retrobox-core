@@ -3,8 +3,10 @@ from __future__ import annotations
 from shutil import copyfile
 from typing import TYPE_CHECKING
 
+from configgen.controllersConfig import _logger
+
 from ... import Command
-from ...batoceraPaths import CONFIGS, ensure_parents_and_open, mkdir_if_not_exists
+from ...batoceraPaths import _SYSTEM_LOCAL_BIN, CONFIGS, ensure_parents_and_open, mkdir_if_not_exists
 from ...controller import generate_sdl_game_controller_config
 from ...utils.configparser import CaseSensitiveConfigParser
 from ..Generator import Generator
@@ -174,15 +176,19 @@ class FlycastGenerator(Generator):
         # internal config
         mkdir_if_not_exists(FLYCAST_SAVES)
 
-        # vmuA1
         if not FLYCAST_VMUA1.is_file():
-            copyfile(FLYCAST_VMU_BLANK, FLYCAST_VMUA1)
-        # vmuA2
+            try:
+                copyfile(FLYCAST_VMU_BLANK, FLYCAST_VMUA1)
+            except FileNotFoundError:
+                _logger.debug("vmu_save_blank.bin not found, flycast will create VMU on first run")
         if not FLYCAST_VMUA2.is_file():
-            copyfile(FLYCAST_VMU_BLANK, FLYCAST_VMUA2)
+            try:
+                copyfile(FLYCAST_VMU_BLANK, FLYCAST_VMUA2)
+            except FileNotFoundError:
+                pass
 
         # the command to run
-        commandArray = ['/usr/bin/flycast', rom]
+        commandArray = [f'{_SYSTEM_LOCAL_BIN}/flycast', rom]
         # Here is the trick to make flycast find files :
         # emu.cfg is in $XDG_CONFIG_DIRS or $XDG_CONFIG_HOME.
         # VMU will be in $XDG_DATA_HOME / $FLYCAST_DATADIR because it needs rw access -> /userdata/saves/dreamcast

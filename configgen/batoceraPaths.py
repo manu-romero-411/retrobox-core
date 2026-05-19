@@ -28,7 +28,7 @@ BATOCERA_SHARE_DIR:  Final = BATOCERA_ROOT / 'resources'
 DATAINIT_DIR:        Final = BATOCERA_SHARE_DIR / 'datainit'
 BATOCERA_ES_DIR:     Final = Path('/home/manuel/proyectos/batocera-emulationstation/appimage/es')
 CONFIGGEN_DATA_DIR:  Final = BATOCERA_SHARE_DIR / "configgen/data"
-DEFAULTS_DIR: Final = Path('/home/manuel/proyectos/batocera-configgen')
+DEFAULTS_DIR: Final = Path(__file__).parent.parent
 
 HOME_INIT:  Final = DATAINIT_DIR / 'system'
 CONF_INIT:  Final = HOME_INIT / 'configs'

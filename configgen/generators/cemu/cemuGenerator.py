@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, cast
 from xml.dom import minidom
 
 from ... import Command
-from ...batoceraPaths import CACHE, CONFIGS, SAVES, configure_emulator, mkdir_if_not_exists
+from ...batoceraPaths import _SYSTEM_LOCAL_BIN, CACHE, CONFIGS, SAVES, configure_emulator, mkdir_if_not_exists
 from ...controller import generate_sdl_game_controller_config
 from ...utils import vulkan
 from ..Generator import Generator
@@ -56,9 +56,9 @@ class CemuGenerator(Generator):
         cemuControllers.generateControllerConfig(system, playersControllers)
 
         if configure_emulator(rom):
-            commandArray = ["/usr/bin/cemu/cemu"]
+            commandArray = [f"{_SYSTEM_LOCAL_BIN}/cemu"]
         else:
-            commandArray = ["/usr/bin/cemu/cemu", "-f", "-g", rom]
+            commandArray = [f"{_SYSTEM_LOCAL_BIN}/cemu", "-f", "-g", rom]
             # force no menubar
             commandArray.append("--force-no-menubar")
 
@@ -227,8 +227,14 @@ class CemuGenerator(Generator):
         CemuGenerator.setSectionConfig(config, audio_root, "TVVolume", "100")
         # Set the audio device - we choose the 1st device as this is more likely the answer
         # pactl list sinks-raw | sed -e s+"^sink=[0-9]* name=\([^ ]*\) .*"+"\1"+ | sed 1q | tr -d '\n'
-        proc = subprocess.run(["/usr/bin/cemu/get-audio-device"], stdout=subprocess.PIPE)
-        cemuAudioDevice = proc.stdout.decode('utf-8')
+        try:
+            proc = subprocess.run(
+                "pactl list sinks-raw | sed -e 's/^sink=[0-9]* name=\\([^ ]*\\) .*/\\1/' | sed 1q | tr -d '\\n'",
+                shell=True, stdout=subprocess.PIPE
+            )
+            cemuAudioDevice = proc.stdout.decode('utf-8').strip()
+        except Exception:
+            cemuAudioDevice = ""
         _logger.debug("*** audio device = %s ***", cemuAudioDevice)
         if system.config.get_bool("cemu_audio_config", True):
             CemuGenerator.setSectionConfig(config, audio_root, "TVDevice", cemuAudioDevice)

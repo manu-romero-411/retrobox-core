@@ -75,8 +75,11 @@ def _load_system_config(system_name: str, /) -> dict[str, Any]:
 
     # In the yaml files, the "options" structure is not flat, so we have to flatten it here
     # because the options are flat in batocera.conf to make it easier for end users to edit
-    data: dict[str, Any] = {'emulator': defaults['emulator'], 'core': defaults['core']}
-
+    data: dict[str, Any] = {
+        'emulator': defaults.get('emulator'),
+        'core':     defaults.get('core'),
+    }
+    
     if 'options' in defaults:
         _dict_merge(data, defaults['options'])
 
