@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
     from ...controller import Controllers
     from ...Emulator import Emulator
-    from ...types import HotkeysContext
+    from ...batoceraTypes import HotkeysContext
 
 _logger = logging.getLogger(__name__)
 

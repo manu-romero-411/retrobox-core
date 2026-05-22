@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from ...Emulator import Emulator
     from ...gun import Guns
     from ...input import Input
-    from ...types import DeviceInfoMapping
+    from ...batoceraTypes import DeviceInfoMapping
     from .mameTypes import MameControlScheme
 
 _logger = logging.getLogger(__name__)

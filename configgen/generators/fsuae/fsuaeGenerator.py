@@ -13,7 +13,7 @@ from . import fsuaeControllers
 from .fsuaePaths import FSUAE_BIOS_DIR, FSUAE_CONFIG_DIR, FSUAE_SAVES
 
 if TYPE_CHECKING:
-    from ...types import HotkeysContext
+    from ...batoceraTypes import HotkeysContext
 
 _logger = logging.getLogger(__name__)
 

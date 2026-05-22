@@ -10,7 +10,7 @@ from ..Generator import Generator
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from ...types import HotkeysContext
+    from ...batoceraTypes import HotkeysContext
 
 _CONFIG_DIR: Final = CONFIGS / 'dosbox'
 # Use a separate file from dosbox.conf to avoid overwriting by dosbox

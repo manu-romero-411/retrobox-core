@@ -16,7 +16,7 @@ _logger = logging.getLogger(__name__)
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from ...types import HotkeysContext
+    from ...batoceraTypes import HotkeysContext
 
 # Path to the configuration file
 _CONFIG: Final = CONFIGS / 'openjazz' / 'openjazz.cfg'

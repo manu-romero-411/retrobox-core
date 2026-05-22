@@ -13,7 +13,7 @@ from .xemuPaths import XEMU_BIN, XEMU_CONFIG, XEMU_SAVES
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from ...types import HotkeysContext
+    from ...batoceraTypes import HotkeysContext
 
 class XemuGenerator(Generator):
 

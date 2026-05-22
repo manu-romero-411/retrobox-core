@@ -17,7 +17,7 @@ from ..Generator import Generator
 if TYPE_CHECKING:
     from ...controller import Controllers
     from ...Emulator import Emulator
-    from ...types import HotkeysContext
+    from ...batoceraTypes import HotkeysContext
 
 SUPERMODEL_SHARE: Final = Path('/usr/share/supermodel')
 SUPERMODEL_CONFIG: Final = CONFIGS / 'supermodel'

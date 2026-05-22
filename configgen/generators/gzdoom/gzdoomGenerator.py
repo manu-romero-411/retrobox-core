@@ -13,7 +13,7 @@ from ..Generator import Generator
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from ...types import HotkeysContext
+    from ...batoceraTypes import HotkeysContext
 
 _CONFIG_DIR: Final = CONFIGS / "gzdoom"
 _INI_FILE: Final = _CONFIG_DIR / "gzdoom.ini"

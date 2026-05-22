@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     from qrcode.image.pil import PilImage
 
     from configgen.gun import Guns
-    from configgen.types import Resolution
+    from configgen.batoceraTypes import Resolution
 
     from ..config import SystemConfig
     from ..Emulator import Emulator

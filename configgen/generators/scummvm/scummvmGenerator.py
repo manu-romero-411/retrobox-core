@@ -11,7 +11,7 @@ from ...utils.configparser import CaseSensitiveConfigParser
 from ..Generator import Generator
 
 if TYPE_CHECKING:
-    from ...types import HotkeysContext
+    from ...batoceraTypes import HotkeysContext
 
 scummConfigDir: Final = CONFIGS / "scummvm"
 scummConfigFile: Final = scummConfigDir / "scummvm.ini"

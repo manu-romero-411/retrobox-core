@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
     from ...controller import Controllers
     from ...Emulator import Emulator
-    from ...types import Resolution
+    from ...batoceraTypes import Resolution
 
 _logger = logging.getLogger(__name__)
 

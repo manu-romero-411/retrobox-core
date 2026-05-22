@@ -7,7 +7,8 @@ from ...batoceraPaths import ensure_parents_and_open
 from ...utils import vulkan
 from ...utils.configparser import CaseSensitiveConfigParser
 from .ppssppPaths import PPSSPP_PSP_SYSTEM_DIR
-
+import getpass
+    
 if TYPE_CHECKING:
     from ...Emulator import Emulator
 
@@ -143,7 +144,7 @@ def createPPSSPPConfig(iniConfig: CaseSensitiveConfigParser, system: Emulator):
         iniConfig.add_section("SystemParam")
 
     # Forcing Nickname to Batocera or User name
-    username = "Batocera"
+    username = getpass.getuser()
     if system.config.get_bool('retroachievements') and (config_username := system.config.get('retroachievements.username')):
         username = config_username
     iniConfig.set("SystemParam", "NickName", username)

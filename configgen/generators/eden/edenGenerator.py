@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from configgen import Command as Command
-from configgen.batoceraPaths import _SYSTEM_LOCAL_BIN, BATOCERA_SHARE_DIR, CONFIGS, ROMS
+from configgen.batoceraPaths import _SYSTEM_LOCAL_BIN, CONFIGS, DEFAULTS_DIR, ROMS, SAVES
 from configgen.generators.Generator import Generator
 from configgen.utils.configparser import CaseSensitiveRawConfigParser
 from configgen.input import Input
@@ -27,7 +27,7 @@ from ctypes import create_string_buffer
 eslog = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from configgen.types import HotkeysContext
+    from configgen.batoceraTypes import HotkeysContext
 
 class DictToObject:
     def __init__(self, dictionary):
@@ -192,7 +192,7 @@ def list_sdl_gamepads(sdlversion):
     os.environ["SDL_JOYSTICK_HIDAPI_SWITCH"] = "1"
     os.environ["SDL_JOYSTICK_HIDAPI_XBOX"] = "1"
     os.environ["SDL_JOYSTICK_HIDAPI_STEAMDECK"] = "0"
-    os.environ["SDL_GAMECONTROLLERCONFIG_FILE"] = f"{BATOCERA_SHARE_DIR}/switch_configgen/sdl2/gamecontrollerdb.txt"
+    os.environ["SDL_GAMECONTROLLERCONFIG_FILE"] = f"{DEFAULTS_DIR}/data/switch/sdl2/gamecontrollerdb.txt"
     
     sdl2.SDL_ClearError()
     try:
@@ -271,7 +271,7 @@ class EdenGenerator(Generator):
         yuzuConfig = os.path.expanduser(f"{CONFIGS}/{config_name}/qt-config.ini")
         
         # El template lo seguimos buscando en la carpeta del script
-        yuzuConfigTemplate = f'{BATOCERA_SHARE_DIR}/switch_configgen/qt-config.ini.template'
+        yuzuConfigTemplate = f'{DEFAULTS_DIR}/data/switch/qt-config.ini.template'
         EdenGenerator.writeYuzuConfig(yuzuConfig, yuzuConfigTemplate, system, playersControllers, sdlversion, emulator)
 
         # Configuración de comandos según ROM de control o sistema
@@ -307,9 +307,11 @@ class EdenGenerator(Generator):
             commandArray.append("-qlaunch")
 
         if use_rom:
-            commandArray.extend(["-g", rom])
+            commandArray.extend(["-g", str(rom)])
 
         environment = {
+            "XDG_CONFIG_HOME":f"{CONFIGS}",
+            #"XDG_DATA_HOME":f"{SAVES}/switch",
             "SDL_JOYSTICK_HIDAPI": "1",
             "SDL_JOYSTICK_HIDAPI_STEAMDECK": "0",
             "SDL_JOYSTICK_HIDAPI_PS4": "1",

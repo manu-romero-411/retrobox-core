@@ -12,7 +12,7 @@ from ...utils.configparser import CaseSensitiveConfigParser
 from ..Generator import Generator
 
 if TYPE_CHECKING:
-    from ...types import HotkeysContext
+    from ...batoceraTypes import HotkeysContext
 
 class SonicManiaGenerator(Generator):
 

@@ -22,7 +22,7 @@ from ..Generator import Generator
 
 if TYPE_CHECKING:
     from ...config import SystemConfig
-    from ...types import HotkeysContext, Resolution
+    from ...batoceraTypes import HotkeysContext, Resolution
 
 _BSTONE_CONFIG: Final = CONFIGS / "bstone"
 _BSTONE_CONFIG_FILE: Final = _BSTONE_CONFIG / "bstone_config.txt"

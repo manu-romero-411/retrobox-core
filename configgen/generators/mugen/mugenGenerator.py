@@ -11,7 +11,7 @@ from ...exceptions import BatoceraException
 from ..Generator import Generator
 
 if TYPE_CHECKING:
-    from ...types import HotkeysContext
+    from ...batoceraTypes import HotkeysContext
 
 def get_mugen_version(settings_path: Path) -> str:
 

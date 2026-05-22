@@ -12,7 +12,7 @@ from ...utils.configparser import CaseSensitiveConfigParser
 from ..Generator import Generator
 
 if TYPE_CHECKING:
-    from ...types import HotkeysContext
+    from ...batoceraTypes import HotkeysContext
 
 fout2ConfigDir: Final = CONFIGS / "fallout2"
 fout2ConfigFile: Final = fout2ConfigDir / "fallout2.cfg"

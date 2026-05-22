@@ -7,7 +7,7 @@ from ...controller import generate_sdl_game_controller_config, write_sdl_control
 from ..Generator import Generator
 
 if TYPE_CHECKING:
-    from ...types import HotkeysContext
+    from ...batoceraTypes import HotkeysContext
 
 class ShGenerator(Generator):
 

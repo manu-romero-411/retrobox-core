@@ -14,7 +14,7 @@ from ..Generator import Generator
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from ...types import HotkeysContext
+    from ...batoceraTypes import HotkeysContext
 
 _logger = logging.getLogger(__name__)
 

@@ -10,7 +10,7 @@ from . import ppssppConfig, ppssppControllers
 from .ppssppPaths import PPSSPP_CONFIG_DIR, PPSSPP_BIN
 
 if TYPE_CHECKING:
-    from ...types import HotkeysContext, Resolution
+    from ...batoceraTypes import HotkeysContext, Resolution
 
 class PPSSPPGenerator(Generator):
 

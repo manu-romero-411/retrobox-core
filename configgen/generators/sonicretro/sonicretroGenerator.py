@@ -13,7 +13,7 @@ from ..Generator import Generator
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from ...types import HotkeysContext
+    from ...batoceraTypes import HotkeysContext
 
 @cache
 def _get_resolved_path_md5(path: Path) -> str:

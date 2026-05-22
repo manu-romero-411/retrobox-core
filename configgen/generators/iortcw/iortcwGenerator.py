@@ -8,7 +8,7 @@ from ...controller import generate_sdl_game_controller_config
 from ..Generator import Generator
 
 if TYPE_CHECKING:
-    from ...types import HotkeysContext
+    from ...batoceraTypes import HotkeysContext
 
 _IORTCW_CONFIG: Final = ROMS / "rtcw"
 _IORTCW_CONFIG_FILE: Final = _IORTCW_CONFIG / "main" / "wolfconfig.cfg"

@@ -36,7 +36,7 @@ from .libretroPaths import (
 
 if TYPE_CHECKING:
     from ...Emulator import Emulator
-    from ...types import HotkeysContext
+    from ...batoceraTypes import HotkeysContext
 
 _logger = logging.getLogger(__name__)
 
@@ -145,7 +145,7 @@ class LibretroGenerator(Generator):
         retroarchCore = retroarchCore = RETROARCH_CORES / f"{self._core_filename(system.config.core)}_libretro.so"
         infoFile = RETROARCH_SHARE / f"{self._core_filename(system.config.core)}_libretro.info"
         # Retroarch core on the filesystem
-        _logger.warning("DEBUG core seleccionado: %r", system.config.core)
+        #_logger.warning("DEBUG core seleccionado: %r", system.config.core)
 
         # for each core, a file /usr/lib/<core>.info must exit, otherwise, info such as rewinding/netplay will not work
         # to do a global check : cd /usr/lib/libretro && for i in *.so; do INF=$(echo $i | sed -e s+/usr/lib/libretro+/usr/share/libretro/info+ -e s+\.so+.info+); test -e "$INF" || echo $i; done

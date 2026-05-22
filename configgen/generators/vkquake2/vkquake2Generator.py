@@ -12,7 +12,7 @@ from ...exceptions import BatoceraException
 from ..Generator import Generator
 
 if TYPE_CHECKING:
-    from ...types import HotkeysContext
+    from ...batoceraTypes import HotkeysContext
 
 vkquake2RomPath = ROMS / "quake2"
 vkquake2Binary = vkquake2RomPath / "quake2"

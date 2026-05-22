@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from ...controller import Controller, Controllers
     from ...Emulator import Emulator
     from ...input import Input, InputMapping
-    from ...types import DeviceInfoMapping
+    from ...batoceraTypes import DeviceInfoMapping
     from ...utils.configparser import CaseSensitiveConfigParser
 
 # Must read :

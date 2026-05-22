@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
     from ...controller import Controllers
     from ...Emulator import Emulator
-    from ...types import Resolution
+    from ...batoceraTypes import Resolution
 
 def writeCfgFile(system: Emulator, filename: Path, init_line: str, defaults_to_add: Iterable[str], controls_to_add: Iterable[str], gameResolution: Resolution) -> None:
     if not filename.is_file():

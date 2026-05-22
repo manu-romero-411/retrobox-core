@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
     from ...Emulator import Emulator
     from ...settings.unixSettings import UnixSettings
-    from ...types import DeviceInfoMapping
+    from ...batoceraTypes import DeviceInfoMapping
 
 def _set(settings: UnixSettings, settings_name: str, value: Any) -> None:
     settings.save(settings_name, '' if value is None else f'"{value}"')

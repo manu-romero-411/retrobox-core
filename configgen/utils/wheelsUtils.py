@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 
     from ..controller import Controller, ControllerList
     from ..Emulator import Emulator
-    from ..types import DeviceInfoDict
+    from ..batoceraTypes import DeviceInfoDict
 
 _logger = logging.getLogger(__name__)
 

@@ -7,7 +7,7 @@ from ..Generator import Generator
 from . import kodiConfig
 
 if TYPE_CHECKING:
-    from ...types import HotkeysContext
+    from ...batoceraTypes import HotkeysContext
 
 class KodiGenerator(Generator):
 

@@ -22,7 +22,7 @@ from ...batoceraPaths import CONFIGS, mkdir_if_not_exists
 from ..Generator import Generator
 
 if TYPE_CHECKING:
-    from ...types import HotkeysContext
+    from ...batoceraTypes import HotkeysContext
 
 _logger = logging.getLogger(__name__)
 

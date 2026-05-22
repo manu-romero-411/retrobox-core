@@ -7,7 +7,7 @@ from ...batoceraPaths import SAVES, mkdir_if_not_exists
 from ..Generator import Generator
 
 if TYPE_CHECKING:
-    from ...types import HotkeysContext
+    from ...batoceraTypes import HotkeysContext
 
 _THEXTECH_SAVES: Final = SAVES / "thextech"
 

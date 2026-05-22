@@ -11,7 +11,7 @@ from ...controller import generate_sdl_game_controller_config
 from ..Generator import Generator
 
 if TYPE_CHECKING:
-    from ...types import HotkeysContext
+    from ...batoceraTypes import HotkeysContext
 
 SYSTEM_DIR: Final = Path('/usr/bin/sonic3-air')
 SAVES_DIR: Final = SAVES / "sonic3-air"

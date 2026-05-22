@@ -6,7 +6,7 @@ from ...utils import videoMode
 
 if TYPE_CHECKING:
     from ...Emulator import Emulator
-    from ...types import Resolution, ScreenInfo
+    from ...batoceraTypes import Resolution, ScreenInfo
     from ...utils.configparser import CaseSensitiveConfigParser
 
 def configureWindowing(vpinballSettings: CaseSensitiveConfigParser, system: Emulator, gameResolution: Resolution, hasDmd: bool) -> None:

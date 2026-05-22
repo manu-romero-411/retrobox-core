@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from ..controller import Controllers
     from ..Emulator import Emulator
     from ..gun import Guns
-    from ..types import DeviceInfoMapping, HotkeysContext, Resolution
+    from ..batoceraTypes import DeviceInfoMapping, HotkeysContext, Resolution
 
 class Generator(metaclass=ABCMeta):
     @abstractmethod

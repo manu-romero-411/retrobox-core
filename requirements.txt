@@ -1,0 +1,6 @@
+pyudev
+pysdl2
+PyYAML
+qrcode
+Pillow
+evdev

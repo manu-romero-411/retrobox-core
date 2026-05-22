@@ -9,7 +9,7 @@ from ..Generator import Generator
 from . import fba2xConfig, fba2xControllers
 
 if TYPE_CHECKING:
-    from ...types import HotkeysContext
+    from ...batoceraTypes import HotkeysContext
 
 fbaRoot = CONFIGS / 'fba'
 fbaCustom = fbaRoot / 'fba2x.cfg'

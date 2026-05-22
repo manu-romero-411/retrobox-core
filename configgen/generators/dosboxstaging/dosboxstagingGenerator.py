@@ -9,7 +9,7 @@ from ..Generator import Generator
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from ...types import HotkeysContext
+    from ...batoceraTypes import HotkeysContext
 
 def _find_iname(directory: Path, filename: str) -> Path | None:
     if not directory.is_dir():

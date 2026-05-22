@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Final, NotRequired, TypedDict, cast
 import pyudev
 
 if TYPE_CHECKING:
-    from .types import DeviceInfoDict, DeviceInfoMapping
+    from .batoceraTypes import DeviceInfoDict, DeviceInfoMapping
 
 _logger: Final = logging.getLogger(__name__)
 

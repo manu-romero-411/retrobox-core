@@ -10,7 +10,7 @@ from ...controller import Controller
 from ..Generator import Generator
 
 if TYPE_CHECKING:
-    from ...types import HotkeysContext
+    from ...batoceraTypes import HotkeysContext
 
 _MELONDS_SAVES: Final = SAVES / "nds"
 _MELONDS_ROMS: Final = ROMS / "nds"

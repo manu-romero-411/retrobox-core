@@ -12,7 +12,7 @@ from .mupenPaths import MUPEN_CONFIG_DIR, MUPEN_CUSTOM
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from ...types import HotkeysContext
+    from ...batoceraTypes import HotkeysContext
 
 class MupenGenerator(Generator):
 

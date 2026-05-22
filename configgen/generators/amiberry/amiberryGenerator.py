@@ -13,7 +13,7 @@ from ..Generator import Generator
 from ..libretro import libretroControllers
 
 if TYPE_CHECKING:
-    from ...types import HotkeysContext
+    from ...batoceraTypes import HotkeysContext
 
 _logger = logging.getLogger(__name__)
 

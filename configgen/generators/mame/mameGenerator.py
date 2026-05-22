@@ -35,7 +35,7 @@ from .mamePaths import MAME_BIOS, MAME_CHEATS, MAME_CONFIG, MAME_DEFAULT_DATA, M
 
 if TYPE_CHECKING:
     from ...Emulator import Emulator
-    from ...types import HotkeysContext, Resolution
+    from ...batoceraTypes import HotkeysContext, Resolution
     from .mameTypes import MameControlScheme
 
 _logger = logging.getLogger(__name__)

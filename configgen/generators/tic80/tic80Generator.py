@@ -7,7 +7,7 @@ from ..Generator import Generator
 
 if TYPE_CHECKING:
     from pathlib import Path
-    from ...types import HotkeysContext
+    from ...batoceraTypes import HotkeysContext
 
 class tic80Generator(Generator):
 

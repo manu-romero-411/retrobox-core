@@ -14,7 +14,7 @@ from ...batoceraPaths import BIOS, CONFIGS, SCREENSHOTS, USERDATA, mkdir_if_not_
 from ..Generator import Generator
 
 if TYPE_CHECKING:
-    from ...types import HotkeysContext
+    from ...batoceraTypes import HotkeysContext
 
 _logger = logging.getLogger(__name__)
 

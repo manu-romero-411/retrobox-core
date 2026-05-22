@@ -115,6 +115,9 @@ def writeHotKeyConfig(retroconfig: UnixSettings, controllers: Controllers, /) ->
             _hotkey_save(retroconfig, rakey, pad[btn])
 
 # Write a configuration for a specified controller
+# Write a configuration for a specified controller
+# Write a configuration for a specified controller
+# Write a configuration for a specified controller
 def writeControllerConfig(
     retroconfig: UnixSettings,
     controller: Controller,
@@ -128,7 +131,68 @@ def writeControllerConfig(
     for key in generatedConfig:
         retroconfig.save(key, generatedConfig[key])
 
-    retroconfig.save(f'input_player{playerIndex}_joypad_index', controller.index)
+    # Forzar fallback por defecto: si todo falla, usamos la asignación de EmulationStation
+    joypad_index = controller.index
+    
+    c_guid = getattr(controller, 'guid', '').lower()
+    if len(c_guid) >= 32:
+        try:
+            import os
+            sys_input = "/sys/class/input"
+            if os.path.exists(sys_input):
+                # 1. Extracción segura del Vendor y Product ID del GUID de SDL2
+                # Estructura estándar: bytes 4-5 para Vendor, bytes 8-9 para Product (Little Endian)
+                c_vendor = (c_guid[10:12] + c_guid[8:10]).zfill(4)
+                c_product = (c_guid[18:20] + c_guid[16:18]).zfill(4)
+
+                devices = []
+                for d in os.listdir(sys_input):
+                    if d.startswith("js"):
+                        js_dir = os.path.join(sys_input, d)
+                        v_path = os.path.join(js_dir, "device/id/vendor")
+                        p_path = os.path.join(js_dir, "device/id/product")
+                        
+                        v, p = "", ""
+                        try:
+                            # Lectura aislada: si un nodo falla por permisos, no rompe el bucle
+                            if os.path.exists(v_path):
+                                with open(v_path, 'r') as f:
+                                    v = f.read().strip().lower().lstrip('0x').zfill(4)
+                            if os.path.exists(p_path):
+                                with open(p_path, 'r') as f:
+                                    p = f.read().strip().lower().lstrip('0x').zfill(4)
+                        except (IOError, OSError):
+                            continue
+                        
+                        devices.append({
+                            'node': d,
+                            'real_path': os.path.realpath(js_dir),
+                            'vendor': v,
+                            'product': p
+                        })
+
+                # 2. Replicar la ordenación exacta por hardware de udev (alfabética por sysfs path)
+                devices.sort(key=lambda x: x['real_path'])
+
+                # 3. Filtrar dispositivos del sistema que coinciden con el hardware actual
+                matching_devices = [dev for dev in devices if dev['vendor'] == c_vendor and dev['product'] == c_product]
+
+                if matching_devices:
+                    # Obtener los índices globales que ocupan los mandos que coinciden en el árbol de udev
+                    global_udev_indices = [devices.index(dev) for dev in matching_devices]
+                    
+                    # Control de desempate para mandos idénticos (mismo VID/PID en distintos puertos)
+                    es_idx = int(controller.index) if str(controller.index).isdigit() else 0
+                    match_pos = min(es_idx, len(global_udev_indices) - 1)
+                    
+                    joypad_index = str(global_udev_indices[match_pos])
+
+        except Exception:
+            # Captura de seguridad absoluta: ante cualquier comportamiento imprevisto del entorno,
+            # mantenemos el índice original de ES para asegurar que el juego al menos arranque.
+            joypad_index = controller.index
+
+    retroconfig.save(f'input_player{playerIndex}_joypad_index', str(joypad_index))
     retroconfig.save(f'input_player{playerIndex}_analog_dpad_mode', getAnalogMode(controller, system))
 
 # Create a configuration for a given controller

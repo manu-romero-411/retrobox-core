@@ -1,6 +1,7 @@
 {
     "version": "0.2.0",
     "configurations": [
+    
         {
             "name": "configgen: Switch eden-emu (ROM genérica)",
             "type": "debugpy",
@@ -179,13 +180,20 @@
             "cwd": "${workspaceFolder}",
             "args": [
                 "-p1index", "0",
-                "-p1guid", "03004e526f0e0000a802000023020000",
-                "-p1name", "PDP Xbox One Arctic White",
+                "-p1guid", "030081b85e0400008e02000002010000",
+                "-p1name", "Xbox 360 Controller",
                 "-p1nbbuttons", "11",
                 "-p1nbhats", "1",
                 "-p1nbaxes", "6",
+                "-p2index", "1",
+                "-p2guid", "03004e526f0e0000a802000023020000",
+                "-p2name", "PDP Xbox One Arctic White",
+                "-p2nbbuttons", "11",
+                "-p2nbhats", "1",
+                "-p2nbaxes", "6",
+                "-wheel", 
                 "-system", "megadrive",
-                "-rom", "/penguintb/juegos/roms/megadrive/Sonic & Knuckles + Sonic The Hedgehog (USA, Europe) (Lock-on Combination).zip",
+                "-rom", "/penguintb/juegos/roms/megadrive/Sonic The Hedgehog 2 (World) (Rev B).zip",
                 "-gameinfoxml", "/tmp/game.xml",
                 "-systemname", "Mega Drive"
             ],

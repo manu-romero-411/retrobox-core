@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from ...controller import Controllers
-    from ...types import HotkeysContext
+    from ...batoceraTypes import HotkeysContext
 
 class EasyRPGGenerator(Generator):
 

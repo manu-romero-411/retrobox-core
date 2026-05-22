@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from ... import Command
-from ...batoceraPaths import CACHE, CONFIGS, SAVES, USERDATA, mkdir_if_not_exists
+from ...batoceraPaths import _XDG_CONFIG, CACHE, CONFIGS, SAVES, USERDATA, mkdir_if_not_exists
 from ...utils import vulkan
 from ...utils.configparser import CaseSensitiveConfigParser
 from ..Generator import Generator
@@ -23,7 +23,7 @@ from .dolphinPaths import (
 )
 
 if TYPE_CHECKING:
-    from ...types import HotkeysContext
+    from ...batoceraTypes import HotkeysContext
 
 _logger = logging.getLogger(__name__)
 
@@ -422,11 +422,31 @@ class DolphinGenerator(Generator):
         print("========================================================================")
         print(DOLPHIN_BIN)
         print("========================================================================")
+
+        """
+        wrapper_script = (
+            f'DESKTOP_DIR="{_XDG_CONFIG}/dolphin-emu"; '
+            f'BATOCERA_DIR="{DOLPHIN_CONFIG}"; '
+            f'BACKUP_DIR="{_XDG_CONFIG}/dolphin-emu.bak"; ' 
+            'if [ -L "$DESKTOP_DIR" ]; then rm "$DESKTOP_DIR"; '
+            'elif [ -d "$DESKTOP_DIR" ]; then rm -rf "$BACKUP_DIR" && mv "$DESKTOP_DIR" "$BACKUP_DIR"; fi; '
+            'mkdir -p "$BATOCERA_DIR" && ln -s "$BATOCERA_DIR" "$DESKTOP_DIR"; '
+            'cleanup() { rm -f "$DESKTOP_DIR"; if [ -d "$BACKUP_DIR" ]; then mv "$BACKUP_DIR" "$DESKTOP_DIR"; fi; }; '
+            'trap cleanup EXIT INT TERM; '
+            '"$0" "$@"'
+        )
+
         if Path(DOLPHIN_BIN).is_file():
             # use the -b 'batch' option for nicer exit
-            commandArray = [DOLPHIN_BIN, "-b", "-e", rom]
+            commandArray = ["bash", "-c", wrapper_script, DOLPHIN_BIN, "-b", "-e", rom]
         else:
-            commandArray = ["dolphin-emu-nogui", "-e", rom]
+            commandArray = ["bash", "-c", wrapper_script, "dolphin-emu-nogui", "-b", "-e", rom]
+        """
+        if Path(DOLPHIN_BIN).is_file():
+            # use the -b 'batch' option for nicer exit
+            commandArray = [DOLPHIN_BIN, "-e", rom]
+        else:
+            commandArray = ["dolphin-emu-nogui", "-b", "-e", rom]
 
         # state_slot option
         if state_filename := system.config.get('state_filename'):
@@ -435,9 +455,8 @@ class DolphinGenerator(Generator):
         return Command.Command(
             array=commandArray,
             env = {
-                "XDG_CONFIG_HOME": Path.home() / '.config',
-                "XDG_DATA_HOME":   Path.home() / '.local' / 'share',
-                "XDG_CACHE_HOME":  Path.home() / '.cache',
+                "XDG_CONFIG_HOME":f"{CONFIGS}",
+                "XDG_DATA_HOME":f"{SAVES}",
                 "SDL_JOYSTICK_HIDAPI": "1",
                 "SDL_JOYSTICK_HIDAPI_SWITCH": "1",
                 "SDL_JOYSTICK_HIDAPI_PRO": "1",

@@ -37,7 +37,7 @@ from ..Generator import Generator
 if TYPE_CHECKING:
     from ...Emulator import Emulator
     from ...gun import Guns
-    from ...types import DeviceInfoMapping, HotkeysContext, Resolution
+    from ...batoceraTypes import DeviceInfoMapping, HotkeysContext, Resolution
 
 _logger = logging.getLogger(__name__)
 

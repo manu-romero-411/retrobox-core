@@ -9,7 +9,7 @@ from ...settings.unixSettings import UnixSettings
 from ..Generator import Generator
 
 if TYPE_CHECKING:
-    from ...types import HotkeysContext
+    from ...batoceraTypes import HotkeysContext
 
 _CONFIGDIR  = CONFIGS / 'GSplus'
 _CONFIGFILE = _CONFIGDIR / 'config.txt'

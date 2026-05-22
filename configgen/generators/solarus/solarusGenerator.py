@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from ...controller import Controllers
     from ...Emulator import Emulator
     from ...input import Input
-    from ...types import HotkeysContext
+    from ...batoceraTypes import HotkeysContext
 
 _CONFIG_DIR: Final = CONFIGS / "solarus"
 

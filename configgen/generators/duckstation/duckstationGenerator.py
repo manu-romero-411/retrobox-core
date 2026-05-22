@@ -24,7 +24,7 @@ from ..Generator import Generator
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
-    from ...types import HotkeysContext
+    from ...batoceraTypes import HotkeysContext
 
 class DuckstationGenerator(Generator):
 

@@ -18,7 +18,7 @@ import evdev
 import pyudev
 from evdev import ecodes
 
-from configgen.batoceraPaths import _XDG_DATA, CONFIGS
+from batoceraPaths import _XDG_DATA, CONFIGS
 
 if TYPE_CHECKING:
     from collections.abc import Mapping

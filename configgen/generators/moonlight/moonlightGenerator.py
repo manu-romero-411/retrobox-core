@@ -13,7 +13,7 @@ from . import moonlightConfig
 from .moonlightPaths import MOONLIGHT_GAME_LIST, MOONLIGHT_STAGING_CONFIG
 
 if TYPE_CHECKING:
-    from ...types import HotkeysContext
+    from ...batoceraTypes import HotkeysContext
 
 class MoonlightGenerator(Generator):
 

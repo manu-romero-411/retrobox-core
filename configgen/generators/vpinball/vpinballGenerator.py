@@ -14,7 +14,7 @@ from ..Generator import Generator
 from . import vpinballOptions, vpinballWindowing
 
 if TYPE_CHECKING:
-    from ...types import HotkeysContext
+    from ...batoceraTypes import HotkeysContext
 
 _logger = logging.getLogger(__name__)
 

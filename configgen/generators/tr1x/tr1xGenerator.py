@@ -29,7 +29,7 @@ from ..Generator import Generator
 _logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from ...types import HotkeysContext
+    from ...batoceraTypes import HotkeysContext
 
 class TR1XGenerator(Generator):
 

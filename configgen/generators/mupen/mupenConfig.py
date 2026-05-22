@@ -8,7 +8,7 @@ from .mupenPaths import MUPEN_CONFIG_DIR, MUPEN_SAVES
 if TYPE_CHECKING:
     from ...controller import Controllers
     from ...Emulator import Emulator
-    from ...types import Resolution
+    from ...batoceraTypes import Resolution
     from ...utils.configparser import CaseSensitiveConfigParser
 
 def setMupenConfig(iniConfig: CaseSensitiveConfigParser, system: Emulator, controllers: Controllers, gameResolution: Resolution):

@@ -9,7 +9,7 @@ from ...exceptions import BatoceraException
 from ..Generator import Generator
 
 if TYPE_CHECKING:
-    from ...types import HotkeysContext
+    from ...batoceraTypes import HotkeysContext
 
 class DXX_RebirthGenerator(Generator):
 

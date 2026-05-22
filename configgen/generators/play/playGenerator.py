@@ -12,7 +12,7 @@ from ...batoceraPaths import CACHE, CONFIGS, SAVES, USERDATA, configure_emulator
 from ..Generator import Generator
 
 if TYPE_CHECKING:
-    from ...types import HotkeysContext
+    from ...batoceraTypes import HotkeysContext
 
 playConfig: Final = CONFIGS / 'play'
 playSaves: Final = SAVES / 'play'

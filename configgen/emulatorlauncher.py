@@ -26,7 +26,7 @@ from typing import TYPE_CHECKING, Any, cast
 import pyudev
 import sdl2
 
-from .batoceraPaths import BATOCERA_SHARE_DIR, ES_GAMES_METADATA, SAVES, SYSTEM_SCRIPTS, USER_SCRIPTS, GUN_OVERLAYS_DIR, HOTKEYGEN_BIN, HUD_CONFIG_FILE
+from .batoceraPaths import BATOCERA_CONF, BATOCERA_SHARE_DIR, ES_GAMES_METADATA, SAVES, USER_SCRIPTS, GUN_OVERLAYS_DIR, HUD_CONFIG_FILE
 from .controller import Controller
 from .Emulator import Emulator
 from .exceptions import BadCommandLineArguments, BaseBatoceraException, BatoceraException, UnexpectedEmulatorExit
@@ -45,7 +45,7 @@ if TYPE_CHECKING:
 
     from .Command import Command
     from .generators.Generator import Generator
-    from .types import Resolution
+    from .batoceraTypes import Resolution
 
 _logger = logging.getLogger(__name__)
 
@@ -162,7 +162,7 @@ def start_rom(args: argparse.Namespace, maxnbplayers: int, rom: Path, original_r
                 os.environ.update({'SDL_RENDER_VSYNC': system.config["sdlvsync"]})
 
                 # run a script before emulator starts
-                callExternalScripts(SYSTEM_SCRIPTS, "gameStart", [systemName, system.config.emulator, effectiveCore, rom])
+                #callExternalScripts(SYSTEM_SCRIPTS, "gameStart", [systemName, system.config.emulator, effectiveCore, rom])
                 callExternalScripts(USER_SCRIPTS, "gameStart", [systemName, system.config.emulator, effectiveCore, rom])
 
                 # run the emulator
@@ -217,19 +217,22 @@ def start_rom(args: argparse.Namespace, maxnbplayers: int, rom: Path, original_r
                         _logger.error("Failed to draw_gun_borders for gun_borders")
                         _logger.error(e)
 
+                    
                     with profiler.pause():
+                        """
                         try:
                             _logger.debug("Triggering mouse reset to primary display")
                             subprocess.call([HOTKEYGEN_BIN, "--reset-mouse"])
                         except Exception as e:
                             _logger.warning("Failed to reset mouse: %s", e)
+                        """
                         monitor_thread.start()
                         exitCode = runCommand(cmd)
-
+                    
                 # run a script after emulator shuts down
                 callExternalScripts(USER_SCRIPTS, "gameStop", [systemName, system.config.emulator, effectiveCore, rom])
-                callExternalScripts(SYSTEM_SCRIPTS, "gameStop", [systemName, system.config.emulator, effectiveCore, rom])
-
+                #callExternalScripts(SYSTEM_SCRIPTS, "gameStop", [systemName, system.config.emulator, effectiveCore, rom])
+                os.remove(BATOCERA_CONF)
             finally:
                 # always restore the resolution
                 if resolutionChanged:

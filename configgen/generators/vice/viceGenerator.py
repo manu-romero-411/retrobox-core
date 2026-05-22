@@ -11,7 +11,7 @@ from ..Generator import Generator
 from . import viceConfig, viceControllers
 
 if TYPE_CHECKING:
-    from ...types import HotkeysContext
+    from ...batoceraTypes import HotkeysContext
 
 _VICE_CONFIG_DIR: Final = CONFIGS / 'vice'
 

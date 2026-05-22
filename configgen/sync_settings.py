@@ -36,8 +36,9 @@ def sync() -> None:
             name = KEY_MAP.get(name, name)  # traducir si hay mapeo
             lines.append(f'{name}={value}')
 
-        BATOCERA_CONF.parent.mkdir(parents=True, exist_ok=True)
-        BATOCERA_CONF.write_text('\n'.join(lines) + '\n', encoding='latin1')
+        #BATOCERA_CONF.parent.mkdir(parents=True, exist_ok=True)
+        with open(BATOCERA_CONF, 'w', encoding='utf-8') as f:
+            f.write('\n'.join(lines) + '\n')
         _logger.debug("batocera.conf sincronizado (%d entradas)", len(lines))
     except Exception:
         _logger.exception("Error sincronizando es_settings → batocera.conf")

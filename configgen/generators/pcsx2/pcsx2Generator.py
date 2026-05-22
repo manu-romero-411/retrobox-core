@@ -34,14 +34,14 @@ if TYPE_CHECKING:
     from ...Emulator import Emulator
     from ...gun import Guns
     from ...input import Input
-    from ...types import DeviceInfoMapping, HotkeysContext, Resolution
+    from ...batoceraTypes import DeviceInfoMapping, HotkeysContext, Resolution
 
 _logger = logging.getLogger(__name__)
 
 _PCSX2_BIN_DIR:       Final = Path("/opt/pcsx2")
 _PCSX2_BIN:           Final = Path("/usr/local/bin/pcsx2")        # symlink al AppImage
 _PCSX2_RESOURCES_DIR: Final = _PCSX2_BIN_DIR / "resources"
-_PCSX2_CONFIG:        Final = Path.home() / '.config' / 'PCSX2'
+_PCSX2_CONFIG:        Final = CONFIGS / 'pcsx2'
 _PCSX2_BIOS:          Final = BIOS / "pcsx2" / "bios"
 
 class Pcsx2Generator(Generator):
@@ -147,7 +147,7 @@ class Pcsx2Generator(Generator):
 
         if state_slot := system.config.get_str('state_slot'):
             commandArray.extend(["-stateindex", state_slot])
-        _logger.warning("DEBUG pcsx2 command: %s env: %s", commandArray, envcmd)
+        #_logger.warning("DEBUG pcsx2 command: %s env: %s", commandArray, envcmd)
         return Command.Command(
             array=commandArray,
             env=envcmd

@@ -23,12 +23,14 @@ _SYSTEM_LOCAL_SHARE: Final = Path('/usr/local/share')
 # ---------------------------------------------------------------------------
 # Paths de instalación del sistema (igual que en batocera)
 # ---------------------------------------------------------------------------
-BATOCERA_ROOT:  Final = _XDG_DATA / 'batocera'
+BATOCERA_ROOT: Final = Path(os.environ.get('BATOCERA_ROOT', str(_XDG_DATA / 'batocera')))
+USERDATA: Final = Path(os.environ.get('USERDATA', str(BATOCERA_ROOT)))
+
 BATOCERA_SHARE_DIR:  Final = BATOCERA_ROOT / 'resources'
 DATAINIT_DIR:        Final = BATOCERA_SHARE_DIR / 'datainit'
-BATOCERA_ES_DIR:     Final = Path('/home/manuel/proyectos/batocera-emulationstation/appimage/es')
-CONFIGGEN_DATA_DIR:  Final = BATOCERA_SHARE_DIR / "configgen/data"
-DEFAULTS_DIR: Final = Path(__file__).parent.parent
+#BATOCERA_ES_DIR:     Final = Path('/home/manuel/proyectos/batocera-emulationstation/appimage/es')
+BATOCERA_ES_DIR:     Final = BATOCERA_ROOT / 'emulationstation'
+DEFAULTS_DIR: Final = BATOCERA_SHARE_DIR / 'configgen'
 
 HOME_INIT:  Final = DATAINIT_DIR / 'system'
 CONF_INIT:  Final = HOME_INIT / 'configs'
@@ -36,23 +38,22 @@ CONF_INIT:  Final = HOME_INIT / 'configs'
 # ---------------------------------------------------------------------------
 # "userdata" → $HOME
 # ---------------------------------------------------------------------------
-USERDATA: Final = BATOCERA_ROOT
 ROMS:     Final = USERDATA / 'roms'          # ajusta si los tienes en otro sitio
 
 # ---------------------------------------------------------------------------
 # "system" de batocera → ~/.local/share/batocera  (estado interno del port)
 # ---------------------------------------------------------------------------
-HOME:  Final = _XDG_DATA / 'batocera'
+HOME:  Final = USERDATA
 CACHE: Final = _XDG_CACHE / 'batocera'
 LOGS:  Final = HOME / 'logs'
 
-BATOCERA_CONF: Final = HOME / 'batocera.conf'
-USER_SCRIPTS:  Final = HOME / 'scripts'
+BATOCERA_CONF: Final = '/tmp/retrobox_gamelaunch.conf'
+USER_SCRIPTS:  Final = HOME / 'user_scripts'
 
 # ---------------------------------------------------------------------------
 # Configs de emuladores → ~/.config  (XDG; retroarch ya vive en ~/.config/retroarch)
 # ---------------------------------------------------------------------------
-CONFIGS: Final = _XDG_CONFIG
+CONFIGS: Final = USERDATA / 'emuconfigs'
 EVMAPY:  Final = CONFIGS / 'evmapy'
 
 SAVES:       Final = USERDATA / 'saves'
@@ -77,11 +78,11 @@ _ES_RESOURCES_DIR:   Final = BATOCERA_ES_DIR / 'resources'
 ES_GUNS_METADATA:    Final = _ES_RESOURCES_DIR / 'gungames.xml'
 ES_WHEELS_METADATA:  Final = _ES_RESOURCES_DIR / 'wheelgames.xml'
 ES_GAMES_METADATA:   Final = _ES_RESOURCES_DIR / 'gamesdb.xml'
-ES_GUNS_ART_METADATA: Final = CONFIGGEN_DATA_DIR / 'gamesbuttonsdb.xml'
+ES_GUNS_ART_METADATA: Final = DEFAULTS_DIR / 'data' / 'gamesbuttonsdb.xml'
 
 BATOCERA_SHADERS:    Final = BATOCERA_SHARE_DIR / 'shaders'
 SYSTEM_DECORATIONS:  Final = DATAINIT_DIR / 'decorations'
-SYSTEM_SCRIPTS:      Final = DEFAULTS_DIR / 'scripts'
+SYSTEM_SCRIPTS:      Final = BATOCERA_SHARE_DIR / 'system_scripts'
 
 # Runtime dir (en batocera es /var/run, en Debian usamos /tmp)
 RUNTIME_DIR: Final = Path('/tmp/batocera-run')
@@ -97,7 +98,7 @@ CMDFILES_DIR:      Final = RUNTIME_DIR / 'cmdfiles'
 SHADER_BEZELS_DIR: Final = RUNTIME_DIR / 'shader_bezels'
 HUD_CONFIG_FILE:   Final = RUNTIME_DIR / 'hud.config'
 GUN_OVERLAYS_DIR:  Final = RUNTIME_DIR / 'batocera-overlays'
-HOTKEYGEN_BIN: Final = Path.home() / '.local' / 'bin' / 'hotkeygen'
+HOTKEYGEN_BIN: Final = SYSTEM_SCRIPTS / 'hotkeygen'
 
 # ---------------------------------------------------------------------------
 # Utilidades (sin cambios)
@@ -105,9 +106,19 @@ HOTKEYGEN_BIN: Final = Path.home() / '.local' / 'bin' / 'hotkeygen'
 def configure_emulator(rom: Path, /) -> bool:
     return str(rom) == 'config'
 
-def mkdir_if_not_exists(dir: Path, /) -> None:
-    if not dir.exists():
-        dir.mkdir(parents=True)
+def mkdir_if_not_exists(dir):
+    try:
+        dir.mkdir(parents=True, exist_ok=True)
+    except FileExistsError:
+        # Si es un enlace simbólico roto, lo eliminamos y lo creamos de verdad
+        if dir.is_symlink():
+            dir.unlink()
+            dir.mkdir(parents=True, exist_ok=True)
+        else:
+            # Si es un archivo regular, lo renombramos para no perder datos y creamos el directorio
+            import time
+            dir.rename(dir.with_name(f"{dir.name}.bak_{int(time.time())}"))
+            dir.mkdir(parents=True, exist_ok=True)
 
 @overload
 @contextmanager

@@ -9,7 +9,7 @@ from ...utils.configparser import CaseSensitiveConfigParser
 from ..Generator import Generator
 
 if TYPE_CHECKING:
-    from ...types import HotkeysContext
+    from ...batoceraTypes import HotkeysContext
 
 _CONFIG_DIR: Final = CONFIGS / 'dosbox'
 _CONFIG: Final = _CONFIG_DIR / 'dosboxx.conf'

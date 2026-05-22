@@ -10,7 +10,7 @@ from ...controller import Controller, generate_sdl_game_controller_config
 from ..Generator import Generator
 
 if TYPE_CHECKING:
-    from ...types import HotkeysContext
+    from ...batoceraTypes import HotkeysContext
 
 CONFIG_DIR: Final = CONFIGS / 'sdlpop'
 SCREENSHOTS_DIR: Final = SCREENSHOTS / 'sdlpop'

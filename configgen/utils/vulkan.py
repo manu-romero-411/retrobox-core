@@ -5,9 +5,11 @@ import subprocess
 from pathlib import Path
 from typing import Final
 
+from configgen.batoceraPaths import SYSTEM_SCRIPTS, USERDATA
+
 _logger: Final = logging.getLogger(__name__)
 
-_BATOCERA_VULKAN: Final = Path('/home/manuel/proyectos/batocera-configgen/batocera-vulkan')
+_BATOCERA_VULKAN: Final =  f"{SYSTEM_SCRIPTS}/batocera-vulkan"
 
 def is_available() -> bool:
     try:

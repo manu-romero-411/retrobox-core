@@ -11,7 +11,7 @@ from ..Generator import Generator
 
 if TYPE_CHECKING:
     from ...input import Input
-    from ...types import HotkeysContext
+    from ...batoceraTypes import HotkeysContext
 
 bigPemuConfig = CONFIGS / "bigpemu" / "BigPEmuConfig.bigpcfg"
 

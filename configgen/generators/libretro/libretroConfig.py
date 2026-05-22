@@ -28,7 +28,7 @@ if TYPE_CHECKING:
     from ...Emulator import Emulator
     from ...generators.Generator import Generator
     from ...gun import Gun, Guns
-    from ...types import BezelInfo, DeviceInfoMapping, Resolution
+    from ...batoceraTypes import BezelInfo, DeviceInfoMapping, Resolution
 
 _logger = logging.getLogger(__name__)
 

@@ -23,7 +23,7 @@ from ...utils import currentPlatform, esSettings
 from ..Generator import Generator
 
 if TYPE_CHECKING:
-    from ...types import HotkeysContext
+    from ...batoceraTypes import HotkeysContext
 
 defaultConfig = Path( CONFIGS / "yquake2/baseq2/yq2.cfg" )
 

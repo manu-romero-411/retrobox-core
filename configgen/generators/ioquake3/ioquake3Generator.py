@@ -11,7 +11,7 @@ from . import ioquake3Config
 from .ioquake3Paths import IOQUAKE3_ROMS
 
 if TYPE_CHECKING:
-    from ...types import HotkeysContext
+    from ...batoceraTypes import HotkeysContext
 
 class IOQuake3Generator(Generator):
 

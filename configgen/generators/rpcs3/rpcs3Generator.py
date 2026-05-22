@@ -19,7 +19,7 @@ from .rpcs3Paths import RPCS3_BIN, RPCS3_CONFIG, RPCS3_CONFIG_DIR, RPCS3_CURRENT
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from ...types import HotkeysContext, Resolution
+    from ...batoceraTypes import HotkeysContext, Resolution
 
 _logger = logging.getLogger(__name__)
 

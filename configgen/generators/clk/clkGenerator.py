@@ -5,13 +5,15 @@ import zipfile
 from pathlib import Path
 from typing import TYPE_CHECKING, Final
 
+from configgen.batoceraPaths import BIOS
+
 from ... import Command
 from ...controller import generate_sdl_game_controller_config
 from ...exceptions import BatoceraException
 from ..Generator import Generator
 
 if TYPE_CHECKING:
-    from ...types import HotkeysContext
+    from ...batoceraTypes import HotkeysContext
 
 # Static temp file for extraction as CLK doens't support zipped roms
 _TMP_DIR: Final = Path("/tmp/clk_extracted")
@@ -56,7 +58,7 @@ class ClkGenerator(Generator):
         if romzip is None:
             raise BatoceraException(f'ROM is a directory: {rom}')
 
-        commandArray = ["clksignal", romzip,  "--rompath=/userdata/bios/"]
+        commandArray = ["clksignal", romzip,  f"--rompath={BIOS}"]
 
         if system.name in _SVIDEO_SYSTEMS:
             commandArray.extend(["--output=SVideo"])

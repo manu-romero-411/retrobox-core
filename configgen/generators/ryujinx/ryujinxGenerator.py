@@ -16,7 +16,7 @@ from shutil import copyfile
 from pathlib import Path
 from typing import TYPE_CHECKING
 from configgen import Command as Command
-from configgen.batoceraPaths import _SYSTEM_LOCAL_BIN, CONFIGS, ROMS, SAVES, BATOCERA_SHARE_DIR, mkdir_if_not_exists
+from configgen.batoceraPaths import _SYSTEM_LOCAL_BIN, CONFIGS, DEFAULTS_DIR, ROMS, SAVES, BATOCERA_SHARE_DIR, mkdir_if_not_exists
 from configgen.controller import generate_sdl_game_controller_config
 from configgen.generators.Generator import Generator
 from configgen.utils.configparser import CaseSensitiveRawConfigParser
@@ -32,19 +32,19 @@ from ctypes import create_string_buffer
 eslog = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from configgen.types import HotkeysContext
+    from configgen.batoceraTypes import HotkeysContext
 
 #subprocess.run(["batocera-mouse", "show"], check=False)
 
 try:
     # exécute le script et attend la fin
-    subprocess.Popen([f"{BATOCERA_SHARE_DIR}/switch_configgen/generators/ryujinxloadfirmware.sh"], stderr=subprocess.PIPE, shell=True)
+    subprocess.Popen([f"{DEFAULTS_DIR}/data/switch/ryujinxloadfirmware.sh"], stderr=subprocess.PIPE, shell=True)
     print("[RYUJINX] Script Bash exécuté avec succès", file=sys.stderr)
 except subprocess.CalledProcessError as e:
     print("[RYUJINX][ERROR] Le script Bash a échoué :", file=sys.stderr)
 
 def getCurrentCard() -> str | None:
-    proc = subprocess.Popen([f"{BATOCERA_SHARE_DIR}/switch_configgen/generators/detectvideo.sh"], stdout=subprocess.PIPE, shell=True)
+    proc = subprocess.Popen([f"{DEFAULTS_DIR}/data/switch/detectvideo.sh"], stdout=subprocess.PIPE, shell=True)
     (out, err) = proc.communicate()
     for val in out.decode().splitlines():
         return val # return the first line
@@ -269,13 +269,13 @@ class RyujinxGenerator(Generator):
 
     def generate(self, system, rom, playersControllers, metadata, guns, wheels, gameResolution):
         eslog.warning("DEBUG: generate() llamado, emulator=%s", system.config['emulator'])
-        st = os.stat(f"{BATOCERA_SHARE_DIR}/switch_configgen/generators/detectvideo.sh")
-        os.chmod(f"{BATOCERA_SHARE_DIR}/switch_configgen/generators/detectvideo.sh", st.st_mode | stat.S_IEXEC)
+        st = os.stat(f"{DEFAULTS_DIR}/data/switch/detectvideo.sh")
+        os.chmod(f"{DEFAULTS_DIR}/data/switch/detectvideo.sh", st.st_mode | stat.S_IEXEC)
 
         mkdir_if_not_exists(Path(f"{CONFIGS}/Ryujinx"))
         # mkdir_if_not_exists(Path(f"{CONFIGS}/Ryujinx/system"))
 
-        template = Path(f"{BATOCERA_SHARE_DIR}/switch_configgen/Config.json.template")
+        template = Path(f"{DEFAULTS_DIR}/data/switch/Config.json.template")
         target = CONFIGS / "Ryujinx" / "Config.json.template"
         copyfile(template, target) 
 
@@ -293,7 +293,7 @@ class RyujinxGenerator(Generator):
         mkdir_if_not_exists(Path(f"{SAVES}/switch/ryujinx/save/save_system"))
         mkdir_if_not_exists(Path(f"{SAVES}/switch/ryujinx/mods"))
 
-    #Link Ryujinx User save/mods folder (bis/user)/(bis/system/save)
+        #Link Ryujinx User save/mods folder (bis/user)/(bis/system/save)
         # #USER SAVE (bis/user)-------
         if os.path.exists(f"{CONFIGS}/Ryujinx/bis/user"):
             if not os.path.islink(f"{CONFIGS}/Ryujinx/bis/user"):
@@ -357,6 +357,8 @@ class RyujinxGenerator(Generator):
                         "SDL_JOYSTICK_HIDAPI_SWITCH" : "1",
                         "SDL_GAMECONTROLLERCONFIG": sdl_mapping,
                         "DOTNET_EnableAlternateStackCheck":"1",
+                        "XDG_CONFIG_HOME":f"{CONFIGS}",
+                        #"XDG_DATA_HOME":f"{SAVES}",
         }
 
         rom_nameq = os.path.basename(rom)

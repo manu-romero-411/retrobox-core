@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, cast
 from xml.dom import minidom
 
 from ... import Command
-from ...batoceraPaths import _SYSTEM_LOCAL_BIN, CACHE, CONFIGS, SAVES, configure_emulator, mkdir_if_not_exists
+from ...batoceraPaths import _SYSTEM_LOCAL_BIN, _XDG_CONFIG, CONFIGS, SAVES, configure_emulator, mkdir_if_not_exists
 from ...controller import generate_sdl_game_controller_config
 from ...utils import vulkan
 from ..Generator import Generator
@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from ...Emulator import Emulator
-    from ...types import HotkeysContext
+    from ...batoceraTypes import HotkeysContext
 
 _logger = logging.getLogger(__name__)
 
@@ -55,19 +55,36 @@ class CemuGenerator(Generator):
         # Set-up the controllers
         cemuControllers.generateControllerConfig(system, playersControllers)
 
-        if configure_emulator(rom):
-            commandArray = [f"{_SYSTEM_LOCAL_BIN}/cemu"]
-        else:
-            commandArray = [f"{_SYSTEM_LOCAL_BIN}/cemu", "-f", "-g", rom]
-            # force no menubar
-            commandArray.append("--force-no-menubar")
+        # Script intermedio para gestionar enlaces simbólicos y backups dinámicamente
+        cemu_bin = f"{_SYSTEM_LOCAL_BIN}/cemu"
+        """
+        wrapper_script = (
+            f'DESKTOP_DIR="{_XDG_CONFIG}/Cemu"; '
+            f'BATOCERA_DIR="{CEMU_CONFIG}"; '
+            f'BACKUP_DIR="{_XDG_CONFIG}/Cemu.desktop.bak"; ' 
+            'if [ -L "$DESKTOP_DIR" ]; then rm "$DESKTOP_DIR"; '
+            'elif [ -d "$DESKTOP_DIR" ]; then rm -rf "$BACKUP_DIR" && mv "$DESKTOP_DIR" "$BACKUP_DIR"; fi; '
+            'mkdir -p "$BATOCERA_DIR" && ln -s "$BATOCERA_DIR" "$DESKTOP_DIR"; '
+            'cleanup() { rm -f "$DESKTOP_DIR"; if [ -d "$BACKUP_DIR" ]; then mv "$BACKUP_DIR" "$DESKTOP_DIR"; fi; }; '
+            'trap cleanup EXIT INT TERM; '
+            '"$0" "$@"'
+        )
 
+        if configure_emulator(rom):
+            commandArray = ["bash", "-c", wrapper_script, cemu_bin]
+        else:
+            commandArray = ["bash", "-c", wrapper_script, cemu_bin, "-f", "-g", rom, "--force-no-menubar"]
+        """
+        if configure_emulator(rom):
+            commandArray = [cemu_bin]
+        else:
+            commandArray = [cemu_bin, "-f", "-g", rom, "--force-no-menubar"]
+        
         return Command.Command(
             array=commandArray,
             env={
-                "XDG_CONFIG_HOME": CONFIGS,
-                "XDG_CACHE_HOME": CACHE,
-                "XDG_DATA_HOME": SAVES,
+                "XDG_CONFIG_HOME":f"{CONFIGS}",
+                "XDG_DATA_HOME":f"{SAVES}",
                 "SDL_GAMECONTROLLERCONFIG": generate_sdl_game_controller_config(playersControllers),
                 "SDL_JOYSTICK_HIDAPI": "0"
             }
@@ -225,12 +242,11 @@ class CemuGenerator(Generator):
         CemuGenerator.setSectionConfig(config, audio_root, "TVChannels", system.config.get("cemu_audio_channels", "1"))  # 1 = Stereo
         # Set volume to the max
         CemuGenerator.setSectionConfig(config, audio_root, "TVVolume", "100")
-        # Set the audio device - we choose the 1st device as this is more likely the answer
-        # pactl list sinks-raw | sed -e s+"^sink=[0-9]* name=\([^ ]*\) .*"+"\1"+ | sed 1q | tr -d '\n'
+        # Set the audio device using standard pactl compatible with PipeWire
         try:
             proc = subprocess.run(
-                "pactl list sinks-raw | sed -e 's/^sink=[0-9]* name=\\([^ ]*\\) .*/\\1/' | sed 1q | tr -d '\\n'",
-                shell=True, stdout=subprocess.PIPE
+                "pactl get-default-sink",
+                shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
             )
             cemuAudioDevice = proc.stdout.decode('utf-8').strip()
         except Exception:

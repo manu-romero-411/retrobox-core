@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from ...config import SystemConfig
-    from ...types import Resolution
+    from ...batoceraTypes import Resolution
 
 _logger = logging.getLogger(__name__)
 

@@ -16,9 +16,11 @@ if TYPE_CHECKING:
     from ...controller import Controller, Controllers
     from ...Emulator import Emulator
     from ...gun import Guns
-    from ...types import DeviceInfoMapping
+    from ...batoceraTypes import DeviceInfoMapping
 
 _logger = logging.getLogger(__name__)
+
+NINTENDO_PRO_NAMES = {"Nintendo Switch Pro Controller", "Pro Controller"}
 
 # Create the controller configuration file
 def generateControllerConfig(system: Emulator, playersControllers: Controllers, metadata: Mapping[str, str], wheels: DeviceInfoMapping, rom: Path, guns: Guns) -> None:
@@ -517,8 +519,12 @@ def generateControllerConfig_any(system: Emulator, playersControllers: Controlle
             nsamepad = double_pads.get(pad.real_name.strip(), 0)
             double_pads[pad.real_name.strip()] = nsamepad+1
 
+            # fix for switch pro controllers
+            real_name = pad.real_name.strip()
+            device_name = "Nintendo Switch Pro Controller" if real_name in NINTENDO_PRO_NAMES else real_name
+
             f.write(f"[{anyDefKey}{nplayer}]\n")
-            f.write(f"Device = SDL/{str(nsamepad).strip()}/{pad.real_name.strip()}\n")
+            f.write(f"Device = SDL/{str(nsamepad).strip()}/{device_name}\n")
 
             if system.config.get_bool("use_pad_profiles"):
                 if not generateControllerConfig_any_from_profiles(f, pad, system):
@@ -528,6 +534,8 @@ def generateControllerConfig_any(system: Emulator, playersControllers: Controlle
                     generateControllerConfig_any_auto(f, pad, wheelMapping, wheelReverseAxes or {}, None, wheelExtraOptions, system, nplayer, nsamepad)
                 elif pad.device_path in wheels:
                     generateControllerConfig_wheel(f, pad, nplayer)
+                elif pad.real_name.strip() in NINTENDO_PRO_NAMES:   # ← nuevo
+                    generateControllerConfig_nintendo_pro(f, system, nplayer, nsamepad)
                 else:
                     generateControllerConfig_any_auto(f, pad, anyMapping, anyReverseAxes, anyReplacements, extraOptions, system, nplayer, nsamepad)
 
@@ -563,6 +571,55 @@ def generateControllerConfig_wheel(f: codecs.StreamReaderWriter, pad: Controller
             write_key(f, wheelMapping[input.name], input.type, input.id, input.value, pad.axis_count, False, None, None)
             if input.name == "joystick1left" and "joystick1right" in wheelMapping:
                 write_key(f, wheelMapping["joystick1right"], input.type, input.id, input.value, pad.axis_count, True, None, None)
+
+def generateControllerConfig_nintendo_pro(
+    f: codecs.StreamReaderWriter,
+    system: Emulator,
+    nplayer: int,
+    nsamepad: int
+) -> None:
+    deadzone = system.config.get(f"deadzone_{nplayer}", "16.0")
+
+    mapping = {
+        "Buttons/A":       "`Button E`",
+        "Buttons/B":       "`Button S`",
+        "Buttons/X":       "`Button N`",
+        "Buttons/Y":       "`Button W`",
+        "Buttons/Z":       "`Shoulder R`",
+        "Buttons/Start":   "Start",
+        "Triggers/L":      "`Trigger L`",
+        "Triggers/R":      "`Trigger R`",
+        "Triggers/L-Analog": "`Trigger L`",
+        "Triggers/R-Analog": "`Trigger R`",
+        "D-Pad/Up":        "`Pad N`",
+        "D-Pad/Down":      "`Pad S`",
+        "D-Pad/Left":      "`Pad W`",
+        "D-Pad/Right":     "`Pad E`",
+        "Main Stick/Up":   "`Left Y+`",
+        "Main Stick/Down": "`Left Y-`",
+        "Main Stick/Left": "`Left X-`",
+        "Main Stick/Right":"`Left X+`",
+        "C-Stick/Up":      "`Right Y+`",
+        "C-Stick/Down":    "`Right Y-`",
+        "C-Stick/Left":    "`Right X-`",
+        "C-Stick/Right":   "`Right X+`",
+    }
+    for key, val in mapping.items():
+        f.write(f"{key} = {val}\n")
+
+    f.write(f"Main Stick/Dead Zone = {deadzone}\n")
+    f.write(f"C-Stick/Dead Zone = {deadzone}\n")
+
+    match system.config.get(f"jsgate_size_{nplayer}"):
+        case 'smaller':
+            f.write("Main Stick/Gate Size = 64.0\n")
+            f.write("C-Stick/Gate Size = 56.0\n")
+        case 'larger':
+            f.write("Main Stick/Gate Size = 95.0\n")
+            f.write("C-Stick/Gate Size = 88.0\n")
+
+    if system.config.get_bool("rumble"):
+        f.write("Rumble/Motor = Weak\n")
 
 def generateControllerConfig_any_auto(f: codecs.StreamReaderWriter, pad: Controller, anyMapping: Mapping[str, str | None], anyReverseAxes: Mapping[str | None, str], anyReplacements: Mapping[str, str] | None, extraOptions: Mapping[str, str], system: Emulator, nplayer: int, nsamepad: int) -> None:
     for opt in extraOptions:
@@ -611,7 +668,7 @@ def generateControllerConfig_any_auto(f: codecs.StreamReaderWriter, pad: Control
         if system.config.get_bool("dsmotion"):
             # Detectamos el sufijo correcto según el mando
             clean_name = pad.real_name.strip()
-            if clean_name == "Pro Controller":
+            if clean_name in NINTENDO_PRO_NAMES:
                 motion_suffix = " (IMU)"
             else:
                 motion_suffix = " Motion Sensors"
@@ -694,14 +751,13 @@ def write_key(f: codecs.StreamReaderWriter, keyname: str, input_type: str, input
         else:
             f.write(f"Button {input_id}")
     elif input_type == "hat":
-        if input_value == "1" or input_value == "4":        # up or down
-            f.write(f"Axis {int(input_global_id)+1+int(input_id)*2}")
-        else:
-            f.write(f"Axis {int(input_global_id)+int(input_id)*2}")
-        if input_value == "1" or input_value == "8":        # up or left
-            f.write("-")
-        else:
-            f.write("+")
+        hat_directions = {
+            "1": "Pad N",
+            "2": "Pad E",
+            "4": "Pad S",
+            "8": "Pad W"
+        }
+        f.write(hat_directions.get(str(input_value), "Pad N"))
     elif input_type == "axis":
         # Ensure full values are used for analog triggers
         prefix = "Full " if keyname in {"Triggers/L-Analog", "Triggers/R-Analog"} else ""
