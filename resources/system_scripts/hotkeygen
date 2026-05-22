@@ -1,0 +1,5 @@
+#!/bin/bash
+# Obtiene la ruta absoluta del directorio superior de este script
+BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. >/dev/null 2>&1 && pwd -P)"
+
+exec python3 "$BASE_DIR/emulationstation/batocera-configgen/configgen/hotkeygen.py" "$@"

@@ -218,3 +218,43 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# otros directorios y archivos
+.emulationstation/music/
+.emulationstation/music/*
+.emulationstation/themes/
+.emulationstation/themes/*
+.emulationstation/tmp/
+.emulationstation/tmp/*
+.emulationstation/es_log.*
+
+bios/
+bios/*
+cheats/
+cheats/*
+decorations/
+decorations/*
+emuconfigs/
+emuconfigs/*
+emulationstation/
+emulationstation/*
+logs/
+logs/*
+music/
+music/*
+resources/alsa/
+resources/alsa/*
+resources/datainit/
+resources/datainit/*
+resources/datainit/
+resources/datainit/*
+roms/
+roms/*
+saves/
+saves/*
+screenshots/
+screenshots/*
+shaders/
+shaders/*
+
+
