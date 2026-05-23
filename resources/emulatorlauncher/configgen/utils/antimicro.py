@@ -25,9 +25,12 @@ def launch_antimicrox(
         extra_args (list): Argumentos adicionales
     """
 
-    if not guid and device_index is None:
-        raise ValueError("Debes especificar guid o device_index")
+    #if not guid and device_index is None:
+    #    raise ValueError("Debes especificar guid o device_index")
 
+    if not guid:
+        return None
+    
     cmd = ["antimicrox"]
 
     if hidden:

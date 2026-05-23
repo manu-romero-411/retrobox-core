@@ -1,0 +1,10 @@
+#!/bin/bash
+
+if test -z "${DISPLAY}"
+then
+    export DISPLAY=$(getLocalXDisplay)
+fi
+
+"${USERDATA}/resources/emulatorlauncher/emulatorlauncher.sh" -system wiiu -rom config
+
+exit 0

@@ -1,0 +1,5 @@
+#!/bin/bash
+
+export DISPLAY=$(getLocalXDisplay)
+
+/usr/local/bin/retroarch --menu --config "${USERDATA}/emuconfigs/retroarch/retroarchcustom.cfg"

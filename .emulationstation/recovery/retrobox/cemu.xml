@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<gameList parentHash="40339">
+	<game>
+		<path>./cemu.menu</path>
+		<name>Cemu (Wii U)</name>
+		<desc>Run Cemu Emulator (Wii U).</desc>
+		<genre>Emulator</genre>
+		<image>./media/cemu-logo.png</image>
+		<marquee>./media/cemu-logo.png</marquee>
+		<rating>0</rating>
+		<developer>Cemu Team</developer>
+		<publisher>Cemu Team</publisher>
+		<playcount>2</playcount>
+		<lastplayed>20260523T123935</lastplayed>
+		<gametime>31</gametime>
+		<lang>en</lang>
+		<region>wr</region>
+	</game>
+</gameList>

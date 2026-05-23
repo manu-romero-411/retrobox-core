@@ -1,0 +1,16 @@
+#!/bin/bash
+
+if [ -n "$WAYLAND_DISPLAY" ]; then
+    export SDL_VIDEODRIVER=wayland
+    export SDL_VIDEO_WAYLAND_WMCLASS="batocera-config-flycast"
+else
+    export DISPLAY=$(getLocalXDisplay)
+fi
+
+export XDG_CONFIG_HOME="${USERDATA}/configs"
+export XDG_CONFIG_DIRS="${USERDATA}/configs"
+export XDG_DATA_HOME="${USERDATA}/saves/dreamcast"
+export FLYCAST_DATADIR="${USERDATA}/saves/dreamcast"
+export FLYCAST_BIOS_PATH="${USERDATA}/bios"
+
+/usr/local/bin/flycast
