@@ -4,8 +4,6 @@ A proof-of-concept port of the [batocera](https://github.com/batocera-linux/bato
 
 The goal is to have a batocera/Retrobat-like experience if paired with a compiled [batocera-emulationstation](https://github.com/batocera-linux/batocera-emulationstation) frontend, featuring automatic emulator configuration, bezels, shaders, controller mapping — without having to reboot to other OS.
 
----
-
 ## Motivation
 
 Batocera is excellent as a dedicated gaming system, but it needs to be booted as a whole OS. A few years ago, I discovered Retrobat, but it is Windows-only (there are some ways to run it on Linux with Wine/Lutris, but not all emulators work). RetroDeck, EmuDeck and ES-DE doesn't have all the goodies Retrobat and Batocera have, such as auto gamepad config (the most important thing for me).
@@ -16,8 +14,6 @@ This project brings the parts that matter most to a desktop Linux installation:
 - Bezels work in Vulkan-powered emulators via a patched MangoHud build (the same approach batocera uses)
 - Shader support via RetroArch's slang pipeline
 - Adapted ontroller autoconfiguration for RetroArch, Flycast, Dolphin, PCSX2, PPSSPP, Cemu, Ryujinx and Eden. More to come.
-
----
 
 ## Architecture
 
@@ -33,8 +29,6 @@ EmulationStation
 ```
 
 This repo can be cloned and used everywhere. Paths have been adapted to replace `/userdata` hierarchy. The `retrobox.sh` adapts paths if the directory is moved.
-
----
 
 ## Key changes vs upstream batocera-configgen
 
@@ -64,7 +58,7 @@ batocera ships several system-specific binaries that don't exist on a standard L
 
 ### ES settings sync
 
-We reads emulator settings from `retrobox.conf` (key=value). EmulationStation on a standard install writes to `es_settings.cfg` (XML). A small Python script (`resources/emulatorlauncher/configgen/sync_settings.py`) translates between them before each game launch.
+Emulators read their settings from `batocera.conf` (key=value). EmulationStation on a standard install writes to `es_settings.cfg` (XML). A small Python script (`resources/emulatorlauncher/configgen/sync_settings.py`) translates between them before each game launch, using a temporal file. This will be worked around in the future to allow reading directly from the XML.
 
 ### RetroArch paths
 
@@ -92,8 +86,6 @@ The other emulators (with the exception of eden) don't use gamepad shortcuts and
 
 Generators adapted from a third-party batocera package. Paths converted to this environment standard, AppImage-specific HOME handling resolved.
 
----
-
 ## Setup
 
 1. Clone this repo
@@ -118,14 +110,12 @@ libice6 libsm6 libxtst6 libxi6 inotify-tools antimicro
 # coming soon
 ```
 
-**Python dependencies for use in `venv`:***
+**Python dependencies for use in `venv`:**
 
 ```bash
 source /path/to/venv/bin/activate
 pip install --no-user pyudev pysdl2 PyYAML lxml evdev requests qrcode[pil]
 ```
-
----
 
 ## Directory layout
 
@@ -146,8 +136,6 @@ pip install --no-user pyudev pysdl2 PyYAML lxml evdev requests qrcode[pil]
     └── configgen/
         └── data/          # gamesbuttonsdb.xml etc.
 ```
-
----
 
 ## License
 
