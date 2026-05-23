@@ -227,6 +227,8 @@ __marimo__/
 .emulationstation/tmp/
 .emulationstation/tmp/*
 .emulationstation/es_log.*
+.emulationstation/es_settings.*
+.emulationstation/es_*input*
 
 bios/
 bios/*
