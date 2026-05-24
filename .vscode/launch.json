@@ -1,18 +1,20 @@
 {
     "version": "0.2.0",
     "configurations": [
-    
+        
+
+
         {
             "name": "configgen: Switch eden-emu (ROM genérica)",
             "type": "debugpy",
             "request": "launch",
             "module": "configgen.emulatorlauncher",
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/resources/emulatorlauncher",
             "args": [
                 "-p1index",
                 "0",
                 "-p1guid",
-                "03004e526f0e0000a802000023020000",
+                "0600b7926f0e0000a802000000010000",
                 "-p1name",
                 "PDP Xbox One Arctic White",
                 "-p1nbbuttons",
@@ -24,7 +26,7 @@
                 "-system",
                 "switch",
                 "-rom",
-                "/penguintb/juegos/roms/switch/Donkey Kong Country Returns HD [01009D901BC56000][v0][US](nsw2u.com).nsp",
+                "/run/media/manuel/penguinTB/juegos/roms/switch/Donkey Kong Country Returns HD [01009D901BC56000][v0][US](nsw2u.com).nsp",
                 "-gameinfoxml",
                 "/tmp/game.xml",
                 "-systemname",
@@ -45,23 +47,23 @@
             "type": "debugpy",
             "request": "launch",
             "module": "configgen.emulatorlauncher",
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/resources/emulatorlauncher",
             "args": [
                 "-p1index", "0",
-                "-p1guid", "03004e526f0e0000a802000023020000",
-                "-p1name", "PDP Xbox One Arctic White",
-                "-p1nbbuttons", "11",
+                "-p1guid", "0500d71f7e0500000920000000006803",
+                "-p1name", "Nintendo Switch Pro Controller",
+                "-p1nbbuttons", "16",
                 "-p1nbhats", "1",
                 "-p1nbaxes", "6",
                 "-p2index", "1",
-                "-p2guid", "0500d71f7e0500000920000001800000",
-                "-p2name", "Pro Controller",
-                "-p2nbbuttons", "14",
+                "-p2guid", "0600b7926f0e0000a802000000010000",
+                "-p2name", "PDP Xbox One Arctic White",
+                "-p2nbbuttons", "11",
                 "-p2nbhats", "1",
-                "-p2nbaxes", "4",
+                "-p2nbaxes", "6",
                 "-wheel", 
                 "-system", "gamecube",
-                "-rom", "/penguintb/juegos/roms/gamecube/Mario Kart - Double Dash!! (Europe) (En,Fr,De,Es,It).rvz",
+                "-rom", "/run/media/manuel/penguinTB/juegos/roms/gamecube/Mario Kart - Double Dash!! (Europe) (En,Fr,De,Es,It).rvz",
                 "-gameinfoxml", "/tmp/game.xml",
                 "-systemname", "GameCube"
             ],
@@ -77,7 +79,7 @@
             "type": "debugpy",
             "request": "launch",
             "module": "configgen.emulatorlauncher",
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/resources/emulatorlauncher",
             "args": [
                 "-p1index", "0",
                 "-p1guid", "03004e526f0e0000a802000023020000",
@@ -102,7 +104,7 @@
             "type": "debugpy",
             "request": "launch",
             "module": "configgen.emulatorlauncher",
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/resources/emulatorlauncher",
             "args": [
                 "-p1index", "0",
                 "-p1guid", "03004e526f0e0000a802000023020000",
@@ -127,7 +129,7 @@
             "type": "debugpy",
             "request": "launch",
             "module": "configgen.emulatorlauncher",
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/resources/emulatorlauncher",
             "args": [
                 "-p1index", "0",
                 "-p1guid", "03004e526f0e0000a802000023020000",
@@ -152,7 +154,7 @@
             "type": "debugpy",
             "request": "launch",
             "module": "configgen.emulatorlauncher",
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/resources/emulatorlauncher",
             "args": [
                 "-p1index", "0",
                 "-p1guid", "03004e526f0e0000a802000023020000",
@@ -173,27 +175,58 @@
             "justMyCode": false
         },
         {
-            "name": "configgen: Mega Drive (ROM genérica)",
+            "name": "configgen: Mega Drive (Sonic 2 Xbox+Switch)",
             "type": "debugpy",
             "request": "launch",
             "module": "configgen.emulatorlauncher",
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/resources/emulatorlauncher",
             "args": [
-                "-p1index", "0",
-                "-p1guid", "030081b85e0400008e02000002010000",
-                "-p1name", "Xbox 360 Controller",
+                "-p1index", "1",
+                "-p1guid", "0600b7926f0e0000a802000000010000",
+                "-p1name", "PDP Xbox One Arctic White",
                 "-p1nbbuttons", "11",
                 "-p1nbhats", "1",
                 "-p1nbaxes", "6",
+                "-p2index", "0",
+                "-p2guid", "0500d71f7e0500000920000000006803",
+                "-p2name", "Nintendo Switch Pro Controller",
+                "-p2nbbuttons", "16",
+                "-p2nbhats", "1",
+                "-p2nbaxes", "6",
+                "-wheel", 
+                "-system", "megadrive",
+                "-rom", "/run/media/manuel/penguinTB/juegos/roms/megadrive/Sonic The Hedgehog 2 (World) (Rev B).zip",
+                "-gameinfoxml", "/tmp/game.xml",
+                "-systemname", "Mega Drive"
+            ],
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            },
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "configgen: Mega Drive (Sonic 2 Switch+Xbox)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "configgen.emulatorlauncher",
+            "cwd": "${workspaceFolder}/resources/emulatorlauncher",
+            "args": [
+                "-p1index", "0",
+                "-p1guid", "0500d71f7e0500000920000000006803",
+                "-p1name", "Nintendo Switch Pro Controller",
+                "-p1nbbuttons", "16",
+                "-p1nbhats", "1",
+                "-p1nbaxes", "6",
                 "-p2index", "1",
-                "-p2guid", "03004e526f0e0000a802000023020000",
+                "-p2guid", "0600b7926f0e0000a802000000010000",
                 "-p2name", "PDP Xbox One Arctic White",
                 "-p2nbbuttons", "11",
                 "-p2nbhats", "1",
                 "-p2nbaxes", "6",
                 "-wheel", 
                 "-system", "megadrive",
-                "-rom", "/penguintb/juegos/roms/megadrive/Sonic The Hedgehog 2 (World) (Rev B).zip",
+                "-rom", "/run/media/manuel/penguinTB/juegos/roms/megadrive/Sonic The Hedgehog 2 (World) (Rev B).zip",
                 "-gameinfoxml", "/tmp/game.xml",
                 "-systemname", "Mega Drive"
             ],
@@ -208,7 +241,7 @@
             "type": "debugpy",
             "request": "launch",
             "module": "configgen.emulatorlauncher",
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/resources/emulatorlauncher",
             "args": [
                 "-p1index", "0",
                 "-p1guid", "03004e526f0e0000a802000023020000",
@@ -220,6 +253,23 @@
                 "-rom", "/penguintb/juegos/roms/gb/A-mazing Tater (USA).zip",
                 "-gameinfoxml", "/tmp/game.xml",
                 "-systemname", "Game Boy"
+            ],
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            },
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "configgen: libretro config",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "configgen.emulatorlauncher",
+            "cwd": "${workspaceFolder}/resources/emulatorlauncher",
+            "args": [
+                "-system", "config",
+                "-emulator", "libretro",
+                "-rom", "config",
             ],
             "env": {
                 "PYTHONPATH": "${workspaceFolder}"

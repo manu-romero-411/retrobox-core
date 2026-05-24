@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import xml.etree.ElementTree as ET
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import InitVar, dataclass, field, replace
@@ -90,6 +91,59 @@ def _find_input_config(roots: Iterable[ET.Element], name: str, guid: str, /) -> 
             return element
 
     raise BatoceraException(f'Could not find controller data for "{name}" with GUID "{guid}"')
+
+def getJoystickHardwareIds(device_path: str, /) -> tuple[str, str] | None:
+    """
+    Obtiene Vendor y Product ID en decimal leyendo de forma unívoca el archivo uevent.
+    Soporta /dev/hidrawX y /dev/input/eventX sin depender de estructuras dinámicas de subcarpetas.
+    """
+
+    if not device_path or not os.path.exists(device_path):
+        return None
+
+    base_name = os.path.basename(device_path) # ej: 'hidraw6' o 'event19'
+
+    try:
+        # 1. Determinamos la ruta base en sysfs según el tipo de nodo
+        if 'hidraw' in base_name:
+            uevent_path = Path("/sys/class/hidraw") / base_name / "device" / "uevent"
+        elif 'event' in base_name:
+            uevent_path = Path("/sys/class/input") / base_name / "device" / "uevent"
+        else:
+            return None
+
+        if not uevent_path.exists():
+            return None
+
+        # 2. Parseamos el archivo uevent buscando el ID de hardware
+        vendor_hex, product_hex = None, None
+        
+        with open(uevent_path, 'r', encoding='utf-8') as f:
+            for line in f:
+                line = line.strip()
+                
+                # Caso hidraw: Típicamente "HID_ID=0005:0000057E:00002009"
+                if line.startswith("HID_ID="):
+                    parts = line.split("=")[1].split(":")
+                    vendor_hex = parts[1]
+                    product_hex = parts[2]
+                    break
+                
+                # Caso event estándar: Típicamente "PRODUCT=3/57e/2009/11b"
+                elif line.startswith("PRODUCT="):
+                    parts = line.split("=")[1].split("/")
+                    vendor_hex = parts[1]
+                    product_hex = parts[2]
+                    break
+
+        # 3. Si encontramos los hexadecimales, conversión limpia a string decimal
+        if vendor_hex and product_hex:
+            return str(int(vendor_hex, 16)), str(int(product_hex, 16))
+
+    except Exception as e:
+        print(f"[DEBUG_HW] Error unívoco en sysfs para {base_name}: {e}")
+
+    return None
 
 class _RelaxedDict(TypedDict):
     centered: bool
@@ -300,11 +354,11 @@ class Controller:
     # Create a controller array with the player id as a key
     @classmethod
     def load_for_players(cls, max_players: int, args: Namespace, /) -> ControllerList:
-        cfg_roots = [
-            ET.parse(conffile).getroot()
-            for conffile in (USER_ES_DIR / 'es_input.cfg', BATOCERA_ES_DIR / 'es_input.cfg')
-            if conffile.exists()
-        ]
+        cfg_roots = []
+        for conffile in (USER_ES_DIR / 'es_input.cfg', BATOCERA_ES_DIR / 'es_input.cfg'):
+            print(f"[DEBUG] buscando cfg en: {conffile} → existe={conffile.exists()}")
+            if conffile.exists():
+                cfg_roots.append(ET.parse(conffile).getroot())
 
         return [
             controller
@@ -317,7 +371,6 @@ class Controller:
         cls, roots: Iterable[ET.Element], args: Namespace, player_number: int, /,
     ) -> Controller | None:
         index: int | None = getattr(args, f'p{player_number}index')
-
         if index is None:
             return None
 
@@ -325,6 +378,10 @@ class Controller:
         real_name: str = getattr(args, f'p{player_number}name')
 
         input_config = _find_input_config(roots, real_name, guid)
+
+        print(f"[DEBUG] player{player_number}: buscando guid={guid} name={real_name}")
+        print(f"[DEBUG] player{player_number}: encontrado deviceName={input_config.get('deviceName')} guid={input_config.get('deviceGUID')}")
+
 
         device_path_calc = getattr(args, f'p{player_number}devicepath', None)
         button_count_calc = getattr(args, f'p{player_number}nbbuttons')

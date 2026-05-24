@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from ... import Command
-from ...batoceraPaths import _XDG_CONFIG, CACHE, CONFIGS, SAVES, USERDATA, mkdir_if_not_exists
+from ...batoceraPaths import _XDG_CONFIG, CACHE, CONFIGS, SAVES, USERDATA, configure_emulator, mkdir_if_not_exists
 from ...utils import vulkan
 from ...utils.configparser import CaseSensitiveConfigParser
 from ..Generator import Generator
@@ -442,11 +442,13 @@ class DolphinGenerator(Generator):
         else:
             commandArray = ["bash", "-c", wrapper_script, "dolphin-emu-nogui", "-b", "-e", rom]
         """
+        commandArray = []
         if Path(DOLPHIN_BIN).is_file():
-            # use the -b 'batch' option for nicer exit
-            commandArray = [DOLPHIN_BIN, "-e", rom]
-        else:
-            commandArray = ["dolphin-emu-nogui", "-b", "-e", rom]
+            if configure_emulator(rom):
+                commandArray.extend([DOLPHIN_BIN])
+            else:
+                # use the -b 'batch' option for nicer exit
+                commandArray.extend([DOLPHIN_BIN, "-b", "-e", rom])
 
         # state_slot option
         if state_filename := system.config.get('state_filename'):

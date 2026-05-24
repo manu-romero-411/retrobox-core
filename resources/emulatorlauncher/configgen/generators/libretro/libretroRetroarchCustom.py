@@ -30,7 +30,7 @@ def generateRetroarchCustom() -> None:
 
     # Input
     retroarchSettings.save('input_autodetect_enable',           '"false"')
-    retroarchSettings.save('input_joypad_driver',               '"sdl2"')
+    retroarchSettings.save('input_joypad_driver',               '"udev"')
     retroarchSettings.save('input_player1_analog_dpad_mode',    '"1"')
     retroarchSettings.save('input_player2_analog_dpad_mode',    '"1"')
     retroarchSettings.save('input_player3_analog_dpad_mode',    '"1"')

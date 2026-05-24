@@ -9,14 +9,13 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from configgen import Command as Command
-from configgen.batoceraPaths import _SYSTEM_LOCAL_BIN, CONFIGS, DEFAULTS_DIR, ROMS, SAVES
+from configgen.batoceraPaths import _SYSTEM_LOCAL_BIN, CONFIGS, DEFAULTS_DIR, ROMS, SAVES, configure_emulator
 from configgen.generators.Generator import Generator
 from configgen.utils.configparser import CaseSensitiveRawConfigParser
 from configgen.input import Input
 from datetime import datetime
 
-# Importación de nuestro nuevo módulo de rutas modularizado
-from configgen.generators.eden import edenPaths
+from configgen.generators.eden.edenPaths import SWITCH_DLC_DIR, EDEN_BIN, SWITCH_ROMS, SWITCH_UPDATE_DIR, setup_eden_environments
 
 os.environ["PYSDL2_DLL_PATH"] = "/usr/lib/x86_64-linux-gnu"
 
@@ -252,19 +251,14 @@ class EdenGenerator(Generator):
             "keys": { "exit": ["KEY_LEFTALT", "KEY_F4"]}
         }
 
-    def executionDirectory(self, config, rom):
-        return _SYSTEM_LOCAL_BIN
-
     def generate(self, system, rom, playersControllers, metadata, guns, wheels, gameResolution):
         eslog.warning("DEBUG: generate() llamado, emulator=%s", system.config['emulator'])
         emulator = system.config['emulator']
 
         sdlversion = 2
-        if emulator == 'citron-emu':
-            sdlversion = 3
 
         # Invocar la creación modular de rutas y entornos symlink
-        edenPaths.setup_eden_environments()
+        setup_eden_environments()
 
         # Forzamos la ruta real de configuración en Debian nativo (~/.config/eden/qt-config.ini o ~/.config/citron/qt-config.ini)
         config_name = "citron" if emulator == "citron-emu" else "eden"
@@ -274,44 +268,16 @@ class EdenGenerator(Generator):
         yuzuConfigTemplate = f'{DEFAULTS_DIR}/data/switch/qt-config.ini.template'
         EdenGenerator.writeYuzuConfig(yuzuConfig, yuzuConfigTemplate, system, playersControllers, sdlversion, emulator)
 
-        # Configuración de comandos según ROM de control o sistema
-        BASE_COMMAND = {
-            "emulator": emulator,
-            "use_rom": True,
-            "qlaunch": False,
-        }
+        commandArray = [f"{EDEN_BIN}"]
 
-        XCI_CONFIG_MAP = {
-            "eden_config.xci_config": {
-                "emulator": "eden-emu",
-                "qlaunch": False,
-                "use_rom": False,                                
-            },
-            "eden_qlaunch.xci_config": {
-                "emulator": "eden-emu",
-                "qlaunch": True,
-                "use_rom": False,                                
-            },
-        }
-
-        rom_nameq = os.path.basename(rom)
-        cfg = XCI_CONFIG_MAP.get(rom_nameq, BASE_COMMAND)
-
-        emulator_to_use = cfg["emulator"]
-        use_qlaunch = cfg["qlaunch"]
-        use_rom = cfg["use_rom"]
-
-        commandArray = [f"./{emulator_to_use}", "-f"]
-
-        if use_qlaunch:
-            commandArray.append("-qlaunch")
-
-        if use_rom:
-            commandArray.extend(["-g", str(rom)])
+        if configure_emulator(rom):
+            commandArray.extend(["-qlaunch"])
+        else:
+            commandArray.extend(["-f", "-g", str(rom)])
 
         environment = {
             "XDG_CONFIG_HOME":f"{CONFIGS}",
-            #"XDG_DATA_HOME":f"{SAVES}/switch",
+            "XDG_DATA_HOME":f"{SAVES}/switch",
             "SDL_JOYSTICK_HIDAPI": "1",
             "SDL_JOYSTICK_HIDAPI_STEAMDECK": "0",
             "SDL_JOYSTICK_HIDAPI_PS4": "1",
@@ -369,8 +335,8 @@ class EdenGenerator(Generator):
         if not yuzuConfig.has_section("UI"):
             yuzuConfig.add_section("UI")
 
-        yuzuConfig.set("UI", "enable_discord_presence", "false")
-        yuzuConfig.set("UI", "enable_discord_presence\\default", "false")
+        yuzuConfig.set("UI", "enable_discord_presence", "true")
+        yuzuConfig.set("UI", "enable_discord_presence\\default", "true")
 
         yuzuConfig.set("UI", "check_for_updates_on_start", "false")
         yuzuConfig.set("UI", "check_for_updates_on_start\\default", "false")
@@ -384,8 +350,8 @@ class EdenGenerator(Generator):
 
         # Common external path (dlc/update)
         yuzuConfig.set("UI", "Paths\\external_content_dirs\\size", "2")
-        yuzuConfig.set("UI", "Paths\\external_content_dirs\\1\\path", f"{ROMS}/switch_update/dlc/")
-        yuzuConfig.set("UI", "Paths\\external_content_dirs\\2\\path", f"{ROMS}/switch_update/update/")
+        yuzuConfig.set("UI", "Paths\\external_content_dirs\\1\\path", f"{SWITCH_UPDATE_DIR}")
+        yuzuConfig.set("UI", "Paths\\external_content_dirs\\2\\path", f"{SWITCH_DLC_DIR}")
 
         #citron shortcuts
         yuzuConfig.set("UI", "Shortcuts\\shortcuts\\size", "1")#adjust to number of shortcut sets
@@ -421,12 +387,12 @@ class EdenGenerator(Generator):
         yuzuConfig.set("UI", "Shortcuts\\Main%20Window\\Continue\\Pause%20Emulation\\Context\\default", "true")
         yuzuConfig.set("UI", "Shortcuts\\Main%20Window\\Continue\\Pause%20Emulation\\Context", "1")
 
-        yuzuConfig.set("UI", "Paths\\romsPath", f"{ROMS}/switch")
+        yuzuConfig.set("UI", "Paths\\romsPath", f"{SWITCH_ROMS}")
         yuzuConfig.set("UI", "Paths\\gamedirs\\1\\deep_scan", "true")
         yuzuConfig.set("UI", "Paths\\gamedirs\\1\\deep_scan\\default", "false")
         yuzuConfig.set("UI", "Paths\\gamedirs\\1\\expanded", "true")
         yuzuConfig.set("UI", "Paths\\gamedirs\\1\\expanded\\default", "true")
-        yuzuConfig.set("UI", "Paths\\gamedirs\\1\\path", f"{ROMS}/switch")
+        yuzuConfig.set("UI", "Paths\\gamedirs\\1\\path", f"{SWITCH_ROMS}")
         yuzuConfig.set("UI", "Paths\\gamedirs\\size", "3")
 
         # Interface language (citron)

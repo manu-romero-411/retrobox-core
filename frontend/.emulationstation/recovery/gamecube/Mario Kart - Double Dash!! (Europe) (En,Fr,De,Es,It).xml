@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<gameList parentHash="71500">
+	<game id="4754">
+		<path>./Mario Kart - Double Dash!! (Europe) (En,Fr,De,Es,It).rvz</path>
+		<name>Mario Kart : Double Dash!!</name>
+		<desc>Al igual que en títulos anteriores, Double Dash!! incorpora personajes de la franquicia de Mario y los enfrenta unos contra otros mientras que compiten en diferentes pistas con temática de Mario. El juego introduce una serie de nuevas características de juego, sobre todo la inclusión de dos pilotos por kart. Hay 20 personajes para elegir en total, once de ellos siendo nuevos en la serie. Un objeto especial para cada personaje también ha sido implementado.
+
+Es el cuarto juego de la serie Mario Kart y el tercero para una videoconsola de sobremesa después de Mario Kart 64. Todos los circuitos del juego son nuevos con respecto a sus predecesores.</desc>
+		<genre>Carreras, Conducción</genre>
+		<image>./images/Mario Kart - Double Dash!! (Europe) (En,Fr,De,Es,It)-image.png</image>
+		<video>./videos/Mario Kart - Double Dash!! (Europe) (En,Fr,De,Es,It)-video.mp4</video>
+		<marquee>./images/Mario Kart - Double Dash!! (Europe) (En,Fr,De,Es,It)-marquee.png</marquee>
+		<thumbnail>./images/Mario Kart - Double Dash!! (Europe) (En,Fr,De,Es,It)-thumb.png</thumbnail>
+		<manual>./manuals/Mario Kart - Double Dash!! (Europe) (En,Fr,De,Es,It)-manual.pdf</manual>
+		<rating>0.9</rating>
+		<releasedate>20031114T000000</releasedate>
+		<developer>Nintendo EAD</developer>
+		<publisher>Nintendo</publisher>
+		<family>Mario Kart</family>
+		<players>1-4</players>
+		<playcount>27</playcount>
+		<lastplayed>20260524T232623</lastplayed>
+		<gametime>4765</gametime>
+		<lang>it,es,de,fr,en</lang>
+		<region>eu</region>
+		<scrap name="ScreenScraper" date="20260315T135229" />
+	</game>
+</gameList>

@@ -7,6 +7,4 @@ else
     export DISPLAY=$(getLocalXDisplay)
 fi
 
-"${USERDATA}/resources/emulatorlauncher/emulatorlauncher.sh" -system model2 -rom config
-
-exit 0
+exec "${USERDATA}/resources/emulatorlauncher/emulatorlauncher.sh" -system model2 -rom config

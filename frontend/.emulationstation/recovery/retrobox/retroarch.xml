@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<gameList parentHash="40466">
+	<game>
+		<path>./retroarch.menu</path>
+		<name>RetroArch (Multi Cores Emulator)</name>
+		<desc>Run RetroArch (Multi Cores Emulator).</desc>
+		<genre>Emulator</genre>
+		<image>./media/retroarch-logo.png</image>
+		<marquee>./media/retroarch-logo.png</marquee>
+		<rating>0</rating>
+		<developer>Libretro Team</developer>
+		<publisher>Libretro Team</publisher>
+		<playcount>6</playcount>
+		<lastplayed>20260524T213456</lastplayed>
+		<gametime>519</gametime>
+		<lang>en</lang>
+		<region>wr</region>
+	</game>
+</gameList>

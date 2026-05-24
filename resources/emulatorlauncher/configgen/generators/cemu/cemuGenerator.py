@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, cast
 from xml.dom import minidom
 
 from ... import Command
-from ...batoceraPaths import _SYSTEM_LOCAL_BIN, _XDG_CONFIG, CONFIGS, SAVES, configure_emulator, mkdir_if_not_exists
+from ...batoceraPaths import _SYSTEM_LOCAL_BIN, CONFIGS, SAVES, configure_emulator, mkdir_if_not_exists
 from ...controller import generate_sdl_game_controller_config
 from ...utils import vulkan
 from ..Generator import Generator

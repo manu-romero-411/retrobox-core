@@ -220,15 +220,15 @@ __marimo__/
 .streamlit/secrets.toml
 
 # otros directorios y archivos
-.emulationstation/music/
-.emulationstation/music/*
-.emulationstation/themes/
-.emulationstation/themes/*
-.emulationstation/tmp/
-.emulationstation/tmp/*
-.emulationstation/es_log.*
-.emulationstation/es_settings.*
-.emulationstation/es_*input*
+frontend/.emulationstation/music/
+frontend/.emulationstation/music/*
+frontend/.emulationstation/themes/
+frontend/.emulationstation/themes/*
+frontend/.emulationstation/tmp/
+frontend/.emulationstation/tmp/*
+frontend/.emulationstation/es_log.*
+frontend/.emulationstation/es_settings.*
+frontend/.emulationstation/es_*input*
 
 bios/
 bios/*
@@ -238,8 +238,13 @@ decorations/
 decorations/*
 emuconfigs/
 emuconfigs/*
-emulationstation/
-emulationstation/*
+frontend/locale/
+frontend/locale/*
+frontend/resources/
+frontend/resources/*
+frontend/share/
+frontend/share/*
+frontend/emulationstation
 logs/
 logs/*
 music/

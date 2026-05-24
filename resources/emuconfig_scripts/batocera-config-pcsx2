@@ -3,11 +3,8 @@
 # when the program is called from a non X environment, handle the mouse
 # maybe an other choice is better
 
-if test -z "${DISPLAY}"
-then
+if test -z "${DISPLAY}"; then
     export DISPLAY=$(getLocalXDisplay)
 fi
 
-export XDG_CONFIG_HOME="${USERDATA}/configs"
-
-/usr/local/bin/pcsx2
+exec "${USERDATA}/resources/emulatorlauncher/emulatorlauncher.sh" -system ps2 -emulator pcsx2 -rom config

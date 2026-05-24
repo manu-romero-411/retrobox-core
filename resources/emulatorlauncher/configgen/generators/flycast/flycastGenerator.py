@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 from configgen.controllersConfig import _logger
 
 from ... import Command
-from ...batoceraPaths import _SYSTEM_LOCAL_BIN, CONFIGS, ensure_parents_and_open, mkdir_if_not_exists
+from ...batoceraPaths import _SYSTEM_LOCAL_BIN, CONFIGS, configure_emulator, ensure_parents_and_open, mkdir_if_not_exists
 from ...controller import generate_sdl_game_controller_config
 from ...utils.configparser import CaseSensitiveConfigParser
 from ..Generator import Generator
@@ -187,8 +187,13 @@ class FlycastGenerator(Generator):
             except FileNotFoundError:
                 pass
 
+        commandArray = []
         # the command to run
-        commandArray = [f'{_SYSTEM_LOCAL_BIN}/flycast', rom]
+        if configure_emulator(rom):
+            commandArray.extend([f'{_SYSTEM_LOCAL_BIN}/flycast', rom])
+        else:
+            commandArray.extend([f'{_SYSTEM_LOCAL_BIN}/flycast'])
+        
         # Here is the trick to make flycast find files :
         # emu.cfg is in $XDG_CONFIG_DIRS or $XDG_CONFIG_HOME.
         # VMU will be in $XDG_DATA_HOME / $FLYCAST_DATADIR because it needs rw access -> /userdata/saves/dreamcast

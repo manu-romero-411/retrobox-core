@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import csv
+from ctypes import CDLL
+from ctypes.util import find_library
+import glob
 import logging
 import re
 import subprocess
@@ -248,3 +251,32 @@ def getAltDecoration(systemName: str, rom: str | Path, emulator: str) -> str:
                 return str(row[1])
 
     return "0"
+
+def supportsVulkan() -> bool:
+    # 1. Filtro rápido: ¿Está el loader en el sistema?
+    lib_path = find_library("vulkan")
+    if not lib_path:
+        return False
+
+    # 2. Comprobación real: ¿Se puede cargar y responde a la API básica?
+    try:
+        vulkan_lib = CDLL(lib_path)
+        # vkCreateInstance es el punto de entrada obligatorio de cualquier app Vulkan
+        if hasattr(vulkan_lib, "vkCreateInstance"):
+            return True
+    except Exception:
+        pass
+
+    # 3. Fallback estático: Buscar manifiestos ICD (Drivers de proveedores)
+    # Usamos glob para evitar bucles anidados con os.listdir
+    icd_patterns = [
+        "/usr/share/vulkan/icd.d/*.json",
+        "/etc/vulkan/icd.d/*.json",
+        "/usr/local/share/vulkan/icd.d/*.json"
+    ]
+    
+    for pattern in icd_patterns:
+        if glob.glob(pattern):
+            return True
+
+    return False

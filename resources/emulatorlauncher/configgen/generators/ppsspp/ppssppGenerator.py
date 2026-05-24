@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from ... import Command
-from ...batoceraPaths import CONFIGS, SAVES
+from ...batoceraPaths import CONFIGS, SAVES, configure_emulator
 from ...controller import Controller, generate_sdl_game_controller_config
 from ..Generator import Generator
 from . import ppssppConfig, ppssppControllers
@@ -36,7 +36,11 @@ class PPSSPPGenerator(Generator):
             ppssppControllers.generateControllerConfig(controller)
 
         # The command to run
-        commandArray = [PPSSPP_BIN, rom, '--fullscreen']
+        commandArray = []
+        if configure_emulator(rom):
+            commandArray.extend([PPSSPP_BIN, rom, '--fullscreen'])
+        else:
+            commandArray.extend([PPSSPP_BIN])
 
         # Adapt the menu size to low defenition
         # I've played with this option on PC to fix menu size in Hi-Resolution and it not working fine. I'm almost sure this option break the emulator (Darknior)

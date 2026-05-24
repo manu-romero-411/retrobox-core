@@ -1,49 +1,35 @@
 # edenPaths.py
 import os
 from pathlib import Path
-from configgen.batoceraPaths import BIOS, CONFIGS, ROMS, SAVES, _XDG_DATA, mkdir_if_not_exists
+from typing import Final
+from configgen.batoceraPaths import _SYSTEM_LOCAL_BIN, BIOS, CONFIGS, ROMS, SAVES, _XDG_DATA, ensure_symlink, mkdir_if_not_exists
 
-# --- Definición de Rutas Base ---
-SWITCH_BIOS = os.path.join(BIOS, "switch")
-SWITCH_KEYS = os.path.join(SWITCH_BIOS, "keys")
-SWITCH_FIRMWARE = os.path.join(SWITCH_BIOS, "firmware")
+# --- Base ---
+SWITCH_BIOS: Final = BIOS / "switch"
+SWITCH_KEYS: Final = SWITCH_BIOS / "keys"
+SWITCH_FIRMWARE: Final = SWITCH_BIOS / "firmware"
 
-EDEN_DATA = os.path.join(_XDG_DATA, "eden")
-EDEN_KEYS = os.path.join(EDEN_DATA, "keys")
-EDEN_REGISTERED = os.path.join(EDEN_DATA, "nand/system/Contents/registered")
+EDEN_BIN: Final = _SYSTEM_LOCAL_BIN / "eden-emu"
+EDEN_DATA: Final = SAVES / "switch" / "eden"
+EDEN_KEYS: Final = EDEN_DATA / "keys"
+EDEN_REGISTERED: Final = EDEN_DATA / "nand/system/Contents/registered"
 
-UPDATE_DIR = os.path.join(ROMS, "switch_update")
-DLC_DIR = os.path.join(UPDATE_DIR, "dlc")
-UPDATES_DIR = os.path.join(UPDATE_DIR, "update")
-SWITCH_ROMS = os.path.join(ROMS, "switch")
+SWITCH_UPDATE_DIR: Final = ROMS / "switch_update"
+SWITCH_DLC_DIR: Final = SWITCH_UPDATE_DIR / "dlc"
+SWITCH_UPDATES_DIR: Final = SWITCH_UPDATE_DIR / "update"
+SWITCH_ROMS: Final = ROMS / "switch"
+SWITCH_MODS_DIR: Final = SWITCH_UPDATE_DIR / "mods"
 
-# Rutas de Guardado y Mods
-SAVE_BASE = os.path.join(SAVES, "switch/eden_citron")
-USER_SAVE_TARGET = os.path.join(SAVE_BASE, "save/save_user")
-SYSTEM_SAVE_TARGET = os.path.join(SAVE_BASE, "save/save_system")
-MODS_TARGET = os.path.join(SAVE_BASE, "mods")
+# Saves
+SAVE_BASE: Final = EDEN_DATA
+USER_SAVE_TARGET: Final = SAVE_BASE / "save/save_user"
+SYSTEM_SAVE_TARGET: Final = SAVE_BASE / "save/save_system"
 
-EDEN_USER_SAVE_LINK = os.path.join(EDEN_DATA, "nand/user/save")
-EDEN_SYSTEM_SAVE_LINK = os.path.join(EDEN_DATA, "nand/system/save")
-EDEN_MODS_LINK = os.path.join(EDEN_DATA, "load")
+EDEN_USER_SAVE_LINK: Final = EDEN_DATA / "nand/user/save"
+EDEN_SYSTEM_SAVE_LINK: Final = EDEN_DATA / "nand/system/save"
+EDEN_MODS_LINK: Final = EDEN_DATA / "load"
 
-YUZU_CONFIG_FILE = os.path.join(CONFIGS, 'yuzu/qt-config.ini')
-
-def ensure_symlink(target, link_path):
-    """Crea o actualiza un enlace simbólico de forma segura."""
-    import shutil
-    if os.path.exists(link_path):
-        if not os.path.islink(link_path):
-            shutil.rmtree(link_path)
-            os.symlink(target, link_path)
-        else:
-            if os.readlink(link_path) != target:
-                os.unlink(link_path)
-                os.symlink(target, link_path)
-    else:
-        # Asegurar que el directorio padre del enlace existe
-        os.makedirs(os.path.dirname(link_path), exist_ok=True)
-        os.symlink(target, link_path)
+YUZU_CONFIG_FILE: Final = CONFIGS / "yuzu/qt-config.ini"
 
 def setup_eden_environments():
     """Inicializa todos los directorios requeridos y enlaces simbólicos."""
@@ -51,8 +37,8 @@ def setup_eden_environments():
     dirs_to_create = [
         SWITCH_BIOS, SWITCH_KEYS, SWITCH_FIRMWARE,
         EDEN_DATA, os.path.join(EDEN_DATA, "nand/system/Contents"),
-        UPDATE_DIR, DLC_DIR, UPDATES_DIR, SWITCH_ROMS,
-        USER_SAVE_TARGET, SYSTEM_SAVE_TARGET, MODS_TARGET
+        SWITCH_UPDATE_DIR, SWITCH_DLC_DIR, SWITCH_UPDATES_DIR, SWITCH_ROMS,
+        USER_SAVE_TARGET, SYSTEM_SAVE_TARGET, SWITCH_MODS_DIR
     ]
     
     for d in dirs_to_create:
@@ -63,4 +49,4 @@ def setup_eden_environments():
     ensure_symlink(SWITCH_FIRMWARE, EDEN_REGISTERED)
     ensure_symlink(USER_SAVE_TARGET, EDEN_USER_SAVE_LINK)
     ensure_symlink(SYSTEM_SAVE_TARGET, EDEN_SYSTEM_SAVE_LINK)
-    ensure_symlink(MODS_TARGET, EDEN_MODS_LINK)
+    ensure_symlink(SWITCH_MODS_DIR, EDEN_MODS_LINK)

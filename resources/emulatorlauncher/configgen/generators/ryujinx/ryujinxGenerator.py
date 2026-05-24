@@ -16,18 +16,21 @@ from shutil import copyfile
 from pathlib import Path
 from typing import TYPE_CHECKING
 from configgen import Command as Command
-from configgen.batoceraPaths import _SYSTEM_LOCAL_BIN, CONFIGS, DEFAULTS_DIR, ROMS, SAVES, BATOCERA_SHARE_DIR, mkdir_if_not_exists
+from configgen.batoceraPaths import _SYSTEM_LOCAL_BIN, CONFIGS, DEFAULTS_DIR, ROMS, SAVES, configure_emulator, ensure_symlink, mkdir_if_not_exists
 from configgen.controller import generate_sdl_game_controller_config
 from configgen.generators.Generator import Generator
-from configgen.utils.configparser import CaseSensitiveRawConfigParser
-from configgen.input import Input, InputDict, InputMapping
+from configgen.generators.eden.edenPaths import SWITCH_FIRMWARE, SWITCH_KEYS, SWITCH_MODS_DIR, SWITCH_ROMS
+from configgen.generators.ryujinx.ryujinxPaths import RYUJINX_BIS, RYUJINX_CONFIG, RYUJINX_CONFIG_FILE, RYUJINX_CONFIG_FILE_BFR, RYUJINX_CONFIG_FILE_TPL, RYUJINX_MODS_LINK, RYUJINX_SAVE_BASE, RYUJINX_SYSTEM_CONFIG_DIR, RYUJINX_SYSTEM_DIR, RYUJINX_USER_DIR, RYUJINX_SYSTEM_SAVES, RYUJINX_USER_SAVES
+from configgen.input import Input
+import hashlib
 
-os.environ["PYSDL2_DLL_PATH"] = f"{BATOCERA_SHARE_DIR}/switch_sdl2/"
+#os.environ["PYSDL2_DLL_PATH"] = f"{BATOCERA_SHARE_DIR}/switch_sdl2/"
 #os.environ["PATH"] = "/userdata/system/switch/extra/xdgfix:" + os.environ.get("PATH", "")
 
 import sdl2
 from sdl2 import joystick
 from ctypes import create_string_buffer
+
 
 eslog = logging.getLogger(__name__)
 
@@ -36,12 +39,54 @@ if TYPE_CHECKING:
 
 #subprocess.run(["batocera-mouse", "show"], check=False)
 
-try:
-    # exécute le script et attend la fin
-    subprocess.Popen([f"{DEFAULTS_DIR}/data/switch/ryujinxloadfirmware.sh"], stderr=subprocess.PIPE, shell=True)
-    print("[RYUJINX] Script Bash exécuté avec succès", file=sys.stderr)
-except subprocess.CalledProcessError as e:
-    print("[RYUJINX][ERROR] Le script Bash a échoué :", file=sys.stderr)
+# copiar todo lo de una carpeta a otra (sincronizar .keys)
+def sync_keys(src_dir: Path, dst_dir: Path):
+    if not src_dir.is_dir():
+        return
+
+    dst_dir.mkdir(parents=True, exist_ok=True)
+
+    for f in src_dir.iterdir():
+        if f.is_file():
+            shutil.copy2(f, dst_dir / f.name)
+
+# calcular el checksum de todo un directorio - para ver integridad de firmware
+def compute_dir_checksum(path: Path) -> str:
+    files = sorted(p for p in path.rglob("*") if p.is_file())
+    h = hashlib.sha256()
+
+    for f in files:
+        h.update(f.read_bytes())
+
+    return h.hexdigest()
+
+# sincronizar firmware de la carpeta bios con lo que necesita ryujinx (carpetas con 00)
+def sync_firmware(src: Path, registered: Path, checksum_file: Path):
+    if not src.is_dir():
+        return
+
+    new_checksum = compute_dir_checksum(src)
+
+    old_checksum = None
+    if checksum_file.exists():
+        old_checksum = checksum_file.read_text().strip()
+
+    if new_checksum == old_checksum:
+        return  # nada que hacer
+
+    # rebuild
+    if registered.exists():
+        shutil.rmtree(registered)
+
+    registered.mkdir(parents=True, exist_ok=True)
+
+    for f in src.glob("*.nca"):
+        dst_dir = registered / f.name
+        dst_dir.mkdir()
+        shutil.copy2(f, dst_dir / "00")
+
+    checksum_file.parent.mkdir(parents=True, exist_ok=True)
+    checksum_file.write_text(new_checksum)
 
 def getCurrentCard() -> str | None:
     proc = subprocess.Popen([f"{DEFAULTS_DIR}/data/switch/detectvideo.sh"], stdout=subprocess.PIPE, shell=True)
@@ -49,17 +94,6 @@ def getCurrentCard() -> str | None:
     for val in out.decode().splitlines():
         return val # return the first line
 
-def ensure_symlink(target, link_path):
-    if os.path.exists(link_path):
-        if not os.path.islink(link_path):
-            shutil.rmtree(link_path)
-            os.symlink(target, link_path)
-        else:
-            if os.readlink(link_path) != target:
-                os.unlink(link_path)
-                os.symlink(target, link_path)
-    else:
-        os.symlink(target, link_path)
 def sdlmapping_to_controller(mapping, guid):
 
     sdl_to_batoinputmapping = {
@@ -269,82 +303,45 @@ class RyujinxGenerator(Generator):
 
     def generate(self, system, rom, playersControllers, metadata, guns, wheels, gameResolution):
         eslog.warning("DEBUG: generate() llamado, emulator=%s", system.config['emulator'])
-        st = os.stat(f"{DEFAULTS_DIR}/data/switch/detectvideo.sh")
-        os.chmod(f"{DEFAULTS_DIR}/data/switch/detectvideo.sh", st.st_mode | stat.S_IEXEC)
+        script = DEFAULTS_DIR / "data/switch/detectvideo.sh"
+        st = script.stat()
+        script.chmod(st.st_mode | stat.S_IEXEC)
 
-        mkdir_if_not_exists(Path(f"{CONFIGS}/Ryujinx"))
-        # mkdir_if_not_exists(Path(f"{CONFIGS}/Ryujinx/system"))
+        mkdir_if_not_exists(RYUJINX_CONFIG)
 
-        template = Path(f"{DEFAULTS_DIR}/data/switch/Config.json.template")
-        target = CONFIGS / "Ryujinx" / "Config.json.template"
-        copyfile(template, target) 
+        copyfile(RYUJINX_CONFIG_FILE_TPL, RYUJINX_CONFIG_FILE)
 
-    #Create Folder
-        mkdir_if_not_exists(Path(f"{CONFIGS}/Ryujinx/mods"))
-        mkdir_if_not_exists(Path(f"{CONFIGS}/Ryujinx/bis"))
-        mkdir_if_not_exists(Path(f"{CONFIGS}/Ryujinx/bis/system"))
-        mkdir_if_not_exists(Path(f"{CONFIGS}/Ryujinx/bis/system/save"))
-        mkdir_if_not_exists(Path(f"{CONFIGS}/Ryujinx/bis/system/Contents"))
-        mkdir_if_not_exists(Path(f"{CONFIGS}/Ryujinx/bis/user"))
-        mkdir_if_not_exists(Path(f"{SAVES}/switch"))
-        mkdir_if_not_exists(Path(f"{SAVES}/switch/ryujinx"))
-        mkdir_if_not_exists(Path(f"{SAVES}/switch/ryujinx/save"))
-        mkdir_if_not_exists(Path(f"{SAVES}/switch/ryujinx/save/save_user"))
-        mkdir_if_not_exists(Path(f"{SAVES}/switch/ryujinx/save/save_system"))
-        mkdir_if_not_exists(Path(f"{SAVES}/switch/ryujinx/mods"))
+        # Crear estructura base
+        mkdir_if_not_exists(RYUJINX_BIS)
+        mkdir_if_not_exists(RYUJINX_BIS / "system/Contents")
 
-        #Link Ryujinx User save/mods folder (bis/user)/(bis/system/save)
-        # #USER SAVE (bis/user)-------
-        if os.path.exists(f"{CONFIGS}/Ryujinx/bis/user"):
-            if not os.path.islink(f"{CONFIGS}/Ryujinx/bis/user"):
-                shutil.rmtree(f"{CONFIGS}/Ryujinx/bis/user")
-                os.symlink(f"{SAVES}/switch/ryujinx/save/save_user", f"{CONFIGS}/Ryujinx/bis/user")
-            else:
-                current_target = os.readlink(f"{CONFIGS}/Ryujinx/bis/user")
-                if current_target != f"{SAVES}/switch/ryujinx/save/save_user":
-                    os.unlink(f"{SAVES}/switch/ryujinx/save/save_user")
-                    os.symlink(f"{SAVES}/switch/ryujinx/save/save_user", f"{CONFIGS}/Ryujinx/bis/user")
-        else:
-            os.symlink(f"{SAVES}/switch/ryujinx/save/save_user", f"{CONFIGS}/Ryujinx/bis/user")
+        # Firmware + keys
+        sync_keys(SWITCH_KEYS, RYUJINX_SYSTEM_CONFIG_DIR)
 
-        # #USER SAVE (bis/system/save)-------
-        if os.path.exists(f"{CONFIGS}/Ryujinx/bis/system/save"):
-            if not os.path.islink(f"{CONFIGS}/Ryujinx/bis/system/save"):
-                shutil.rmtree(f"{CONFIGS}/Ryujinx/bis/system/save")
-                os.symlink(f"{SAVES}/switch/ryujinx/save/save_system", f"{CONFIGS}/Ryujinx/bis/system/save")
-            else:
-                current_target = os.readlink(f"{CONFIGS}/Ryujinx/bis/system/save")
-                if current_target != f"{SAVES}/switch/ryujinx/save/save_system":
-                    os.unlink(f"{SAVES}/switch/ryujinx/save/save_system")
-                    os.symlink(f"{SAVES}/switch/ryujinx/save/save_system", f"{CONFIGS}/Ryujinx/bis/system/save")
-        else:
-            os.symlink(f"{SAVES}/switch/ryujinx/save/save_system", f"{CONFIGS}/Ryujinx/bis/system/save")
+        sync_firmware(
+            SWITCH_FIRMWARE,
+            RYUJINX_SYSTEM_DIR / "Contents/registered",
+            RYUJINX_CONFIG / "checksum_firmware.txt"
+)        
+        # Saves base
+        mkdir_if_not_exists(RYUJINX_SAVE_BASE)
 
-        # #USER MODS (Ryujinx/mods)-------
-        if os.path.exists(f"{CONFIGS}/Ryujinx/mods"):
-            if not os.path.islink(f"{CONFIGS}/Ryujinx/mods"):
-                shutil.rmtree(f"{CONFIGS}/Ryujinx/mods")
-                os.symlink(f"{SAVES}/switch/ryujinx/mods", f"{CONFIGS}/Ryujinx/mods")
-            else:
-                current_target = os.readlink(f"{CONFIGS}/Ryujinx/mods")
-                if current_target != f"{SAVES}/switch/ryujinx/mods":
-                    os.unlink(f"{SAVES}/switch/ryujinx/mods")
-                    os.symlink(f"{SAVES}/switch/ryujinx/mods", f"{CONFIGS}/Ryujinx/mods")
-        else:
-            os.symlink(f"{SAVES}/switch/ryujinx/mods", f"{CONFIGS}/Ryujinx/mods")
+        # USER SAVE
+        mkdir_if_not_exists(RYUJINX_USER_SAVES)
+        ensure_symlink(RYUJINX_USER_SAVES, RYUJINX_USER_DIR)
 
-        RyujinxConfig = Path(f'{CONFIGS}/Ryujinx/Config.json')
-        RyujinxConfigTemplate = str(CONFIGS) + '/Ryujinx/Config.json.template'
-        RyujinxHome = CONFIGS
+        # SYSTEM SAVE
+        mkdir_if_not_exists(RYUJINX_SYSTEM_SAVES)
+        ensure_symlink(RYUJINX_SYSTEM_SAVES, RYUJINX_SYSTEM_DIR / "save")
 
-        RyujinxConfigFileBefore = str(CONFIGS) + '/Ryujinx/Config.json.before'
-
-        RyujinxRegisteredBios = Path(f'{CONFIGS}/Ryujinx/bis/system/Contents/registered')
+        # MODS
+        mkdir_if_not_exists(SWITCH_MODS_DIR)
+        ensure_symlink(SWITCH_MODS_DIR, RYUJINX_MODS_LINK)
 
         writelog("Controller mapping before: {}".format(generate_sdl_game_controller_config(playersControllers)))
 
         #Configuration update
-        sdl_mapping = RyujinxGenerator.writeRyujinxConfig(str(CONFIGS) + '/Ryujinx/Config.json', RyujinxConfigFileBefore, RyujinxConfigTemplate, system, playersControllers)
+        sdl_mapping = RyujinxGenerator.writeRyujinxConfig(f"{RYUJINX_CONFIG_FILE}", f"{RYUJINX_CONFIG_FILE_BFR}", f"{RYUJINX_CONFIG_FILE_TPL}", system, playersControllers)
 
         writelog("Controller mapping after: {}".format(str(sdl_mapping)))
 
@@ -358,14 +355,13 @@ class RyujinxGenerator(Generator):
                         "SDL_GAMECONTROLLERCONFIG": sdl_mapping,
                         "DOTNET_EnableAlternateStackCheck":"1",
                         "XDG_CONFIG_HOME":f"{CONFIGS}",
-                        #"XDG_DATA_HOME":f"{SAVES}",
+                        "XDG_DATA_HOME":f"{SAVES}",
         }
 
-        rom_nameq = os.path.basename(rom)
-        if rom_nameq == 'ryujinx_config.xci_config':
-            commandArray = [f"{_SYSTEM_LOCAL_BIN}/ryujinx"]
-        else:
-            commandArray = [f"{_SYSTEM_LOCAL_BIN}/ryujinx", rom]
+        commandArray = []
+        commandArray.extend([f"{_SYSTEM_LOCAL_BIN}/ryujinx"])
+        if not configure_emulator(rom):
+            commandArray.extend([rom])
 
         return Command.Command(array=commandArray, env=environment)
 
@@ -388,14 +384,14 @@ class RyujinxGenerator(Generator):
         writelog(RyujinxConfigTemplateFile)
         data = {}
 
-        if os.path.exists(f"{CONFIGS}/Ryujinx/Config.json.template"):
-            with open(f"{CONFIGS}/Ryujinx/Config.json.template", "r+") as read_file:
+        if os.path.exists(f"{RYUJINX_CONFIG_FILE_TPL}"):
+            with open(f"{RYUJINX_CONFIG_FILE_TPL}", "r+") as read_file:
                 data = json.load(read_file)
 
         # if manual controller configuration, keep current config
         if system.isOptSet('ryu_auto_controller_config') and system.config["ryu_auto_controller_config"] == "0":
-            if os.path.exists(f"{CONFIGS}/Ryujinx/Config.json"):
-                with open(f"{CONFIGS}/Ryujinx/Config.json", "r+") as read_file:
+            if os.path.exists(f"{RYUJINX_CONFIG_FILE}"):
+                with open(f"{RYUJINX_CONFIG_FILE}", "r+") as read_file:
                     current_data = json.load(read_file)
                     data['input_config'] = current_data['input_config']
 
@@ -441,7 +437,7 @@ class RyujinxGenerator(Generator):
             data['graphics_backend'] = 'Vulkan'
 
         data['language_code'] = str(getLangFromEnvironment())
-        data['game_dirs'] = [f"{ROMS}/switch"]
+        data['game_dirs'] = [f"{SWITCH_ROMS}"]
 
         sdl_mapping = generate_sdl_game_controller_config(playersControllers)
 

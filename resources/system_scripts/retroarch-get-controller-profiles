@@ -1,0 +1,65 @@
+#!/bin/bash
+
+# =============================================================================
+# CONFIGURACIÓN DE RUTAS
+# =============================================================================
+RA_AUTOCONFIG_DIR="$HOME/.config/retroarch/autoconfig"
+DEST_HARDWARE_DIR="${USERDATA}/emuconfigs/retroarch/autoconfig"
+
+# Validar que exista el directorio origen
+if [ ! -d "$RA_AUTOCONFIG_DIR" ]; then
+    echo "[-] Error: No existe el directorio de autoconfig nativo en $RA_AUTOCONFIG_DIR"
+    exit 1
+fi
+
+# Asegurar que el directorio destino de hardware exista
+mkdir -p "$DEST_HARDWARE_DIR"
+
+echo "=== INICIANDO AUTOMATIZACIÓN DE PERFILES POR HARDWARE ==="
+echo "Buscando perfiles en: $RA_AUTOCONFIG_DIR"
+echo "Destino de guardado:  $DEST_HARDWARE_DIR"
+echo "-------------------------------------------------------"
+
+cd "$RA_AUTOCONFIG_DIR" || exit 1
+shopt -s nullglob
+cfg_files=( *.cfg )
+
+if [ ${#cfg_files[@]} -eq 0 ]; then
+    echo "[-] No se encontraron ficheros .cfg en $RA_AUTOCONFIG_DIR"
+    exit 1
+fi
+
+# =============================================================================
+# PROCESAMIENTO AUTOMÁTICO
+# =============================================================================
+for file in "${cfg_files[@]}"; do
+    # Extraer Vendor y Product ID del contenido del .cfg (vienen en formato: input_vendor_id = "XXXX")
+    # Limpiamos comillas, espacios y posibles retornos de carro de Windows (\r)
+    v_id=$(grep -i "input_vendor_id" "$file" | sed -E 's/.*=[[:space:]]*"?([0-9]+)"?.*/\1/' | tr -d '\r')
+    p_id=$(grep -i "input_product_id" "$file" | sed -E 's/.*=[[:space:]]*"?([0-9]+)"?.*/\1/' | tr -d '\r')
+    display_name=$(grep -i "input_device" "$file" | head -n 1 | sed -E 's/.*=[[:space:]]*"?([^"]*)"?.*/\1/' | tr -d '\r')
+
+    # Si el archivo de RetroArch no contiene estos IDs, no podemos automatizarlo por hardware
+    if [ -z "$v_id" ] || [ -z "$p_id" ]; then
+        echo "[Pasadlo] Fichero '$file' no contiene input_vendor_id o input_product_id. Saltando."
+        continue
+    fi
+
+    # Nombre del archivo destino unívoco en formato decimal (ej: 1406-8201.cfg)
+    dest_file="$DEST_HARDWARE_DIR/${v_id}-${p_id}.cfg"
+
+    echo "[+] Procesando: $display_name ($file)"
+    echo "    -> Identificado Hardware: Vendor=$v_id, Product=$p_id"
+    
+    # Escribimos el nuevo archivo limpio en la carpeta de hardware de tu mini-batocera
+    echo "# Perfil de hardware automatizado para: $display_name" > "$dest_file"
+    echo "# ID de búsqueda: ${v_id}-${p_id}" >> "$dest_file"
+    
+    # Volcamos el contenido original quitándole líneas redundantes de comentarios previos si las hubiera
+    grep -v "^#" "$file" >> "$dest_file"
+
+    echo "    [OK] Guardado de forma unívoca en: $dest_file"
+done
+
+echo "-------------------------------------------------------"
+echo "=== PROCESO FINALIZADO CON ÉXITO ==="

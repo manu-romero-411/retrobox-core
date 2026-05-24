@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 from xml.dom import minidom
 
-from ...batoceraPaths import BIOS, CONFIGS, DEFAULTS_DIR, MAME_ARTWORK_DIR, MAME_SOFTWARE_DIR, ROMS, SAVES, USER_DECORATIONS, mkdir_if_not_exists
+from ...batoceraPaths import BIOS, CMDFILES_DIR, CONFIGS, DEFAULTS_DIR, MAME_ARTWORK_DIR, MAME_SOFTWARE_DIR, ROMS, SAVES, USER_DECORATIONS, mkdir_if_not_exists
 from ..mame.mameCommon import is_atom_floppy
 
 if TYPE_CHECKING:

@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, NotRequired, TypedDict, cast
 
 from ... import controllersConfig
-from ...batoceraPaths import DEFAULTS_DIR, ES_GAMES_METADATA, SAVES, mkdir_if_not_exists, USERDATA
+from ...batoceraPaths import DEFAULTS_DIR, ES_GAMES_METADATA, SAVES, SHADER_BEZELS_DIR, mkdir_if_not_exists, USERDATA
 from ...controller import Controller
 from ...settings.unixSettings import UnixSettings
 from ...utils import bezels as bezelsUtil, esSettings, metadata as metadataUtils, videoMode, vulkan

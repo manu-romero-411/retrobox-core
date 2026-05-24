@@ -1,6 +1,12 @@
 from __future__ import annotations
 
+from glob import glob
+import os
+from pathlib import Path
 from typing import TYPE_CHECKING, Literal
+
+from configgen.controller import getJoystickHardwareIds
+from configgen.generators.libretro.libretroPaths import RETROARCH_CONFIG
 
 from ...controllersConfig import getAssociatedMouse, getDevicesInformation
 
@@ -10,6 +16,7 @@ if TYPE_CHECKING:
     from ...Emulator import Emulator
     from ...input import Input
     from ...settings.unixSettings import UnixSettings
+
 
 # Map an emulationstation direction to the corresponding retroarch
 retroarchdirs = {'up': 'up', 'down': 'down', 'left': 'left', 'right': 'right'}
@@ -48,10 +55,44 @@ def writeControllersConfig(
     retroconfig.save('input_ai_service',          '"f9"')
     retroconfig.save('input_reset',               '"f10"')
     retroconfig.save('input_rewind',              '"f11"')
-    retroconfig.save('input_hold_fast_forward',   '"f12"')
+
+    # See if FF is toggle or hold
+    ff_action = 'toggle_fast_forward' if (
+        system.isOptSet('toggle_fast_forward')
+        and system.getOptBoolean('toggle_fast_forward')
+    ) else 'hold_fast_forward'
+
+    retroconfig.save(f'input_{ff_action}',        '"f12"')
     retroconfig.save('input_screenshot',          '"nul"')
     retroconfig.save('input_audio_mute',          '"nul"')
     retroconfig.save('input_grab_mouse_toggle',   '"nul"')
+
+    # --- MAPEO ÚNICO RESILIENTE PARA EL DRIVER UDEV ---
+    udev_index_map = {}
+    try:
+        import glob
+        import os
+
+        # Listamos y ordenamos numéricamente los eventX una sola vez
+        event_devices = glob.glob('/dev/input/event*')
+        event_devices.sort(key=lambda x: int(x.split('event')[-1]))
+
+        # Resolvemos las rutas reales de los mandos del sistema que existen físicamente
+        valid_system_paths = []
+        for c in controllers:
+            if c.device_path and os.path.exists(c.device_path):
+                valid_system_paths.append(os.path.realpath(c.device_path))
+
+        # Ordenamos los mandos según su aparición en los nodos del kernel
+        valid_system_paths.sort(key=lambda x: event_devices.index(x) if x in event_devices else 999)
+
+        # Poblamos un diccionario indexando por su ruta real desreferenciada
+        for index, path in enumerate(valid_system_paths):
+            udev_index_map[path] = str(index)
+    except Exception:
+        # Si falla la lectura de I/O, el diccionario se queda vacío y aplicará fallback
+        pass
+    # --------------------------------------------------
 
     for controller in controllers:
         mouseIndex: str | None = None
@@ -60,8 +101,13 @@ def writeControllersConfig(
             mouseIndex = getAssociatedMouse(deviceList, controller.device_path)
         if mouseIndex is None:
             mouseIndex = '0'
-        writeControllerConfig(retroconfig, controller, controller.player_number, system, lightgun, mouseIndex)
-    writeHotKeyConfig(retroconfig, controllers)
+            
+        # Determinamos el joypad_index usando el mapa calculado o fallback del frontend
+        current_real_path = os.path.realpath(controller.device_path) if controller.device_path else ""
+        joypad_index = udev_index_map.get(current_real_path, controller.index)
+
+        # Pasamos directamente el índice resuelto a la función hija
+        writeControllerConfig(retroconfig, controller, controller.player_number, system, joypad_index, lightgun, mouseIndex)    
 
 # Remove all controller configurations
 def cleanControllerConfig(retroconfig: UnixSettings, controllers: Controllers, /) -> None:
@@ -70,31 +116,51 @@ def cleanControllerConfig(retroconfig: UnixSettings, controllers: Controllers, /
     for x in [
             'state_slot_increase',  'load_state',        'save_state',
             'state_slot_decrease',  'reset',             'exit_emulator',
-            'rewind',               'hold_fast_forward', 'screenshot',
-            'disk_prev',            'disk_next',         'disk_eject_toggle',
-            'shader_prev',          'shader_next',       'ai_service',
-            'menu_toggle'
+            'rewind',               'hold_fast_forward', 'toggle_fast_forward',
+            'screenshot',           'disk_prev',         'disk_next',
+            'disk_eject_toggle',    'shader_prev',       'shader_next',
+            'ai_service',           'menu_toggle'
     ]:
         retroconfig.disable_all(f'input_{x}')
 
 # Write the hotkey for player 1
-def _hotkey_save(retroconfig: UnixSettings, key: str, input: Input, /) -> None:
-    """Guarda una hotkey usando el sufijo correcto según el tipo de input."""
-    value = getConfigValue(input)
-    if input.type == 'axis':
-        retroconfig.save(f'{key}_axis', value)
-    else:
-        # button y hat van ambos en _btn (hat usa formato h0up, h0left, etc.)
-        retroconfig.save(f'{key}_btn', value)
+def _hotkey_save(key: str, input_obj: Input, config: dict[str, object] | None = None, /) -> tuple[str, str]:
+    """Devuelve la tupla (clave, valor) con el sufijo correcto buscando en el Plan B o en el objeto Input."""
+    
+    # RAMA PLAN B: Buscamos en las claves que el parseador del archivo ya inyectó en config
+    if config is not None:
+        # Traducimos el nombre genérico de ES (pagedown/pageup) al botón real de RetroArch (r/l)
+        ra_btn = 'r' if input_obj == 'pagedown' else ('l' if input_obj == 'pageup' else input_obj)
+        
+        btn_key = f"input_player1_{ra_btn.name}_btn"
+        axis_key = f"input_player1_{ra_btn.name}_axis"
+        
+        if btn_key in config:
+            return f"{key}_btn", str(config[btn_key])
+        elif axis_key in config:
+            return f"{key}_axis", str(config[axis_key])
+            
+        # Fallback de seguridad: Si por lo que sea no se indexó, devolvemos tupla vacía para no romper
+        return "", ""
 
-def writeHotKeyConfig(retroconfig: UnixSettings, controllers: Controllers, /) -> None:
-    if not controllers:
-        return
-    pad = controllers[0].inputs
-    if 'hotkey' not in pad or pad['hotkey'].type != 'button':
-        return
+    # RAMA PLAN A: Mapeo tradicional por EmulationStation
+    value = getConfigValue(input_obj)
+    suffix = '_axis' if input_obj.type == 'axis' else '_btn'
+    return f'{key}{suffix}', value
 
-    retroconfig.save('input_enable_hotkey_btn', getConfigValue(pad['hotkey']))
+def writeHotKeyConfig(controller: Controller, manual_config: bool, config: dict[str, object] | None = None, /) -> dict[str, str]:
+    """Genera el diccionario de hotkeys desde EmulationStation sin romper bucles."""
+    hotkeys = {}
+    if not controller:
+        return hotkeys
+    
+    pad = controller.inputs
+    chosen_hotkey = pad.get('hotkey') or pad.get('select')
+    if not chosen_hotkey or chosen_hotkey.type != 'button':
+        return hotkeys
+
+    if not manual_config:
+        hotkeys['input_enable_hotkey_btn'] = getConfigValue(chosen_hotkey)
 
     hotkey_map = {
         'start':    'input_exit_emulator',
@@ -106,95 +172,39 @@ def writeHotKeyConfig(retroconfig: UnixSettings, controllers: Controllers, /) ->
         'right':    'input_hold_fast_forward',
         'left':     'input_rewind',
         'up':       'input_disk_eject_toggle',
-        'pagedown': 'input_disk_next',    # R1 en ES = pagedown
-        'pageup':   'input_disk_prev',    # L1 en ES = pageup
+        'pagedown': 'input_disk_next',
+        'pageup':   'input_disk_prev',
     }
 
     for btn, rakey in hotkey_map.items():
         if btn in pad:
-            _hotkey_save(retroconfig, rakey, pad[btn])
+            k, v = _hotkey_save(rakey, pad[btn], config)
+            # Transformamos 'input_exit_emulator_btn' en 'input_player1_exit_emulator_btn'
+            # Cortamos a partir del carácter 6 ('input_') y le metemos el prefijo del player 1
+            hotkeys[k] = v
+            
+    return hotkeys            
 
-# Write a configuration for a specified controller
-# Write a configuration for a specified controller
-# Write a configuration for a specified controller
 # Write a configuration for a specified controller
 def writeControllerConfig(
     retroconfig: UnixSettings,
     controller: Controller,
     playerIndex: int,
     system: Emulator,
+    joypad_index: str,
     lightgun: bool,
     mouseIndex: str,
     /,
 ):
     generatedConfig = generateControllerConfig(controller, system, lightgun, mouseIndex)
+    print(f"[DEBUG5] escribiendo {len(generatedConfig)} claves para player{playerIndex} ({controller.real_name})")
+    print(f"[DEBUG5] joypad_index para retroarch/udev: {joypad_index}")
     for key in generatedConfig:
         retroconfig.save(key, generatedConfig[key])
 
-    # Forzar fallback por defecto: si todo falla, usamos la asignación de EmulationStation
-    joypad_index = controller.index
-    
-    c_guid = getattr(controller, 'guid', '').lower()
-    if len(c_guid) >= 32:
-        try:
-            import os
-            sys_input = "/sys/class/input"
-            if os.path.exists(sys_input):
-                # 1. Extracción segura del Vendor y Product ID del GUID de SDL2
-                # Estructura estándar: bytes 4-5 para Vendor, bytes 8-9 para Product (Little Endian)
-                c_vendor = (c_guid[10:12] + c_guid[8:10]).zfill(4)
-                c_product = (c_guid[18:20] + c_guid[16:18]).zfill(4)
-
-                devices = []
-                for d in os.listdir(sys_input):
-                    if d.startswith("js"):
-                        js_dir = os.path.join(sys_input, d)
-                        v_path = os.path.join(js_dir, "device/id/vendor")
-                        p_path = os.path.join(js_dir, "device/id/product")
-                        
-                        v, p = "", ""
-                        try:
-                            # Lectura aislada: si un nodo falla por permisos, no rompe el bucle
-                            if os.path.exists(v_path):
-                                with open(v_path, 'r') as f:
-                                    v = f.read().strip().lower().lstrip('0x').zfill(4)
-                            if os.path.exists(p_path):
-                                with open(p_path, 'r') as f:
-                                    p = f.read().strip().lower().lstrip('0x').zfill(4)
-                        except (IOError, OSError):
-                            continue
-                        
-                        devices.append({
-                            'node': d,
-                            'real_path': os.path.realpath(js_dir),
-                            'vendor': v,
-                            'product': p
-                        })
-
-                # 2. Replicar la ordenación exacta por hardware de udev (alfabética por sysfs path)
-                devices.sort(key=lambda x: x['real_path'])
-
-                # 3. Filtrar dispositivos del sistema que coinciden con el hardware actual
-                matching_devices = [dev for dev in devices if dev['vendor'] == c_vendor and dev['product'] == c_product]
-
-                if matching_devices:
-                    # Obtener los índices globales que ocupan los mandos que coinciden en el árbol de udev
-                    global_udev_indices = [devices.index(dev) for dev in matching_devices]
-                    
-                    # Control de desempate para mandos idénticos (mismo VID/PID en distintos puertos)
-                    es_idx = int(controller.index) if str(controller.index).isdigit() else 0
-                    match_pos = min(es_idx, len(global_udev_indices) - 1)
-                    
-                    joypad_index = str(global_udev_indices[match_pos])
-
-        except Exception:
-            # Captura de seguridad absoluta: ante cualquier comportamiento imprevisto del entorno,
-            # mantenemos el índice original de ES para asegurar que el juego al menos arranque.
-            joypad_index = controller.index
-
     retroconfig.save(f'input_player{playerIndex}_joypad_index', str(joypad_index))
     retroconfig.save(f'input_player{playerIndex}_analog_dpad_mode', getAnalogMode(controller, system))
-
+    
 # Create a configuration for a given controller
 def generateControllerConfig(
     controller: Controller,
@@ -203,7 +213,60 @@ def generateControllerConfig(
     mouseIndex: str,
     /,
 ) -> dict[str, object]:
-# Map an emulationstation button name to the corresponding retroarch name
+
+    config: dict[str, object] = {}
+    hw_ids = getJoystickHardwareIds(controller.device_path)
+    
+    if hw_ids:
+        vendor_dec, product_dec = hw_ids
+        
+        hw_cfg_name = f"{vendor_dec}-{product_dec}.cfg"
+        hw_cfg_path = RETROARCH_CONFIG / 'autoconfig' / hw_cfg_name
+        
+        if hw_cfg_path.exists():
+            p_num = controller.player_number
+            print(f"[DEBUG_HW] Aplicando perfil {hw_cfg_name} al Player {p_num}")
+            
+            cfg_hotkey = None
+            cfg_select = None
+            
+            try:
+                with open(hw_cfg_path, 'r', encoding='utf-8') as f:
+                    for line in f:
+                        line = line.strip()
+                        if not line or line.startswith(('#', ';')):
+                            continue
+                        if '=' in line:
+                            k, v = line.split('=', 1)
+                            k, v = k.strip(), v.strip()
+                            
+                            if k in ('input_driver', 'input_device', 'input_device_display_name', 'input_vendor_id', 'input_product_id'):
+                                continue
+
+                            if k.startswith('input_'):
+                                # Capturamos los valores limpios que usaremos para la hotkey de respaldo
+                                if k == 'input_enable_hotkey_btn':
+                                    cfg_hotkey = v
+                                elif k == 'input_select_btn':
+                                    cfg_select = v
+                                
+                                suffix = k[6:]
+                                config[f"input_player{p_num}_{suffix}"] = v        
+                
+                # Al salir del archivo, si eres Player 1, metemos la hotkey global de tu .cfg
+                if p_num == 1:
+                    config['input_enable_hotkey_btn'] = cfg_hotkey or cfg_select
+                    config.update(writeHotKeyConfig(controller, True, config))
+
+                if not lightgun:
+                    config[f'input_player{p_num}_mouse_index'] = mouseIndex
+                    
+                return config
+                
+            except Exception as e:
+                print(f"[DEBUG_HW] Falló la lectura del perfil {hw_cfg_name}: {e}") 
+    # Si no detectamos mapping manual de mando, seguimos
+    # Map an emulationstation button name to the corresponding retroarch name
     retroarchbtns = {'a': 'a', 'b': 'b', 'x': 'x', 'y': 'y', \
                      'pageup': 'l', 'pagedown': 'r', 'l2': 'l2', 'r2': 'r2', \
                      'l3': 'l3', 'r3': 'r3', \
@@ -238,7 +301,6 @@ def generateControllerConfig(
         retroarchbtns["pageup"] = "r"
         retroarchbtns["pagedown"] = "l"
 
-    config: dict[str, object] = {}
     # config['input_device'] = '"%s"' % controller.real_name
     for btnkey in retroarchbtns:
         btnvalue = retroarchbtns[btnkey]
@@ -275,22 +337,26 @@ def generateControllerConfig(
                 config[f'input_player{controller.player_number}_{jsvalue}_plus_axis'] = f'-{input.id}'
 
     if not lightgun:
-        # dont touch to it when there are connected lightguns
         config[f'input_player{controller.player_number}_mouse_index'] = mouseIndex
+    
+    # Si entra por aquí (Plan A), mete las hotkeys de EmulationStation
+    if controller.player_number == 1:
+        config.update(writeHotKeyConfig(controller, False))
+        
     return config
 
 # Returns the value to write in retroarch config file, depending on the type
 def getConfigValue(input: Input, /) -> str | None:
     if input.type == 'button':
-        return input.id
+        return f'"{input.id}"'          # <--- Forzamos las comillas aquí
     if input.type == 'axis':
         if input.value == '-1':
-            return f'-{input.id}'
-        return f'+{input.id}'
+            return f'"-{input.id}"'     # <--- Forzamos las comillas aquí
+        return f'"+{input.id}"'         # <--- Forzamos las comillas aquí
     if input.type == 'hat':
-        return f'h{input.id}{hatstoname[input.value]}'
+        return f'"h{input.id}{hatstoname[input.value]}"' # <--- Forzamos las comillas aquí
     if input.type == 'key':
-        return input.id
+        return f'"{input.id}"'          # <--- Forzamos las comillas aquí
     return None
 
 # Return the retroarch analog_dpad_mode

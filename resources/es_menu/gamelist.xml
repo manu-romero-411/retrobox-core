@@ -120,23 +120,6 @@
 		<region>wr</region>
 	</game>
 	<game>
-		<path>./cemu.menu</path>
-		<name>Cemu (Wii U)</name>
-		<desc>Run Cemu Emulator (Wii U).</desc>
-		<image>./media/cemu-logo.png</image>
-		<marquee>./media/cemu-logo.png</marquee>
-		<rating>0</rating>
-		<releasedate />
-		<developer>Cemu Team</developer>
-		<publisher>Cemu Team</publisher>
-		<genre>Emulator</genre>
-		<playcount />
-		<lastplayed />
-		<gametime />
-		<lang>en</lang>
-		<region>wr</region>
-	</game>
-	<game>
 		<path>./cgenius.menu</path>
 		<name>Commander Genius</name>
 		<desc>Run Commander Genius.</desc>
@@ -299,23 +282,6 @@
 		<releasedate />
 		<developer>DOSBox Staging team</developer>
 		<publisher>DOSBox Staging team</publisher>
-		<genre>Emulator</genre>
-		<playcount />
-		<lastplayed />
-		<gametime />
-		<lang>en</lang>
-		<region>wr</region>
-	</game>
-	<game>
-		<path>./eden.menu</path>
-		<name>Eden (Switch)</name>
-		<desc>Run Eden (Switch). This software is not provided by RetroBat.</desc>
-		<image>./media/eden-logo.png</image>
-		<marquee>./media/eden-logo.png</marquee>
-		<rating>0</rating>
-		<releasedate />
-		<developer>The Eden Team</developer>
-		<publisher />
 		<genre>Emulator</genre>
 		<playcount />
 		<lastplayed />
@@ -494,21 +460,6 @@
 		<region>wr</region>
 	</game>
 	<game>
-		<path>./m2emulator.menu</path>
-		<name>M2Emulator (Model 2)</name>
-		<desc>Run M2Emulator (Model 2).</desc>
-		<image>./media/m2emulator-logo.png</image>
-		<marquee>./media/m2emulator-logo.png</marquee>
-		<developer>Nebula Team</developer>
-		<publisher>Nebula Team</publisher>
-		<genre>Emulator</genre>
-		<playcount />
-		<lastplayed />
-		<gametime />
-		<lang>en</lang>
-		<region>wr</region>
-	</game>
-	<game>
 		<path>./magicengine.menu</path>
 		<name>Magic Engine (PC Engine)</name>
 		<desc>Run Magic Engine (PC Engine).</desc>
@@ -627,23 +578,6 @@
 		<desc>Run PCSX2 Emulator (v1.6) (PlayStation 2).</desc>
 		<image>./media/pcsx2-16-logo.png</image>
 		<marquee>./media/pcsx2-16-logo.png</marquee>
-		<rating>0</rating>
-		<releasedate />
-		<developer>PCSX2 Team</developer>
-		<publisher>PCSX2 Team</publisher>
-		<genre>Emulator</genre>
-		<playcount />
-		<lastplayed />
-		<gametime />
-		<lang>en</lang>
-		<region>wr</region>
-	</game>
-	<game>
-		<path>./pcsx2.menu</path>
-		<name>PCSX2 (PlayStation 2)</name>
-		<desc>Run PCSX2 Emulator (PlayStation 2).</desc>
-		<image>./media/pcsx2-logo.png</image>
-		<marquee>./media/pcsx2-logo.png</marquee>
 		<rating>0</rating>
 		<releasedate />
 		<developer>PCSX2 Team</developer>
@@ -1319,23 +1253,6 @@
 		<region>wr</region>
 	</game>
 	<game>
-		<path>./retroarch.menu</path>
-		<name>RetroArch (Multi Cores Emulator)</name>
-		<desc>Run RetroArch (Multi Cores Emulator).</desc>
-		<image>./media/retroarch-logo.png</image>
-		<marquee>./media/retroarch-logo.png</marquee>
-		<rating>0</rating>
-		<releasedate />
-		<developer>Libretro Team</developer>
-		<publisher>Libretro Team</publisher>
-		<genre>Emulator</genre>
-		<playcount />
-		<lastplayed />
-		<gametime />
-		<lang>en</lang>
-		<region>wr</region>
-	</game>
-	<game>
 		<path>./tsugaru.menu</path>
 		<name>Tsugaru (FM Towns)</name>
 		<desc>Run Tsugaru (FM Towns).</desc>
@@ -1516,6 +1433,83 @@
 		<publisher>Geod Studio</publisher>
 		<playcount>1</playcount>
 		<lastplayed>20260523T123259</lastplayed>
+		<lang>en</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./cemu.menu</path>
+		<name>Cemu (Wii U)</name>
+		<desc>Run Cemu Emulator (Wii U).</desc>
+		<genre>Emulator</genre>
+		<image>./media/cemu-logo.png</image>
+		<marquee>./media/cemu-logo.png</marquee>
+		<rating>0</rating>
+		<developer>Cemu Team</developer>
+		<publisher>Cemu Team</publisher>
+		<playcount>2</playcount>
+		<lastplayed>20260523T123935</lastplayed>
+		<gametime>31</gametime>
+		<lang>en</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./retroarch.menu</path>
+		<name>RetroArch (Multi Cores Emulator)</name>
+		<desc>Run RetroArch (Multi Cores Emulator).</desc>
+		<genre>Emulator</genre>
+		<image>./media/retroarch-logo.png</image>
+		<marquee>./media/retroarch-logo.png</marquee>
+		<rating>0</rating>
+		<developer>Libretro Team</developer>
+		<publisher>Libretro Team</publisher>
+		<playcount>3</playcount>
+		<lastplayed>20260523T141425</lastplayed>
+		<gametime>66</gametime>
+		<lang>en</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./pcsx2.menu</path>
+		<name>PCSX2 (PlayStation 2)</name>
+		<desc>Run PCSX2 Emulator (PlayStation 2).</desc>
+		<genre>Emulator</genre>
+		<image>./media/pcsx2-logo.png</image>
+		<marquee>./media/pcsx2-logo.png</marquee>
+		<rating>0</rating>
+		<developer>PCSX2 Team</developer>
+		<publisher>PCSX2 Team</publisher>
+		<playcount>2</playcount>
+		<lastplayed>20260523T130743</lastplayed>
+		<lang>en</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./m2emulator.menu</path>
+		<name>M2Emulator (Model 2)</name>
+		<desc>Run M2Emulator (Model 2).</desc>
+		<genre>Emulator</genre>
+		<image>./media/m2emulator-logo.png</image>
+		<marquee>./media/m2emulator-logo.png</marquee>
+		<developer>Nebula Team</developer>
+		<publisher>Nebula Team</publisher>
+		<playcount>5</playcount>
+		<lastplayed>20260523T184116</lastplayed>
+		<gametime>67</gametime>
+		<lang>en</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./eden.menu</path>
+		<name>Eden (Switch)</name>
+		<desc>Run Eden (Switch). This software is not provided by RetroBat.</desc>
+		<genre>Emulator</genre>
+		<image>./media/eden-logo.png</image>
+		<marquee>./media/eden-logo.png</marquee>
+		<rating>0</rating>
+		<developer>The Eden Team</developer>
+		<playcount>1</playcount>
+		<lastplayed>20260523T172021</lastplayed>
+		<gametime>667</gametime>
 		<lang>en</lang>
 		<region>wr</region>
 	</game>

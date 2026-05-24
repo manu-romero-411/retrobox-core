@@ -8,10 +8,11 @@ import stat
 from pathlib import Path, PureWindowsPath
 from typing import TYPE_CHECKING, Final
 
+from configgen.generators.model2emu.model2emuPaths import M2EMU_EMUDIR, M2EMU_RESOURCES, M2EMU_WINEPREFIX, MODEL2_ROMS
+
 from ... import Command
-from ...batoceraPaths import ROMS, configure_emulator, mkdir_if_not_exists
+from ...batoceraPaths import configure_emulator, mkdir_if_not_exists
 from ...controller import generate_sdl_game_controller_config
-from ...utils import wine
 from ...utils.configparser import CaseSensitiveConfigParser
 from ..Generator import Generator
 
@@ -19,8 +20,6 @@ if TYPE_CHECKING:
     from ...batoceraTypes import HotkeysContext
 
 _logger = logging.getLogger(__name__)
-
-MODEL2_ROMS: Final = ROMS / "model2"
 
 class Model2EmuGenerator(Generator):
 
@@ -31,155 +30,145 @@ class Model2EmuGenerator(Generator):
         }
 
     def generate(self, system, rom, playersControllers, metadata, guns, wheels, gameResolution):
-        wine_runner = wine.Runner.default("model2")
-        emupath = wine_runner.bottle_dir / "model2emu"
+        import subprocess
 
-        mkdir_if_not_exists(wine_runner.bottle_dir)
+        # 1. Definición de rutas
+        mkdir_if_not_exists(M2EMU_WINEPREFIX)
+        mkdir_if_not_exists(M2EMU_EMUDIR)
 
-        #copy model2emu to /userdata for rw & emulator directory creation reasons
-        if not emupath.exists():
-            shutil.copytree("/usr/model2emu", emupath)
-            (emupath / "EMULATOR.INI").chmod(stat.S_IRWXO)
+        # 2. Copiar emulador al WINEPREFIX para garantizar permisos rw
+        if not M2EMU_EMUDIR.exists():
+            shutil.copytree(M2EMU_RESOURCES, M2EMU_EMUDIR)
+            (M2EMU_EMUDIR / "EMULATOR.INI").chmod(stat.S_IRWXO)
 
-        # install windows libraries required
-        wine_runner.install_wine_trick('d3dx9')
-        wine_runner.install_wine_trick('d3dcompiler_42')
-        wine_runner.install_wine_trick('d3dx9_42')
-        wine_runner.install_wine_trick('xact')
-        wine_runner.install_wine_trick('xact_x64')
+        # 3. Configurar entorno de ejecución base
+        env = os.environ.copy()
+        env["WINEPREFIX"] = str(M2EMU_WINEPREFIX)
+        env["WINEDEBUG"] = "-all"
+        env["WINEDLLOVERRIDES"] = "d3d9=n,b" # Fuerza el uso de DXVK
 
-        # for existing bottles we want to ensure files are updated as necessary
-        copy_updated_files(Path("/usr/model2emu/scripts"), emupath / "scripts")
+        # 4. Instalación inicial de dependencias
+        winetricks_done = M2EMU_WINEPREFIX / ".winetricks.done"
+        if not winetricks_done.exists():
+            _logger.info("Instalando dependencias de Wine y DXVK...")
+            subprocess.run([
+                "winetricks", "-q", "d3dx9", "d3dcompiler_42", "d3dcompiler_43", "d3dx9_42", "d3dx9_43", "xact", "xact_x64"
+            ], env=env, check=True)
+            winetricks_done.touch()
 
-        xinput_cfg_done = wine_runner.bottle_dir / "xinput_cfg.done"
+        # 5. Mantenimiento de scripts y configuraciones actualizadas
+        copy_updated_files(M2EMU_RESOURCES / "scripts", M2EMU_EMUDIR / "scripts")
+        
+        xinput_cfg_done = M2EMU_WINEPREFIX / ".xinput_cfg.done"
         if not xinput_cfg_done.exists():
-            copy_updated_files(Path("/usr/model2emu/CFG"), emupath / "CFG")
-            with xinput_cfg_done.open("w") as f:
-                f.write("done")
+            cfg_dest = M2EMU_EMUDIR / "CFG"
+            cfg_dest.mkdir(parents=True, exist_ok=True)
+            copy_updated_files(M2EMU_RESOURCES / "CFG", cfg_dest)
+            xinput_cfg_done.touch()
+        
+        # .resolve() convierte "../roms/model2" en "/userdata/roms/model2" (o la ruta real de Debian)
+        #absolute_rom_dir = Path(os.path.realpath(rom)).parent.resolve()
+        
+        # Reemplazar barras de Linux (/) a Windows (\) para el emulador
+        rom_directory_win = PureWindowsPath(MODEL2_ROMS)
 
-        # move to the emulator path to ensure configs are saved etc
-        os.chdir(emupath)
+        # Cambiar al directorio de trabajo del emulador
+        os.chdir(M2EMU_EMUDIR)
 
-        commandArray: list[str | Path] = [wine_runner.wine, emupath / "emulator_multicpu.exe"]
-        # simplify the rom name (strip the directory & extension)
+        # 6. Preparar comando base
+        commandArray: list[str | Path] = ["wine", M2EMU_EMUDIR / "emulator_multicpu.exe"]
         if not configure_emulator(rom):
             commandArray.extend([rom.stem])
 
-        # modify the ini file resolution accordingly
-        configFileName = emupath / "EMULATOR.INI"
+        # 7. Modificación del archivo EMULATOR.INI
+        configFileName = M2EMU_EMUDIR / "EMULATOR.INI"
         Config = CaseSensitiveConfigParser(interpolation=None)
         if configFileName.is_file():
             Config.read(configFileName)
 
-        # add subdirectories
-        dirnum = 1 # existing rom path
-        for possibledir in MODEL2_ROMS.iterdir():
-            if possibledir.is_dir() and possibledir.name != "images":
-                dirnum = dirnum + 1
-                # convert to windows friendly name
-                subdir = PureWindowsPath(possibledir)
-                # add path to ini file
-                Config.set("RomDirs",f"Dir{dirnum}", f"Z:{subdir}")
+        # Asegurar sección limpia
+        if Config.has_section("RomDirs"):
+            Config.remove_section("RomDirs")
+        Config.add_section("RomDirs")
+        Config.set("RomDirs", "Dir1", f"Z:{rom_directory_win}")
 
-        # set ini to use chosen resolution and automatically start in fullscreen
-        Config.set("Renderer","FullScreenWidth", str(gameResolution["width"]))
-        Config.set("Renderer","FullScreenHeight", str(gameResolution["height"]))
-        Config.set("Renderer","FullMode", system.config.get("model2_renderRes", "4"))
-        Config.set("Renderer","AutoFull", "1")
-        Config.set("Renderer","ForceSync", "1")
-        # widescreen
-        lua_file_path = emupath / "scripts" / f"{rom.stem}.lua"
+        # Si iteras subdirectorios adicionales, aplica la misma lógica:
+        dirnum = 1
+        if MODEL2_ROMS.exists():
+            for possibledir in MODEL2_ROMS.iterdir():
+                if possibledir.is_dir() and possibledir.name not in ["images", "media"]:
+                    dirnum += 1
+                    subdir_win = PureWindowsPath(possibledir.resolve())
+                    Config.set("RomDirs", f"Dir{dirnum}", f"Z:{subdir_win}")
+
+        # Opciones de Renderizado
+        Config.set("Renderer", "FullScreenWidth", str(gameResolution["width"]))
+        Config.set("Renderer", "FullScreenHeight", str(gameResolution["height"]))
+        Config.set("Renderer", "FullMode", system.config.get("model2_renderRes", "4"))
+        Config.set("Renderer", "AutoFull", "1")
+        Config.set("Renderer", "ForceSync", "1")
+
+        # 8. Modificaciones de scripts LUA (Widescreen, Scanlines, Sinden)
+        lua_file_path = M2EMU_EMUDIR / "scripts" / f"{rom.stem}.lua"
         if lua_file_path.exists():
             modify_lua_widescreen(lua_file_path, system.config.get_bool("model2_ratio"))
-        # scanlines
-        if lua_file_path.exists():
             modify_lua_scanlines(lua_file_path, system.config.get_bool("model2_scanlines"))
-        # sinden - check if rom is a gun game
-        known_gun_roms = ["bel", "gunblade", "hotd", "rchase2", "vcop", "vcop2", "vcopa"]
-        if rom.stem in known_gun_roms and system.config.use_guns and guns:
-            for gun in guns:
-                if gun.needs_borders:
-                    if lua_file_path.exists():
+            
+            known_gun_roms = ["bel", "gunblade", "hotd", "rchase2", "vcop", "vcop2", "vcopa"]
+            if rom.stem in known_gun_roms and system.config.use_guns and guns:
+                for gun in guns:
+                    if gun.needs_borders:
                         bordersSize = system.guns_borders_size_name(guns)
-                        # add more intelligence for lower resolution screens to avoid massive borders
-                        if bordersSize == "thin":
-                            thickness = "1"
-                        elif bordersSize == "medium":
-                            if gameResolution["width"] <= 640:
-                                thickness = "1"  # thin
-                            elif 640 < gameResolution["width"] <= 1080:
-                                thickness = "2"
-                            else:
-                                thickness = "2"
-                        else:
-                            if gameResolution["width"] << 1080:
-                                thickness = "2"
-                            else:
-                                thickness = "3"
-
+                        thickness = "1"
+                        if bordersSize == "medium":
+                            thickness = "1" if gameResolution["width"] <= 640 else "2"
+                        elif bordersSize != "thin":
+                            thickness = "2" if gameResolution["width"] <= 1080 else "3"
                         modify_lua_sinden(lua_file_path, "true", thickness)
-                else:
-                    modify_lua_sinden(lua_file_path, "false", "0")
+                    else:
+                        modify_lua_sinden(lua_file_path, "false", "0")
 
-        # now set the other emulator features
-        Config.set("Renderer","FakeGouraud", system.config.get("model2_fakeGouraud", "0"))
-        Config.set("Renderer","Bilinear", system.config.get("model2_bilinearFiltering", "1"))
-        Config.set("Renderer","Trilinear", system.config.get("model2_trilinearFiltering", "0"))
-        Config.set("Renderer","FilterTilemaps", system.config.get("model2_filterTilemaps", "0"))
-        Config.set("Renderer","ForceManaged", system.config.get("model2_forceManaged", "0"))
-        Config.set("Renderer","AutoMip", system.config.get("model2_enableMIP", "0"))
-        Config.set("Renderer","MeshTransparency", system.config.get("model2_meshTransparency", "0"))
-        Config.set("Renderer","FSAA", system.config.get("model2_fullscreenAA", "0"))
-        Config.set("Input","UseRawInput", system.config.get("model2_useRawInput", "0"))
+        # Configuración general y de entrada
+        Config.set("Renderer", "FakeGouraud", system.config.get("model2_fakeGouraud", "0"))
+        Config.set("Renderer", "Bilinear", system.config.get("model2_bilinearFiltering", "1"))
+        Config.set("Renderer", "Trilinear", system.config.get("model2_trilinearFiltering", "0"))
+        Config.set("Renderer", "FilterTilemaps", system.config.get("model2_filterTilemaps", "0"))
+        Config.set("Renderer", "ForceManaged", system.config.get("model2_forceManaged", "0"))
+        Config.set("Renderer", "AutoMip", system.config.get("model2_enableMIP", "0"))
+        Config.set("Renderer", "MeshTransparency", system.config.get("model2_meshTransparency", "0"))
+        Config.set("Renderer", "FSAA", system.config.get("model2_fullscreenAA", "0"))
+        Config.set("Input", "UseRawInput", system.config.get("model2_useRawInput", "0"))
+        
         if crosshairs := system.config.get("model2_crossHairs"):
-            Config.set("Renderer","DrawCross", crosshairs)
+            Config.set("Renderer", "DrawCross", crosshairs)
         else:
-            for gun in guns:
-                if gun.needs_cross:
-                    Config.set("Renderer","DrawCross", "1")
-                else:
-                    Config.set("Renderer","DrawCross", "0")
+            draw_cross = "1" if any(gun.needs_cross for gun in guns) else "0"
+            Config.set("Renderer", "DrawCross", draw_cross)
 
-        # xinput
-        Config.set("Input","XInput", system.config.get_bool("model2_xinput", return_values=("1", "0")))
+        Config.set("Input", "XInput", system.config.get_bool("model2_xinput", return_values=("1", "0")))
+        Config.set("Input", "EnableFF", system.config.get_bool("model2_forceFeedback", return_values=("1", "0")))
 
-        # force feedback
-        Config.set("Input","EnableFF", system.config.get_bool("model2_forceFeedback", return_values=("1", "0")))
+        # Forzar la desactivación de red o simulación local en EMULATOR.INI
+        if not Config.has_section("Network"):
+            Config.add_section("Network")
+        
+        # 0 = Desactivado/Simulado para que no se quede colgado esperando nodos
+        Config.set("Network", "RxPort", "0")
+        Config.set("Network", "TxPort", "0")
 
+        # Guardar EMULATOR.INI
         with configFileName.open('w') as configfile:
             Config.write(configfile)
 
-        # set the environment variables
-        environment = wine_runner.get_environment()
-        environment.update({
+        # 9. Añadir controles de SDL al entorno
+        env.update({
             "SDL_GAMECONTROLLERCONFIG": generate_sdl_game_controller_config(playersControllers),
-            "SDL_JOYSTICK_HIDAPI": "0"
+            "SDL_JOYSTICK_HIDAPI": "0",
         })
 
-        # check if software render option is chosen
-        if system.config.get("model2_Software") == "1":
-            environment.update({
-                "__GLX_VENDOR_LIBRARY_NAME": "mesa",
-                "MESA_LOADER_DRIVER_OVERRIDE": "llvmpipe",
-                "GALLIUM_DRIVER": "llvmpipe"
-            })
+        #env.update({"PULSE_LATENCY_MSEC": "20"})
 
-        # ensure nvidia driver used for vulkan
-        if Path('/var/tmp/nvidia.prime').exists():
-            variables_to_remove = ['__NV_PRIME_RENDER_OFFLOAD', '__VK_LAYER_NV_optimus', '__GLX_VENDOR_LIBRARY_NAME']
-            for variable_name in variables_to_remove:
-                if variable_name in os.environ:
-                    del os.environ[variable_name]
-
-            environment.update(
-                {
-                    'VK_ICD_FILENAMES': '/usr/share/vulkan/icd.d/nvidia_icd.x86_64.json',
-                    'VK_LAYER_PATH': '/usr/share/vulkan/explicit_layer.d'
-                }
-            )
-
-        # now run the emulator
-        return Command.Command(array=commandArray, env=environment)
+        return Command.Command(array=commandArray, env=env)
 
 def modify_lua_widescreen(file_path: Path, condition: bool) -> None:
     with file_path.open('r') as lua_file:

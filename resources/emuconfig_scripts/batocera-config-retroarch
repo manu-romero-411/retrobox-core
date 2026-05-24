@@ -1,5 +1,10 @@
 #!/bin/bash
 
-export DISPLAY=$(getLocalXDisplay)
+# when the program is called from a non X environment, handle the mouse
+# maybe an other choice is better
 
-/usr/local/bin/retroarch --menu --config "${USERDATA}/emuconfigs/retroarch/retroarchcustom.cfg"
+if test -z "${DISPLAY}"; then
+    export DISPLAY=$(getLocalXDisplay)
+fi
+
+"${USERDATA}/resources/emulatorlauncher/emulatorlauncher.sh" -system config -emulator libretro -rom config

@@ -1,0 +1,146 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+
+## INSTALADOR DE RETROARCH
+## INSTALABLE EN: x86_64
+## FECHA DE CREACIÓN: 1 de noviembre de 2025
+## FECHAS DE MODIFICACIÓN:
+
+## VARIABLES
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd -P)"
+ROOTDIR="$(realpath "$SCRIPT_DIR/..")"
+if [ -z "$TARGET_USER" ]; then
+	TARGET_USER="$(getent passwd 1000 | cut -d: -f1 || true)"
+fi
+
+if [ -n "$TARGET_USER" ]; then
+	USER_HOME="$(getent passwd "$TARGET_USER" | cut -d: -f6)"
+fi
+
+if [ -z "${USER_HOME}" ]; then
+  USER_HOME=/home/$(id -nu 1000)
+fi
+
+URL="https://buildbot.libretro.com/nightly/linux/x86_64/RetroArch.7z"
+DESTDIR="/opt"
+TMPDIR="$(mktemp -d)"
+ARCHIVE="$TMPDIR/RetroArch.7z"
+
+## FUNCIONES
+
+function check_root(){
+	if [ $(id -u) -ne 0 ]; then
+		echo "[ERROR] Se necesitan permisos de root."
+		exit 1
+	fi
+}
+
+cleanup() {
+	rm -rf "$TMPDIR"
+}
+trap cleanup EXIT
+
+function desktop_file(){
+	desktop_icon
+	mkdir -p /usr/local/share/applications/
+	cat << EOF > /usr/local/share/applications/retroarch-standalone.desktop
+[Desktop Entry]
+Version=1.0
+Name=RetroArch
+GenericName=Frontend for the libretro API
+Type=Application
+Comment=Frontend for emulators, game engines and media players
+Comment[es]=Frontend para emuladores, motores de juegos y reproductores multimedia
+Comment[ru]=Графический интерфейс для эмуляторов, игровых движков и медиаплееров
+Comment[fr]=Interface graphique pour émulateurs, moteurs de jeu et lecteurs multimédia
+Comment[de]=Front-End für Emulatoren, Spiel-Engines und Mediaplayer
+Icon=${USER_HOME}/.app-icons/svg/retroarch.svg
+Exec=${DESTDIR}/retroarch/RetroArch-Linux-x86_64.AppImage
+Terminal=false
+StartupNotify=false
+StartupWMClass=retroarch
+Keywords=multi;engine;emulator;xmb;
+Categories=Game;Emulator;
+EOF
+
+}
+
+function desktop_icon(){
+	mkdir -p "${USER_HOME}"/.app-icons/svg/
+	cat << EOF > "${USER_HOME}"/.app-icons/svg/retroarch.svg
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   role="img"
+   viewBox="0 0 1024 1024"
+   version="1.1"
+   id="svg1"
+   width="1024"
+   height="1024"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1" />
+  <path
+     id="rect49"
+     style="fill:#000000;stroke-width:15;fill-opacity:1"
+     d="m 365.4593,-3.3e-5 c -11.72881,7.5e-4 -23.45601,0.009 -35.18554,0.0835 -11.99599,0.069 -23.9894,0.20673 -35.9824,0.53173 -26.13299,0.70901 -52.49389,2.24756 -78.33688,6.89356 -26.21798,4.712 -50.61894,12.4048 -74.43892,24.52879 -23.41199,11.918 -44.83707,27.48793 -63.41306,46.06492 C 59.52551,96.678457 43.95557,118.10354 32.03758,141.51552 19.91359,165.33551 12.22079,189.73646 7.50879,215.95445 2.86279,241.79744 1.3247,268.15834 0.6167,294.29133 0.2907,306.28432 0.1525,318.27774 0.0835,330.27373 0.0142,340.76857 0.0019,351.26216 0,361.75614 V 658.5392 c 7.5e-4,11.72881 0.009,23.45747 0.0835,35.18699 0.069,11.996 0.2072,23.98942 0.5332,35.98241 0.708,26.13397 2.24609,52.49435 6.89209,78.33837 4.712,26.21698 12.4048,50.61597 24.52879,74.43596 11.91799,23.41304 27.48793,44.83753 46.06492,63.41455 18.57599,18.57599 40.00107,34.14794 63.41306,46.06491 23.81998,12.12501 48.22094,19.81581 74.43892,24.52881 25.84299,4.645 52.20389,6.1831 78.33688,6.892 11.993,0.3251 23.98641,0.4628 35.9824,0.5318 11.72953,0.074 23.45673,0.084 35.18554,0.085 h 293.0799 c 11.7288,0 23.45752,-0.01 35.18699,-0.085 11.99602,-0.069 23.98941,-0.2067 35.98243,-0.5318 26.13396,-0.7089 52.49435,-2.247 78.33836,-6.892 26.21699,-4.713 50.61602,-12.4038 74.43592,-24.52881 23.4131,-11.91697 44.8376,-27.48892 63.4146,-46.06491 18.576,-18.57702 34.1479,-40.00151 46.0649,-63.41455 12.125,-23.81999 19.8158,-48.21898 24.5288,-74.43596 4.645,-25.84402 6.1831,-52.2044 6.8921,-78.33837 0.325,-11.99299 0.4627,-23.98641 0.5317,-35.98241 0.074,-11.72952 0.084,-23.45818 0.085,-35.18699 V 365.45927 c 0,-11.72881 -0.011,-23.45601 -0.085,-35.18554 -0.069,-11.99599 -0.2067,-23.98941 -0.5317,-35.9824 -0.709,-26.13299 -2.2471,-52.49389 -6.8921,-78.33688 -4.713,-26.21799 -12.4038,-50.61894 -24.5288,-74.43893 -11.917,-23.41198 -27.4889,-44.837063 -46.0649,-63.413053 -18.577,-18.57699 -40.0015,-34.14692 -63.4146,-46.06492 -23.8199,-12.12399 -48.21893,-19.81679 -74.43592,-24.52879 -25.84401,-4.646 -52.2044,-6.18455 -78.33836,-6.89356 -11.99302,-0.325 -23.98641,-0.46273 -35.98243,-0.53173 -11.72947,-0.0741 -23.45819,-0.0826 -35.18699,-0.0835 z" />
+  <path
+     d="m 347.31043,312.83085 49.78987,61.27983 h -99.57974 l -22.97994,91.91976 h -61.27985 l 22.97993,-91.91976 h -61.27982 l -45.95989,183.83953 h 122.55969 l -15.31997,61.27983 h 107.23974 l -80.4298,91.91976 h 90.00477 l 74.6848,-91.91976 h 168.51956 l 74.68478,91.91976 h 90.00479 L 680.51962,619.23004 H 787.75927 L 772.43925,557.95021 H 894.999 L 849.03908,374.11068 h -61.27981 l 22.97991,91.91976 h -61.27984 l -22.97991,-91.91976 h -99.57975 l 49.78993,-61.27983 h -65.10992 l -53.61982,61.27983 H 466.04013 L 412.4202,312.83085 Z m 7.65997,122.55968 h 61.2799 v 61.27983 h -61.2799 z m 252.93884,0 h 61.27994 v 61.27983 h -61.27994 z"
+     id="path1"
+     style="stroke-width:31.9164;fill:#ffffff" />
+</svg>
+EOF
+
+}
+
+function install_app(){
+	uninstall_app
+	mkdir -p "$DESTDIR"
+	chmod 0755 "$DESTDIR"
+
+	curl -fSL -o "$ARCHIVE" "$URL"
+
+	# Extraer respetando la estructura dentro del 7z; usamos una extracción temporal y luego movemos
+	EXTRACT_DIR="$TMPDIR/extracted"
+	mkdir -p "$EXTRACT_DIR"
+
+	# Extraer archivos; la opción -y responde sí a todas las preguntas si las hubiera
+	7z x -y -o"$EXTRACT_DIR" "$ARCHIVE"
+
+	rsync -av "$EXTRACT_DIR"/RetroArch-Linux-x86_64 "$DESTDIR"
+	mv "$DESTDIR"/RetroArch-Linux-x86_64 "$DESTDIR"/retroarch
+
+	# establecer permisos razonables: directorios 755, archivos 644, ejecutables detectados 755
+	find "${DESTDIR}/retroarch" -type d -exec chmod 0755 {} +
+	find "${DESTDIR}/retroarch" -type f -exec chmod 0644 {} +
+	mkdir -p "${USER_HOME}/.config/"
+	mv "${DESTDIR}/retroarch/RetroArch-Linux-x86_64.AppImage.home/.config/retroarch" "${USER_HOME}/.config/retroarch"
+	rm -r "${DESTDIR}/retroarch/RetroArch-Linux-x86_64.AppImage.home"
+
+	chown -R 1000:1000 "${DESTDIR}/retroarch" "${USER_HOME}/.config/retroarch"
+
+	chmod +x ${DESTDIR}/retroarch/RetroArch-Linux-x86_64.AppImage
+	ln -s ${DESTDIR}/retroarch/RetroArch-Linux-x86_64.AppImage /usr/local/bin/retroarch
+	desktop_file
+}
+
+function uninstall_app(){
+    rm -rf "/usr/local/bin/retroarch" || true
+    rm -rf "${DESTDIR}/retroarch" || true
+	rm -f "${USER_HOME}/.app-icons/svg/retroarch.svg" || true
+    rm -f /usr/local/share/applications/retroarch-standalone.desktop || true
+}
+
+## LLAMADAS
+
+check_root
+
+case $1 in
+	"-i") install_app;;
+	"-u") uninstall_app;;
+	*) exit 1;;
+esac
+
+exit 0

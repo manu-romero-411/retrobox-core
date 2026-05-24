@@ -19,6 +19,7 @@ from ...batoceraPaths import (
     SAVES,
     USER_SHADERS,
     USERDATA,
+    configure_emulator,
     mkdir_if_not_exists,
 )
 from ...exceptions import BatoceraException, MissingCore
@@ -150,7 +151,7 @@ class LibretroGenerator(Generator):
         # for each core, a file /usr/lib/<core>.info must exit, otherwise, info such as rewinding/netplay will not work
         # to do a global check : cd /usr/lib/libretro && for i in *.so; do INF=$(echo $i | sed -e s+/usr/lib/libretro+/usr/share/libretro/info+ -e s+\.so+.info+); test -e "$INF" || echo $i; done
         _logger.debug("Looking for core info: %s", infoFile)   # ← añade esto
-        if not infoFile.exists():
+        if not infoFile.exists() and not configure_emulator(rom):
             raise MissingCore
 
         # The command to run
@@ -323,7 +324,13 @@ class LibretroGenerator(Generator):
 
             commandArray = [RETROARCH_BIN, "-L", retroarchCore, "--config", system.config['configfile']]
         else:
-            commandArray = [RETROARCH_BIN, "-L", retroarchCore, "--config", system.config['configfile']]
+            # lógica para abrir retroarch sin rom desde el menú de config de emuladores
+            if configure_emulator(rom):
+                dontAppendROM = True
+                commandArray = [RETROARCH_BIN, "--config", system.config['configfile']]
+            else:
+                # caso general para la mayoría de emuladores y cores
+                commandArray = [RETROARCH_BIN, "-L", retroarchCore, "--config", system.config['configfile']]
 
         configToAppend: list[Path] = []
 
@@ -390,7 +397,7 @@ class LibretroGenerator(Generator):
         # Use command line instead of ROM file for MAME variants
         if system.config.core in [ 'mame', 'mess', 'mamevirtual', 'same_cdi' ]:
             dontAppendROM = True
-            commandArray.append(fstr(CMDFILES_DIR) + '/{rom.stem}.cmd')
+            commandArray.append(f"{CMDFILES_DIR}/{rom.stem}.cmd")
 
         if system.config.core == 'hatarib':
             biosdir = BIOS / "hatarib"
@@ -418,30 +425,35 @@ class LibretroGenerator(Generator):
         return Command.Command(array=commandArray, env={"XDG_CONFIG_HOME":CONFIGS})
 
 def getGFXBackend(system: Emulator) -> str:
-        # Start with the selected option
-        # Pick glcore or gl based on drivers if not selected
-        backend = system.config.get("gfxbackend")
-        if backend:
-            setManually = True
-        else:
-            setManually = False
-            # glvendor check first, to avoid a 2nd testing on intel boards
-            if videoMode.getGLVendor() in ["nvidia", "amd"] and videoMode.getGLVersion() >= 3.1:
-                backend = "glcore"
-            else:
-                backend = "gl"
+    backend = system.config.get("gfxbackend")
 
-        # Retroarch has flipped between using opengl or gl, correct the setting here if needed.
-        if backend == "opengl":
+    if backend:
+        setManually = True
+    else:
+        setManually = False
+
+        # PRIORIDAD: Vulkan si está disponible
+        if videoMode.supportsVulkan():
+            backend = "vulkan"
+        # Si no, fallback a OpenGL
+        elif videoMode.getGLVendor() in ["nvidia", "amd"] and videoMode.getGLVersion() >= 3.1:
+            backend = "glcore"
+        else:
             backend = "gl"
 
-        # Don't change based on core if manually selected.
-        if not setManually:
-            # If set to glcore or gl, override setting for certain cores that require one or the other
-            core = system.config.core
-            if backend == "gl" and core in [ 'kronos', 'mupen64plus-next', 'melonds', 'beetle-psx-hw' ]:
+    # Retroarch has flipped between using opengl or gl, correct the setting here if needed.
+    if backend == "opengl":
+        backend = "gl"
+
+    # No tocar si el usuario lo eligió manualmente
+    if not setManually:
+        core = system.config.core
+
+        # Overrides específicos por core
+        if backend in ["gl", "glcore"]:
+            if backend == "gl" and core in ['kronos', 'mupen64plus-next', 'melonds', 'beetle-psx-hw']:
                 backend = "glcore"
-            if backend == "glcore" and core in [ 'parallel_n64', 'yabasanshiro', 'boom3' ]:
+            if backend == "glcore" and core in ['parallel_n64', 'yabasanshiro', 'boom3']:
                 backend = "gl"
 
-        return backend
+    return backend

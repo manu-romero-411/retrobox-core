@@ -52,7 +52,34 @@ case "$1" in
 
         echo "1920x1080"  # fallback hardcodeado
         ;;
+    listModes)
+        # 1. KDE Wayland via kscreen-doctor
+        if command -v kscreen-doctor &>/dev/null && [ -n "$WAYLAND_DISPLAY" ]; then
+            kscreen-doctor -o 2>/dev/null \
+                | grep -oE "[0-9]+x[0-9]+" \
+                | sort -u
+            exit 0
+        fi
 
+        # 2. wlr-randr (otros compositores Wayland)
+        if command -v wlr-randr &>/dev/null && [ -n "$WAYLAND_DISPLAY" ]; then
+            wlr-randr 2>/dev/null \
+                | grep -oE "[0-9]+x[0-9]+" \
+                | sort -u
+            exit 0
+        fi
+
+        # 3. X11 fallback (xrandr)
+        if command -v xrandr &>/dev/null && [ -n "$DISPLAY" ]; then
+            xrandr 2>/dev/null \
+                | grep -oE "[0-9]+x[0-9]+" \
+                | sort -u
+            exit 0
+        fi
+
+        # 4. Fallback si no hay entorno gráfico responsivo
+        "$0" currentMode
+        ;;
     minTomaxResolution)
         # batocera usa esto para ajustar resolución mínima/máxima
         # en Debian lo dejamos como no-op (devuelve la actual)

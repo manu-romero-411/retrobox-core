@@ -4,6 +4,7 @@ import os
 from contextlib import contextmanager
 from pathlib import Path
 from typing import IO, TYPE_CHECKING, Any, Final, overload
+import shutil
 
 if TYPE_CHECKING:
     from _typeshed import OpenBinaryModeUpdating, OpenBinaryModeWriting, OpenTextModeUpdating, OpenTextModeWriting
@@ -23,13 +24,13 @@ _SYSTEM_LOCAL_SHARE: Final = Path('/usr/local/share')
 # ---------------------------------------------------------------------------
 # Paths de instalación del sistema (igual que en batocera)
 # ---------------------------------------------------------------------------
-BATOCERA_ROOT: Final = Path(os.environ.get('BATOCERA_ROOT', str(_XDG_DATA / 'batocera')))
+BATOCERA_ROOT: Final = Path(os.environ.get('BATOCERA_ROOT', str("/var/penguin/juegos/retrobox")))
 USERDATA: Final = Path(os.environ.get('USERDATA', str(BATOCERA_ROOT)))
 
 BATOCERA_SHARE_DIR:  Final = BATOCERA_ROOT / 'resources'
 DATAINIT_DIR:        Final = BATOCERA_SHARE_DIR / 'datainit'
 #BATOCERA_ES_DIR:     Final = Path('/home/manuel/proyectos/batocera-emulationstation/appimage/es')
-BATOCERA_ES_DIR:     Final = BATOCERA_ROOT / 'emulationstation'
+BATOCERA_ES_DIR:     Final = BATOCERA_ROOT / 'frontend'
 DEFAULTS_DIR: Final = BATOCERA_SHARE_DIR / 'configgen'
 
 HOME_INIT:  Final = DATAINIT_DIR / 'system'
@@ -66,9 +67,9 @@ CHEATS:      Final = USERDATA / 'cheats'
 USER_SHADERS:    Final = USERDATA / 'shaders'
 USER_DECORATIONS:  Final = USERDATA / 'decorations'
 # ---------------------------------------------------------------------------
-# EmulationStation → ~/.emulationstation  (ES lo fija, no es configurable)
+# EmulationStation
 # ---------------------------------------------------------------------------
-USER_ES_DIR: Final = USERDATA / '.emulationstation'
+USER_ES_DIR: Final = USERDATA / "frontend" / '.emulationstation'
 ES_SETTINGS: Final = USER_ES_DIR / 'es_settings.cfg'
 
 # ---------------------------------------------------------------------------
@@ -100,9 +101,7 @@ HUD_CONFIG_FILE:   Final = RUNTIME_DIR / 'hud.config'
 GUN_OVERLAYS_DIR:  Final = RUNTIME_DIR / 'batocera-overlays'
 HOTKEYGEN_BIN: Final = SYSTEM_SCRIPTS / 'hotkeygen'
 
-# ---------------------------------------------------------------------------
 # Utilidades (sin cambios)
-# ---------------------------------------------------------------------------
 def configure_emulator(rom: Path, /) -> bool:
     return str(rom) == 'config'
 
@@ -119,6 +118,68 @@ def mkdir_if_not_exists(dir):
             import time
             dir.rename(dir.with_name(f"{dir.name}.bak_{int(time.time())}"))
             dir.mkdir(parents=True, exist_ok=True)
+
+def ensure_symlink(source: Path, link: Path) -> None:
+    """
+    Garantiza que exista un symlink: link -> source
+
+    Seguridad:
+    - No borra directorios no vacíos
+    - Evita ciclos de symlinks
+    - No toca nada si ya está correcto
+    """
+
+    source = source.resolve()
+    link = link
+
+    # --- 1. Evitar auto-referencia ---
+    if link.resolve() == source:
+        return
+
+    # --- 2. Detectar ciclos (link dentro de source o viceversa) ---
+    try:
+        if source in link.resolve().parents:
+            raise RuntimeError(f"Symlink loop detected: {link} -> {source}")
+    except FileNotFoundError:
+        # link aún no existe → ok
+        pass
+
+    # --- 3. Si ya existe ---
+    if link.exists() or link.is_symlink():
+
+        # --- Caso A: ya es symlink ---
+        if link.is_symlink():
+            try:
+                if link.resolve() == source:
+                    return  # ya correcto
+            except FileNotFoundError:
+                pass  # symlink roto → lo recreamos
+
+            link.unlink()
+            link.symlink_to(source)
+            return
+
+        # --- Caso B: es directorio real ---
+        if link.is_dir():
+
+            # protección crítica
+            if any(link.iterdir()):
+                raise RuntimeError(
+                    f"Refusing to replace non-empty directory: {link}"
+                )
+
+            shutil.rmtree(link)
+            link.symlink_to(source)
+            return
+
+        # --- Caso C: archivo ---
+        link.unlink()
+        link.symlink_to(source)
+        return
+
+    # --- 4. No existe ---
+    link.parent.mkdir(parents=True, exist_ok=True)
+    link.symlink_to(source)
 
 @overload
 @contextmanager

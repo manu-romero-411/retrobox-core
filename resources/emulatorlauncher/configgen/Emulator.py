@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any
 
 import yaml
 
-from .batoceraPaths import BATOCERA_CONF, BATOCERA_SHADERS, DEFAULTS_DIR, ES_SETTINGS, USER_SHADERS
+from .batoceraPaths import BATOCERA_CONF, BATOCERA_SHADERS, DEFAULTS_DIR, ES_SETTINGS, USER_SHADERS, configure_emulator
 from .config import Config, SystemConfig
 from .exceptions import MissingEmulator
 from .settings.unixSettings import UnixSettings
@@ -42,7 +42,7 @@ def _load_defaults(system_name: str, default_yml: Path, default_arch_yml: Path, 
     try:
         defaults = yaml.load(default_yml.read_text(), Loader=yaml.CLoader)
     except:
-        return None
+        return {}
 
     arch_defaults: dict[str, Any] = {}
     if default_arch_yml.exists():
@@ -151,8 +151,9 @@ class Emulator:
         system_data.update(game_settings)
 
         if not system_data['emulator']:
-            _logger.error('no emulator defined. exiting.')
-            raise MissingEmulator
+            if not configure_emulator(rom):
+                _logger.error('no emulator defined. exiting.')
+                raise MissingEmulator
 
         try:
             es_config = ET.parse(ES_SETTINGS)
