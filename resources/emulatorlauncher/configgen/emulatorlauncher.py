@@ -165,10 +165,10 @@ def start_rom(args: argparse.Namespace, maxnbplayers: int, rom: Path, original_r
                 os.environ.update({'SDL_RENDER_VSYNC': system.config["sdlvsync"]})
 
                 # antimicro start
-                launch_antimicrox(
-                    profile_path=f"{BATOCERA_SHARE_DIR}/antimicro-mapping.gamecontroller.amgp",
-                    guid=args.p1guid
-                )
+                #launch_antimicrox(
+                #    profile_path=f"{BATOCERA_SHARE_DIR}/antimicro-mapping.gamecontroller.amgp",
+                #    guid=args.p1guid
+                #)
 
                 # run a script before emulator starts
                 #callExternalScripts(SYSTEM_SCRIPTS, "gameStart", [systemName, system.config.emulator, effectiveCore, rom])
@@ -196,6 +196,7 @@ def start_rom(args: argparse.Namespace, maxnbplayers: int, rom: Path, original_r
                             with hud_config_file.open('w') as f:
                                 f.write(hudconfig)
                             cmd.env["MANGOHUD_CONFIGFILE"] = hud_config_file
+                            #cmd.env["LD_PRELOAD"] = "/usr/local/lib64/mangohud/libMangoHud_dlsym.so"
                             if not generator.hasInternalMangoHUDCall():
                                 cmd.array.insert(0, "--dlsym")
                                 cmd.array.insert(0, "mangohud")
@@ -238,8 +239,8 @@ def start_rom(args: argparse.Namespace, maxnbplayers: int, rom: Path, original_r
                         monitor_thread.start()
                         exitCode = runCommand(cmd)
 
-                # antimicro start
-                stop_antimicrox()
+                # antimicro stop
+                #stop_antimicrox(True)
 
                 # run a script after emulator shuts down
                 callExternalScripts(USER_SCRIPTS, "gameStop", [systemName, system.config.emulator, effectiveCore, rom])

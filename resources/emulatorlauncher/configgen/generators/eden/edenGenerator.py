@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING
 
 from configgen import Command as Command
 from configgen.batoceraPaths import _SYSTEM_LOCAL_BIN, CONFIGS, DEFAULTS_DIR, ROMS, SAVES, configure_emulator
+from configgen.controller import get_dpad_button_indices_evdev, get_dpad_button_indices_sysfs, map_hidraw_to_evdev
 from configgen.generators.Generator import Generator
 from configgen.utils.configparser import CaseSensitiveRawConfigParser
 from configgen.input import Input
@@ -43,10 +44,19 @@ def log_stderr(msg):
     ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     print(f"{ts} [SWITCH-DEBUG] {msg}", file=sys.stdout)	
 
-def fix_guid_for_eden(guid):
-    # SDL del sistema modifica bytes 2-5, eden espera el GUID SDL estándar
-    # 03004e526f0e... → 030000006f0e...
-    return guid[:4] + "0000" + guid[8:]
+
+def normalize_sdl_guid(raw_guid: str) -> str:
+    """
+    Bluetooth vía BlueZ+HIDAPI se presenta al kernel como USB HID (0300),
+    aunque SDL lo detecte como BT (0500). Los dispositivos virtuales (0600)
+    son correctos tal cual. Futuros mandos USB/virtual no necesitan remap.
+    """
+    g = raw_guid.lower()
+    bus = g[:4]
+    remap = {
+        "0500": "0300",  # BT → USB HID (BlueZ/HIDAPI)
+    }
+    return remap.get(bus, bus) + g[4:]
 
 def hidraw_get_guid(devpath):
     try:
@@ -89,16 +99,7 @@ def list_hidraw_devices():
         })
     return devices
 
-def map_hidraw_to_evdev():
-    mapping = {}
-    for h in glob.glob("/sys/class/hidraw/hidraw*"):
-        hid = os.path.basename(h)
-        devpath = os.path.realpath(os.path.join(h, "device"))
-        for root, dirs, files in os.walk(devpath):
-            for d in dirs:
-                if d.startswith("event"):
-                    mapping[f"/dev/{hid}"] = f"/dev/input/{d}"
-    return mapping
+
 
 def sdlmapping_to_controller(mapping, guid):
     sdl_to_batoinputmapping = {
@@ -184,7 +185,7 @@ def detect_bus_from_hidraw(hidraw_path: str):
 
     return bus_prefix[2:]
 
-def list_sdl_gamepads(sdlversion):
+def eden_list_sdl_gamepads(sdlversion):
     os.environ["SDL_JOYSTICK_HIDAPI"] = "1"
     os.environ["SDL_JOYSTICK_HIDAPI_PS4"] = "1"
     os.environ["SDL_JOYSTICK_HIDAPI_PS5"] = "1"
@@ -208,13 +209,7 @@ def list_sdl_gamepads(sdlversion):
             joy_guid = joystick.SDL_JoystickGetDeviceGUID(i)
             buff = create_string_buffer(33)
             joystick.SDL_JoystickGetGUIDString(joy_guid, buff, 33)
-            print("================================================================")
-            print(f"GUID raw de SDL: {bytes(buff)}", flush=True)
-
             guidstring = ((bytes(buff)).decode()).split('\x00', 1)[0]
-
-            print(f"GUID tras decode: {guidstring}", flush=True)
-            print("================================================================")
             joy_path = joystick.SDL_JoystickPathForIndex(i).decode()
 
             if 'hidraw' in joy_path and sdlversion == 3:
@@ -222,10 +217,25 @@ def list_sdl_gamepads(sdlversion):
                 guidstring = bustype + guidstring[2:]
 
             mapping = sdl2.SDL_GameControllerMapping(pad)
-            import pprint
-            pprint.pprint(mapping)
-            eslog.debug(str(mapping))
             controller = sdlmapping_to_controller(str(mapping), guidstring)
+
+            normalized_guid = normalize_sdl_guid(guidstring)
+            normalized_guid = normalized_guid[:4] + "0000" + normalized_guid[8:]
+
+            if normalized_guid in EDEN_RARE_DPAD_GUIDS:
+                dpad_sdl_buttons = {
+                    'up':    sdl2.SDL_CONTROLLER_BUTTON_DPAD_UP,
+                    'down':  sdl2.SDL_CONTROLLER_BUTTON_DPAD_DOWN,
+                    'left':  sdl2.SDL_CONTROLLER_BUTTON_DPAD_LEFT,
+                    'right': sdl2.SDL_CONTROLLER_BUTTON_DPAD_RIGHT,
+                }
+                for direction, btn_idx in dpad_sdl_buttons.items():
+                    controller['inputs'][direction] = Input(
+                        name=direction, type="button",
+                        id=str(btn_idx), value=1, code=0
+                    )
+                    eslog.debug("dpad fix: %s → %d", direction, btn_idx)            
+                            
             sdl_devices[joy_path] = controller
 
     sdl2.SDL_Quit()
@@ -673,7 +683,7 @@ class EdenGenerator(Generator):
         if not system.isOptSet('yuzu_auto_controller_config') or system.config["yuzu_auto_controller_config"] != "0":
             # 1. Obtener los mapeos de hardware
             evdev_hidraw = evdev_to_hidraw()
-            sdl_gamepads = list_sdl_gamepads(sdlversion)
+            sdl_gamepads = eden_list_sdl_gamepads(sdlversion)
 
             # 2. Inicializar TODOS los puertos posibles de Eden por defecto como desconectados
             # Esto evita que se queden mandos "fantasmas" de sesiones anteriores
@@ -682,19 +692,21 @@ class EdenGenerator(Generator):
                 yuzuConfig.set("Controls", f"player_{slot}_connected\\default", "false")
 
             guid_port = {}
+            global_port_counter = {}  # puerto SDL real, independiente del slot de Eden
             
             # 3. Iterar respetando el ID de jugador real asignado por Batocera
             for pad in playersControllers:
                 # Batocera cuenta desde 1 (P1, P2, P3...), Eden cuenta desde 0 (player_0, player_1...)
                 # Si pad.player no está disponible, hacemos fallback seguro al orden de la lista
                 real_player_index = (pad.player - 1) if hasattr(pad, 'player') else playersControllers.index(pad)
-                
-                # Control de desbordamiento (Eden solo soporta hasta 8 mandos)
                 if real_player_index < 0 or real_player_index > 7:
                     continue
 
                 player_nb_str = f"player_{real_player_index}"
 
+                # ← AQUÍ, antes de tocar nada de inputs o botones
+                current_buttons_mapping = dict(yuzuButtonsMapping)
+                
                 # Resolver rutas de hardware para extraer inputs del gamepad
                 hidraw_path = None
                 if pad.device_path in evdev_hidraw:
@@ -712,12 +724,6 @@ class EdenGenerator(Generator):
                             pad.inputs = gamepad['inputs']
                             break
 
-                # Control del índice del puerto físico por GUID duplicado
-                if pad.guid not in guid_port:
-                    guid_port[pad.guid] = 0
-                else:
-                    guid_port[pad.guid] = guid_port[pad.guid] + 1
-
                 # Configurar tipo de mando basándonos en su índice real de Batocera
                 yuzuConfig.set("Controls", player_nb_str + "_type\\default", "false")
                 if system.isOptSet('p{}_pad'.format(real_player_index)):
@@ -725,38 +731,42 @@ class EdenGenerator(Generator):
                 else:
                     yuzuConfig.set("Controls", player_nb_str + "_type", "0")
 
-                # Tratamiento de botones invertidos de Nintendo
-                if pad.real_name and "Nintendo" in pad.real_name:
-                    yuzuButtonsMapping["button_a"] = "b"
-                    yuzuButtonsMapping["button_b"] = "a"
-                    yuzuButtonsMapping["button_x"] = "y"
-                    yuzuButtonsMapping["button_y"] = "x"
+                # Normalización del GUID — ANTES de usarlo
+                eden_guid = normalize_sdl_guid(pad.guid)
+                eden_guid = eden_guid[:4] + "0000" + eden_guid[8:]
+
+                # Puerto — ANTES de usarlo
+                if eden_guid not in global_port_counter:
+                    global_port_counter[eden_guid] = 0
+                else:
+                    global_port_counter[eden_guid] += 1
+                port = global_port_counter[eden_guid]
 
                 yuzu_inverse_button = system.config.get('yuzu_inverse_button', 'false').lower() == 'true'
                 if yuzu_inverse_button:
-                    yuzuButtonsMapping["button_a"] = "b"
-                    yuzuButtonsMapping["button_b"] = "a"
-                    yuzuButtonsMapping["button_x"] = "y"
-                    yuzuButtonsMapping["button_y"] = "x"
+                    current_buttons_mapping["button_a"] = "b"
+                    current_buttons_mapping["button_b"] = "a"
+                    current_buttons_mapping["button_x"] = "y"
+                    current_buttons_mapping["button_y"] = "x"
 
-                # Normalización del GUID para Eden
-                eden_guid = pad.guid[:4] + "0000" + pad.guid[8:]
+                # UN solo loop de botones — current_buttons_mapping, no yuzuButtonsMapping
+                for x in current_buttons_mapping:
+                    yuzuConfig.set("Controls", player_nb_str + "_" + x,
+                        '"{}"'.format(EdenGenerator.setButton(emulator, current_buttons_mapping[x],
+                                    eden_guid, pad.inputs, port)))
 
-                # Inyectar mapeos específicos del jugador activo actual
-                for x in yuzuButtonsMapping:
-                    yuzuConfig.set("Controls", player_nb_str + "_" + x, '"{}"'.format(EdenGenerator.setButton(emulator, yuzuButtonsMapping[x], eden_guid, pad.inputs, guid_port[pad.guid])))
                 for x in yuzuAxisMapping:
-                    yuzuConfig.set("Controls", player_nb_str + "_" + x, '"{}"'.format(EdenGenerator.setAxis(yuzuAxisMapping[x], eden_guid, pad.inputs, guid_port[pad.guid])))
+                    yuzuConfig.set("Controls", player_nb_str + "_" + x,
+                        '"{}"'.format(EdenGenerator.setAxis(yuzuAxisMapping[x],
+                                    eden_guid, pad.inputs, port)))
 
-                # Configurar extras del jugador activo y MARCAR COMO CONECTADO
+                # Extras y activación
                 yuzuConfig.set("Controls", player_nb_str + "_button_screenshot\\default", "false")
                 yuzuConfig.set("Controls", player_nb_str + "_button_screenshot", "[empty]")
                 yuzuConfig.set("Controls", player_nb_str + "_motionleft\\default", "false")
                 yuzuConfig.set("Controls", player_nb_str + "_motionleft", "[empty]")
                 yuzuConfig.set("Controls", player_nb_str + "_motionright", "[empty]")
                 yuzuConfig.set("Controls", player_nb_str + "_motionright\\default", "false")
-                
-                # ACTIVACIÓN EXPLÍCITA DEL MANDO CONECTADO
                 yuzuConfig.set("Controls", player_nb_str + "_connected", "true")
                 yuzuConfig.set("Controls", player_nb_str + "_connected\\default", "false")
 
@@ -793,7 +803,8 @@ class EdenGenerator(Generator):
     def setButton(emulator, key, padGuid, padInputs, port):
         if key in padInputs:
             input_data = padInputs[key]
-            print(f"HAT: id={input_data.id}, value={input_data.value}", file=sys.stderr)
+            eslog.debug("setButton: key=%s type=%s id=%s value=%s",
+                        key, input_data.type, input_data.id, input_data.value)
             if input_data.type == "button":
                 return f"engine:sdl,port:{port},guid:{padGuid},button:{input_data.id}"
             elif input_data.type == "hat":
@@ -802,7 +813,6 @@ class EdenGenerator(Generator):
             elif input_data.type == "axis":
                 return f"engine:sdl,port:{port},guid:{padGuid},axis:{input_data.id},threshold:0.500000,invert:+"
         return "[empty]"
-
     
     @staticmethod
     def hatdirectionvalue(value):

@@ -226,6 +226,9 @@ frontend/.emulationstation/themes/
 frontend/.emulationstation/themes/*
 frontend/.emulationstation/tmp/
 frontend/.emulationstation/tmp/*
+frontend/.emulationstation/resources/
+frontend/.emulationstation/resources/*
+frontend/.emulationstation/music/*
 frontend/.emulationstation/es_log.*
 frontend/.emulationstation/es_settings.*
 frontend/.emulationstation/es_*input*

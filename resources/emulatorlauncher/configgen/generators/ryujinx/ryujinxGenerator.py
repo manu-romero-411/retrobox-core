@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 from configgen import Command as Command
 from configgen.batoceraPaths import _SYSTEM_LOCAL_BIN, CONFIGS, DEFAULTS_DIR, ROMS, SAVES, configure_emulator, ensure_symlink, mkdir_if_not_exists
-from configgen.controller import generate_sdl_game_controller_config
+from configgen.controller import generate_sdl_game_controller_config, normalize_sdl_guid_for_emulator
 from configgen.generators.Generator import Generator
 from configgen.generators.eden.edenPaths import SWITCH_FIRMWARE, SWITCH_KEYS, SWITCH_MODS_DIR, SWITCH_ROMS
 from configgen.generators.ryujinx.ryujinxPaths import RYUJINX_BIS, RYUJINX_CONFIG, RYUJINX_CONFIG_FILE, RYUJINX_CONFIG_FILE_BFR, RYUJINX_CONFIG_FILE_TPL, RYUJINX_MODS_LINK, RYUJINX_SAVE_BASE, RYUJINX_SYSTEM_CONFIG_DIR, RYUJINX_SYSTEM_DIR, RYUJINX_USER_DIR, RYUJINX_SYSTEM_SAVES, RYUJINX_USER_SAVES
@@ -322,7 +322,8 @@ class RyujinxGenerator(Generator):
             SWITCH_FIRMWARE,
             RYUJINX_SYSTEM_DIR / "Contents/registered",
             RYUJINX_CONFIG / "checksum_firmware.txt"
-)        
+        )
+        
         # Saves base
         mkdir_if_not_exists(RYUJINX_SAVE_BASE)
 
@@ -371,6 +372,12 @@ class RyujinxGenerator(Generator):
         if len(g) != 32:
             return sdl_guid
         b = [g[i:i+2] for i in range(0, 32, 2)]
+
+        # Remap bus BT (05 00 LE) → USB (03 00 LE) igual que Eden
+        # b[0]=low byte, b[1]=high byte del bus en little-endian
+        if b[0] == '05' and b[1] == '00':
+            b[0] = '03'
+
         bus_le = b[0:2]
         b[0] = '00'
         b[1] = '00'
@@ -505,8 +512,9 @@ class RyujinxGenerator(Generator):
                         if not g:
                             return False
 
-                        g = re.sub(r'[^0-9a-f]', '', str(g).lower())
-
+                        #g = re.sub(r'[^0-9a-f]', '', str(g).lower())
+                        g = normalize_sdl_guid_for_emulator(g.lower().replace('-', ''))
+                        
                         if len(g) != 32:
                             return False
 

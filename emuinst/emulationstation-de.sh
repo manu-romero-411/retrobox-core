@@ -174,7 +174,7 @@ function appimage_install(){
   cd "${INSTALL_DIR}"
   "${INSTALL_DIR}/emulationstation-de.AppImage" --appimage-extract
   mv "${INSTALL_DIR}"/squashfs-root/* "${INSTALL_DIR}/."
-  rm -r "${INSTALL_DIR}/squashfs-root/"
+#  rm -r "${INSTALL_DIR}/squashfs-root/" || true
   rm "${INSTALL_DIR}/emulationstation-de.AppImage"
 
   chown -R 1000:1000 "${INSTALL_DIR}"

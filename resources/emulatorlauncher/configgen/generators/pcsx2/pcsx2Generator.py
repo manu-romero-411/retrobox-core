@@ -38,10 +38,8 @@ if TYPE_CHECKING:
 
 _logger = logging.getLogger(__name__)
 
-_PCSX2_BIN_DIR:       Final = Path("/opt/pcsx2")
 _PCSX2_BIN:           Final = Path("/usr/local/bin/pcsx2")        # symlink al AppImage
-_PCSX2_RESOURCES_DIR: Final = _PCSX2_BIN_DIR / "resources"
-_PCSX2_CONFIG:        Final = CONFIGS / 'pcsx2'
+_PCSX2_CONFIG:        Final = CONFIGS / 'PCSX2'
 _PCSX2_BIOS:          Final = BIOS / "pcsx2" / "bios"
 
 class Pcsx2Generator(Generator):
@@ -124,7 +122,7 @@ class Pcsx2Generator(Generator):
                 _logger.warning("CPU does not support SSE4.1 which is required by pcsx2.  The emulator will likely crash with SIGILL (illegal instruction).")
 
         envcmd: dict[str, str | Path] = {
-            "XDG_CONFIG_HOME": str(Path.home() / '.config')
+            "XDG_CONFIG_HOME": CONFIGS
         }
 
         # wheels won't work correctly when SDL_GAMECONTROLLERCONFIG is set. excluding wheels from SDL_GAMECONTROLLERCONFIG doesn't fix too.
@@ -165,10 +163,10 @@ def getGfxRatioFromConfig(config: SystemConfig, gameResolution: Resolution):
 def configureReg(config_directory: Path) -> None:
     with ensure_parents_and_open(config_directory / "PCSX2-reg.ini", "w") as f:
         f.write("DocumentsFolderMode=User\n")
-        f.write(f"CustomDocumentsFolder={_PCSX2_BIN_DIR}\n")
+        f.write(f"CustomDocumentsFolder={_PCSX2_CONFIG}\n")
         f.write("UseDefaultSettingsFolder=enabled\n")
         f.write(f"SettingsFolder={config_directory / 'inis'}\n")
-        f.write(f"Install_Dir={_PCSX2_BIN_DIR}\n")
+        f.write(f"Install_Dir={_PCSX2_CONFIG}\n")
         f.write("RunWizard=0\n")
 
 def configureAudio(config_directory: Path) -> None:
@@ -511,20 +509,20 @@ def configureINI(config_directory: Path, bios_directory: Path, system: Emulator,
     # Gun crosshairs
     if pcsx2INIConfig.has_section("USB1"):
         if system.config.get("pcsx2_crosshairs") == "1":
-            pcsx2INIConfig.set("USB1", "guncon2_cursor_path", str(_PCSX2_RESOURCES_DIR / "crosshairs" / "default.png"))
+            pcsx2INIConfig.set("USB1", "guncon2_cursor_path", str(_PCSX2_CONFIG / "crosshairs" / "default.png"))
             pcsx2INIConfig.set("USB1", "guncon2_cursor_color", "#0000ff") # blue
         else:
             pcsx2INIConfig.set("USB1", "guncon2_cursor_path", "")
     if pcsx2INIConfig.has_section("USB2"):
         if system.config.get("pcsx2_crosshairs") == "1":
-            pcsx2INIConfig.set("USB2", "guncon2_cursor_path", str(_PCSX2_RESOURCES_DIR / "crosshairs" / "default.png"))
+            pcsx2INIConfig.set("USB2", "guncon2_cursor_path", str(_PCSX2_CONFIG / "crosshairs" / "default.png"))
             pcsx2INIConfig.set("USB2", "guncon2_cursor_color", "#ff0000") # red
         else:
             pcsx2INIConfig.set("USB2", "guncon2_cursor_path", "")
     # hack for the fog bug for guns (time crisis - crisis zone)
     fog_files = [
-        _PCSX2_RESOURCES_DIR / "textures" / "SCES-52530" / "replacements" / "c321d53987f3986d-eadd4df7c9d76527-00005dd4.png",
-        _PCSX2_RESOURCES_DIR / "textures" / "SLUS-20927" / "replacements" / "c321d53987f3986d-eadd4df7c9d76527-00005dd4.png"
+        _PCSX2_CONFIG / "textures" / "SCES-52530" / "replacements" / "c321d53987f3986d-eadd4df7c9d76527-00005dd4.png",
+        _PCSX2_CONFIG / "textures" / "SLUS-20927" / "replacements" / "c321d53987f3986d-eadd4df7c9d76527-00005dd4.png"
     ]
     texture_dir = config_directory / "textures"
     # copy textures if necessary to PCSX2 config folder

@@ -5,6 +5,8 @@ from typing import TYPE_CHECKING
 
 import pyudev
 
+from configgen.controller import normalize_sdl_guid_for_emulator
+
 from ...batoceraPaths import mkdir_if_not_exists
 from .cemuPaths import CEMU_CONTROLLER_PROFILES
 
@@ -45,6 +47,12 @@ def generateControllerConfig(system: Emulator, playersControllers: Controllers) 
 
     DEFAULT_DEADZONE       = '0.25'
     DEFAULT_RANGE          = '1'
+    
+    # Mandos con layout Nintendo donde A/B y X/Y están invertidos respecto a Xbox
+    NINTENDO_LAYOUT_GUIDS = {
+        "030000007e0500000920000000006803",  # Nintendo Switch Pro Controller
+    }
+
 
     buttonMappingsSDL = {
         GAMEPAD: { # excludes show screen
@@ -259,7 +267,7 @@ def generateControllerConfig(system: Emulator, playersControllers: Controllers) 
         # Create controller configuration
         controllerNode = ET.SubElement(root, 'controller')
         addTextElement(controllerNode, 'api', api)
-        addTextElement(controllerNode, 'uuid', f"{guid_n[pad.index]}_{pad.guid}") # controller guid
+        addTextElement(controllerNode, 'uuid', f"{guid_n[pad.index]}_{normalize_sdl_guid_for_emulator(pad.guid)}") # controller guid
         addTextElement(controllerNode, 'display_name', pad.real_name) # controller name
         addTextElement(controllerNode, 'rumble', system.config.get('cemu_rumble', '0')) # % chosen
         addAnalogControl(controllerNode, 'axis')
@@ -267,9 +275,14 @@ def generateControllerConfig(system: Emulator, playersControllers: Controllers) 
         addAnalogControl(controllerNode, 'trigger')
 
         # Apply the appropriate button mappings
-        mappingsNode = ET.SubElement(controllerNode, "mappings")
-        mapping = (buttonMappingsSDL,buttonMappingsWiimote)[isWiimote(pad)][type]
+        mappingsNode = ET.SubElement(controllerNode, 'mappings')
+        mapping = dict((buttonMappingsSDL,buttonMappingsWiimote)[isWiimote(pad)][type])
+        if (("Nintendo" in pad.real_name or pad.guid in NINTENDO_LAYOUT_GUIDS) \
+            and not isWiimote(pad)):
+            mapping["1"], mapping["2"] = mapping["2"], mapping["1"]
+            mapping["3"], mapping["4"] = mapping["4"], mapping["3"]
         for key, value in mapping.items():
+            
             entryNode = ET.SubElement(mappingsNode, "entry")
             addTextElement(entryNode, "mapping", key)
             addTextElement(entryNode, "button", value)

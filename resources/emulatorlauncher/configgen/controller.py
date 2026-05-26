@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import glob
 import os
 import xml.etree.ElementTree as ET
 from collections.abc import Iterable, Mapping, Sequence
@@ -91,6 +92,102 @@ def _find_input_config(roots: Iterable[ET.Element], name: str, guid: str, /) -> 
             return element
 
     raise BatoceraException(f'Could not find controller data for "{name}" with GUID "{guid}"')
+
+
+_HIDAPI_BUS = "0300"  # lo que SDL+HIDAPI reporta siempre vía kernel HID
+
+def normalize_sdl_guid_for_emulator(raw_guid: str) -> str:
+    """
+    SDL con backend HIDAPI/hidraw presenta todos los mandos como USB HID (0300)
+    independientemente del transporte físico (BT=0500, virtual=0600, etc.).
+    Normaliza el GUID de Batocera para que coincida con lo que ve el emulador.
+    """
+    g = raw_guid.lower()
+    bus = g[:4]
+
+    if bus == _HIDAPI_BUS:
+        return g  # ya correcto, no tocar
+
+    # cualquier otro bus → USB HID, igual que lo ve SDL+HIDAPI
+    return _HIDAPI_BUS + g[4:]
+
+def map_hidraw_to_evdev():
+    """
+    Correspondencia entre nodos hidraw y event, para poder leer capacidades evdev de mandos que SDL expone vía hidraw.
+    """
+    mapping = {}
+    for h in glob.glob("/sys/class/hidraw/hidraw*"):
+        hid = os.path.basename(h)
+        devpath = os.path.realpath(os.path.join(h, "device"))
+        for root, dirs, files in os.walk(devpath):
+            for d in dirs:
+                if d.startswith("event"):
+                    mapping[f"/dev/{hid}"] = f"/dev/input/{d}"
+    return mapping
+
+def get_dpad_button_indices_evdev(evdev_path):
+    """
+    Lee las capacidades evdev del dispositivo y devuelve
+    {direction: joystick_button_index} para BTN_DPAD_*.
+    """
+    try:
+        import evdev
+        dev = evdev.InputDevice(evdev_path)
+        caps = dev.capabilities()
+        btn_codes = sorted(caps.get(evdev.ecodes.EV_KEY, []))
+        dev.close()
+
+        dpad_ecodes = {
+            'up':    evdev.ecodes.BTN_DPAD_UP,    # 0x220
+            'down':  evdev.ecodes.BTN_DPAD_DOWN,  # 0x221
+            'left':  evdev.ecodes.BTN_DPAD_LEFT,  # 0x222
+            'right': evdev.ecodes.BTN_DPAD_RIGHT, # 0x223
+        }
+        return {
+            direction: btn_codes.index(code)
+            for direction, code in dpad_ecodes.items()
+            if code in btn_codes
+        }
+    except Exception as e:
+        print("get_dpad_button_indices(%s): %s", evdev_path, e)
+        return {}
+
+def get_dpad_button_indices_sysfs(evdev_path):
+    """
+    Lee /sys/.../capabilities/key para calcular los índices SDL
+    de BTN_DPAD_* sin depender de python-evdev.
+    """
+    dev_name = os.path.basename(evdev_path)  # eventX
+    caps_path = f"/sys/class/input/{dev_name}/device/capabilities/key"
+
+    BTN_DPAD_UP    = 0x220
+    BTN_DPAD_DOWN  = 0x221
+    BTN_DPAD_LEFT  = 0x222
+    BTN_DPAD_RIGHT = 0x223
+
+    try:
+        with open(caps_path) as f:
+            hex_str = f.read().strip()
+
+        # chunks big-endian separados por espacios
+        bits = int(hex_str.replace(' ', ''), 16)
+
+        # SDL solo cuenta BTN_* (>= 0x100), en orden ascendente
+        btn_codes = sorted(i for i in range(bits.bit_length()) if (bits >> i) & 1 and i >= 0x100)
+
+        result = {}
+        for direction, code in [('up',    BTN_DPAD_UP),
+                                 ('down',  BTN_DPAD_DOWN),
+                                 ('left',  BTN_DPAD_LEFT),
+                                 ('right', BTN_DPAD_RIGHT)]:
+            if code in btn_codes:
+                result[direction] = btn_codes.index(code)
+                print("dpad sysfs: %s → code 0x%x → button %d", direction, code, result[direction])
+
+        return result
+    except Exception as e:
+        print("get_dpad_button_indices_sysfs(%s): %s", evdev_path, e)
+        return {}
 
 def getJoystickHardwareIds(device_path: str, /) -> tuple[str, str] | None:
     """

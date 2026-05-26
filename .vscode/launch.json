@@ -1,9 +1,9 @@
 {
     "version": "0.2.0",
     "configurations": [
-        
 
 
+    
         {
             "name": "configgen: Switch eden-emu (ROM genérica)",
             "type": "debugpy",
@@ -11,18 +11,18 @@
             "module": "configgen.emulatorlauncher",
             "cwd": "${workspaceFolder}/resources/emulatorlauncher",
             "args": [
-                "-p1index",
-                "0",
-                "-p1guid",
-                "0600b7926f0e0000a802000000010000",
-                "-p1name",
-                "PDP Xbox One Arctic White",
-                "-p1nbbuttons",
-                "11",
-                "-p1nbhats",
-                "1",
-                "-p1nbaxes",
-                "6",
+                "-p1index", "1",
+                "-p1guid", "0600b7926f0e0000a802000000010000",
+                "-p1name", "PDP Xbox One Arctic White",
+                "-p1nbbuttons", "11",
+                "-p1nbhats", "1",
+                "-p1nbaxes", "6",
+                "-p2index", "0",
+                "-p2guid", "0500d71f7e0500000920000000006803",
+                "-p2name", "Nintendo Switch Pro Controller",
+                "-p2nbbuttons", "16",
+                "-p2nbhats", "1",
+                "-p2nbaxes", "6",
                 "-system",
                 "switch",
                 "-rom",
@@ -82,13 +82,13 @@
             "cwd": "${workspaceFolder}/resources/emulatorlauncher",
             "args": [
                 "-p1index", "0",
-                "-p1guid", "03004e526f0e0000a802000023020000",
-                "-p1name", "PDP Xbox One Arctic White",
-                "-p1nbbuttons", "11",
+                "-p1guid", "0500d71f7e0500000920000000006803",
+                "-p1name", "Nintendo Switch Pro Controller",
+                "-p1nbbuttons", "16",
                 "-p1nbhats", "1",
                 "-p1nbaxes", "6",
                 "-system", "psp",
-                "-rom", "/penguintb/juegos/roms/psp/Pac-Man Championship Edition (Spain) (Minis).iso",
+                "-rom", "/run/media/manuel/penguinTB/juegos/roms/psp/Pac-Man Championship Edition (Spain) (Minis).iso",
                 "-gameinfoxml", "/tmp/game.xml",
                 "-systemname", "PlayStation Portable"
             ],
@@ -163,7 +163,7 @@
                 "-p1nbhats", "1",
                 "-p1nbaxes", "6",
                 "-system", "ps2",
-                "-rom", "/penguintb/juegos/roms/ps2/Dragon Quest - The Journey of the Cursed King (Europe, Australia) (En,Fr,De,Es,It).chd",
+                "-rom", "/run/media/manuel/penguinTB/juegos/roms/ps2/Dragon Quest - The Journey of the Cursed King (Europe, Australia) (En,Fr,De,Es,It).chd",
                 "-gameinfoxml", "/tmp/game.xml",
                 "-systemname", "PlayStation 2"
             ],

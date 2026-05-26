@@ -78,7 +78,7 @@ class LibretroGenerator(Generator):
             system.config['core'] = 'mame'
 
         # Get the graphics backend first
-        gfxBackend = getGFXBackend(system)
+        gfxBackend = gfx_backend_get(system)
 
         # Get the shader before writing the config, we may need to disable bezels based on the shader.
         renderConfig = system.renderconfig
@@ -424,23 +424,26 @@ class LibretroGenerator(Generator):
 
         return Command.Command(array=commandArray, env={"XDG_CONFIG_HOME":CONFIGS})
 
-def getGFXBackend(system: Emulator) -> str:
+def gfx_backend_check(backend: str) -> str:
+    if backend == "vulkan":
+        if videoMode.supportsVulkan():
+            return gfx_backend_check("glcore")
+    elif backend == "glcore":
+        if videoMode.getGLVendor() in ["nvidia", "amd"] and videoMode.getGLVersion() >= 3.1:
+            return "glcore"
+    else:
+        return "gl"
+
+def gfx_backend_get(system: Emulator) -> str:
     backend = system.config.get("gfxbackend")
 
     if backend:
         setManually = True
+        backend = gfx_backend_check(backend)
     else:
         setManually = False
-
-        # PRIORIDAD: Vulkan si está disponible
-        if videoMode.supportsVulkan():
-            backend = "vulkan"
-        # Si no, fallback a OpenGL
-        elif videoMode.getGLVendor() in ["nvidia", "amd"] and videoMode.getGLVersion() >= 3.1:
-            backend = "glcore"
-        else:
-            backend = "gl"
-
+        backend = gfx_backend_check("glcore")
+    
     # Retroarch has flipped between using opengl or gl, correct the setting here if needed.
     if backend == "opengl":
         backend = "gl"

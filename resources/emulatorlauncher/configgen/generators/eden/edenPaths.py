@@ -31,6 +31,12 @@ EDEN_MODS_LINK: Final = EDEN_DATA / "load"
 
 YUZU_CONFIG_FILE: Final = CONFIGS / "yuzu/qt-config.ini"
 
+# GAMEPAD RARE CONFIG
+# Mandos que exponen el dpad como BTN_DPAD_* pero SDL los virtualiza como hat
+EDEN_RARE_DPAD_GUIDS = {
+    "030000007e0500000920000000006803",  # Switch Pro Controller
+}
+
 def setup_eden_environments():
     """Inicializa todos los directorios requeridos y enlaces simbólicos."""
     # 1. Crear Directorios necesarios

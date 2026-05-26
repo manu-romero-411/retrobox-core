@@ -15,6 +15,10 @@ _logger = logging.getLogger(__name__)
 ppssppControlsIni: Final  = PPSSPP_PSP_SYSTEM_DIR / 'controls.ini'
 ppssppControlsInit: Final = PPSSPP_CONFIG_INIT / 'controls.ini'
 
+PPSSPP_NINTENDO_CONTROLLERS = {
+    "030000007e0500000920000000006803",  # Switch Pro Controller
+}
+
 # This configgen is based on PPSSPP 1.5.4.
 # Therefore, all code/github references are valid at this version, and may not be valid with later updates
 
@@ -87,6 +91,21 @@ sdlNameToNKCode = {
     "right" : NKCODE_DPAD_RIGHT
 }
 
+nintendo_sdl_name_to_nk_code = {
+    "a" : NKCODE_BUTTON_2, # A
+    "b" : NKCODE_BUTTON_3, # B
+    "x" : NKCODE_BUTTON_4, # X
+    "y" : NKCODE_BUTTON_1, # Y
+    "select" : NKCODE_BUTTON_9, # SELECT/BACK
+    "start" : NKCODE_BUTTON_10, # START
+    "pageup" : NKCODE_BUTTON_6, # L
+    "pagedown" : NKCODE_BUTTON_5, # R
+    "up" : NKCODE_DPAD_UP,
+    "down" : NKCODE_DPAD_DOWN,
+    "left" : NKCODE_DPAD_LEFT,
+    "right" : NKCODE_DPAD_RIGHT
+}
+
 SDLHatMap = {
     "up" : NKCODE_DPAD_UP,
     "down" : NKCODE_DPAD_DOWN,
@@ -129,44 +148,47 @@ ppssppMapping =  { 'a' :             {'button': 'Circle'},
 
 # Create the controller configuration file
 def generateControllerConfig(controller: Controller):
-    # Set config file name
+    is_nintendo = any(kw in controller.real_name.lower()
+                      for kw in ['nintendo', 'switch', 'joy-con', 'pro controller'])
+
+    nintendo_remap = {
+        'a': 'b', 'b': 'a',
+        'x': 'y', 'y': 'x',
+    } if is_nintendo else {}
+
     configFileName = ppssppControlsIni
     Config = CaseSensitiveConfigParser(interpolation=None)
     Config.read(ppssppControlsInit)
-    # As we start with the default ini file, no need to create the section
     section = "ControlMapping"
     if not Config.has_section(section):
         Config.add_section(section)
 
-    # Parse controller inputs
     for index in controller.inputs:
         input = controller.inputs[index]
-        if input.name not in ppssppMapping or input.type not in ppssppMapping[input.name]:
+        effective_name = nintendo_remap.get(input.name, input.name)
+
+        if effective_name not in ppssppMapping or input.type not in ppssppMapping[effective_name]:
             continue
 
-        var = ppssppMapping[input.name][input.type]
+        var = ppssppMapping[effective_name][input.type]
         padnum = controller.index
 
         if input.type == 'button':
-            pspcode = sdlNameToNKCode[input.name]
+            pspcode = nintendo_sdl_name_to_nk_code.get(effective_name) if is_nintendo \
+                else sdlNameToNKCode[effective_name]
             val = f"{DEVICE_ID_PAD_0 + padnum}-{pspcode}"
             val = optionValue(Config, section, var, val)
             Config.set(section, var, val)
 
         elif input.type == 'axis':
-            # Get the axis code
             nkAxisId = SDLJoyAxisMap[input.id]
-            # Apply the magic axis formula
             pspcode = axisToCode(nkAxisId, int(input.value))
             val = f"{DEVICE_ID_PAD_0 + padnum}-{pspcode}"
             val = optionValue(Config, section, var, val)
-            _logger.debug("Adding %s to %s", var, val)
             Config.set(section, var, val)
 
-            # Skip the rest if it's an axis dpad
-            if input.name in [ 'up', 'down', 'left', 'right' ]:
+            if input.name in ['up', 'down', 'left', 'right']:
                 continue
-            # Also need to do the opposite direction manually. The input.id is the same as up/left, but the direction is opposite
             if input.name == 'joystick1up':
                 var = ppssppMapping['joystick1down'][input.type]
             elif input.name == 'joystick1left':
