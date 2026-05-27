@@ -269,7 +269,7 @@ gamecube:
   core:     dolphin
 gamegear:
   emulator: libretro
-  core:     genesisplusgx
+  core:     genesis_plus_gx
 gamepock:
   emulator: libretro
   core:     mame
@@ -385,13 +385,13 @@ mame:
   core:     mame078plus
 mastersystem:
   emulator: libretro
-  core:     genesisplusgx
+  core:     genesis_plus_gx
 megadrive:
   emulator: libretro
-  core:     genesisplusgx
+  core:     genesis_plus_gx
 megadrive-msu:
   emulator: libretro
-  core:     genesisplusgx
+  core:     genesis_plus_gx
 megaduck:
   emulator: libretro
   core:     sameduck
@@ -450,11 +450,11 @@ multivision:
   emulator: libretro
   core:     gearsystem
 n64:
-  emulator: mupen64plus
-  core:     glide64mk2
+  emulator: libretro
+  core:     mupen64plus_next
 n64dd:
-  emulator: mupen64plus
-  core:     glide64mk2
+  emulator: libretro
+  core:     mupen64plus_next
 namco22:
   emulator: libretro
   core:     mame
@@ -523,10 +523,10 @@ pc98:
   core:     np2kai
 pcengine:
   emulator: libretro
-  core:     pce_fast
+  core:     mednafen_pce
 pcenginecd:
   emulator: libretro
-  core:     pce_fast
+  core:     mednafen_pce
 pcfx:
   emulator: libretro
   core:     pcfx
@@ -538,7 +538,7 @@ pet:
   core:     xpet
 pico:
   emulator: libretro
-  core:     genesisplusgx
+  core:     genesis_plus_gx
 pico8:
   emulator: libretro
   core:     fake08
@@ -574,7 +574,7 @@ psvita:
   core:     vita3k
 psx:
   emulator: libretro
-  core:     pcsx_rearmed
+  core:     mednafen_psx
 pv1000:
   emulator: libretro
   core:     mame
@@ -643,7 +643,7 @@ sega32x:
   core:     picodrive
 megacd:
   emulator: libretro
-  core:     genesisplusgx
+  core:     genesis_plus_gx
 sc3000:
   emulator: libretro
   core:     mame
@@ -655,7 +655,7 @@ beena:
   core:     mame
 sg1000:
   emulator: libretro
-  core:     genesisplusgx
+  core:     genesis_plus_gx
 sgb:
   emulator: libretro
   core:     mgba
@@ -787,7 +787,7 @@ vircon32:
   core:     vircon32
 virtualboy:
   emulator: libretro
-  core:     vb
+  core:     mednafen_vb
 vis:
   emulator: libretro
   core:     mame

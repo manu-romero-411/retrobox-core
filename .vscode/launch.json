@@ -3,6 +3,8 @@
     "configurations": [
 
 
+
+
     
         {
             "name": "configgen: Switch eden-emu (ROM genérica)",
@@ -198,6 +200,30 @@
                 "-rom", "/run/media/manuel/penguinTB/juegos/roms/megadrive/Sonic The Hedgehog 2 (World) (Rev B).zip",
                 "-gameinfoxml", "/tmp/game.xml",
                 "-systemname", "Mega Drive"
+            ],
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            },
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "configgen: PC Engine (Bonk)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "configgen.emulatorlauncher",
+            "cwd": "${workspaceFolder}/resources/emulatorlauncher",
+            "args": [
+                "-p1index", "1",
+                "-p1guid", "0600b7926f0e0000a802000000010000",
+                "-p1name", "PDP Xbox One Arctic White",
+                "-p1nbbuttons", "11",
+                "-p1nbhats", "1",
+                "-p1nbaxes", "6",
+                "-system", "pcengine",
+                "-rom", "/run/media/manuel/penguinTB/juegos/roms/pcengine/Bonk's Adventure (USA).zip",
+                "-gameinfoxml", "/tmp/game.xml",
+                "-systemname", "PC Engine"
             ],
             "env": {
                 "PYTHONPATH": "${workspaceFolder}"

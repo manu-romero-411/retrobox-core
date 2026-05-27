@@ -76,6 +76,9 @@ _GENERATOR_MAP: Final[dict[str, tuple[str, str]]] = {
     'eden-emu': ('eden.edenGenerator', 'EdenGenerator'),
     'ryujinx': ('ryujinx.ryujinxGenerator', 'RyujinxGenerator'),
     'ryujinx-emu': ('ryujinx.ryujinxGenerator', 'RyujinxGenerator'),
+    'heroic': ('heroic.heroicGenerator', 'HeroicGenerator'),
+    'steam': ('steam.steamGenerator', 'SteamGenerator'),
+    'lutris': ('lutris.lutrisGenerator', 'LutrisGenerator'),
 }
 
 def get_generator(emulator: str, core: str) -> Generator:

@@ -45,6 +45,9 @@ class LibretroGenerator(Generator):
     def _core_filename(self, core: str) -> str:
         """Traduce nombres alias de Batocera a nombres de fichero upstream de RetroArch."""
         _MAP = {
+            'pce':                    'mednafen_pce',
+            'pce_fast':               'mednafen_pce_fast',
+            'vb':                     'mednafen_vb',
             'genesisplusgx':          'genesis_plus_gx',
             'genesisplusgx-expanded': 'genesis_plus_gx',
             'genesisplusgx-wide':     'genesis_plus_gx_wide',

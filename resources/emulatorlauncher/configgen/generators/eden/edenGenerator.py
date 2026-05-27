@@ -16,7 +16,7 @@ from configgen.utils.configparser import CaseSensitiveRawConfigParser
 from configgen.input import Input
 from datetime import datetime
 
-from configgen.generators.eden.edenPaths import SWITCH_DLC_DIR, EDEN_BIN, SWITCH_ROMS, SWITCH_UPDATE_DIR, setup_eden_environments
+from configgen.generators.eden.edenPaths import EDEN_RARE_DPAD_GUIDS, SWITCH_DLC_DIR, EDEN_BIN, SWITCH_ROMS, SWITCH_UPDATE_DIR, setup_eden_environments
 
 os.environ["PYSDL2_DLL_PATH"] = "/usr/lib/x86_64-linux-gnu"
 
