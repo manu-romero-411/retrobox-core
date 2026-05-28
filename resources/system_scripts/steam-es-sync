@@ -1,0 +1,185 @@
+#!/usr/bin/env bash
+# =============================================================================
+# steam-es-sync.sh
+# Escanea todos los juegos instalados en Steam (todas las bibliotecas) y
+# genera un archivo <nombre>.steam por cada uno en:
+#   /var/penguin/juegos/retrobox/roms/steam/
+#
+# Formato del enlace: steam://rungameid/<appid>
+# =============================================================================
+
+set -uo pipefail
+
+# ── Configuración ─────────────────────────────────────────────────────────────
+DESTINO="/var/penguin/juegos/retrobox/roms/steam"
+
+# Rutas habituales donde Steam puede estar instalado
+STEAM_ROOTS=(
+#    "${HOME}/.steam/steam"
+    "${HOME}/.local/share/Steam"
+    "${HOME}/.var/app/com.valvesoftware.Steam/.local/share/Steam"  # Flatpak
+    "/var/penguin/juegos/steam"  # Ruta personalizada 
+)
+
+# ── Colores ───────────────────────────────────────────────────────────────────
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+CYAN='\033[0;36m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+log_info()  { echo -e "${CYAN}[INFO]${NC}  $*"; }
+log_ok()    { echo -e "${GREEN}[ OK ]${NC}  $*"; }
+log_warn()  { echo -e "${YELLOW}[WARN]${NC}  $*"; }
+log_error() { echo -e "${RED}[ERR ]${NC}  $*"; }
+log_lib()   { echo -e "${BLUE}[LIB ]${NC}  $*"; }
+
+# ── Parseo de VDF ─────────────────────────────────────────────────────────────
+# Extrae el valor de una clave en un archivo VDF/ACF.
+# Formato de línea VDF:  "clave"    "valor"
+# Uso: vdf_get <archivo> <clave>
+vdf_get() {
+    local archivo="$1"
+    local clave="$2"
+    grep -m1 -i "\"${clave}\"" "$archivo" \
+        | sed 's/.*"'"${clave}"'"\s*"\(.*\)"/\1/I'
+}
+
+# ── Limpieza de nombre para nombre de archivo ──────────────────────────────────
+limpiar_nombre() {
+    local nombre="$1"
+    nombre="${nombre//[\/\\:*?\"<>|]/-}"
+    nombre="${nombre#"${nombre%%[![:space:]]*}"}"
+    nombre="${nombre%"${nombre##*[![:space:]]}"}"
+    echo "$nombre"
+}
+
+# ── Localizar instalación de Steam ────────────────────────────────────────────
+STEAM_ROOT=""
+for ruta in "${STEAM_ROOTS[@]}"; do
+    if [[ -d "$ruta/steamapps" ]]; then
+        STEAM_ROOT="$ruta"
+        break
+    fi
+done
+
+if [[ -z "$STEAM_ROOT" ]]; then
+    log_error "No se encontró ninguna instalación de Steam en las rutas habituales:"
+    for ruta in "${STEAM_ROOTS[@]}"; do
+        log_error "  • $ruta"
+    done
+    log_error "Edita la variable STEAM_ROOTS al inicio del script si tu instalación está en otra ruta."
+    exit 1
+fi
+
+log_info "Steam encontrado en: ${STEAM_ROOT}"
+
+# ── Leer todas las rutas de biblioteca desde libraryfolders.vdf ───────────────
+LIBRARY_VDF=""
+for candidate in \
+    "${STEAM_ROOT}/steamapps/libraryfolders.vdf" \
+    "${STEAM_ROOT}/libraryfolder.vdf"; do
+    if [[ -f "$candidate" ]]; then
+        LIBRARY_VDF="$candidate"
+        break
+    fi
+done
+
+if [[ -z "$LIBRARY_VDF" ]]; then
+    log_error "No se encontró el archivo de bibliotecas en:"
+    log_error "  • ${STEAM_ROOT}/steamapps/libraryfolders.vdf"
+    log_error "  • ${STEAM_ROOT}/libraryfolder.vdf"
+    exit 1
+fi
+
+log_info "Bibliotecas leídas desde: ${LIBRARY_VDF}"
+
+# Extraer valores de "path" del VDF (pueden estar como "path" o dentro de
+# objetos numerados en versiones modernas del archivo)
+mapfile -t LIBRARY_PATHS < <(
+    grep -i '"path"' "$LIBRARY_VDF" \
+        | sed 's/.*"path"\s*"\(.*\)"/\1/' \
+        | sort -u
+)
+
+# La biblioteca principal siempre incluye STEAM_ROOT
+LIBRARY_PATHS=("${STEAM_ROOT}" "${LIBRARY_PATHS[@]}")
+
+# Eliminar duplicados preservando orden
+declare -A seen_paths
+UNIQUE_PATHS=()
+for p in "${LIBRARY_PATHS[@]}"; do
+    [[ -z "$p" ]] && continue
+    [[ -n "${seen_paths[$p]+x}" ]] && continue
+    seen_paths[$p]=1
+    UNIQUE_PATHS+=("$p")
+done
+
+# ── Crear directorio destino ───────────────────────────────────────────────────
+if [[ ! -d "$DESTINO" ]]; then
+    log_info "Creando directorio destino: ${DESTINO}"
+    mkdir -p "$DESTINO"
+fi
+
+total=0
+libs_encontradas=0
+
+# ── Iterar sobre cada biblioteca ──────────────────────────────────────────────
+for lib in "${UNIQUE_PATHS[@]}"; do
+    steamapps_dir="${lib}/steamapps"
+
+    [[ ! -d "$steamapps_dir" ]] && continue
+
+    echo ""
+    log_lib "Biblioteca: ${steamapps_dir}"
+    ((libs_encontradas++)) || true
+
+    juegos_en_lib=0
+
+    # Cada juego instalado tiene un archivo appmanifest_<appid>.acf
+    while IFS= read -r -d '' acf; do
+        appid="$(vdf_get "$acf" "appid")"
+        nombre="$(vdf_get "$acf" "name")"
+
+        # Saltar entradas vacías o sin nombre
+        [[ -z "$appid" || -z "$nombre" ]] && continue
+
+        # Saltar herramientas, runtimes y redistributables de Steam
+        if echo "$nombre" | grep -qiE \
+            'proton|steam linux runtime|steamworks|redistributabl|pressure vessel|sniper|soldier'; then
+            log_warn "Saltando herramienta: ${nombre} (appid: ${appid})"
+            continue
+        fi
+
+        nombre_limpio="$(limpiar_nombre "$nombre")"
+        enlace="steam://rungameid/${appid}"
+        ruta_archivo="${DESTINO}/${nombre_limpio}.steam"
+        # Dentro del while, tras obtener nombre_limpio y enlace:
+        executable="$(vdf_get "$acf" "LaunchExecutable")"   # puede estar vacío en algunos juegos
+        ruta_archivo="${DESTINO}/${nombre_limpio}.steam"
+
+        {
+            echo "$enlace"
+            echo "${executable:-}"   # segunda línea: vacía si no se encontró
+        } > "$ruta_archivo"
+        log_ok "${nombre_limpio}.steam  →  ${enlace}"
+
+        ((juegos_en_lib++)) || true
+        ((total++)) || true
+
+    done < <(find "$steamapps_dir" -maxdepth 1 -name "appmanifest_*.acf" -print0 2>/dev/null)
+
+    if [[ $juegos_en_lib -eq 0 ]]; then
+        log_warn "No se encontraron juegos instalados en esta biblioteca."
+    fi
+done
+
+# ── Resumen ───────────────────────────────────────────────────────────────────
+echo ""
+echo -e "${GREEN}══════════════════════════════════════════════════════════${NC}"
+echo -e "${GREEN}  ✔  ${total} archivo(s) .steam generados en:${NC}"
+echo -e "${GREEN}     ${DESTINO}${NC}"
+echo -e "${GREEN}     (${libs_encontradas} biblioteca(s) de Steam escaneada(s))${NC}"
+echo -e "${GREEN}══════════════════════════════════════════════════════════${NC}"
+echo ""

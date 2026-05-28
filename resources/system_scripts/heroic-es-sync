@@ -1,0 +1,153 @@
+#!/usr/bin/env bash
+# =============================================================================
+# heroic_es_sync
+# Escanea todos los juegos instalados en Heroic Games Launcher (Epic/legendary,
+# GOG y sideload) y genera un archivo <nombre>.heroic por cada uno; esto permite
+# que se sincronicen automáticamente con EmulationStation
+# =============================================================================
+
+set -euo pipefail
+
+# ── Configuración ─────────────────────────────────────────────────────────────
+HEROIC_CONFIG="${HOME}/.config/heroic"
+DESTINO="/var/penguin/juegos/retrobox/roms/heroic"
+
+# Archivos de juegos instalados por plataforma
+EPIC_JSON="${HEROIC_CONFIG}/legendaryConfig/legendary/installed.json"
+GOG_JSON="${HEROIC_CONFIG}/gog_store/installed.json"
+SIDELOAD_JSON="${HEROIC_CONFIG}/sideload_apps/library.json"
+
+# ── Colores para mensajes ──────────────────────────────────────────────────────
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+CYAN='\033[0;36m'
+NC='\033[0m' # Sin color
+
+# ── Funciones de utilidad ──────────────────────────────────────────────────────
+
+log_info()    { echo -e "${CYAN}[INFO]${NC}  $*"; }
+log_ok()      { echo -e "${GREEN}[ OK ]${NC}  $*"; }
+log_warn()    { echo -e "${YELLOW}[WARN]${NC}  $*"; }
+log_error()   { echo -e "${RED}[ERR ]${NC}  $*"; }
+
+# Limpia el nombre del juego para usarlo como nombre de archivo seguro:
+#   - Reemplaza / \ : * ? " < > | por guiones
+#   - Elimina espacios al inicio y al final
+limpiar_nombre() {
+    local nombre="$1"
+    # Reemplazar caracteres inválidos en nombres de archivo
+    nombre="${nombre//[\/\\:*?\"<>|]/-}"
+    # Quitar espacios al inicio/fin
+    nombre="${nombre#"${nombre%%[![:space:]]*}"}"
+    nombre="${nombre%"${nombre##*[![:space:]]}"}"
+    echo "$nombre"
+}
+
+crear_archivo_heroic() {
+    local nombre="$1"
+    local app_name="$2"
+    local runner="$3"
+
+    local nombre_limpio
+    nombre_limpio="$(limpiar_nombre "$nombre")"
+    local ruta_archivo="${DESTINO}/${nombre_limpio}.heroic"
+    local enlace="heroic://launch?appName=${app_name}&runner=${runner}"
+
+    echo "$enlace" > "$ruta_archivo"
+    log_ok "[$runner] ${nombre_limpio}.heroic  →  ${enlace}"
+}
+
+# ── Verificar dependencias ─────────────────────────────────────────────────────
+if ! command -v jq &>/dev/null; then
+    log_error "jq no está instalado. Instálalo con:  sudo apt install jq"
+    exit 1
+fi
+
+# ── Crear directorio destino si no existe ──────────────────────────────────────
+if [[ ! -d "$DESTINO" ]]; then
+    log_info "Creando directorio destino: ${DESTINO}"
+    mkdir -p "$DESTINO"
+fi
+
+total=0
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 1. EPIC GAMES  (runner = legendary)
+#    Formato: objeto JSON cuyas claves son app_name y los valores contienen
+#    "app_name" y "title"
+# ══════════════════════════════════════════════════════════════════════════════
+echo ""
+log_info "━━━ Epic Games (legendary) ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+if [[ -f "$EPIC_JSON" ]]; then
+    while IFS=$'\t' read -r app_name titulo; do
+        [[ -z "$app_name" || -z "$titulo" ]] && continue
+        crear_archivo_heroic "$titulo" "$app_name" "legendary"
+        ((total++)) || true
+    done < <(
+        jq -r '
+            to_entries[]
+            | [ .value.app_name, .value.title ]
+            | @tsv
+        ' "$EPIC_JSON" 2>/dev/null
+    )
+else
+    log_warn "No se encontró: ${EPIC_JSON}"
+fi
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 2. GOG GAMES  (runner = gog)
+#    Formato: array JSON con objetos que contienen "appName" y "title"
+# ══════════════════════════════════════════════════════════════════════════════
+echo ""
+log_info "━━━ GOG Games ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+if [[ -f "$GOG_JSON" ]]; then
+    while IFS=$'\t' read -r app_name titulo; do
+        [[ -z "$app_name" || -z "$titulo" ]] && continue
+        crear_archivo_heroic "$titulo" "$app_name" "gog"
+        ((total++))
+    done < <(
+        jq -r '
+            .[]
+            | [ .appName, .title ]
+            | @tsv
+        ' "$GOG_JSON" 2>/dev/null
+    )
+else
+    log_warn "No se encontró: ${GOG_JSON}"
+fi
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 3. SIDELOAD / APPS EXTERNAS  (runner = sideload)
+#    Formato: array JSON con objetos que contienen "app_name" y "title"
+# ══════════════════════════════════════════════════════════════════════════════
+echo ""
+log_info "━━━ Sideload / Apps externas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+if [[ -f "$SIDELOAD_JSON" ]]; then
+    while IFS=$'\t' read -r app_name titulo; do
+        [[ -z "$app_name" || -z "$titulo" ]] && continue
+        crear_archivo_heroic "$titulo" "$app_name" "sideload"
+        ((total++))
+    done < <(
+        jq -r '
+            .[]
+            | [ .app_name, .title ]
+            | @tsv
+        ' "$SIDELOAD_JSON" 2>/dev/null
+    )
+else
+    log_warn "No se encontró: ${SIDELOAD_JSON}"
+fi
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Resumen final
+# ══════════════════════════════════════════════════════════════════════════════
+echo ""
+echo -e "${GREEN}══════════════════════════════════════════════════════════${NC}"
+echo -e "${GREEN}  ✔  ${total} archivo(s) .heroic generados en:${NC}"
+echo -e "${GREEN}     ${DESTINO}${NC}"
+echo -e "${GREEN}══════════════════════════════════════════════════════════${NC}"
+echo ""

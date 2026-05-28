@@ -228,6 +228,8 @@ frontend/.emulationstation/tmp/
 frontend/.emulationstation/tmp/*
 frontend/.emulationstation/resources/
 frontend/.emulationstation/resources/*
+frontend/.emulationstation/recovery/
+frontend/.emulationstation/recovery/*
 frontend/.emulationstation/music/*
 frontend/.emulationstation/es_log.*
 frontend/.emulationstation/es_settings.*

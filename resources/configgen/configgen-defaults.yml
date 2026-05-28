@@ -371,6 +371,18 @@ lowresnx:
 lutro:
   emulator: libretro
   core:     lutro
+heroic:
+  emulator: heroic
+  core:     heroic
+  options:
+    hud_support: false
+
+lutris:
+  emulator: lutris
+  core:     lutris
+  options:
+    hud_support: false
+
 lynx:
   emulator: libretro
   core:     mednafen_lynx

@@ -1,0 +1,10 @@
+#!/bin/bash
+
+STEAM_FILE="$1"
+
+if [[ ! -f "$STEAM_FILE" ]]; then
+    echo "Archivo no encontrado: $STEAM_FILE"
+    exit 1
+fi
+
+exec steam "$(cat "$STEAM_FILE")" # &>/dev/null

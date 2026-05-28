@@ -1,0 +1,11 @@
+#!/bin/bash
+
+LUTRIS_FILE="$1"
+
+if [[ ! -f "$LUTRIS_FILE" ]]; then
+    echo "Archivo no encontrado: $LUTRIS_FILE"
+    exit 1
+fi
+
+env LUTRIS_SKIP_INIT=1 lutris "$(cat "$LUTRIS_FILE")" # &>/dev/null
+exit $?

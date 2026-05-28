@@ -1,0 +1,10 @@
+#!/bin/bash
+
+HEROIC_FILE="$1"
+
+if [[ ! -f "$HEROIC_FILE" ]]; then
+    echo "Archivo no encontrado: $HEROIC_FILE"
+    exit 1
+fi
+
+exec heroic --no-gui "$(cat "$HEROIC_FILE")" # &>/dev/null
