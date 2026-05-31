@@ -2,6 +2,27 @@
   "version": "0.2.0",
   "configurations": [
 
+
+    {
+      "name": "configgen: dolphin config",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "configgen.emulatorlauncher",
+      "cwd": "${workspaceFolder}/resources/emulatorlauncher",
+      "args": [
+        "-system",
+        "wii",
+        "-rom",
+        "config",
+        "-emulator",
+        "dolphin"
+      ],
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}"
+      },
+      "console": "integratedTerminal",
+      "justMyCode": false
+    }, 
     {
       "name": "configgen: HEROIC ()",
       "type": "debugpy",
@@ -136,6 +157,41 @@
         "/tmp/game.xml",
         "-systemname",
         "GameCube"
+      ],
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}",
+        "PATH": "/home/manuel/proyectos/batocera-configgen:/home/manuel/.local/bin:/usr/local/bin:/usr/bin:/bin"
+      },
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      "name": "configgen: wii (sonic colours)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "configgen.emulatorlauncher",
+      "cwd": "${workspaceFolder}/resources/emulatorlauncher",
+      "args": [
+        "-p1index",
+        "0",
+        "-p1guid",
+        "0500d71f7e0500000920000000006803",
+        "-p1name",
+        "Nintendo Switch Pro Controller",
+        "-p1nbbuttons",
+        "16",
+        "-p1nbhats",
+        "1",
+        "-p1nbaxes",
+        "6",
+        "-system",
+        "wii",
+        "-rom",
+        "/run/media/manuel/penguinTB/juegos/roms/wii/Sonic Colours (Europe) (En,Ja,Fr,De,Es,It).rvz",
+        "-gameinfoxml",
+        "/tmp/game.xml",
+        "-systemname",
+        "Wii"
       ],
       "env": {
         "PYTHONPATH": "${workspaceFolder}",

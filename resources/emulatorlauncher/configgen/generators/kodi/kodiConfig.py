@@ -4,14 +4,14 @@ import hashlib
 from typing import TYPE_CHECKING, Final
 from xml.dom import minidom
 
-from ...batoceraPaths import HOME, ensure_parents_and_open, mkdir_if_not_exists
+from ...batoceraPaths import _USER_HOME, HOME, ensure_parents_and_open, mkdir_if_not_exists
 
 if TYPE_CHECKING:
     from pathlib import Path
 
     from ...controller import Controllers
 
-_KODI_USERDATA: Final = HOME / '.kodi' / 'userdata'
+_KODI_USERDATA: Final = _USER_HOME / '.kodi' / 'userdata'
 
 def writeKodiConfigs(kodiJoystick: Path, currentControllers: Controllers, provider: str):
     kodihatspositions    = {1: 'up', 2: 'right', 4: 'down', 8: 'left'}

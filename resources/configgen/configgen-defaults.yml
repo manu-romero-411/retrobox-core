@@ -57,6 +57,11 @@ apple2:
 apple2gs:
   emulator: gsplus
   core:     gsplus
+apps:
+  emulator: chrome
+  core:     chrome
+  options:
+    hud_support: false
 arcadia:
   emulator: libretro
   core:     mame

@@ -18,7 +18,7 @@ for i in "${!args[@]}"; do
         if [[ -n "${args[$next]+set}" ]]; then
             rom_path="${args[$next]}"
             # Solo absolutizar si no es ya una ruta absoluta
-            if [[ "$rom_path" != /* ]]; then
+            if [[ "$rom_path" != /* ]] && [[ "${rom_path}" != "config" ]]; then
                 args[$next]="$(realpath -m -- "$rom_path")"
             fi
         fi

@@ -188,23 +188,6 @@
 		<region>wr</region>
 	</game>
 	<game>
-		<path>./dolphin-emu.menu</path>
-		<name>Dolphin (GameCube,Wii,WAD)</name>
-		<desc>Run Dolphin Emulator (GameCube, Wii, WAD).</desc>
-		<image>./media/dolphin-logo.png</image>
-		<marquee>./media/dolphin-logo.png</marquee>
-		<rating>0</rating>
-		<releasedate />
-		<developer>Dolphin Team</developer>
-		<publisher>Dolphin Team</publisher>
-		<genre>Emulator</genre>
-		<playcount />
-		<lastplayed />
-		<gametime />
-		<lang>en</lang>
-		<region>wr</region>
-	</game>
-	<game>
 		<path>./dolphin-triforce.menu</path>
 		<name>Dolphin Triforce</name>
 		<desc>Run Dolphin Emulator (Triforce).</desc>
@@ -1151,23 +1134,6 @@
 		<region>wr</region>
 	</game>
 	<game>
-		<path>./ryujinx.menu</path>
-		<name>Ryujinx (Switch)</name>
-		<desc>Run Ryujinx (Switch). This software is not provided by RetroBat. You can download it here: https://ryujinx.org/download</desc>
-		<image>./media/ryujinx-logo.png</image>
-		<marquee>./media/ryujinx-logo.png</marquee>
-		<rating>0</rating>
-		<releasedate />
-		<developer>Ryujinx Team</developer>
-		<publisher>Ryujinx Team</publisher>
-		<genre>Emulator</genre>
-		<playcount />
-		<lastplayed />
-		<gametime />
-		<lang>en</lang>
-		<region>wr</region>
-	</game>
-	<game>
 		<path>./stella.menu</path>
 		<name>Stella (Atari 2600)</name>
 		<desc>Run Stella (Atari 2600).</desc>
@@ -1437,22 +1403,6 @@
 		<region>wr</region>
 	</game>
 	<game>
-		<path>./cemu.menu</path>
-		<name>Cemu (Wii U)</name>
-		<desc>Run Cemu Emulator (Wii U).</desc>
-		<genre>Emulator</genre>
-		<image>./media/cemu-logo.png</image>
-		<marquee>./media/cemu-logo.png</marquee>
-		<rating>0</rating>
-		<developer>Cemu Team</developer>
-		<publisher>Cemu Team</publisher>
-		<playcount>2</playcount>
-		<lastplayed>20260523T123935</lastplayed>
-		<gametime>31</gametime>
-		<lang>en</lang>
-		<region>wr</region>
-	</game>
-	<game>
 		<path>./m2emulator.menu</path>
 		<name>M2Emulator (Model 2)</name>
 		<desc>Run M2Emulator (Model 2).</desc>
@@ -1499,6 +1449,22 @@
 		<region>wr</region>
 	</game>
 	<game>
+		<path>./ryujinx.menu</path>
+		<name>Ryujinx (Switch)</name>
+		<desc>Run Ryujinx (Switch). This software is not provided by RetroBat. You can download it here: https://ryujinx.org/download</desc>
+		<genre>Emulator</genre>
+		<image>./media/ryujinx-logo.png</image>
+		<marquee>./media/ryujinx-logo.png</marquee>
+		<rating>0</rating>
+		<developer>Ryujinx Team</developer>
+		<publisher>Ryujinx Team</publisher>
+		<playcount>2</playcount>
+		<lastplayed>20260529T220828</lastplayed>
+		<gametime>103</gametime>
+		<lang>en</lang>
+		<region>wr</region>
+	</game>
+	<game>
 		<path>./pcsx2.menu</path>
 		<name>PCSX2 (PlayStation 2)</name>
 		<desc>Run PCSX2 Emulator (PlayStation 2).</desc>
@@ -1508,10 +1474,47 @@
 		<rating>0</rating>
 		<developer>PCSX2 Team</developer>
 		<publisher>PCSX2 Team</publisher>
-		<playcount>3</playcount>
-		<lastplayed>20260525T203628</lastplayed>
+		<playcount>5</playcount>
+		<lastplayed>20260529T220856</lastplayed>
 		<gametime>19</gametime>
 		<lang>en</lang>
 		<region>wr</region>
+	</game>
+	<game>
+		<path>./cemu.menu</path>
+		<name>Cemu (Wii U)</name>
+		<desc>Run Cemu Emulator (Wii U).</desc>
+		<genre>Emulator</genre>
+		<image>./media/cemu-logo.png</image>
+		<marquee>./media/cemu-logo.png</marquee>
+		<rating>0</rating>
+		<developer>Cemu Team</developer>
+		<publisher>Cemu Team</publisher>
+		<playcount>3</playcount>
+		<lastplayed>20260529T234206</lastplayed>
+		<gametime>42</gametime>
+		<lang>en</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./dolphin-emu.menu</path>
+		<name>Dolphin (GameCube,Wii,WAD)</name>
+		<desc>Run Dolphin Emulator (GameCube, Wii, WAD).</desc>
+		<genre>Emulator</genre>
+		<image>./media/dolphin-logo.png</image>
+		<marquee>./media/dolphin-logo.png</marquee>
+		<rating>0</rating>
+		<developer>Dolphin Team</developer>
+		<publisher>Dolphin Team</publisher>
+		<playcount>1</playcount>
+		<lastplayed>20260530T005200</lastplayed>
+		<gametime>30</gametime>
+		<lang>en</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./demul-old.menu</path>
+		<name>demul-old</name>
+		<lang>en</lang>
 	</game>
 </gameList>

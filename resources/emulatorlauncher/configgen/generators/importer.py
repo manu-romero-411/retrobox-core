@@ -79,6 +79,8 @@ _GENERATOR_MAP: Final[dict[str, tuple[str, str]]] = {
     'heroic': ('heroic.heroicGenerator', 'HeroicGenerator'),
     'steam': ('steam.steamGenerator', 'SteamGenerator'),
     'lutris': ('lutris.lutrisGenerator', 'LutrisGenerator'),
+    'chrome': ('chrome.chromeGenerator', 'ChromeGenerator'),
+    'firefox': ('firefox.firefoxGenerator', 'FirefoxGenerator'),
 }
 
 def get_generator(emulator: str, core: str) -> Generator:

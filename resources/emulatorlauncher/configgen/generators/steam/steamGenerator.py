@@ -1,4 +1,5 @@
 from __future__ import annotations
+import glob
 import os
 import sys
 import subprocess
@@ -96,6 +97,7 @@ echo "[steam-wrapper] Steam cerrado."
 
     script = f"""#!/usr/bin/env bash
 set -uo pipefail
+trap 'rm -f "$0"' EXIT
 echo "[steam-wrapper] Lanzando Steam..."
 {launch_cmd}
 {monitor}
@@ -110,6 +112,12 @@ exit 0
 class SteamGenerator(Generator):
 
     def generate(self, system, rom, playersControllers, metadata, guns, wheels, gameResolution):
+        for old in glob.glob("/tmp/steam_wrapper_*.sh"):
+            try:
+                os.remove(old)
+            except OSError:
+                pass
+            
         steam_bin = _find_steam_binary()
         app_id: str | None = None
 

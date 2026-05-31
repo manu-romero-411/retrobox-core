@@ -427,12 +427,8 @@ class LibretroGenerator(Generator):
 
         return Command.Command(array=commandArray, env={
             "XDG_CONFIG_HOME": CONFIGS,
-            "SDL_JOYSTICK_HIDAPI": "1",
-            "SDL_JOYSTICK_HIDAPI_XBOX": "1",
-            "SDL_JOYSTICK_HIDAPI_STEAMDECK" : "1",
-            "SDL_JOYSTICK_HIDAPI_PS4" : "1",
-            "SDL_JOYSTICK_HIDAPI_PS5" : "1",
-            "SDL_JOYSTICK_HIDAPI_SWITCH" : "1",
+#            "WAYLAND_DISPLAY" : "",
+#            "SDL_VIDEODRIVER" : "x11"
         })
 
 def gfx_backend_check(backend: str) -> str:
