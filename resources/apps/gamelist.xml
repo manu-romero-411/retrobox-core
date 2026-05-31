@@ -1,0 +1,203 @@
+<?xml version="1.0"?>
+<gameList>
+	<game>
+		<path>./twitch.webapp</path>
+		<name>Twitch</name>
+		<desc>Plataforma líder de streaming en directo, centrada en videojuegos, esports y contenido creativo.</desc>
+		<image>./app-icons/twitch.png</image>
+		<marquee>./app-icons/twitch.png</marquee>
+		<rating>0</rating>
+		<releasedate>20110606T000000</releasedate>
+		<developer>Twitch Interactive</developer>
+		<publisher>Twitch Interactive</publisher>
+		<genre>Streaming</genre>
+		<playcount />
+		<lastplayed />
+		<gametime />
+		<lang>es</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./netflix.webapp</path>
+		<name>Netflix</name>
+		<desc>El mayor servicio de streaming del mundo, con series, películas y documentales originales disponibles en más de 190 países.</desc>
+		<image>./app-icons/netflix.png</image>
+		<marquee>./app-icons/netflix.png</marquee>
+		<rating>0</rating>
+		<releasedate>20070116T000000</releasedate>
+		<developer>Netflix Inc.</developer>
+		<publisher>Netflix Inc.</publisher>
+		<genre>Streaming</genre>
+		<playcount />
+		<lastplayed />
+		<gametime />
+		<lang>es</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./YouTube.webapp</path>
+		<name>YouTube</name>
+		<playcount>5</playcount>
+		<lastplayed>20260531T174841</lastplayed>
+		<gametime>154</gametime>
+		<lang>en</lang>
+	</game>
+	<game>
+		<path>./Twitch.webapp</path>
+		<name>Twitch</name>
+		<playcount>11</playcount>
+		<lastplayed>20260531T173912</lastplayed>
+		<gametime>94</gametime>
+		<lang>en</lang>
+	</game>
+	<game>
+		<path>./youtube.webapp</path>
+		<name>YouTube</name>
+		<desc>Plataforma de vídeo online con millones de vídeos subidos por usuarios y creadores de todo el mundo.</desc>
+		<genre>Streaming</genre>
+		<image>./app-icons/youtube.png</image>
+		<marquee>./app-icons/youtube.png</marquee>
+		<rating>0</rating>
+		<releasedate>20050214T000000</releasedate>
+		<developer>Google LLC</developer>
+		<publisher>Google LLC</publisher>
+		<playcount>3</playcount>
+		<lastplayed>20260531T181455</lastplayed>
+		<lang>es</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./rtve_play.webapp</path>
+		<name>RTVE Play</name>
+		<desc>Servicio de streaming gratuito de Radio Televisión Española con acceso a series, películas, noticias y contenido en directo.</desc>
+		<genre>Streaming</genre>
+		<image>./app-icons/rtve_play.png</image>
+		<marquee>./app-icons/rtve_play.png</marquee>
+		<rating>0</rating>
+		<releasedate>20110101T000000</releasedate>
+		<developer>RTVE</developer>
+		<publisher>RTVE</publisher>
+		<playcount>2</playcount>
+		<lastplayed>20260531T181028</lastplayed>
+		<lang>es</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./atresplayer.webapp</path>
+		<name>Atresplayer</name>
+		<desc>Plataforma de streaming de Atresmedia con contenido de Antena 3, laSexta y canales temáticos, incluyendo series exclusivas.</desc>
+		<genre>Streaming</genre>
+		<image>./app-icons/atresplayer.png</image>
+		<marquee>./app-icons/atresplayer.png</marquee>
+		<rating>0</rating>
+		<releasedate>20120901T000000</releasedate>
+		<developer>Atresmedia</developer>
+		<publisher>Atresmedia</publisher>
+		<playcount>1</playcount>
+		<lastplayed>20260531T181521</lastplayed>
+		<gametime>10</gametime>
+		<lang>es</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./spotify.webapp</path>
+		<name>Spotify</name>
+		<desc>Servicio de música en streaming con acceso a millones de canciones, podcasts y listas de reproducción personalizadas.</desc>
+		<genre>Streaming</genre>
+		<image>./app-icons/spotify.png</image>
+		<marquee>./app-icons/spotify.png</marquee>
+		<rating>0</rating>
+		<releasedate>20081007T000000</releasedate>
+		<developer>Spotify AB</developer>
+		<publisher>Spotify AB</publisher>
+		<playcount>2</playcount>
+		<lastplayed>20260531T181142</lastplayed>
+		<gametime>27</gametime>
+		<lang>es</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./pluto_tv.webapp</path>
+		<name>Pluto TV</name>
+		<desc>Servicio gratuito de streaming con publicidad que ofrece canales lineales temáticos y contenido bajo demanda sin necesidad de registro.</desc>
+		<genre>Streaming</genre>
+		<image>./app-icons/pluto_tv.png</image>
+		<marquee>./app-icons/pluto_tv.png</marquee>
+		<rating>0</rating>
+		<releasedate>20140331T000000</releasedate>
+		<developer>Paramount Streaming</developer>
+		<publisher>Paramount Streaming</publisher>
+		<playcount>1</playcount>
+		<lastplayed>20260531T181903</lastplayed>
+		<gametime>186</gametime>
+		<lang>es</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./crunchyroll.webapp</path>
+		<name>Crunchyroll</name>
+		<desc>Plataforma especializada en anime, manga y dorama con el mayor catálogo de animación japonesa en streaming del mundo.</desc>
+		<genre>Streaming</genre>
+		<image>./app-icons/crunchyroll.png</image>
+		<marquee>./app-icons/crunchyroll.png</marquee>
+		<rating>0</rating>
+		<releasedate>20060514T000000</releasedate>
+		<developer>Sony Pictures Entertainment</developer>
+		<publisher>Sony Pictures Entertainment</publisher>
+		<playcount>1</playcount>
+		<lastplayed>20260531T181536</lastplayed>
+		<gametime>10</gametime>
+		<lang>es</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./amazon_prime_video.webapp</path>
+		<name>Amazon Prime Video</name>
+		<desc>Servicio de streaming de Amazon con películas, series originales y eventos deportivos en directo incluido con Prime.</desc>
+		<genre>Streaming</genre>
+		<image>./app-icons/amazon_prime_video.png</image>
+		<marquee>./app-icons/amazon_prime_video.png</marquee>
+		<rating>0</rating>
+		<releasedate>20060907T000000</releasedate>
+		<developer>Amazon.com Inc.</developer>
+		<publisher>Amazon.com Inc.</publisher>
+		<playcount>1</playcount>
+		<lastplayed>20260531T181507</lastplayed>
+		<lang>es</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./hbo_max.webapp</path>
+		<name>Max (HBO Max)</name>
+		<desc>Plataforma de streaming de Warner Bros. Discovery con contenido de HBO, DC, Cartoon Network y producciones originales exclusivas.</desc>
+		<genre>Streaming</genre>
+		<image>./app-icons/hbo_max.png</image>
+		<marquee>./app-icons/hbo_max.png</marquee>
+		<rating>0</rating>
+		<releasedate>20200527T000000</releasedate>
+		<developer>Warner Bros. Discovery</developer>
+		<publisher>Warner Bros. Discovery</publisher>
+		<playcount>2</playcount>
+		<lastplayed>20260531T185736</lastplayed>
+		<gametime>10</gametime>
+		<lang>es</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./kodi.kodi</path>
+		<name>Kodi</name>
+		<desc>Centro multimedia de código abierto para reproducir vídeo, música, imágenes y podcasts desde cualquier fuente local o en red.</desc>
+		<genre>Streaming</genre>
+		<image>./app-icons/kodi.png</image>
+		<marquee>./app-icons/kodi.png</marquee>
+		<rating>0</rating>
+		<releasedate>20040101T000000</releasedate>
+		<developer>Kodi Foundation</developer>
+		<publisher>Kodi Foundation</publisher>
+		<playcount>4</playcount>
+		<lastplayed>20260531T194518</lastplayed>
+		<gametime>34</gametime>
+		<lang>es</lang>
+		<region>wr</region>
+	</game>
+</gameList>
