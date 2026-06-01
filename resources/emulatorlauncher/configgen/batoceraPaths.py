@@ -35,6 +35,7 @@ DEFAULTS_DIR: Final = BATOCERA_SHARE_DIR / 'configgen'
 
 HOME_INIT:  Final = DATAINIT_DIR / 'system'
 CONF_INIT:  Final = HOME_INIT / 'configs'
+EMULATORS:  Final = USERDATA / 'emulators'
 
 # ---------------------------------------------------------------------------
 # "userdata" → $HOME

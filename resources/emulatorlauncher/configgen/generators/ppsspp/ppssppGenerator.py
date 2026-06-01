@@ -7,7 +7,7 @@ from ...batoceraPaths import CONFIGS, SAVES, configure_emulator
 from ...controller import Controller, generate_sdl_game_controller_config
 from ..Generator import Generator
 from . import ppssppConfig, ppssppControllers
-from .ppssppPaths import PPSSPP_CONFIG_DIR, PPSSPP_BIN
+from .ppssppPaths import _PPSSPP_XDG, PPSSPP_CONFIG_DIR, PPSSPP_BIN
 
 if TYPE_CHECKING:
     from ...batoceraTypes import HotkeysContext, Resolution
@@ -54,7 +54,7 @@ class PPSSPPGenerator(Generator):
         return Command.Command(
             array=commandArray,
             env={
-                "XDG_CONFIG_HOME": CONFIGS,
+                "XDG_CONFIG_HOME": _PPSSPP_XDG,
                 "XDG_DATA_HOME": SAVES,
                 "SDL_GAMECONTROLLERCONFIG": generate_sdl_game_controller_config(playersControllers, ignore_buttons = ["hotkey"]) # the hotkey button is used to open the menu
             }

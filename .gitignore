@@ -243,6 +243,10 @@ decorations/
 decorations/*
 emuconfigs/
 emuconfigs/*
+emulators/*
+!emulators/*.sh
+emulators/eden.sh
+emulators/ryujinx.sh
 frontend/locale/
 frontend/locale/*
 frontend/resources/
@@ -260,6 +264,10 @@ resources/datainit/
 resources/datainit/*
 resources/datainit/
 resources/datainit/*
+resources/audio_filters/
+resources/audio_filters/*
+resources/video_filters/
+resources/video_filters/*
 roms/
 roms/*
 saves/
@@ -269,4 +277,5 @@ screenshots/*
 shaders/
 shaders/*
 
+*.AppImage
 

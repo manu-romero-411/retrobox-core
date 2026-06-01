@@ -2,14 +2,18 @@
 import os
 from pathlib import Path
 from typing import Final
-from configgen.batoceraPaths import _SYSTEM_LOCAL_BIN, BIOS, CONFIGS, ROMS, SAVES, _XDG_DATA, ensure_symlink, mkdir_if_not_exists
+from configgen.batoceraPaths import _SYSTEM_LOCAL_BIN, BIOS, CONFIGS, EMULATORS, ROMS, SAVES, _XDG_DATA, ensure_symlink, mkdir_if_not_exists
 
 # --- Base ---
 SWITCH_BIOS: Final = BIOS / "switch"
 SWITCH_KEYS: Final = SWITCH_BIOS / "keys"
 SWITCH_FIRMWARE: Final = SWITCH_BIOS / "firmware"
 
-EDEN_BIN: Final = _SYSTEM_LOCAL_BIN / "eden-emu"
+_EDEN_EMUDIR: Final = EMULATORS / "eden-emu"
+EDEN_BIN: Final = _EDEN_EMUDIR / "eden-emu.AppImage"
+_EDEN_XDG: Final = _EDEN_EMUDIR / "config"
+_EDEN_CONFIG: Final = _EDEN_XDG / "eden"
+_EDEN_INI: Final = _EDEN_CONFIG / "qt-config.ini"
 EDEN_DATA: Final = SAVES / "switch" / "eden"
 EDEN_KEYS: Final = EDEN_DATA / "keys"
 EDEN_REGISTERED: Final = EDEN_DATA / "nand/system/Contents/registered"

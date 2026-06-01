@@ -20,7 +20,7 @@ from configgen.batoceraPaths import _SYSTEM_LOCAL_BIN, CONFIGS, DEFAULTS_DIR, RO
 from configgen.controller import generate_sdl_game_controller_config, normalize_sdl_guid_for_emulator
 from configgen.generators.Generator import Generator
 from configgen.generators.eden.edenPaths import SWITCH_FIRMWARE, SWITCH_KEYS, SWITCH_MODS_DIR, SWITCH_ROMS
-from configgen.generators.ryujinx.ryujinxPaths import RYUJINX_BIS, RYUJINX_CONFIG, RYUJINX_CONFIG_FILE, RYUJINX_CONFIG_FILE_BFR, RYUJINX_CONFIG_FILE_TPL, RYUJINX_MODS_LINK, RYUJINX_SAVE_BASE, RYUJINX_SYSTEM_CONFIG_DIR, RYUJINX_SYSTEM_DIR, RYUJINX_USER_DIR, RYUJINX_SYSTEM_SAVES, RYUJINX_USER_SAVES
+from configgen.generators.ryujinx.ryujinxPaths import _RYUJINX_XDG, RYUJINX_BIN, RYUJINX_BIS, RYUJINX_CONFIG, RYUJINX_CONFIG_FILE, RYUJINX_CONFIG_FILE_BFR, RYUJINX_CONFIG_FILE_TPL, RYUJINX_MODS_LINK, RYUJINX_SAVE_BASE, RYUJINX_SYSTEM_CONFIG_DIR, RYUJINX_SYSTEM_DIR, RYUJINX_USER_DIR, RYUJINX_SYSTEM_SAVES, RYUJINX_USER_SAVES
 from configgen.input import Input
 import hashlib
 
@@ -355,12 +355,12 @@ class RyujinxGenerator(Generator):
                         "SDL_JOYSTICK_HIDAPI_SWITCH" : "1",
                         "SDL_GAMECONTROLLERCONFIG": sdl_mapping,
                         "DOTNET_EnableAlternateStackCheck":"1",
-                        "XDG_CONFIG_HOME":f"{CONFIGS}",
+                        "XDG_CONFIG_HOME":f"{_RYUJINX_XDG}",
                         "XDG_DATA_HOME":f"{SAVES}",
         }
 
         commandArray = []
-        commandArray.extend([f"{_SYSTEM_LOCAL_BIN}/ryujinx"])
+        commandArray.extend([f"{RYUJINX_BIN}"])
         if not configure_emulator(rom):
             commandArray.extend([rom])
 

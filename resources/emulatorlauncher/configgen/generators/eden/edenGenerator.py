@@ -9,14 +9,14 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from configgen import Command as Command
-from configgen.batoceraPaths import _SYSTEM_LOCAL_BIN, CONFIGS, DEFAULTS_DIR, ROMS, SAVES, configure_emulator
+from configgen.batoceraPaths import DEFAULTS_DIR, SAVES, configure_emulator
 from configgen.controller import get_dpad_button_indices_evdev, get_dpad_button_indices_sysfs, map_hidraw_to_evdev
 from configgen.generators.Generator import Generator
 from configgen.utils.configparser import CaseSensitiveRawConfigParser
 from configgen.input import Input
 from datetime import datetime
 
-from configgen.generators.eden.edenPaths import EDEN_RARE_DPAD_GUIDS, SWITCH_DLC_DIR, EDEN_BIN, SWITCH_ROMS, SWITCH_UPDATE_DIR, setup_eden_environments
+from configgen.generators.eden.edenPaths import _EDEN_CONFIG, _EDEN_INI, _EDEN_XDG, EDEN_RARE_DPAD_GUIDS, SWITCH_DLC_DIR, EDEN_BIN, SWITCH_ROMS, SWITCH_UPDATE_DIR, setup_eden_environments
 
 os.environ["PYSDL2_DLL_PATH"] = "/usr/lib/x86_64-linux-gnu"
 
@@ -270,9 +270,7 @@ class EdenGenerator(Generator):
         # Invocar la creación modular de rutas y entornos symlink
         setup_eden_environments()
 
-        # Forzamos la ruta real de configuración en Debian nativo (~/.config/eden/qt-config.ini o ~/.config/citron/qt-config.ini)
-        config_name = "citron" if emulator == "citron-emu" else "eden"
-        yuzuConfig = os.path.expanduser(f"{CONFIGS}/{config_name}/qt-config.ini")
+        yuzuConfig = os.path.expanduser(_EDEN_INI)
         
         # El template lo seguimos buscando en la carpeta del script
         yuzuConfigTemplate = f'{DEFAULTS_DIR}/data/switch/qt-config.ini.template'
@@ -286,7 +284,7 @@ class EdenGenerator(Generator):
             commandArray.extend(["-f", "-g", str(rom)])
 
         environment = {
-            "XDG_CONFIG_HOME":f"{CONFIGS}",
+            "XDG_CONFIG_HOME":f"{_EDEN_XDG}",
             "XDG_DATA_HOME":f"{SAVES}/switch",
             "SDL_JOYSTICK_HIDAPI": "1",
             "SDL_JOYSTICK_HIDAPI_STEAMDECK": "0",

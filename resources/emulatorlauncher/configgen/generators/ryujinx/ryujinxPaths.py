@@ -1,11 +1,13 @@
 from pathlib import Path
 from typing import Final
 
-from configgen.batoceraPaths import _SYSTEM_LOCAL_BIN, CONFIGS, DEFAULTS_DIR, ROMS, SAVES
+from configgen.batoceraPaths import _SYSTEM_LOCAL_BIN, CONFIGS, DEFAULTS_DIR, EMULATORS, ROMS, SAVES
 
-RYUJINX_BIN: Final = _SYSTEM_LOCAL_BIN / "ryujinx"
+_RYUJINX_EMUDIR: Final = EMULATORS / "ryujinx"
+RYUJINX_BIN: Final = _RYUJINX_EMUDIR / "ryujinx.AppImage"
+_RYUJINX_XDG: Final = _RYUJINX_EMUDIR / "config"
 
-RYUJINX_CONFIG: Final = CONFIGS / "Ryujinx"
+RYUJINX_CONFIG: Final = _RYUJINX_XDG / "Ryujinx"
 RYUJINX_CONFIG_FILE: Final = RYUJINX_CONFIG / "Config.json"
 RYUJINX_CONFIG_FILE_TPL: Final = DEFAULTS_DIR / "data" / "switch" / "Config.json.template"
 RYUJINX_CONFIG_FILE_BFR: Final = RYUJINX_CONFIG / "Config.json.before"

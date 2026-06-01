@@ -20,6 +20,7 @@ from .dolphinPaths import (
     DOLPHIN_QT_INI,
     DOLPHIN_SAVES,
     DOLPHIN_SYSCONF,
+    DOLPHIN_XDG,
 )
 
 if TYPE_CHECKING:
@@ -457,7 +458,7 @@ class DolphinGenerator(Generator):
         return Command.Command(
             array=commandArray,
             env = {
-                "XDG_CONFIG_HOME":f"{CONFIGS}",
+                "XDG_CONFIG_HOME":f"{DOLPHIN_XDG}",
                 "XDG_DATA_HOME":f"{SAVES}",
                 "SDL_JOYSTICK_HIDAPI": "1",
                 "SDL_JOYSTICK_HIDAPI_SWITCH": "1",

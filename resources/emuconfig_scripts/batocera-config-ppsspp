@@ -7,4 +7,4 @@ else
      export DISPLAY=$(getLocalXDisplay)
 fi
 
-XDG_CONFIG_HOME="${USERDATA}/emuconfigs" XDG_DATA_HOME="${USERDATA}/saves /usr/local/bin/ppsspp --windowed
+"${USERDATA}/resources/emulatorlauncher/emulatorlauncher.sh" -system psp -emulator ppsspp -rom config

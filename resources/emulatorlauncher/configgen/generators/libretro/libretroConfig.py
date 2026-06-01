@@ -16,6 +16,7 @@ from . import libretroMAMEConfig, libretroOptions
 from .libretroPaths import (
     RETROARCH_CONFIG,
     RETROARCH_CORE_CUSTOM,
+    RETROARCH_CORES,
     RETROARCH_OVERLAY_CONFIG,
     RETROARCH_ASSETS
 )
@@ -215,8 +216,8 @@ def createLibretroConfig(
     retroarchConfig['cache_directory'] = RETROARCH_CONFIG / 'cache'
 
     # require for core informations
-    retroarchConfig['libretro_directory'] = '/usr/lib/libretro'
-    retroarchConfig['libretro_info_path'] = '/usr/share/libretro/info'
+    retroarchConfig['libretro_directory'] = RETROARCH_CORES
+    retroarchConfig['libretro_info_path'] = RETROARCH_CORES
 
     retroarchConfig['video_fullscreen'] = 'true'                # Fullscreen is required at least for x86* and odroidn2
 

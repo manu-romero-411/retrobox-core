@@ -13,6 +13,7 @@ from ...batoceraPaths import (
     BIOS,
     CMDFILES_DIR,
     CONFIGS,
+    EMULATORS,
     HOME,
     OVERLAYS,
     ROMS,
@@ -28,6 +29,7 @@ from ...utils import videoMode as videoMode
 from ..Generator import Generator
 from . import libretroConfig, libretroControllers, libretroRetroarchCustom
 from .libretroPaths import (
+    _RETROARCH_XDG,
     RETROARCH_BIN,
     RETROARCH_CONFIG,
     RETROARCH_CORES,
@@ -426,7 +428,7 @@ class LibretroGenerator(Generator):
             commandArray.extend(["-e", state_slot])
 
         return Command.Command(array=commandArray, env={
-            "XDG_CONFIG_HOME": CONFIGS,
+            "XDG_CONFIG_HOME": _RETROARCH_XDG,
 #            "WAYLAND_DISPLAY" : "",
 #            "SDL_VIDEODRIVER" : "x11"
         })

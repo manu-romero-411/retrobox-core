@@ -14,7 +14,7 @@ from ...controller import generate_sdl_game_controller_config
 from ...utils import vulkan
 from ..Generator import Generator
 from . import cemuControllers
-from .cemuPaths import CEMU_BIOS, CEMU_CONFIG, CEMU_CONTROLLER_PROFILES, CEMU_ROMDIR, CEMU_SAVES
+from .cemuPaths import CEMU_BIN, CEMU_BIOS, CEMU_CONFIG, CEMU_CONTROLLER_PROFILES, CEMU_ROMDIR, CEMU_SAVES, _CEMU_EMUDIR
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -55,35 +55,15 @@ class CemuGenerator(Generator):
         # Set-up the controllers
         cemuControllers.generateControllerConfig(system, playersControllers)
 
-        # Script intermedio para gestionar enlaces simbólicos y backups dinámicamente
-        cemu_bin = f"{_SYSTEM_LOCAL_BIN}/cemu"
-        """
-        wrapper_script = (
-            f'DESKTOP_DIR="{_XDG_CONFIG}/Cemu"; '
-            f'BATOCERA_DIR="{CEMU_CONFIG}"; '
-            f'BACKUP_DIR="{_XDG_CONFIG}/Cemu.desktop.bak"; ' 
-            'if [ -L "$DESKTOP_DIR" ]; then rm "$DESKTOP_DIR"; '
-            'elif [ -d "$DESKTOP_DIR" ]; then rm -rf "$BACKUP_DIR" && mv "$DESKTOP_DIR" "$BACKUP_DIR"; fi; '
-            'mkdir -p "$BATOCERA_DIR" && ln -s "$BATOCERA_DIR" "$DESKTOP_DIR"; '
-            'cleanup() { rm -f "$DESKTOP_DIR"; if [ -d "$BACKUP_DIR" ]; then mv "$BACKUP_DIR" "$DESKTOP_DIR"; fi; }; '
-            'trap cleanup EXIT INT TERM; '
-            '"$0" "$@"'
-        )
-
         if configure_emulator(rom):
-            commandArray = ["bash", "-c", wrapper_script, cemu_bin]
+            commandArray = [CEMU_BIN]
         else:
-            commandArray = ["bash", "-c", wrapper_script, cemu_bin, "-f", "-g", rom, "--force-no-menubar"]
-        """
-        if configure_emulator(rom):
-            commandArray = [cemu_bin]
-        else:
-            commandArray = [cemu_bin, "-f", "-g", rom, "--force-no-menubar"]
+            commandArray = [CEMU_BIN, "-f", "-g", rom, "--force-no-menubar"]
         
         return Command.Command(
             array=commandArray,
             env={
-                "XDG_CONFIG_HOME":f"{CONFIGS}",
+                "XDG_CONFIG_HOME":f"{_CEMU_XDG}",
                 "XDG_DATA_HOME":f"{SAVES}",
                 "SDL_GAMECONTROLLERCONFIG": generate_sdl_game_controller_config(playersControllers),
                 "SDL_JOYSTICK_HIDAPI": "0"

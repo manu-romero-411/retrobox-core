@@ -13,6 +13,7 @@ from ...batoceraPaths import (
     CACHE,
     CONFIGS,
     DATAINIT_DIR,
+    EMULATORS,
     ROMS,
     SAVES,
     SCREENSHOTS,
@@ -38,8 +39,9 @@ if TYPE_CHECKING:
 
 _logger = logging.getLogger(__name__)
 
-_PCSX2_BIN:           Final = Path("/usr/local/bin/pcsx2")        # symlink al AppImage
-_PCSX2_CONFIG:        Final = CONFIGS / 'PCSX2'
+_PCSX2_BIN:           Final = EMULATORS / 'pcsx2' / 'pcsx2.AppImage'
+_PCSX2_XDG:           Final = EMULATORS / 'pcsx2' / 'config'
+_PCSX2_CONFIG:        Final = _PCSX2_XDG / 'PCSX2'
 _PCSX2_BIOS:          Final = BIOS / "pcsx2" / "bios"
 
 class Pcsx2Generator(Generator):
@@ -122,7 +124,7 @@ class Pcsx2Generator(Generator):
                 _logger.warning("CPU does not support SSE4.1 which is required by pcsx2.  The emulator will likely crash with SIGILL (illegal instruction).")
 
         envcmd: dict[str, str | Path] = {
-            "XDG_CONFIG_HOME": CONFIGS
+            "XDG_CONFIG_HOME": _PCSX2_XDG
         }
 
         # wheels won't work correctly when SDL_GAMECONTROLLERCONFIG is set. excluding wheels from SDL_GAMECONTROLLERCONFIG doesn't fix too.

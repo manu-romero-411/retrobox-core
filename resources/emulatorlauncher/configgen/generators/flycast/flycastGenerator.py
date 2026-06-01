@@ -11,7 +11,7 @@ from ...controller import generate_sdl_game_controller_config
 from ...utils.configparser import CaseSensitiveConfigParser
 from ..Generator import Generator
 from . import flycastControllers
-from .flycastPaths import FLYCAST_BIOS, FLYCAST_CONFIG, FLYCAST_SAVES, FLYCAST_VMU_BLANK, FLYCAST_VMUA1, FLYCAST_VMUA2
+from .flycastPaths import _FLYCAST_XDG, FLYCAST_BIN, FLYCAST_BIOS, FLYCAST_CONFIG, FLYCAST_SAVES, FLYCAST_VMU_BLANK, FLYCAST_VMUA1, FLYCAST_VMUA2
 
 if TYPE_CHECKING:
     from ...batoceraTypes import HotkeysContext
@@ -190,10 +190,10 @@ class FlycastGenerator(Generator):
         commandArray = []
         # the command to run
         if configure_emulator(rom):
-            commandArray.extend([f'{_SYSTEM_LOCAL_BIN}/flycast', rom])
+            commandArray.extend([f"{FLYCAST_BIN}"])
         else:
-            commandArray.extend([f'{_SYSTEM_LOCAL_BIN}/flycast'])
-        
+            commandArray.extend([f"{FLYCAST_BIN}", rom])
+
         # Here is the trick to make flycast find files :
         # emu.cfg is in $XDG_CONFIG_DIRS or $XDG_CONFIG_HOME.
         # VMU will be in $XDG_DATA_HOME / $FLYCAST_DATADIR because it needs rw access -> /userdata/saves/dreamcast
@@ -202,8 +202,8 @@ class FlycastGenerator(Generator):
         return Command.Command(
             array=commandArray,
             env={
-                "XDG_CONFIG_HOME": CONFIGS,
-                "XDG_CONFIG_DIRS": CONFIGS,
+                "XDG_CONFIG_HOME": _FLYCAST_XDG,
+                "XDG_CONFIG_DIRS": _FLYCAST_XDG,
                 "XDG_DATA_HOME": FLYCAST_SAVES.parent,
                 "FLYCAST_DATADIR": FLYCAST_SAVES.parent,
                 "FLYCAST_BIOS_PATH": FLYCAST_BIOS,

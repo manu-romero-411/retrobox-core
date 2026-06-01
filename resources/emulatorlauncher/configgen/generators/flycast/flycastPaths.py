@@ -2,9 +2,12 @@ from __future__ import annotations
 
 from typing import Final
 
-from ...batoceraPaths import BIOS, CONFIGS, DEFAULTS_DIR, SAVES
+from ...batoceraPaths import BIOS, CONFIGS, DEFAULTS_DIR, EMULATORS, SAVES
 
-FLYCAST_CONFIG_DIR: Final = CONFIGS / 'flycast'
+_FLYCAST_EMUDIR: Final = EMULATORS / 'flycast'
+FLYCAST_BIN: Final = _FLYCAST_EMUDIR / 'flycast.AppImage'
+_FLYCAST_XDG: Final = _FLYCAST_EMUDIR / 'config'
+FLYCAST_CONFIG_DIR: Final = _FLYCAST_XDG / 'flycast'
 FLYCAST_MAPPING: Final = FLYCAST_CONFIG_DIR / 'mappings'
 FLYCAST_CONFIG: Final = FLYCAST_CONFIG_DIR / 'emu.cfg'
 FLYCAST_SAVES: Final = SAVES / 'dreamcast' / 'flycast'
