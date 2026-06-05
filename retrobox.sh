@@ -59,13 +59,16 @@ videofilters=${USERDATA}/videofilters
 system.retroachievementsounds=${USERDATA}/resources/sounds/retroachievements
 retroachievementsounds=${USERDATA}/sounds/retroachievements
 
-# Padtokey (evmapy)
-system.padtokey=${USERDATA}/resources/evmapy
-padtokey=${USERDATA}/configs/evmapy
+# Padtokey (gamepadly)
+system.padtokey=${USERDATA}/resources/utils/gamepadly/profiles
+padtokey=${USERDATA}/resources/utils/gamepadly/user_profiles
 
 # Zonas horarias
 timezones=/usr/share/zoneinfo
 EOF
 
 cd "${USERDATA}/frontend" || exit 1
-exec "${USERDATA}/frontend/emulationstation" --home "${USERDATA}/frontend" "$@"
+
+"${HOME}/.local/bin/display-only-hdmi" 1080p
+"${USERDATA}/frontend/emulationstation" --home "${USERDATA}/frontend" "$@"
+"${HOME}/.local/bin/display-restore-layout"

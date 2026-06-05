@@ -1,0 +1,97 @@
+{
+    "cooldown": 0.5,
+    "actions_player1": [
+        {
+            "trigger": "joystick1",
+            "type": "mouse",
+            "speed": 800,
+            "deadzone": 0.15,
+            "acceleration": 1.5
+        },
+        {
+            "trigger": ["hotkey", "start"],
+            "type": "key",
+            "target": ["KEY_LEFTALT", "KEY_F4"]
+        },
+        {
+            "trigger": "b",
+            "type": "key",
+            "target": "BTN_LEFT"
+        },
+        {
+            "trigger": "a",
+            "type": "key",
+            "target": ["KEY_LEFTALT", "KEY_LEFT"]
+        },
+        {
+            "trigger": ["hotkey", "y"],
+            "type": "key",
+            "target": ["KEY_LEFTMETA", "KEY_O"]
+        },
+        {
+            "trigger": ["hotkey", "x"],
+            "type": "key",
+            "target": ["KEY_LEFTMETA", "KEY_SYSRQ"]
+        },
+        {
+            "trigger": ["hotkey", "up"],
+            "type": "key",
+            "target": "KEY_VOLUMEUP"
+        },
+        {
+            "trigger": ["hotkey", "down"],
+            "type": "key",
+            "target": "KEY_VOLUMEDOWN"
+        },
+        {
+            "trigger": ["hotkey", "pageup"],
+            "type": "key",
+            "target": "KEY_PREVIOUSSONG"
+        },
+        {
+            "trigger": ["hotkey", "pagedown"],
+            "type": "key",
+            "target": "KEY_NEXTSONG"
+        },
+        {
+            "trigger": "start",
+            "type": "key",
+            "target": "KEY_PLAYPAUSE"
+        },
+        {
+            "trigger": "select",
+            "type": "key",
+            "target": "KEY_TAB"
+        },
+        {
+            "trigger": "pageup",
+            "type": "key",
+            "target": "KEY_PAGEUP"
+        },
+        {
+            "trigger": "pagedown",
+            "type": "key",
+            "target": "KEY_PAGEDOWN"
+        },
+        {
+            "trigger": "up",
+            "type": "key",
+            "target": "KEY_UP"
+        },
+        {
+            "trigger": "down",
+            "type": "key",
+            "target": "KEY_DOWN"
+        },
+        {
+            "trigger": "left",
+            "type": "key",
+            "target": "KEY_LEFT"
+        },
+        {
+            "trigger": "right",
+            "type": "key",
+            "target": "KEY_RIGHT"
+        }
+    ]
+}

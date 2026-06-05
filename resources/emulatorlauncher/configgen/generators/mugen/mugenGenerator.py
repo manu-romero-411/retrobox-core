@@ -54,7 +54,7 @@ class MugenGenerator(Generator):
                     "P1.Joystick.type": "0",
                     "P2.Joystick.type": "0"
                 },
-                # Define the key mappings for evmapy
+                # Define the key mappings for gamepadly
                 "P1 Keys": {
                     "Jump": "200",
                     "Crouch": "208",
@@ -98,7 +98,7 @@ class MugenGenerator(Generator):
                     "P1.Joystick.type": "0",
                     "P2.Joystick.type": "0"
                 },
-                # Define the key mappings for evmapy
+                # Define the key mappings for gamepadly
                 "P1 Keys": {
                     "Jump": "273",
                     "Crouch": "274",

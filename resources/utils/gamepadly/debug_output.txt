@@ -1,0 +1,32 @@
+/usr/lib64/python3.14/site-packages/pygame/pkgdata.py:25: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import resource_stream, resource_exists
+16:24:55  DEBUG      Mapping #0: hotkey + start  →  KeyAction(keys=[56, 62])  (cd=0.5s)
+16:24:55  DEBUG      Mapping #1: mouse (joystick1left, joystick1up)  speed=800.0  dz=0.15  accel=1.5  condición=siempre
+16:24:55  DEBUG      Mapping #2: b  →  ClickAction(button=272)  (cd=0.0s)
+16:24:55  INFO     Perfil '/var/penguin/juegos/retrobox/resources/utils/gamepadly/user_profiles/apps.keys' cargado: 2 hotkey(s), 1 eje(s) de ratón, cooldown global=0.5s
+16:24:55  DEBUG    Mando encontrado por GUID exacto: 'Nintendo Switch Pro Controller'
+16:24:55  DEBUG    Cargando mapa de entradas desde ES input: Nintendo Switch Pro Controller (21 entradas)
+16:24:55  DEBUG    Resolución de hotkeys:
+16:24:55  DEBUG      hotkey + start  →  0x5 + 0x6
+16:24:55  DEBUG      b  →  0x0
+16:24:55  DEBUG    Resolución de ejes de ratón:
+16:24:55  DEBUG      AxisMouse: (joystick1left, joystick1up)  speed=800.0  deadzone=0.15  accel=1.5  condición=siempre
+16:24:55  DEBUG      SDL joystick 0: Nintendo Switch Pro Controller  GUID=0500d71f7e0500000920000000006803
+16:24:55  DEBUG      SDL joystick 1: PDP Xbox One Arctic White  GUID=0600b7926f0e0000a802000000010000
+16:24:55  INFO     Mando conectado: 'Nintendo Switch Pro Controller'  (player=1, sdl_id=0)
+16:24:55  DEBUG    UInput teclado: [56, 62]
+16:24:55  DEBUG    UInput ratón: BTNs=[272]
+16:24:55  INFO     Escuchando 'Nintendo Switch Pro Controller'  GUID=0500d71f7e0500000920000000006803
+16:24:55  INFO     2 hotkey(s)  1 eje(s) de ratón
+16:27:10  WARNING  Mando desconectado, esperando reconexión…
+16:27:13  DEBUG      SDL joystick 0: Nintendo Switch Pro Controller  GUID=0500d71f7e0500000920000000006803
+16:27:13  DEBUG      SDL joystick 1: PDP Xbox One Arctic White  GUID=0600b7926f0e0000a802000000010000
+16:27:13  INFO     Mando conectado: 'Nintendo Switch Pro Controller'  (player=1, sdl_id=0)
+16:27:13  DEBUG    UInput teclado: [56, 62]
+16:27:13  DEBUG    UInput ratón: BTNs=[272]
+16:27:13  INFO     Escuchando 'Nintendo Switch Pro Controller'  GUID=0500d71f7e0500000920000000006803
+16:27:13  INFO     2 hotkey(s)  1 eje(s) de ratón
+16:27:13  WARNING  Mando desconectado, esperando reconexión…
+16:27:13  INFO     Detenido por el usuario.
+pygame 2.6.1 (SDL 2.32.68, Python 3.14.5)
+Hello from the pygame community. https://www.pygame.org/contribute.html

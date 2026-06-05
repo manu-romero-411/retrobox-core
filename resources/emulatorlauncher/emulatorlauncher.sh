@@ -28,7 +28,7 @@ done
 # ---------------------------------------------------------------
 
 #"$PYTHON" -m configgen.sync_settings
-mkdir -p /tmp/batocera-run/{squashfs,evmapy,overlays,mame_software,mame_artwork,cmdfiles,shader_bezels,batocera-overlays}
+mkdir -p /tmp/batocera-run/{squashfs,overlays,mame_software,mame_artwork,cmdfiles,shader_bezels,batocera-overlays}
 
 cd "${CONFIGGEN_DIR}" || exit
 exec "$PYTHON" -m configgen.emulatorlauncher "${args[@]}"

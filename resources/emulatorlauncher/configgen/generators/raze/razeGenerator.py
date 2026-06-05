@@ -171,7 +171,7 @@ class RazeGenerator(Generator):
 
         launch_args += [
             "-exec", self.script_file,
-            # Disable controllers because support is poor; we use evmapy instead
+            # Disable controllers because support is poor; we use gamepadly instead
             "-nojoy",
             "-width", str(gameResolution["width"]),
             "-height", str(gameResolution["height"]),

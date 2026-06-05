@@ -212,7 +212,7 @@ def generateControllerConfig(controller: Controller):
 
         mkdir_if_not_exists(configFileName.parent)
 
-    # hotkey controls are called via evmapy.
+    # hotkey controls are called via gamepadly.
     # configuring specific hotkey in ppsspp is not simple without patching
     Config.set(section, "Rewind",        "1-131")
     Config.set(section, "Fast-forward",  "1-132")

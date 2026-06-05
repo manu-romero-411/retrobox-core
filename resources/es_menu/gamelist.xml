@@ -590,23 +590,6 @@
 		<region>wr</region>
 	</game>
 	<game>
-		<path>./ppsspp.menu</path>
-		<name>PPSSPP (PSP, Homebrews)</name>
-		<desc>Run PPSSPP Emulator (PSP, Homebrews).</desc>
-		<image>./media/ppsspp-logo.png</image>
-		<marquee>./media/ppsspp-logo.png</marquee>
-		<rating>0</rating>
-		<releasedate />
-		<developer>PPSSPP Team</developer>
-		<publisher>PPSSPP Team</publisher>
-		<genre>Emulator</genre>
-		<playcount />
-		<lastplayed />
-		<gametime />
-		<lang>en</lang>
-		<region>wr</region>
-	</game>
-	<game>
 		<path>./project64.menu</path>
 		<name>Project 64 (Nintendo 64)</name>
 		<desc>Run Project 64 (Nintendo 64). This software is not provided by RetroBat. You can download it here: https://www.pj64-emu.com/windows-downloads</desc>
@@ -1433,22 +1416,6 @@
 		<region>wr</region>
 	</game>
 	<game>
-		<path>./retroarch.menu</path>
-		<name>RetroArch (Multi Cores Emulator)</name>
-		<desc>Run RetroArch (Multi Cores Emulator).</desc>
-		<genre>Emulator</genre>
-		<image>./media/retroarch-logo.png</image>
-		<marquee>./media/retroarch-logo.png</marquee>
-		<rating>0</rating>
-		<developer>Libretro Team</developer>
-		<publisher>Libretro Team</publisher>
-		<playcount>6</playcount>
-		<lastplayed>20260524T213456</lastplayed>
-		<gametime>519</gametime>
-		<lang>en</lang>
-		<region>wr</region>
-	</game>
-	<game>
 		<path>./ryujinx.menu</path>
 		<name>Ryujinx (Switch)</name>
 		<desc>Run Ryujinx (Switch). This software is not provided by RetroBat. You can download it here: https://ryujinx.org/download</desc>
@@ -1461,22 +1428,6 @@
 		<playcount>2</playcount>
 		<lastplayed>20260529T220828</lastplayed>
 		<gametime>103</gametime>
-		<lang>en</lang>
-		<region>wr</region>
-	</game>
-	<game>
-		<path>./pcsx2.menu</path>
-		<name>PCSX2 (PlayStation 2)</name>
-		<desc>Run PCSX2 Emulator (PlayStation 2).</desc>
-		<genre>Emulator</genre>
-		<image>./media/pcsx2-logo.png</image>
-		<marquee>./media/pcsx2-logo.png</marquee>
-		<rating>0</rating>
-		<developer>PCSX2 Team</developer>
-		<publisher>PCSX2 Team</publisher>
-		<playcount>5</playcount>
-		<lastplayed>20260529T220856</lastplayed>
-		<gametime>19</gametime>
 		<lang>en</lang>
 		<region>wr</region>
 	</game>
@@ -1497,6 +1448,43 @@
 		<region>wr</region>
 	</game>
 	<game>
+		<path>./demul-old.menu</path>
+		<name>demul-old</name>
+		<lang>en</lang>
+	</game>
+	<game>
+		<path>./ppsspp.menu</path>
+		<name>PPSSPP (PSP, Homebrews)</name>
+		<desc>Run PPSSPP Emulator (PSP, Homebrews).</desc>
+		<genre>Emulator</genre>
+		<image>./media/ppsspp-logo.png</image>
+		<marquee>./media/ppsspp-logo.png</marquee>
+		<rating>0</rating>
+		<developer>PPSSPP Team</developer>
+		<publisher>PPSSPP Team</publisher>
+		<playcount>2</playcount>
+		<lastplayed>20260601T224510</lastplayed>
+		<gametime>36</gametime>
+		<lang>en</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./retroarch.menu</path>
+		<name>RetroArch (Multi Cores Emulator)</name>
+		<desc>Run RetroArch (Multi Cores Emulator).</desc>
+		<genre>Emulator</genre>
+		<image>./media/retroarch-logo.png</image>
+		<marquee>./media/retroarch-logo.png</marquee>
+		<rating>0</rating>
+		<developer>Libretro Team</developer>
+		<publisher>Libretro Team</publisher>
+		<playcount>17</playcount>
+		<lastplayed>20260601T214820</lastplayed>
+		<gametime>1792</gametime>
+		<lang>en</lang>
+		<region>wr</region>
+	</game>
+	<game>
 		<path>./dolphin-emu.menu</path>
 		<name>Dolphin (GameCube,Wii,WAD)</name>
 		<desc>Run Dolphin Emulator (GameCube, Wii, WAD).</desc>
@@ -1506,15 +1494,26 @@
 		<rating>0</rating>
 		<developer>Dolphin Team</developer>
 		<publisher>Dolphin Team</publisher>
-		<playcount>1</playcount>
-		<lastplayed>20260530T005200</lastplayed>
-		<gametime>30</gametime>
+		<playcount>2</playcount>
+		<lastplayed>20260601T214845</lastplayed>
+		<gametime>50</gametime>
 		<lang>en</lang>
 		<region>wr</region>
 	</game>
 	<game>
-		<path>./demul-old.menu</path>
-		<name>demul-old</name>
+		<path>./pcsx2.menu</path>
+		<name>PCSX2 (PlayStation 2)</name>
+		<desc>Run PCSX2 Emulator (PlayStation 2).</desc>
+		<genre>Emulator</genre>
+		<image>./media/pcsx2-logo.png</image>
+		<marquee>./media/pcsx2-logo.png</marquee>
+		<rating>0</rating>
+		<developer>PCSX2 Team</developer>
+		<publisher>PCSX2 Team</publisher>
+		<playcount>7</playcount>
+		<lastplayed>20260601T223444</lastplayed>
+		<gametime>185</gametime>
 		<lang>en</lang>
+		<region>wr</region>
 	</game>
 </gameList>

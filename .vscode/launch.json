@@ -1,8 +1,77 @@
 {
   "version": "0.2.0",
   "configurations": [
-
-
+    //>
+{
+      "name": "configgen: gamepadly",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "mapper",
+      "cwd": "${workspaceFolder}/resources/utils/gamepadly",
+      "args": [
+        "--guid",
+        "0600b7926f0e0000a802000000010000",
+        "--sdl_id",
+        "1",
+        "--player",
+        "1",
+        "--es-input",
+        "/var/penguin/juegos/retrobox/frontend/.emulationstation/es_input.cfg",
+        "--profile",
+        "/var/penguin/juegos/retrobox/resources/apps/youtube.webapp.keys",
+      ],
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}"
+      },
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      "name": "configgen: youtube",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "configgen.emulatorlauncher",
+      "cwd": "${workspaceFolder}/resources/emulatorlauncher",
+      "args": [
+        "-p1index",
+        "1",
+        "-p1guid",
+        "0600b7926f0e0000a802000000010000",
+        "-p1name",
+        "PDP Xbox One Arctic White",
+        "-p1nbbuttons",
+        "11",
+        "-p1nbhats",
+        "1",
+        "-p1nbaxes",
+        "6",
+        "-p2index",
+        "0",
+        "-p2guid",
+        "0500d71f7e0500000920000000006803",
+        "-p2name",
+        "Nintendo Switch Pro Controller",
+        "-p2nbbuttons",
+        "16",
+        "-p2nbhats",
+        "1",
+        "-p2nbaxes",
+        "6",
+        "-system",
+        "apps",
+        "-rom",
+        "/var/penguin/juegos/retrobox/resources/apps/youtube.webapp",
+        "-gameinfoxml",
+        "/tmp/game.xml",
+        "-systemname",
+        "Apps"
+      ],
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}"
+      },
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
     {
       "name": "configgen: dolphin config",
       "type": "debugpy",

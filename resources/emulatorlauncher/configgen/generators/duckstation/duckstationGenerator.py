@@ -401,7 +401,7 @@ class DuckstationGenerator(Generator):
         ## [Hotkeys]
         if not settings.has_section("Hotkeys"):
             settings.add_section("Hotkeys")
-        # Force defaults to be aligned with evmapy
+        # Force defaults to be aligned with gamepadly
         settings.set("Hotkeys", "FastForward",                 "Keyboard/Tab")
         settings.set("Hotkeys", "Reset",                       "Keyboard/F6")
         settings.set("Hotkeys", "LoadSelectedSaveState",       "Keyboard/F1")

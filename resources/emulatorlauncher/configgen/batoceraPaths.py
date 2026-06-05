@@ -56,7 +56,6 @@ USER_SCRIPTS:  Final = HOME / 'user_scripts'
 # Configs de emuladores → ~/.config  (XDG; retroarch ya vive en ~/.config/retroarch)
 # ---------------------------------------------------------------------------
 CONFIGS: Final = USERDATA / 'emuconfigs'
-EVMAPY:  Final = CONFIGS / 'evmapy'
 
 SAVES:       Final = USERDATA / 'saves'
 SCREENSHOTS: Final = USERDATA / 'screenshots'
@@ -90,8 +89,6 @@ SYSTEM_SCRIPTS:      Final = BATOCERA_SHARE_DIR / 'system_scripts'
 RUNTIME_DIR: Final = Path('/tmp/batocera-run')
 
 SQUASHFS_DIR:      Final = RUNTIME_DIR / 'squashfs'
-EVMAPY_RUN_DIR:    Final = RUNTIME_DIR / 'evmapy'
-EVMAPY_MERGED:     Final = RUNTIME_DIR / 'evmapy_merged.keys'
 ROTATION_FILE:     Final = RUNTIME_DIR / 'rk-rotation'
 OVERLAY_BASE_DIR:  Final = RUNTIME_DIR / 'overlays'
 MAME_SOFTWARE_DIR: Final = RUNTIME_DIR / 'mame_software'

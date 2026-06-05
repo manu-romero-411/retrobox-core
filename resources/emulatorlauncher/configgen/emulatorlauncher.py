@@ -3,8 +3,13 @@
 
 from __future__ import annotations
 
-from configgen.sync_settings import sync as syncsettings 
-from configgen.utils.antimicro import launch_antimicrox, stop_antimicrox
+from .batoceraPaths import BATOCERA_CONF, BATOCERA_SHARE_DIR, ES_GAMES_METADATA, SAVES, USER_SCRIPTS, GUN_OVERLAYS_DIR, HUD_CONFIG_FILE, USERDATA
+import sys
+
+sys.path.append(str(USERDATA))
+from resources.utils.gamepadly.manager import GamepadManager
+
+from configgen.sync_settings import sync as syncsettings
 
 from . import profiler
 
@@ -29,18 +34,20 @@ from typing import TYPE_CHECKING, Any, cast
 import pyudev
 import sdl2
 
-from .batoceraPaths import BATOCERA_CONF, BATOCERA_SHARE_DIR, ES_GAMES_METADATA, SAVES, USER_SCRIPTS, GUN_OVERLAYS_DIR, HUD_CONFIG_FILE
+
 from .controller import Controller
 from .Emulator import Emulator
 from .exceptions import BadCommandLineArguments, BaseBatoceraException, BatoceraException, UnexpectedEmulatorExit
 from .generators import get_generator
 from .gun import Gun
 from .utils import bezels as bezelsUtil, metadata, videoMode, wheelsUtils
-#from .utils.evmapy import evmapy
-from .utils.hotkeygen import set_hotkeygen_context
 from .utils.logger import setup_logging
 from .utils.squashfs import mount_squashfs
 from .utils.overlayfs import mount_overlayfs
+
+# Añadir la ruta raíz de los recursos al sys.path
+# Si el script está en .../resources/emulatorlauncher/configgen/
+# La raíz de 'resources' está dos niveles arriba.
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -56,8 +63,6 @@ _logger = logging.getLogger(__name__)
 _player_controllers_lock = threading.Lock()
 # A global variable to hold the current, up-to-date list of player controllers
 _active_player_controllers = []
-# Global reference to the evmapy configurator instance
-_evmapy_instance = None
 
 def main(args: argparse.Namespace, maxnbplayers: int) -> int:
     original_rom = args.rom
@@ -70,7 +75,7 @@ def main(args: argparse.Namespace, maxnbplayers: int) -> int:
         return start_rom(args, maxnbplayers, original_rom, original_rom)
 
 def start_rom(args: argparse.Namespace, maxnbplayers: int, rom: Path, original_rom: Path) -> int:
-    global _active_player_controllers, _evmapy_instance
+    global _active_player_controllers
 
     player_controllers = Controller.load_for_players(maxnbplayers, args)
 
@@ -175,10 +180,14 @@ def start_rom(args: argparse.Namespace, maxnbplayers: int, rom: Path, original_r
                 callExternalScripts(USER_SCRIPTS, "gameStart", [systemName, system.config.emulator, effectiveCore, rom])
 
                 # run the emulator
-                #_evmapy_instance = evmapy(systemName, system.config.emulator, effectiveCore, original_rom, player_controllers, guns)
                 with (
-                    #_evmapy_instance,
-                    set_hotkeygen_context(generator, system)
+                    GamepadManager(
+                        system      = systemName,
+                        emulator    = system.config.emulator,
+                        core        = effectiveCore,
+                        rom         = rom,
+                        controllers = player_controllers,
+                    )
                 ):
                     # change directory if wanted
                     executionDirectory = generator.executionDirectory(system.config, rom)
@@ -469,40 +478,7 @@ def getHudConfig(system: Emulator, systemName: str, emulator: str, core: str, ro
     configstr = configstr.replace("%EMULATORCORE%", hudConfig_protectStr(emulatorstr))
     return configstr.replace("%THUMBNAIL%", hudConfig_protectStr(gameThumbnail))
 
-"""
-def _reconfigure_evmapy_on_the_fly():
-    # Re-runs the evmapy configuration by creating a NEW evmapy instance with the latest controller list.
-    global _evmapy_instance, _active_player_controllers
 
-    with _player_controllers_lock:
-        if not _evmapy_instance:
-            return
-
-        _logger.info(">>> --- STARTING EVMAPY RECONFIGURATION ---")
-
-        valid_controllers = [c for c in _active_player_controllers if c is not None]
-        _logger.info(">>> Found %s valid controllers to configure.", len(valid_controllers))
-        for c in valid_controllers:
-            _logger.info(">>>   - Configuring P%s with Path: %s", c.player_number, c.device_path)
-
-        new_evmapy_instance = evmapy(
-            system=_evmapy_instance.system,
-            emulator=_evmapy_instance.emulator,
-            core=_evmapy_instance.core,
-            rom=_evmapy_instance.rom,
-            controllers=deepcopy(valid_controllers),
-            guns=_evmapy_instance.guns
-        )
-
-        _evmapy_instance = new_evmapy_instance
-
-        subprocess.call(['batocera-evmapy', 'stop'])
-        time.sleep(0.5)
-        cast('Any', _evmapy_instance)._evmapy__prepare()
-        subprocess.call(['batocera-evmapy', 'start'])
-
-        _logger.info(">>> --- EVMAPY RECONFIGURATION COMPLETE ---")
-"""
 def _controller_monitor_thread():
     # Runs in the background, watching for controller add/remove events.
     # Uses pysdl2 to reliably get controller GUIDs and paths, then intelligently "revives"
@@ -579,11 +555,7 @@ def _controller_monitor_thread():
                 reconfigure_needed = True
             else:
                 _logger.info(">>> [Check 2] No change in assigned controller paths detected.")
-        """
-        if reconfigure_needed:
-            time.sleep(1)
-            _reconfigure_evmapy_on_the_fly()
-        """
+
     if we_initialized_sdl:
         sdl2.SDL_QuitSubSystem(sdl2.SDL_INIT_JOYSTICK)
 

@@ -14,7 +14,7 @@ from ...controller import generate_sdl_game_controller_config
 from ...utils import vulkan
 from ..Generator import Generator
 from . import cemuControllers
-from .cemuPaths import CEMU_BIN, CEMU_BIOS, CEMU_CONFIG, CEMU_CONTROLLER_PROFILES, CEMU_ROMDIR, CEMU_SAVES, _CEMU_EMUDIR
+from .cemuPaths import _CEMU_XDG, CEMU_BIN, CEMU_BIOS, CEMU_CONFIG, CEMU_CONTROLLER_PROFILES, CEMU_ROMDIR, CEMU_SAVES, _CEMU_EMUDIR
 
 if TYPE_CHECKING:
     from pathlib import Path

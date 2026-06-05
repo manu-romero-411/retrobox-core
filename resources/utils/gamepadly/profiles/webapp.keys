@@ -1,0 +1,48 @@
+{
+  "_comment": "Perfil para webapps: ratón con stick izquierdo, clic con b/r3.",
+  "cooldown": 0.5,
+  "actions_player1": [
+    {
+      "trigger": "joystick1",
+      "type": "mouse",
+      "speed": 800,
+      "deadzone": 0.15,
+      "acceleration": 1.5,
+      "description": "Mover cursor"
+    },
+    {
+      "trigger": "b",
+      "type": "key",
+      "target": "BTN_LEFT",
+      "description": "Clic izquierdo"
+    },
+    {
+      "trigger": "r3",
+      "type": "key",
+      "target": "BTN_LEFT",
+      "description": "Clic izquierdo (R3)"
+    },
+    {
+      "trigger": "a",
+      "type": "key",
+      "target": ["KEY_LEFTALT", "KEY_LEFT"],
+      "description": "Atrás en el navegador"
+    },
+    {
+      "trigger": "pageup",
+      "type": "key",
+      "target": "KEY_PAGEUP"
+    },
+    {
+      "trigger": "pagedown",
+      "type": "key",
+      "target": "KEY_PAGEDOWN"
+    },
+    {
+      "trigger": ["hotkey", "start"],
+      "type": "key",
+      "target": ["KEY_LEFTALT", "KEY_F4"],
+      "description": "Cerrar"
+    }
+  ]
+}
