@@ -10,6 +10,6 @@ Uso como context manager desde configgen:
     # al salir, los procesos mapper se terminan automáticamente
 """
 
-from .manager import GamepadManager
+from .gamepadly_manager import GamepadManager
 
 __all__ = ["GamepadManager"]

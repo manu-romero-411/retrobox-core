@@ -6,7 +6,7 @@ from typing import Final
 from ...batoceraPaths import BIOS, EMULATORS, ROMS, SAVES
 
 _CEMU_EMUDIR: Final  = EMULATORS / 'cemu'
-_CEMU_XDG: Final = _CEMU_EMUDIR / 'configs'
+_CEMU_XDG: Final = _CEMU_EMUDIR / 'config'
 CEMU_BIN: Final  = _CEMU_EMUDIR / 'cemu.AppImage'
 CEMU_CONFIG: Final  = _CEMU_XDG / 'Cemu'
 CEMU_ROMDIR: Final = ROMS / 'wiiu'

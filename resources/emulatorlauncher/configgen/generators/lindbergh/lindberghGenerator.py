@@ -30,7 +30,7 @@ from ... import Command
 from ...batoceraPaths import _USER_HOME, SAVES, USERDATA, mkdir_if_not_exists
 from ...controller import Controller, Controllers, generate_sdl_game_controller_config
 from ...exceptions import BatoceraException, InvalidConfiguration
-from ...utils import bezels as bezelsUtil, hotkeygen
+from ...utils import bezels as bezelsUtil
 from ...utils.download import download
 from ..Generator import Generator
 
@@ -450,14 +450,14 @@ class LindberghGenerator(Generator):
             return
 
         # add a test key via evdev
-        if input_mode == 2:
+        """if input_mode == 2:
             hkevent = hotkeygen.get_hotkeygen_event()
             if hkevent is not None:
                 self.setConf(conf, "EXIT_GAME",     f"{hkevent}:KEY:{ecodes.KEY_ESC}")
                 # only 1 assignment possible for coins, let's it on the select button of player 1 for the moment
                 # could be set to hotkeygen/coin and on player1/select via .keys, but different from sdl
                 # self.setConf(conf, "PLAYER_1_COIN", f"{hkevent}:KEY:{ecodes.KEY_5}")
-
+        """
         # configure guns
         if input_mode == 2 and system.config.use_guns:
             self.setup_guns_evdev(conf, guns, shortRomName)

@@ -101,6 +101,7 @@ class CemuGenerator(Generator):
         else:
             lang = console_language
         CemuGenerator.setSectionConfig(config, xml_root, "console_language", str(getCemuLang(lang)))
+        CemuGenerator.setSectionConfig(config, xml_root, "use_discord_presence", system.config.get_bool("discordrpc", return_values=("true", "false")))
 
         ## [WINDOWS]
         # Position

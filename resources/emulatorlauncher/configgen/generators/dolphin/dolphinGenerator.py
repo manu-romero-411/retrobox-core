@@ -86,6 +86,10 @@ class DolphinGenerator(Generator):
         # increment savestates
         dolphinSettings.set("General", "AutoIncrementSlot", str(system.config.get_bool('incrementalsavestates', True)))
 
+        discord_presence   = system.config.get_bool('discordrpc', False, return_values=('True', 'False'))
+        dolphinSettings.set("General", "UseDiscordPresence", discord_presence)
+
+
         # Don't ask about statistics
         dolphinSettings.set("Analytics", "PermissionAsked", "True")
 
@@ -391,7 +395,6 @@ class DolphinGenerator(Generator):
             username   = system.config.get('retroachievements.username', '')
             token      = system.config.get('retroachievements.token', '')
             hardcore   = system.config.get('retroachievements.hardcore', 'False')
-            presence   = system.config.get('retroachievements.richpresence', 'False')
             leaderbd   = system.config.get('retroachievements.leaderboard', 'False')
             progress   = system.config.get('retroachievements.challenge_indicators', 'False')
             encore     = system.config.get('retroachievements.encore', 'False')
@@ -404,11 +407,13 @@ class DolphinGenerator(Generator):
             RacConfig.set('Achievements', 'EncoreEnabled', encore)
             RacConfig.set('Achievements', 'ProgressEnabled', progress)
             RacConfig.set('Achievements', 'LeaderboardsEnabled', leaderbd)
-            RacConfig.set('Achievements', 'RichPresenceEnabled', presence)
+            RacConfig.set('Achievements', 'RichPresenceEnabled', discord_presence)
+            RacConfig.set('Achievements', 'DiscordPresenceEnabled', discord_presence)
             RacConfig.set('Achievements', 'UnofficialEnabled', unofficial)
         else:
             RacConfig.set('Achievements', 'Enabled', 'False')
             RacConfig.set('Achievements', 'AchievementsEnabled', 'False')
+
         # Write the configuration to the file
         with (DOLPHIN_CONFIG / 'RetroAchievements.ini').open('w') as rac_configfile:
             RacConfig.write(rac_configfile)

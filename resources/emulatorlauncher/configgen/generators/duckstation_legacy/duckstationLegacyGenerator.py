@@ -75,7 +75,7 @@ class DuckstationLegacyGenerator(Generator):
             case _:
                 settings.set("Main","RewindEnable", "false")
         # Discord
-        settings.set("Main","EnableDiscordPresence", "false")
+        settings.set("Main","EnableDiscordPresence", system.config.get_bool('discordrpc', False, return_values=("true", "false")))
         # Language
         settings.set("Main", "Language", getLangFromEnvironment())
 

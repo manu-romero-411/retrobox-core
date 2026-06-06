@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any
 
 import yaml
 
-from .batoceraPaths import BATOCERA_CONF, BATOCERA_SHADERS, DEFAULTS_DIR, ES_SETTINGS, USER_SHADERS, configure_emulator
+from .batoceraPaths import BATOCERA_SHADERS, DEFAULTS_DIR, ES_SETTINGS, USER_SHADERS, configure_emulator
 from .config import Config, SystemConfig
 from .exceptions import MissingEmulator
 from .settings.unixSettings import UnixSettings
@@ -128,7 +128,7 @@ class Emulator:
         _logger.info('game settings name: %s', gsname)
 
         # load configuration from batocera.conf
-        settings = UnixSettings(BATOCERA_CONF)
+        settings = UnixSettings(ES_SETTINGS)
 
         global_settings = settings.get_all('global')
         system_settings = settings.get_all(args.system)

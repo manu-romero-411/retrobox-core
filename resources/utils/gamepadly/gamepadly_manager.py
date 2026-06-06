@@ -34,7 +34,7 @@ _logger = logging.getLogger(__name__)
 _GAMEPADLY_DIR: Final = BATOCERA_SHARE_DIR / "utils" / "gamepadly"
 _PROFILES_DIR:  Final = _GAMEPADLY_DIR / "profiles"
 _PROFILES_USER_DIR:  Final = _GAMEPADLY_DIR / "user_profiles"
-_MAPPER_SCRIPT: Final = _GAMEPADLY_DIR / "mapper.py"
+_MAPPER_SCRIPT: Final = _GAMEPADLY_DIR / "gamepadly_mapper.py"
 
 # Ruta al es_input.cfg — relativa a la raíz del repo (3 niveles arriba de utils/gamepadly)
 _ES_INPUT: Final = USER_ES_DIR  / "es_input.cfg"
@@ -83,6 +83,8 @@ class GamepadManager(AbstractContextManager):
     _processes: list[subprocess.Popen] = field(default_factory=list, init=False, repr=False)
 
     def __enter__(self) -> "GamepadManager":
+        self._stop_all()
+        
         profile = _find_profile(self.rom, self.system, self.emulator, self.core)
         if profile is None:
             return self

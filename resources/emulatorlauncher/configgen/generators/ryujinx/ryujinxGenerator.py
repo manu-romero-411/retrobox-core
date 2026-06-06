@@ -7,16 +7,14 @@ import os
 import re
 import shutil
 import subprocess
-import sys
 import json
 import stat
-import uuid
 
 from shutil import copyfile
 from pathlib import Path
 from typing import TYPE_CHECKING
 from configgen import Command as Command
-from configgen.batoceraPaths import _SYSTEM_LOCAL_BIN, CONFIGS, DEFAULTS_DIR, ROMS, SAVES, configure_emulator, ensure_symlink, mkdir_if_not_exists
+from configgen.batoceraPaths import DEFAULTS_DIR, SAVES, configure_emulator, ensure_symlink, mkdir_if_not_exists
 from configgen.controller import generate_sdl_game_controller_config, normalize_sdl_guid_for_emulator
 from configgen.generators.Generator import Generator
 from configgen.generators.eden.edenPaths import SWITCH_FIRMWARE, SWITCH_KEYS, SWITCH_MODS_DIR, SWITCH_ROMS
@@ -32,7 +30,7 @@ from sdl2 import joystick
 from ctypes import create_string_buffer
 
 
-eslog = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from configgen.batoceraTypes import HotkeysContext
@@ -213,7 +211,7 @@ def list_sdl_gamepads(sdlversion):
     sdl2.SDL_ClearError()
 
     if sdl2.SDL_Init(sdl2.SDL_INIT_GAMECONTROLLER) != 0:
-        eslog.error("SDL init failed: %s", sdl2.SDL_GetError().decode())
+        _logger.error("SDL init failed: %s", sdl2.SDL_GetError().decode())
         return {}
 
     sdl_devices = {}
@@ -279,7 +277,7 @@ def list_sdl_gamepads(sdlversion):
                 "path": joy_path
             }
 
-            eslog.warning(
+            _logger.warning(
                 "SDL DEVICE index=%d name='%s' guid='%s'",
                 i,
                 name,
@@ -302,7 +300,7 @@ class RyujinxGenerator(Generator):
         }
 
     def generate(self, system, rom, playersControllers, metadata, guns, wheels, gameResolution):
-        eslog.warning("DEBUG: generate() llamado, emulator=%s", system.config['emulator'])
+        _logger.warning("DEBUG: generate() llamado, emulator=%s", system.config['emulator'])
         script = DEFAULTS_DIR / "data/switch/detectvideo.sh"
         st = script.stat()
         script.chmod(st.st_mode | stat.S_IEXEC)
@@ -339,12 +337,12 @@ class RyujinxGenerator(Generator):
         mkdir_if_not_exists(SWITCH_MODS_DIR)
         ensure_symlink(SWITCH_MODS_DIR, RYUJINX_MODS_LINK)
 
-        writelog("Controller mapping before: {}".format(generate_sdl_game_controller_config(playersControllers)))
+        _logger.debug("Controller mapping before: {}".format(generate_sdl_game_controller_config(playersControllers)))
 
         #Configuration update
         sdl_mapping = RyujinxGenerator.writeRyujinxConfig(f"{RYUJINX_CONFIG_FILE}", f"{RYUJINX_CONFIG_FILE_BFR}", f"{RYUJINX_CONFIG_FILE_TPL}", system, playersControllers)
 
-        writelog("Controller mapping after: {}".format(str(sdl_mapping)))
+        _logger.debug("Controller mapping after: {}".format(str(sdl_mapping)))
 
         environment = { 
                         "SDL_JOYSTICK_HIDAPI": "1",
@@ -388,7 +386,7 @@ class RyujinxGenerator(Generator):
     
     @staticmethod
     def writeRyujinxConfig(RyujinxConfigFile, RyujinxConfigFileBefore, RyujinxConfigTemplateFile, system, playersControllers):
-        writelog(RyujinxConfigTemplateFile)
+        _logger.debug(RyujinxConfigTemplateFile)
         data = {}
 
         if os.path.exists(f"{RYUJINX_CONFIG_FILE_TPL}"):
@@ -427,17 +425,16 @@ class RyujinxGenerator(Generator):
         else:
             data['system_region'] = 'USA'
 
-        if system.isOptSet('ryu_docked_mode'):
-            data['docked_mode'] = bool(int(system.config["ryu_docked_mode"]))
-        else:
-            data['docked_mode'] = bool(1)
+        # discord integration
+        data['enable_discord_integration'] = system.config.get_bool('discordrpc', False, return_values=(True, False))
+        
+        # docked mode
+        data['docked_mode'] = system.config.get_bool('ryu_docked_mode', True, return_values=(True, False))
 
         # V-Sync
-        if system.isOptSet('ryu_vsync'):
-            data['enable_vsync'] = bool(int(system.config["ryu_vsync"]))
-        else:
-            data['enable_vsync'] = bool(1)
+        data['enable_vsync'] = system.config.get_bool('ryu_vsync', False, return_values=(True, False))
 
+        # graphics backend
         if system.isOptSet('ryu_backend'):
             data['graphics_backend'] = system.config["ryu_backend"]
         else:
@@ -458,17 +455,17 @@ class RyujinxGenerator(Generator):
             sdl_gamepads = list_sdl_gamepads(2)            
 
             if debugcontrollers:
-                writelog("=====================================================Start Bato Controller Debug Info=========================================================")
+                _logger.debug("=====================================================Start Bato Controller Debug Info=========================================================")
                 for index, controller in enumerate(playersControllers, start=0):
-                    writelog("Controller configName: {}".format(controller.name))
-                    writelog("Controller index: {}".format(controller.index))
-                    writelog("Controller real_name: {}".format(controller.real_name))
-                    writelog("Controller device_path: {}".format(controller.device_path))
-                    writelog("Controller player: {}".format(controller.player_number))
-                    writelog("Controller GUID: {}".format(controller.guid))
-                    writelog("")
-                writelog("=====================================================End Bato Controller Debug Info===========================================================")
-                writelog("")
+                    _logger.debug("Controller configName: {}".format(controller.name))
+                    _logger.debug("Controller index: {}".format(controller.index))
+                    _logger.debug("Controller real_name: {}".format(controller.real_name))
+                    _logger.debug("Controller device_path: {}".format(controller.device_path))
+                    _logger.debug("Controller player: {}".format(controller.player_number))
+                    _logger.debug("Controller GUID: {}".format(controller.guid))
+                    _logger.debug("")
+                _logger.debug("=====================================================End Bato Controller Debug Info===========================================================")
+                _logger.debug("")
 
             input_config = []
             index_of_convuuid = {}
@@ -497,7 +494,7 @@ class RyujinxGenerator(Generator):
                                 found_sdl_guid = sdl_ctrl.get("guid")
                                 found_sdl_mapping = sdl_ctrl.get("mapping")
 
-                                eslog.warning(
+                                _logger.warning(
                                     "Matched SDL controller '%s' -> GUID %s",
                                     target_name,
                                     found_sdl_guid
@@ -536,7 +533,7 @@ class RyujinxGenerator(Generator):
                     else:
                         pure_guid = "00000000000000000000000000000000"
 
-                    writelog(
+                    _logger.debug(
                         f"FINAL GUID SOURCE: controller.guid={controller_guid} "
                         f"found_sdl_guid={found_sdl_guid}"
                     )
@@ -566,7 +563,7 @@ class RyujinxGenerator(Generator):
                         f"{pure_guid[20:32]}"
                     )
 
-                    eslog.warning(
+                    _logger.warning(
                         "Formatted GUID (no index): %s",
                         formatted_guid
                     )
@@ -590,17 +587,17 @@ class RyujinxGenerator(Generator):
 
                     final_guid = f"{current_idx}-{formatted_guid}"
 
-                    eslog.warning(
+                    _logger.warning(
                         "Final controller GUID for Ryujinx: %s",
                         final_guid
                     )
 
-                    eslog.warning("SDL MATCH? target='%s'", target_name)
+                    _logger.warning("SDL MATCH? target='%s'", target_name)
 
                     for sdl_path, sdl_ctrl in sdl_gamepads.items():
-                        eslog.warning("SDL DEVICE: '%s'", sdl_ctrl.get("name"))
+                        _logger.warning("SDL DEVICE: '%s'", sdl_ctrl.get("name"))
 
-                    writelog(f"RAW controller.guid={controller_guid} | SDL found_sdl_guid={found_sdl_guid}")
+                    _logger.debug(f"RAW controller.guid={controller_guid} | SDL found_sdl_guid={found_sdl_guid}")
                     
                     # Sub-bloque: Stick Izquierdo
                     left_joycon_stick = {}
@@ -653,7 +650,8 @@ class RyujinxGenerator(Generator):
 
                     # Lógica de inversión de botones
                     ryu_inverse_button = system.config.get('ryu_inverse_button', 'false').lower() == 'true'
-                    if controller.real_name and "Nintendo" in controller.real_name:
+                    if controller.real_name and ( \
+                        "Nintendo" in controller.real_name or controller.guid in NINTENDO_GUIDS):
                         right_joycon['button_x'] = "X"
                         right_joycon['button_b'] = "B"
                         right_joycon['button_y'] = "Y"
@@ -749,9 +747,3 @@ def getLangFromEnvironment():
         return lang
     else:
         return "en_US"
-
-def writelog(log):
-#    return
-    f = open("/tmp/debugryujinx.txt", "a")
-    f.write(log+"\n")
-    f.close()

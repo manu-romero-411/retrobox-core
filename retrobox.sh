@@ -5,11 +5,24 @@
 
 # sudo dnf install freeimage SDL2_mixer vlc-libs jq p7zip
 # sudo dnf install python3-pyudev python3-pyudev python3-pip python3-virtualenv python3-pysdl2 python3-yaml python3-qrcode python3-pillow python3-evdev python3-qrcode
+
+trap '${HOME}/.local/bin/display-restore-layout' EXIT
+
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd -P)"
 
 export USERDATA="${HERE:-$HOME/.local/share/batocera}"
 export BATOCERA_ROOT="${USERDATA}"
 export PATH="${USERDATA}/resources/system_scripts:${USERDATA}/resources/user_scripts:$PATH"
+
+# Parámetro --shell / -s
+if [[ "$1" == "-s" || "$1" == "--shell" ]]; then
+    exec env \
+        USERDATA="$USERDATA" \
+        BATOCERA_ROOT="$BATOCERA_ROOT" \
+        PATH="${USERDATA}/resources/system_scripts:${USERDATA}/resources/user_scripts:$PATH" \
+        PS1="🎮 \[\e[1;32m\]\u@\h\[\e[0m\]:\[\e[1;34m\]\w\[\e[0m\]\n\$ " \
+        bash --norc --noprofile
+fi
 
 # Comprobar que el directorio de Retrobox es real
 if [ ! -d "${USERDATA}" ]; then
@@ -71,4 +84,4 @@ cd "${USERDATA}/frontend" || exit 1
 
 "${HOME}/.local/bin/display-only-hdmi" 1080p
 "${USERDATA}/frontend/emulationstation" --home "${USERDATA}/frontend" "$@"
-"${HOME}/.local/bin/display-restore-layout"
+exit $?

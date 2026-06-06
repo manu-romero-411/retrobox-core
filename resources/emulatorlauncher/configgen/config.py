@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import logging
 from typing import TYPE_CHECKING, Any, ClassVar, Literal, overload
 
 from .utils.missing import MISSING, MissingType
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
+
+_logger = logging.getLogger(__name__)
 
 @dataclass(slots=True)
 class Config:
@@ -61,7 +64,9 @@ class Config:
 
         if isinstance(value, str):
             value = value.lower()
-
+        
+        _logger.debug(f"clave: {key}, valor: {value}")
+        
         if return_values is None:
             return value in self.TRUE_VALUES
 

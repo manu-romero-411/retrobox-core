@@ -330,352 +330,352 @@ class EdenGenerator(Generator):
         }
 
         # ini file
-        yuzuConfig = CaseSensitiveRawConfigParser()
-        yuzuConfig.optionxform=str
+        eden_config = CaseSensitiveRawConfigParser()
+        eden_config.optionxform=str
 
         if os.path.exists(yuzuConfigFile):
-            yuzuConfig.read(yuzuConfigFile)
+            eden_config.read(yuzuConfigFile)
         # Sinon première création depuis template
         elif os.path.exists(yuzuConfigTemplateFile):
-            yuzuConfig.read(yuzuConfigTemplateFile)
+            eden_config.read(yuzuConfigTemplateFile)
 
     # UI section
-        if not yuzuConfig.has_section("UI"):
-            yuzuConfig.add_section("UI")
+        if not eden_config.has_section("UI"):
+            eden_config.add_section("UI")
 
-        yuzuConfig.set("UI", "enable_discord_presence", "true")
-        yuzuConfig.set("UI", "enable_discord_presence\\default", "true")
+        eden_config.set("UI", "enable_discord_presence", system.config.get_bool('discordrpc', False, return_values=("true", "false")))
+        eden_config.set("UI", "enable_discord_presence\\default", "false")
 
-        yuzuConfig.set("UI", "check_for_updates_on_start", "false")
-        yuzuConfig.set("UI", "check_for_updates_on_start\\default", "false")
+        eden_config.set("UI", "check_for_updates_on_start", "false")
+        eden_config.set("UI", "check_for_updates_on_start\\default", "false")
 
         if emulator == "citron-emu":
-            yuzuConfig.set("UI", "UIGameList\\cache_game_list", "false")
-            yuzuConfig.set("UI", "UIGameList\\cache_game_list\\default", "false")
+            eden_config.set("UI", "UIGameList\\cache_game_list", "false")
+            eden_config.set("UI", "UIGameList\\cache_game_list\\default", "false")
         else:
-            yuzuConfig.set("UI", "UIGameList\\cache_game_list", "true")
-            yuzuConfig.set("UI", "UIGameList\\cache_game_list\\default", "true")
+            eden_config.set("UI", "UIGameList\\cache_game_list", "true")
+            eden_config.set("UI", "UIGameList\\cache_game_list\\default", "true")
 
         # Common external path (dlc/update)
-        yuzuConfig.set("UI", "Paths\\external_content_dirs\\size", "2")
-        yuzuConfig.set("UI", "Paths\\external_content_dirs\\1\\path", f"{SWITCH_UPDATE_DIR}")
-        yuzuConfig.set("UI", "Paths\\external_content_dirs\\2\\path", f"{SWITCH_DLC_DIR}")
+        eden_config.set("UI", "Paths\\external_content_dirs\\size", "2")
+        eden_config.set("UI", "Paths\\external_content_dirs\\1\\path", f"{SWITCH_UPDATE_DIR}")
+        eden_config.set("UI", "Paths\\external_content_dirs\\2\\path", f"{SWITCH_DLC_DIR}")
 
         #citron shortcuts
-        yuzuConfig.set("UI", "Shortcuts\\shortcuts\\size", "1")#adjust to number of shortcut sets
+        eden_config.set("UI", "Shortcuts\\shortcuts\\size", "1")#adjust to number of shortcut sets
         #exit citron
-        yuzuConfig.set("UI", "Shortcuts\\shortcuts\\1\\name", "Exit citron")
-        yuzuConfig.set("UI", "Shortcuts\\shortcuts\\1\\group", "Main Window")
-        yuzuConfig.set("UI", "Shortcuts\\shortcuts\\1\\keyseq", "Ctrl+Q")
-        yuzuConfig.set("UI", "Shortcuts\\shortcuts\\1\\controller_keyseq", "Minus+Plus")
-        yuzuConfig.set("UI", "Shortcuts\\shortcuts\\1\\context", "1")
-        yuzuConfig.set("UI", "Shortcuts\\shortcuts\\1\\repeat", "false")
+        eden_config.set("UI", "Shortcuts\\shortcuts\\1\\name", "Exit citron")
+        eden_config.set("UI", "Shortcuts\\shortcuts\\1\\group", "Main Window")
+        eden_config.set("UI", "Shortcuts\\shortcuts\\1\\keyseq", "Ctrl+Q")
+        eden_config.set("UI", "Shortcuts\\shortcuts\\1\\controller_keyseq", "Minus+Plus")
+        eden_config.set("UI", "Shortcuts\\shortcuts\\1\\context", "1")
+        eden_config.set("UI", "Shortcuts\\shortcuts\\1\\repeat", "false")
 
         #exit eden
-        yuzuConfig.set("UI", "Shortcuts\\Main%20Window\\Exit%20eden\\KeySeq\\default", "false")
-        yuzuConfig.set("UI", "Shortcuts\\Main%20Window\\Exit%20eden\\KeySeq", "Ctrl+Q")
-        yuzuConfig.set("UI", "Shortcuts\\Main%20Window\\Exit%20eden\\Controller_KeySeq\\default", "false")
-        yuzuConfig.set("UI", "Shortcuts\\Main%20Window\\Exit%20eden\\Controller_KeySeq", "Home+Plus")
-        yuzuConfig.set("UI", "Shortcuts\\Main%20Window\\Exit%20eden\\Context\\default", "true")
-        yuzuConfig.set("UI", "Shortcuts\\Main%20Window\\Exit%20eden\\Context", "1")
+        eden_config.set("UI", "Shortcuts\\Main%20Window\\Exit%20eden\\KeySeq\\default", "false")
+        eden_config.set("UI", "Shortcuts\\Main%20Window\\Exit%20eden\\KeySeq", "Ctrl+Q")
+        eden_config.set("UI", "Shortcuts\\Main%20Window\\Exit%20eden\\Controller_KeySeq\\default", "false")
+        eden_config.set("UI", "Shortcuts\\Main%20Window\\Exit%20eden\\Controller_KeySeq", "Home+Plus")
+        eden_config.set("UI", "Shortcuts\\Main%20Window\\Exit%20eden\\Context\\default", "true")
+        eden_config.set("UI", "Shortcuts\\Main%20Window\\Exit%20eden\\Context", "1")
 
         #fullscreen eden
-        yuzuConfig.set("UI", "Shortcuts\\Main%20Window\\Fullscreen\\KeySeq\\default", "false")
-        yuzuConfig.set("UI", "Shortcuts\\Main%20Window\\Fullscreen\\KeySeq", "F11")
-        yuzuConfig.set("UI", "Shortcuts\\Main%20Window\\Fullscreen\\Controller_KeySeq\\default", "false")
-        yuzuConfig.set("UI", "Shortcuts\\Main%20Window\\Fullscreen\\Controller_KeySeq", "Home+B")
-        yuzuConfig.set("UI", "Shortcuts\\Main%20Window\\Fullscreen\\Context\\default", "true")
-        yuzuConfig.set("UI", "Shortcuts\\Main%20Window\\Fullscreen\\Context", "1")
+        eden_config.set("UI", "Shortcuts\\Main%20Window\\Fullscreen\\KeySeq\\default", "false")
+        eden_config.set("UI", "Shortcuts\\Main%20Window\\Fullscreen\\KeySeq", "F11")
+        eden_config.set("UI", "Shortcuts\\Main%20Window\\Fullscreen\\Controller_KeySeq\\default", "false")
+        eden_config.set("UI", "Shortcuts\\Main%20Window\\Fullscreen\\Controller_KeySeq", "Home+B")
+        eden_config.set("UI", "Shortcuts\\Main%20Window\\Fullscreen\\Context\\default", "true")
+        eden_config.set("UI", "Shortcuts\\Main%20Window\\Fullscreen\\Context", "1")
 
         #pause eden
-        yuzuConfig.set("UI", "Shortcuts\\Main%20Window\\Continue\\Pause%20Emulation\\KeySeq\\default", "false")
-        yuzuConfig.set("UI", "Shortcuts\\Main%20Window\\Continue\\Pause%20Emulation\\KeySeq", "F4")
-        yuzuConfig.set("UI", "Shortcuts\\Main%20Window\\Continue\\Pause%20Emulation\\Controller_KeySeq\\default", "false")
-        yuzuConfig.set("UI", "Shortcuts\\Main%20Window\\Continue\\Pause%20Emulation\\Controller_KeySeq", "")
-        yuzuConfig.set("UI", "Shortcuts\\Main%20Window\\Continue\\Pause%20Emulation\\Context\\default", "true")
-        yuzuConfig.set("UI", "Shortcuts\\Main%20Window\\Continue\\Pause%20Emulation\\Context", "1")
+        eden_config.set("UI", "Shortcuts\\Main%20Window\\Continue\\Pause%20Emulation\\KeySeq\\default", "false")
+        eden_config.set("UI", "Shortcuts\\Main%20Window\\Continue\\Pause%20Emulation\\KeySeq", "F4")
+        eden_config.set("UI", "Shortcuts\\Main%20Window\\Continue\\Pause%20Emulation\\Controller_KeySeq\\default", "false")
+        eden_config.set("UI", "Shortcuts\\Main%20Window\\Continue\\Pause%20Emulation\\Controller_KeySeq", "")
+        eden_config.set("UI", "Shortcuts\\Main%20Window\\Continue\\Pause%20Emulation\\Context\\default", "true")
+        eden_config.set("UI", "Shortcuts\\Main%20Window\\Continue\\Pause%20Emulation\\Context", "1")
 
-        yuzuConfig.set("UI", "Paths\\romsPath", f"{SWITCH_ROMS}")
-        yuzuConfig.set("UI", "Paths\\gamedirs\\1\\deep_scan", "true")
-        yuzuConfig.set("UI", "Paths\\gamedirs\\1\\deep_scan\\default", "false")
-        yuzuConfig.set("UI", "Paths\\gamedirs\\1\\expanded", "true")
-        yuzuConfig.set("UI", "Paths\\gamedirs\\1\\expanded\\default", "true")
-        yuzuConfig.set("UI", "Paths\\gamedirs\\1\\path", f"{SWITCH_ROMS}")
-        yuzuConfig.set("UI", "Paths\\gamedirs\\size", "3")
+        eden_config.set("UI", "Paths\\romsPath", f"{SWITCH_ROMS}")
+        eden_config.set("UI", "Paths\\gamedirs\\1\\deep_scan", "true")
+        eden_config.set("UI", "Paths\\gamedirs\\1\\deep_scan\\default", "false")
+        eden_config.set("UI", "Paths\\gamedirs\\1\\expanded", "true")
+        eden_config.set("UI", "Paths\\gamedirs\\1\\expanded\\default", "true")
+        eden_config.set("UI", "Paths\\gamedirs\\1\\path", f"{SWITCH_ROMS}")
+        eden_config.set("UI", "Paths\\gamedirs\\size", "3")
 
         # Interface language (citron)
         if system.isOptSet('yuzu_intlanguage'):
-            yuzuConfig.set("UI", "Paths\\language", system.config["yuzu_intlanguage"])
-            yuzuConfig.set("UI", "Paths\\language\\default", "false")
+            eden_config.set("UI", "Paths\\language", system.config["yuzu_intlanguage"])
+            eden_config.set("UI", "Paths\\language\\default", "false")
         else:
-            yuzuConfig.set("UI", "Paths\\language", "en")
-            yuzuConfig.set("UI", "Paths\\language\\default", "true")
+            eden_config.set("UI", "Paths\\language", "en")
+            eden_config.set("UI", "Paths\\language\\default", "true")
 
         # Single Window Mode
         if system.isOptSet('single_window'):
-            yuzuConfig.set("UI", "singleWindowMode", system.config["single_window"])
-            yuzuConfig.set("UI", "singleWindowMode\\default", "false")
+            eden_config.set("UI", "singleWindowMode", system.config["single_window"])
+            eden_config.set("UI", "singleWindowMode\\default", "false")
         else:
-            yuzuConfig.set("UI", "singleWindowMode", "true")
-            yuzuConfig.set("UI", "singleWindowMode\\default", "true")
+            eden_config.set("UI", "singleWindowMode", "true")
+            eden_config.set("UI", "singleWindowMode\\default", "true")
 
         # User Profile select on boot
         if system.isOptSet('user_profile'):
-            yuzuConfig.set("UI", "select_user_on_boot", system.config["user_profile"])
-            yuzuConfig.set("UI", "select_user_on_boot\\default", "false")
+            eden_config.set("UI", "select_user_on_boot", system.config["user_profile"])
+            eden_config.set("UI", "select_user_on_boot\\default", "false")
         else:
-            yuzuConfig.set("UI", "select_user_on_boot", "true")
-            yuzuConfig.set("UI", "select_user_on_boot\\default", "true")
+            eden_config.set("UI", "select_user_on_boot", "true")
+            eden_config.set("UI", "select_user_on_boot\\default", "true")
 
         # Skip Citron animation/message
-        yuzuConfig.set("UI", "showIntroAnimation", "false")
-        yuzuConfig.set("UI", "showIntroAnimation\\default", "false")
-        yuzuConfig.set("UI", "farewellShown", "true")
-        yuzuConfig.set("UI", "farewellShown\\default", "false")
+        eden_config.set("UI", "showIntroAnimation", "false")
+        eden_config.set("UI", "showIntroAnimation\\default", "false")
+        eden_config.set("UI", "farewellShown", "true")
+        eden_config.set("UI", "farewellShown\\default", "false")
 
         # Confirm exit off
-        yuzuConfig.set("UI", "confirmStop", "2")
-        yuzuConfig.set("UI", "confirmStop\\default", "false")
+        eden_config.set("UI", "confirmStop", "2")
+        eden_config.set("UI", "confirmStop\\default", "false")
 
     # Core section
-        if not yuzuConfig.has_section("Core"):
-            yuzuConfig.add_section("Core")
+        if not eden_config.has_section("Core"):
+            eden_config.add_section("Core")
 
         # Multicore
         if system.isOptSet('multicore'):
-            yuzuConfig.set("Core", "use_multi_core", system.config["multicore"])
-            yuzuConfig.set("Core", "use_multi_core\\default", "false")
+            eden_config.set("Core", "use_multi_core", system.config["multicore"])
+            eden_config.set("Core", "use_multi_core\\default", "false")
         else:
-            yuzuConfig.set("Core", "use_multi_core", "true")
-            yuzuConfig.set("Core", "use_multi_core\\default", "true")
+            eden_config.set("Core", "use_multi_core", "true")
+            eden_config.set("Core", "use_multi_core\\default", "true")
 
         # Memory layout
         if system.isOptSet('yuzu_memory_layout'):
-            yuzuConfig.set("Core", "memory_layout_mode", system.config["yuzu_memory_layout"])
-            yuzuConfig.set("Core", "memory_layout_mode\\default", "false")
+            eden_config.set("Core", "memory_layout_mode", system.config["yuzu_memory_layout"])
+            eden_config.set("Core", "memory_layout_mode\\default", "false")
         else:
-            yuzuConfig.set("Core", "memory_layout_mode", "0")
-            yuzuConfig.set("Core", "memory_layout_mode\\default", "true")
+            eden_config.set("Core", "memory_layout_mode", "0")
+            eden_config.set("Core", "memory_layout_mode\\default", "true")
 
     # Renderer section
-        if not yuzuConfig.has_section("Renderer"):
-            yuzuConfig.add_section("Renderer")
+        if not eden_config.has_section("Renderer"):
+            eden_config.add_section("Renderer")
 
         # Extended Dynamic State Fix for V43 ZEN3
         if is_steamdeck():
-            yuzuConfig.set("Renderer", "extended_dynamic_state", "0")
-            yuzuConfig.set("Renderer", "extended_dynamic_state\\default", "false")
+            eden_config.set("Renderer", "extended_dynamic_state", "0")
+            eden_config.set("Renderer", "extended_dynamic_state\\default", "false")
         # Aspect ratio
         if system.isOptSet('yuzu_ratio'):
-            yuzuConfig.set("Renderer", "aspect_ratio", system.config["yuzu_ratio"])
-            yuzuConfig.set("Renderer", "aspect_ratio\\default", "false")
+            eden_config.set("Renderer", "aspect_ratio", system.config["yuzu_ratio"])
+            eden_config.set("Renderer", "aspect_ratio\\default", "false")
         else:
-            yuzuConfig.set("Renderer", "aspect_ratio", "0")
-            yuzuConfig.set("Renderer", "aspect_ratio\\default", "true")
+            eden_config.set("Renderer", "aspect_ratio", "0")
+            eden_config.set("Renderer", "aspect_ratio\\default", "true")
 
         # Graphical backend
         if system.isOptSet('yuzu_backend'):
-            yuzuConfig.set("Renderer", "backend", system.config["yuzu_backend"])
-            yuzuConfig.set("Renderer", "backend\\default", "false")
+            eden_config.set("Renderer", "backend", system.config["yuzu_backend"])
+            eden_config.set("Renderer", "backend\\default", "false")
         else:
-            yuzuConfig.set("Renderer", "backend", "1")
-            yuzuConfig.set("Renderer", "backend\\default", "true")
+            eden_config.set("Renderer", "backend", "1")
+            eden_config.set("Renderer", "backend\\default", "true")
 
         # Async Shader compilation
         if system.isOptSet('async_shaders'):
-            yuzuConfig.set("Renderer", "use_asynchronous_shaders", system.config["async_shaders"])
-            yuzuConfig.set("Renderer", "use_asynchronous_shaders\\default", "false")
+            eden_config.set("Renderer", "use_asynchronous_shaders", system.config["async_shaders"])
+            eden_config.set("Renderer", "use_asynchronous_shaders\\default", "false")
         else:
-            yuzuConfig.set("Renderer", "use_asynchronous_shaders", "false")
-            yuzuConfig.set("Renderer", "use_asynchronous_shaders\\default", "true")
+            eden_config.set("Renderer", "use_asynchronous_shaders", "false")
+            eden_config.set("Renderer", "use_asynchronous_shaders\\default", "true")
 
         # Assembly shaders
         if system.isOptSet('shaderbackend'):
-            yuzuConfig.set("Renderer", "shader_backend", system.config["shaderbackend"])
-            yuzuConfig.set("Renderer", "shader_backend\\default", "false")
+            eden_config.set("Renderer", "shader_backend", system.config["shaderbackend"])
+            eden_config.set("Renderer", "shader_backend\\default", "false")
         else:
-            yuzuConfig.set("Renderer", "shader_backend", "0")
-            yuzuConfig.set("Renderer", "shader_backend\\default", "true")
+            eden_config.set("Renderer", "shader_backend", "0")
+            eden_config.set("Renderer", "shader_backend\\default", "true")
 
         # Async Gpu Emulation
         if system.isOptSet('async_gpu'):
-            yuzuConfig.set("Renderer", "use_asynchronous_gpu_emulation", system.config["async_gpu"])
-            yuzuConfig.set("Renderer", "use_asynchronous_gpu_emulation\\default", "false")
+            eden_config.set("Renderer", "use_asynchronous_gpu_emulation", system.config["async_gpu"])
+            eden_config.set("Renderer", "use_asynchronous_gpu_emulation\\default", "false")
         else:
-            yuzuConfig.set("Renderer", "use_asynchronous_gpu_emulation", "true")
-            yuzuConfig.set("Renderer", "use_asynchronous_gpu_emulation\\default", "true")
+            eden_config.set("Renderer", "use_asynchronous_gpu_emulation", "true")
+            eden_config.set("Renderer", "use_asynchronous_gpu_emulation\\default", "true")
 
         # NVDEC Emulation
         if system.isOptSet('nvdec_emu'):
-            yuzuConfig.set("Renderer", "nvdec_emulation", system.config["nvdec_emu"])
-            yuzuConfig.set("Renderer", "nvdec_emulation\\default", "false")
+            eden_config.set("Renderer", "nvdec_emulation", system.config["nvdec_emu"])
+            eden_config.set("Renderer", "nvdec_emulation\\default", "false")
         else:
-            yuzuConfig.set("Renderer", "nvdec_emulation", "2")
-            yuzuConfig.set("Renderer", "nvdec_emulation\\default", "true")
+            eden_config.set("Renderer", "nvdec_emulation", "2")
+            eden_config.set("Renderer", "nvdec_emulation\\default", "true")
 
         # Gpu Accuracy
         if system.isOptSet('gpuaccuracy'):
-            yuzuConfig.set("Renderer", "gpu_accuracy", system.config["gpuaccuracy"])
+            eden_config.set("Renderer", "gpu_accuracy", system.config["gpuaccuracy"])
         else:
-            yuzuConfig.set("Renderer", "gpu_accuracy", "1")
-        yuzuConfig.set("Renderer", "gpu_accuracy\\default", "false")
+            eden_config.set("Renderer", "gpu_accuracy", "1")
+        eden_config.set("Renderer", "gpu_accuracy\\default", "false")
 
         # Vsync
         if system.isOptSet('vsync'):
-            yuzuConfig.set("Renderer", "use_vsync", system.config["vsync"])
-            yuzuConfig.set("Renderer", "use_vsync\\default", "false")
+            eden_config.set("Renderer", "use_vsync", system.config["vsync"])
+            eden_config.set("Renderer", "use_vsync\\default", "false")
             if system.config["vsync"] == "2":
-                yuzuConfig.set("Renderer", "use_vsync\\default", "true")
+                eden_config.set("Renderer", "use_vsync\\default", "true")
         else:
-            yuzuConfig.set("Renderer", "use_vsync", "1")
-            yuzuConfig.set("Renderer", "use_vsync\\default", "false")
+            eden_config.set("Renderer", "use_vsync", "1")
+            eden_config.set("Renderer", "use_vsync\\default", "false")
 
         # Gpu cache garbage collection
         if system.isOptSet('gpu_cache_gc'):
-            yuzuConfig.set("Renderer", "use_caches_gc", system.config["gpu_cache_gc"])
+            eden_config.set("Renderer", "use_caches_gc", system.config["gpu_cache_gc"])
         else:
-            yuzuConfig.set("Renderer", "use_caches_gc", "false")
-        yuzuConfig.set("Renderer", "use_caches_gc\\default", "false")
+            eden_config.set("Renderer", "use_caches_gc", "false")
+        eden_config.set("Renderer", "use_caches_gc\\default", "false")
 
         # Max anisotropy
         if system.isOptSet('anisotropy'):
-            yuzuConfig.set("Renderer", "max_anisotropy", system.config["anisotropy"])
-            yuzuConfig.set("Renderer", "max_anisotropy\\default", "false")
+            eden_config.set("Renderer", "max_anisotropy", system.config["anisotropy"])
+            eden_config.set("Renderer", "max_anisotropy\\default", "false")
         else:
-            yuzuConfig.set("Renderer", "max_anisotropy", "0")
-            yuzuConfig.set("Renderer", "max_anisotropy\\default", "true")
+            eden_config.set("Renderer", "max_anisotropy", "0")
+            eden_config.set("Renderer", "max_anisotropy\\default", "true")
 
         # Fullscreen mode
         if system.isOptSet('fullscreen_mode'):
-            yuzuConfig.set("Renderer", "fullscreen_mode", system.config["fullscreen_mode"])
-            yuzuConfig.set("Renderer", "fullscreen_mode\\default", "false")
+            eden_config.set("Renderer", "fullscreen_mode", system.config["fullscreen_mode"])
+            eden_config.set("Renderer", "fullscreen_mode\\default", "false")
         else:
-            yuzuConfig.set("Renderer", "fullscreen_mode", "1")
-            yuzuConfig.set("Renderer", "fullscreen_mode\\default", "true")
+            eden_config.set("Renderer", "fullscreen_mode", "1")
+            eden_config.set("Renderer", "fullscreen_mode\\default", "true")
 
         if emulator == "citron-emu":
             # Resolution scaler
             if system.isOptSet('citron_resolution_scale'):
                 print ("Use Resolution Scale for Citron:",system.config["citron_resolution_scale"], file=sys.stderr)
-                yuzuConfig.set("Renderer", "resolution_setup", system.config["citron_resolution_scale"])
-                yuzuConfig.set("Renderer", "resolution_setup\\default", "false")
+                eden_config.set("Renderer", "resolution_setup", system.config["citron_resolution_scale"])
+                eden_config.set("Renderer", "resolution_setup\\default", "false")
             else:
-                yuzuConfig.set("Renderer", "resolution_setup", "2")
-                yuzuConfig.set("Renderer", "resolution_setup\\default", "true")
+                eden_config.set("Renderer", "resolution_setup", "2")
+                eden_config.set("Renderer", "resolution_setup\\default", "true")
         else:        
             # Resolution scaler
             if system.isOptSet('resolution_scale'):
                 print ("Use Resolution Scale for Eden :",system.config["resolution_scale"], file=sys.stderr)
-                yuzuConfig.set("Renderer", "resolution_setup", system.config["resolution_scale"])
-                yuzuConfig.set("Renderer", "resolution_setup\\default", "false")
+                eden_config.set("Renderer", "resolution_setup", system.config["resolution_scale"])
+                eden_config.set("Renderer", "resolution_setup\\default", "false")
             else:
-                yuzuConfig.set("Renderer", "resolution_setup", "2")
-                yuzuConfig.set("Renderer", "resolution_setup\\default", "true")
+                eden_config.set("Renderer", "resolution_setup", "2")
+                eden_config.set("Renderer", "resolution_setup\\default", "true")
 
         # Scaling filter
         if system.isOptSet('scale_filter'):
-            yuzuConfig.set("Renderer", "scaling_filter", system.config["scale_filter"])
-            yuzuConfig.set("Renderer", "scaling_filter\\default", "false")
+            eden_config.set("Renderer", "scaling_filter", system.config["scale_filter"])
+            eden_config.set("Renderer", "scaling_filter\\default", "false")
         else:
-            yuzuConfig.set("Renderer", "scaling_filter", "1")
-            yuzuConfig.set("Renderer", "scaling_filter\\default", "true")
+            eden_config.set("Renderer", "scaling_filter", "1")
+            eden_config.set("Renderer", "scaling_filter\\default", "true")
 
         # FSR Quality
         if system.isOptSet('fsr_quality'):
-            yuzuConfig.set("Renderer", "fsr2_quality_mode", system.config["fsr_quality"])
-            yuzuConfig.set("Renderer", "fsr2_quality_mode\\default", "false")
+            eden_config.set("Renderer", "fsr2_quality_mode", system.config["fsr_quality"])
+            eden_config.set("Renderer", "fsr2_quality_mode\\default", "false")
         else:
-            yuzuConfig.set("Renderer", "fsr2_quality_mode", "0")
-            yuzuConfig.set("Renderer", "fsr2_quality_mode\\default", "true")
+            eden_config.set("Renderer", "fsr2_quality_mode", "0")
+            eden_config.set("Renderer", "fsr2_quality_mode\\default", "true")
 
         # Anti aliasing method
         if system.isOptSet('aliasing_method'):
-            yuzuConfig.set("Renderer", "anti_aliasing", system.config["aliasing_method"])
-            yuzuConfig.set("Renderer", "anti_aliasing\\default", "false")
+            eden_config.set("Renderer", "anti_aliasing", system.config["aliasing_method"])
+            eden_config.set("Renderer", "anti_aliasing\\default", "false")
         else:
-            yuzuConfig.set("Renderer", "anti_aliasing", "0")
-            yuzuConfig.set("Renderer", "anti_aliasing\\default", "true")
+            eden_config.set("Renderer", "anti_aliasing", "0")
+            eden_config.set("Renderer", "anti_aliasing\\default", "true")
 
         #ASTC Decoding Method
         if system.isOptSet('accelerate_astc'):
-            yuzuConfig.set("Renderer", "accelerate_astc", system.config["accelerate_astc"])
-            yuzuConfig.set("Renderer", "accelerate_astc\\default", "false")
+            eden_config.set("Renderer", "accelerate_astc", system.config["accelerate_astc"])
+            eden_config.set("Renderer", "accelerate_astc\\default", "false")
         else:
-            yuzuConfig.set("Renderer", "accelerate_astc", "1")
-            yuzuConfig.set("Renderer", "accelerate_astc\\default", "true")
+            eden_config.set("Renderer", "accelerate_astc", "1")
+            eden_config.set("Renderer", "accelerate_astc\\default", "true")
 
         # ASTC Texture Recompression
         if system.isOptSet('astc_recompression'):
 
-            yuzuConfig.set("Renderer", "astc_recompression", system.config["astc_recompression"])
-            yuzuConfig.set("Renderer", "astc_recompression\\default", "false")
+            eden_config.set("Renderer", "astc_recompression", system.config["astc_recompression"])
+            eden_config.set("Renderer", "astc_recompression\\default", "false")
             if system.config["astc_recompression"] == "0":
-                yuzuConfig.set("Renderer", "use_vsync\\default", "true")
-            yuzuConfig.set("Renderer", "async_astc", "false")
-            yuzuConfig.set("Renderer", "async_astc\\default", "true")
+                eden_config.set("Renderer", "use_vsync\\default", "true")
+            eden_config.set("Renderer", "async_astc", "false")
+            eden_config.set("Renderer", "async_astc\\default", "true")
         else:
-            yuzuConfig.set("Renderer", "astc_recompression", "0")
-            yuzuConfig.set("Renderer", "astc_recompression\\default", "true")
-            yuzuConfig.set("Renderer", "async_astc", "false")
-            yuzuConfig.set("Renderer", "async_astc\\default", "true")
+            eden_config.set("Renderer", "astc_recompression", "0")
+            eden_config.set("Renderer", "astc_recompression\\default", "true")
+            eden_config.set("Renderer", "async_astc", "false")
+            eden_config.set("Renderer", "async_astc\\default", "true")
 
     # Cpu Section
-        if not yuzuConfig.has_section("Cpu"):
-            yuzuConfig.add_section("Cpu")
+        if not eden_config.has_section("Cpu"):
+            eden_config.add_section("Cpu")
 
         # Cpu Accuracy
         if system.isOptSet('cpuaccuracy'):
-            yuzuConfig.set("Cpu", "cpu_accuracy", system.config["cpuaccuracy"])
-            yuzuConfig.set("Cpu", "cpu_accuracy\\default", "false")
+            eden_config.set("Cpu", "cpu_accuracy", system.config["cpuaccuracy"])
+            eden_config.set("Cpu", "cpu_accuracy\\default", "false")
         else:
-            yuzuConfig.set("Cpu", "cpu_accuracy", "0")
-            yuzuConfig.set("Cpu", "cpu_accuracy\\default", "true")
+            eden_config.set("Cpu", "cpu_accuracy", "0")
+            eden_config.set("Cpu", "cpu_accuracy\\default", "true")
 
     # System section
-        if not yuzuConfig.has_section("System"):
-            yuzuConfig.add_section("System")
+        if not eden_config.has_section("System"):
+            eden_config.add_section("System")
 
         # Language
         if system.isOptSet('language'):
-            yuzuConfig.set("System", "language_index", system.config["language"])
-            yuzuConfig.set("System", "language_index\\default", "false")
+            eden_config.set("System", "language_index", system.config["language"])
+            eden_config.set("System", "language_index\\default", "false")
         else:
-            yuzuConfig.set("System", "language_index", "1")
-            yuzuConfig.set("System", "language_index\\default", "true")
+            eden_config.set("System", "language_index", "1")
+            eden_config.set("System", "language_index\\default", "true")
 
         # Audio Mode
         if system.isOptSet('audio_mode'):
-            yuzuConfig.set("System", "sound_index", system.config["audio_mode"])
-            yuzuConfig.set("System", "sound_index\\default", "false")
+            eden_config.set("System", "sound_index", system.config["audio_mode"])
+            eden_config.set("System", "sound_index\\default", "false")
         else:
-            yuzuConfig.set("System", "sound_index", "1")
-            yuzuConfig.set("System", "sound_index\\default", "true")
+            eden_config.set("System", "sound_index", "1")
+            eden_config.set("System", "sound_index\\default", "true")
 
         # Region
         if system.isOptSet('region'):
-            yuzuConfig.set("System", "region_index", system.config["region"])
-            yuzuConfig.set("System", "region_index\\default", "false")
+            eden_config.set("System", "region_index", system.config["region"])
+            eden_config.set("System", "region_index\\default", "false")
         else:
-            yuzuConfig.set("System", "region_index", "1")
-            yuzuConfig.set("System", "region_index\\default", "true")
+            eden_config.set("System", "region_index", "1")
+            eden_config.set("System", "region_index\\default", "true")
 
         # Dock Mode
         if system.isOptSet('dock_mode'):
             if system.config["dock_mode"] == "1":
-                yuzuConfig.set("System", "use_docked_mode", "1")
-                yuzuConfig.set("System", "use_docked_mode\\default", "true")
+                eden_config.set("System", "use_docked_mode", "1")
+                eden_config.set("System", "use_docked_mode\\default", "true")
             elif system.config["dock_mode"] == "0":
-                yuzuConfig.set("System", "use_docked_mode", "0")
-                yuzuConfig.set("System", "use_docked_mode\\default", "false")
+                eden_config.set("System", "use_docked_mode", "0")
+                eden_config.set("System", "use_docked_mode\\default", "false")
         else:
-            yuzuConfig.set("System", "use_docked_mode", "1")
-            yuzuConfig.set("System", "use_docked_mode\\default", "true")
+            eden_config.set("System", "use_docked_mode", "1")
+            eden_config.set("System", "use_docked_mode\\default", "true")
 
         # controls section
         # Al inicio de writeYuzuConfig, antes de escribir nada en Controls:
         # controls section
-        if not yuzuConfig.has_section("Controls"):
-            yuzuConfig.add_section("Controls")
+        if not eden_config.has_section("Controls"):
+            eden_config.add_section("Controls")
       
         eslog.warning("DEBUG: entrando bloque mandos, yuzu_auto=%s", system.config.get('yuzu_auto_controller_config'))
         if not system.isOptSet('yuzu_auto_controller_config') or system.config["yuzu_auto_controller_config"] != "0":
@@ -686,8 +686,8 @@ class EdenGenerator(Generator):
             # 2. Inicializar TODOS los puertos posibles de Eden por defecto como desconectados
             # Esto evita que se queden mandos "fantasmas" de sesiones anteriores
             for slot in range(8):
-                yuzuConfig.set("Controls", f"player_{slot}_connected", "false")
-                yuzuConfig.set("Controls", f"player_{slot}_connected\\default", "false")
+                eden_config.set("Controls", f"player_{slot}_connected", "false")
+                eden_config.set("Controls", f"player_{slot}_connected\\default", "false")
 
             guid_port = {}
             global_port_counter = {}  # puerto SDL real, independiente del slot de Eden
@@ -723,11 +723,11 @@ class EdenGenerator(Generator):
                             break
 
                 # Configurar tipo de mando basándonos en su índice real de Batocera
-                yuzuConfig.set("Controls", player_nb_str + "_type\\default", "false")
+                eden_config.set("Controls", player_nb_str + "_type\\default", "false")
                 if system.isOptSet('p{}_pad'.format(real_player_index)):
-                    yuzuConfig.set("Controls", player_nb_str + "_type", system.config["p{}_pad".format(real_player_index)])
+                    eden_config.set("Controls", player_nb_str + "_type", system.config["p{}_pad".format(real_player_index)])
                 else:
-                    yuzuConfig.set("Controls", player_nb_str + "_type", "0")
+                    eden_config.set("Controls", player_nb_str + "_type", "0")
 
                 # Normalización del GUID — ANTES de usarlo
                 eden_guid = normalize_sdl_guid(pad.guid)
@@ -749,53 +749,53 @@ class EdenGenerator(Generator):
 
                 # UN solo loop de botones — current_buttons_mapping, no yuzuButtonsMapping
                 for x in current_buttons_mapping:
-                    yuzuConfig.set("Controls", player_nb_str + "_" + x,
+                    eden_config.set("Controls", player_nb_str + "_" + x,
                         '"{}"'.format(EdenGenerator.setButton(emulator, current_buttons_mapping[x],
                                     eden_guid, pad.inputs, port)))
 
                 for x in yuzuAxisMapping:
-                    yuzuConfig.set("Controls", player_nb_str + "_" + x,
+                    eden_config.set("Controls", player_nb_str + "_" + x,
                         '"{}"'.format(EdenGenerator.setAxis(yuzuAxisMapping[x],
                                     eden_guid, pad.inputs, port)))
 
                 # Extras y activación
-                yuzuConfig.set("Controls", player_nb_str + "_button_screenshot\\default", "false")
-                yuzuConfig.set("Controls", player_nb_str + "_button_screenshot", "[empty]")
-                yuzuConfig.set("Controls", player_nb_str + "_motionleft\\default", "false")
-                yuzuConfig.set("Controls", player_nb_str + "_motionleft", "[empty]")
-                yuzuConfig.set("Controls", player_nb_str + "_motionright", "[empty]")
-                yuzuConfig.set("Controls", player_nb_str + "_motionright\\default", "false")
-                yuzuConfig.set("Controls", player_nb_str + "_connected", "true")
-                yuzuConfig.set("Controls", player_nb_str + "_connected\\default", "false")
+                eden_config.set("Controls", player_nb_str + "_button_screenshot\\default", "false")
+                eden_config.set("Controls", player_nb_str + "_button_screenshot", "[empty]")
+                eden_config.set("Controls", player_nb_str + "_motionleft\\default", "false")
+                eden_config.set("Controls", player_nb_str + "_motionleft", "[empty]")
+                eden_config.set("Controls", player_nb_str + "_motionright", "[empty]")
+                eden_config.set("Controls", player_nb_str + "_motionright\\default", "false")
+                eden_config.set("Controls", player_nb_str + "_connected", "true")
+                eden_config.set("Controls", player_nb_str + "_connected\\default", "false")
 
                 # Configuración de vibración
                 if system.isOptSet('yuzu_rumble'):
-                    yuzuConfig.set("Controls", player_nb_str + "_vibration_enabled", system.config["yuzu_rumble"])
-                    yuzuConfig.set("Controls", player_nb_str + "_vibration_enabled\\default", "false")
+                    eden_config.set("Controls", player_nb_str + "_vibration_enabled", system.config["yuzu_rumble"])
+                    eden_config.set("Controls", player_nb_str + "_vibration_enabled\\default", "false")
                 else:
-                    yuzuConfig.set("Controls", player_nb_str + "_vibration_enabled", "true")
-                    yuzuConfig.set("Controls", player_nb_str + "_vibration_enabled\\default", "true")
+                    eden_config.set("Controls", player_nb_str + "_vibration_enabled", "true")
+                    eden_config.set("Controls", player_nb_str + "_vibration_enabled\\default", "true")
 
     # telemetry section
-        if not yuzuConfig.has_section("WebService"):
-            yuzuConfig.add_section("WebService")
-        yuzuConfig.set("WebService", "enable_telemetry", "false")
-        yuzuConfig.set("WebService", "enable_telemetry\\default", "false")
-        yuzuConfig.set("WebService", "enable_auto_update_check", "false")
-        yuzuConfig.set("WebService", "enable_auto_update_check\\default", "false")
+        if not eden_config.has_section("WebService"):
+            eden_config.add_section("WebService")
+        eden_config.set("WebService", "enable_telemetry", "false")
+        eden_config.set("WebService", "enable_telemetry\\default", "false")
+        eden_config.set("WebService", "enable_auto_update_check", "false")
+        eden_config.set("WebService", "enable_auto_update_check\\default", "false")
 
     # Services section
-        if not yuzuConfig.has_section("Services"):
-            yuzuConfig.add_section("Services")
-        yuzuConfig.set("Services", "bcat_backend", "none")
-        yuzuConfig.set("Services", "bcat_backend\\default", "none")
+        if not eden_config.has_section("Services"):
+            eden_config.add_section("Services")
+        eden_config.set("Services", "bcat_backend", "none")
+        eden_config.set("Services", "bcat_backend\\default", "none")
 
         ### update the configuration file
         if not os.path.exists(os.path.dirname(yuzuConfigFile)):
             os.makedirs(os.path.dirname(yuzuConfigFile))
 
         with open(yuzuConfigFile, 'w') as configfile:
-            yuzuConfig.write(configfile)
+            eden_config.write(configfile)
     
     @staticmethod
     def setButton(emulator, key, padGuid, padInputs, port):

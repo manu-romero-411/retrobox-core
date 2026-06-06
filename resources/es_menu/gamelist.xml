@@ -1416,57 +1416,9 @@
 		<region>wr</region>
 	</game>
 	<game>
-		<path>./ryujinx.menu</path>
-		<name>Ryujinx (Switch)</name>
-		<desc>Run Ryujinx (Switch). This software is not provided by RetroBat. You can download it here: https://ryujinx.org/download</desc>
-		<genre>Emulator</genre>
-		<image>./media/ryujinx-logo.png</image>
-		<marquee>./media/ryujinx-logo.png</marquee>
-		<rating>0</rating>
-		<developer>Ryujinx Team</developer>
-		<publisher>Ryujinx Team</publisher>
-		<playcount>2</playcount>
-		<lastplayed>20260529T220828</lastplayed>
-		<gametime>103</gametime>
-		<lang>en</lang>
-		<region>wr</region>
-	</game>
-	<game>
-		<path>./cemu.menu</path>
-		<name>Cemu (Wii U)</name>
-		<desc>Run Cemu Emulator (Wii U).</desc>
-		<genre>Emulator</genre>
-		<image>./media/cemu-logo.png</image>
-		<marquee>./media/cemu-logo.png</marquee>
-		<rating>0</rating>
-		<developer>Cemu Team</developer>
-		<publisher>Cemu Team</publisher>
-		<playcount>3</playcount>
-		<lastplayed>20260529T234206</lastplayed>
-		<gametime>42</gametime>
-		<lang>en</lang>
-		<region>wr</region>
-	</game>
-	<game>
 		<path>./demul-old.menu</path>
 		<name>demul-old</name>
 		<lang>en</lang>
-	</game>
-	<game>
-		<path>./ppsspp.menu</path>
-		<name>PPSSPP (PSP, Homebrews)</name>
-		<desc>Run PPSSPP Emulator (PSP, Homebrews).</desc>
-		<genre>Emulator</genre>
-		<image>./media/ppsspp-logo.png</image>
-		<marquee>./media/ppsspp-logo.png</marquee>
-		<rating>0</rating>
-		<developer>PPSSPP Team</developer>
-		<publisher>PPSSPP Team</publisher>
-		<playcount>2</playcount>
-		<lastplayed>20260601T224510</lastplayed>
-		<gametime>36</gametime>
-		<lang>en</lang>
-		<region>wr</region>
 	</game>
 	<game>
 		<path>./retroarch.menu</path>
@@ -1485,18 +1437,18 @@
 		<region>wr</region>
 	</game>
 	<game>
-		<path>./dolphin-emu.menu</path>
-		<name>Dolphin (GameCube,Wii,WAD)</name>
-		<desc>Run Dolphin Emulator (GameCube, Wii, WAD).</desc>
+		<path>./ppsspp.menu</path>
+		<name>PPSSPP (PSP, Homebrews)</name>
+		<desc>Run PPSSPP Emulator (PSP, Homebrews).</desc>
 		<genre>Emulator</genre>
-		<image>./media/dolphin-logo.png</image>
-		<marquee>./media/dolphin-logo.png</marquee>
+		<image>./media/ppsspp-logo.png</image>
+		<marquee>./media/ppsspp-logo.png</marquee>
 		<rating>0</rating>
-		<developer>Dolphin Team</developer>
-		<publisher>Dolphin Team</publisher>
-		<playcount>2</playcount>
-		<lastplayed>20260601T214845</lastplayed>
-		<gametime>50</gametime>
+		<developer>PPSSPP Team</developer>
+		<publisher>PPSSPP Team</publisher>
+		<playcount>3</playcount>
+		<lastplayed>20260606T152215</lastplayed>
+		<gametime>257</gametime>
 		<lang>en</lang>
 		<region>wr</region>
 	</game>
@@ -1510,9 +1462,57 @@
 		<rating>0</rating>
 		<developer>PCSX2 Team</developer>
 		<publisher>PCSX2 Team</publisher>
-		<playcount>7</playcount>
-		<lastplayed>20260601T223444</lastplayed>
-		<gametime>185</gametime>
+		<playcount>8</playcount>
+		<lastplayed>20260606T154230</lastplayed>
+		<gametime>246</gametime>
+		<lang>en</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./cemu.menu</path>
+		<name>Cemu (Wii U)</name>
+		<desc>Run Cemu Emulator (Wii U).</desc>
+		<genre>Emulator</genre>
+		<image>./media/cemu-logo.png</image>
+		<marquee>./media/cemu-logo.png</marquee>
+		<rating>0</rating>
+		<developer>Cemu Team</developer>
+		<publisher>Cemu Team</publisher>
+		<playcount>4</playcount>
+		<lastplayed>20260606T163243</lastplayed>
+		<gametime>58</gametime>
+		<lang>en</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./ryujinx.menu</path>
+		<name>Ryujinx (Switch)</name>
+		<desc>Run Ryujinx (Switch). This software is not provided by RetroBat. You can download it here: https://ryujinx.org/download</desc>
+		<genre>Emulator</genre>
+		<image>./media/ryujinx-logo.png</image>
+		<marquee>./media/ryujinx-logo.png</marquee>
+		<rating>0</rating>
+		<developer>Ryujinx Team</developer>
+		<publisher>Ryujinx Team</publisher>
+		<playcount>3</playcount>
+		<lastplayed>20260606T173050</lastplayed>
+		<gametime>810</gametime>
+		<lang>en</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./dolphin-emu.menu</path>
+		<name>Dolphin (GameCube,Wii,WAD)</name>
+		<desc>Run Dolphin Emulator (GameCube, Wii, WAD).</desc>
+		<genre>Emulator</genre>
+		<image>./media/dolphin-logo.png</image>
+		<marquee>./media/dolphin-logo.png</marquee>
+		<rating>0</rating>
+		<developer>Dolphin Team</developer>
+		<publisher>Dolphin Team</publisher>
+		<playcount>4</playcount>
+		<lastplayed>20260606T174840</lastplayed>
+		<gametime>328</gametime>
 		<lang>en</lang>
 		<region>wr</region>
 	</game>

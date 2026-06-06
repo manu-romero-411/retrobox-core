@@ -273,7 +273,9 @@ def configureINI(config_directory: Path, bios_directory: Path, system: Emulator,
         pcsx2INIConfig.add_section("EmuCore")
 
     # set the settings we want always enabled
-    pcsx2INIConfig.set("EmuCore", "EnableDiscordPresence", "false")
+    
+    # discord rich presence
+    pcsx2INIConfig.set("EmuCore", "EnableDiscordPresence", system.config.get_bool('discordrpc', False, return_values=("true", "false")))
 
     # Fastboot
     pcsx2INIConfig.set("EmuCore", "EnableFastBoot", system.config.get_bool('pcsx2_fastboot', True, return_values=("false", "true")))

@@ -170,7 +170,10 @@ def createPPSSPPConfig(iniConfig: CaseSensitiveConfigParser, system: Emulator):
 
     # SaveState
     iniConfig.set("General", "StateSlot", system.config.get_str("state_slot", "0"))
-
+    
+    # discord rich presence
+    iniConfig.set("General", "DiscordRichPresence", system.config.get_bool('discordrpc', False, return_values=("1", "0")))
+    
     ## [UPGRADE] - don't upgrade
     if not iniConfig.has_section("Upgrade"):
         iniConfig.add_section("Upgrade")

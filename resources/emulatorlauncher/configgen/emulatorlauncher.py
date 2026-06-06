@@ -3,13 +3,11 @@
 
 from __future__ import annotations
 
-from .batoceraPaths import BATOCERA_CONF, BATOCERA_SHARE_DIR, ES_GAMES_METADATA, SAVES, USER_SCRIPTS, GUN_OVERLAYS_DIR, HUD_CONFIG_FILE, USERDATA
+from .batoceraPaths import BATOCERA_SHARE_DIR, ES_GAMES_METADATA, SAVES, USER_SCRIPTS, GUN_OVERLAYS_DIR, HUD_CONFIG_FILE, USERDATA
 import sys
 
 sys.path.append(str(USERDATA))
-from resources.utils.gamepadly.manager import GamepadManager
-
-from configgen.sync_settings import sync as syncsettings
+from resources.utils.gamepadly.gamepadly_manager import GamepadManager
 
 from . import profiler
 
@@ -34,7 +32,6 @@ from typing import TYPE_CHECKING, Any, cast
 import pyudev
 import sdl2
 
-
 from .controller import Controller
 from .Emulator import Emulator
 from .exceptions import BadCommandLineArguments, BaseBatoceraException, BatoceraException, UnexpectedEmulatorExit
@@ -44,10 +41,6 @@ from .utils import bezels as bezelsUtil, metadata, videoMode, wheelsUtils
 from .utils.logger import setup_logging
 from .utils.squashfs import mount_squashfs
 from .utils.overlayfs import mount_overlayfs
-
-# Añadir la ruta raíz de los recursos al sys.path
-# Si el script está en .../resources/emulatorlauncher/configgen/
-# La raíz de 'resources' está dos niveles arriba.
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -238,13 +231,6 @@ def start_rom(args: argparse.Namespace, maxnbplayers: int, rom: Path, original_r
 
                     
                     with profiler.pause():
-                        """
-                        try:
-                            _logger.debug("Triggering mouse reset to primary display")
-                            subprocess.call([HOTKEYGEN_BIN, "--reset-mouse"])
-                        except Exception as e:
-                            _logger.warning("Failed to reset mouse: %s", e)
-                        """
                         monitor_thread.start()
                         exitCode = runCommand(cmd)
 
@@ -254,7 +240,6 @@ def start_rom(args: argparse.Namespace, maxnbplayers: int, rom: Path, original_r
                 # run a script after emulator shuts down
                 callExternalScripts(USER_SCRIPTS, "gameStop", [systemName, system.config.emulator, effectiveCore, rom])
                 #callExternalScripts(SYSTEM_SCRIPTS, "gameStop", [systemName, system.config.emulator, effectiveCore, rom])
-                os.remove(BATOCERA_CONF)
             finally:
                 # always restore the resolution
                 if resolutionChanged:
@@ -601,10 +586,6 @@ def signal_handler(signal: int, frame: FrameType | None):
         proc.kill()
 
 def launch() -> None:
-    # solución temporal para cargar un batocera.conf volátil en /tmp
-    # TODO: la config debería leerla de es_settings.cfg
-    syncsettings()
-
     with setup_logging():
         global proc
         proc = None

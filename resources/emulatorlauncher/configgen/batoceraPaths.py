@@ -49,7 +49,6 @@ HOME:  Final = USERDATA
 CACHE: Final = _XDG_CACHE / 'batocera'
 LOGS:  Final = HOME / 'logs'
 
-BATOCERA_CONF: Final = '/tmp/retrobox_gamelaunch.conf'
 USER_SCRIPTS:  Final = HOME / 'user_scripts'
 
 # ---------------------------------------------------------------------------
@@ -97,7 +96,6 @@ CMDFILES_DIR:      Final = RUNTIME_DIR / 'cmdfiles'
 SHADER_BEZELS_DIR: Final = RUNTIME_DIR / 'shader_bezels'
 HUD_CONFIG_FILE:   Final = RUNTIME_DIR / 'hud.config'
 GUN_OVERLAYS_DIR:  Final = RUNTIME_DIR / 'batocera-overlays'
-HOTKEYGEN_BIN: Final = SYSTEM_SCRIPTS / 'hotkeygen'
 
 # Utilidades (sin cambios)
 def configure_emulator(rom: Path, /) -> bool:

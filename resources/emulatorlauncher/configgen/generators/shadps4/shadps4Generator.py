@@ -13,6 +13,7 @@
 #
 from __future__ import annotations
 
+import getpass
 import logging
 import os
 import sys
@@ -97,10 +98,10 @@ class shadPS4Generator(Generator):
                     "trophyNotificationDuration": 6.0,
                     "playBGM": False,
                     "BGMvolume": 50,
-                    "enableDiscordRPC": False,
+                    "enableDiscordRPC": system.config.get_bool('discordrpc', False, return_values=(True, False)),
                     "logFilter": "",
                     "logType": "async",
-                    "userName": "Batocera",
+                    "userName": getpass.getuser(),
                     "updateChannel": "Release",
                     "chooseHomeTab": "General",
                     "showSplash": False,

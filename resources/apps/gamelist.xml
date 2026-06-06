@@ -1,23 +1,6 @@
 <?xml version="1.0"?>
 <gameList>
 	<game>
-		<path>./netflix.webapp</path>
-		<name>Netflix</name>
-		<desc>El mayor servicio de streaming del mundo, con series, películas y documentales originales disponibles en más de 190 países.</desc>
-		<image>./app-icons/netflix.png</image>
-		<marquee>./app-icons/netflix.png</marquee>
-		<rating>0</rating>
-		<releasedate>20070116T000000</releasedate>
-		<developer>Netflix Inc.</developer>
-		<publisher>Netflix Inc.</publisher>
-		<genre>Streaming</genre>
-		<playcount />
-		<lastplayed />
-		<gametime />
-		<lang>es</lang>
-		<region>wr</region>
-	</game>
-	<game>
 		<path>./YouTube.webapp</path>
 		<name>YouTube</name>
 		<playcount>5</playcount>
@@ -32,40 +15,6 @@
 		<lastplayed>20260531T173912</lastplayed>
 		<gametime>94</gametime>
 		<lang>en</lang>
-	</game>
-	<game>
-		<path>./hbo_max.webapp</path>
-		<name>Max (HBO Max)</name>
-		<desc>Plataforma de streaming de Warner Bros. Discovery con contenido de HBO, DC, Cartoon Network y producciones originales exclusivas.</desc>
-		<genre>Streaming</genre>
-		<image>./app-icons/hbo_max.png</image>
-		<marquee>./app-icons/hbo_max.png</marquee>
-		<rating>0</rating>
-		<releasedate>20200527T000000</releasedate>
-		<developer>Warner Bros. Discovery</developer>
-		<publisher>Warner Bros. Discovery</publisher>
-		<playcount>2</playcount>
-		<lastplayed>20260531T185736</lastplayed>
-		<gametime>10</gametime>
-		<lang>es</lang>
-		<region>wr</region>
-	</game>
-	<game>
-		<path>./kodi.kodi</path>
-		<name>Kodi</name>
-		<desc>Centro multimedia de código abierto para reproducir vídeo, música, imágenes y podcasts desde cualquier fuente local o en red.</desc>
-		<genre>Streaming</genre>
-		<image>./app-icons/kodi.png</image>
-		<marquee>./app-icons/kodi.png</marquee>
-		<rating>0</rating>
-		<releasedate>20040101T000000</releasedate>
-		<developer>Kodi Foundation</developer>
-		<publisher>Kodi Foundation</publisher>
-		<playcount>4</playcount>
-		<lastplayed>20260531T194518</lastplayed>
-		<gametime>34</gametime>
-		<lang>es</lang>
-		<region>wr</region>
 	</game>
 	<game>
 		<path>./amazon_prime_video.webapp</path>
@@ -197,9 +146,60 @@
 		<releasedate>20081007T000000</releasedate>
 		<developer>Spotify AB</developer>
 		<publisher>Spotify AB</publisher>
-		<playcount>8</playcount>
-		<lastplayed>20260605T164130</lastplayed>
-		<gametime>2126</gametime>
+		<playcount>9</playcount>
+		<lastplayed>20260605T174612</lastplayed>
+		<gametime>2347</gametime>
+		<lang>es</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./kodi.kodi</path>
+		<name>Kodi</name>
+		<desc>Centro multimedia de código abierto para reproducir vídeo, música, imágenes y podcasts desde cualquier fuente local o en red.</desc>
+		<genre>Streaming</genre>
+		<image>./app-icons/kodi.png</image>
+		<marquee>./app-icons/kodi.png</marquee>
+		<rating>0</rating>
+		<releasedate>20040101T000000</releasedate>
+		<developer>Kodi Foundation</developer>
+		<publisher>Kodi Foundation</publisher>
+		<playcount>5</playcount>
+		<lastplayed>20260605T175545</lastplayed>
+		<gametime>50</gametime>
+		<lang>es</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./hbo_max.webapp</path>
+		<name>Max (HBO Max)</name>
+		<desc>Plataforma de streaming de Warner Bros. Discovery con contenido de HBO, DC, Cartoon Network y producciones originales exclusivas.</desc>
+		<genre>Streaming</genre>
+		<image>./app-icons/hbo_max.png</image>
+		<marquee>./app-icons/hbo_max.png</marquee>
+		<rating>0</rating>
+		<releasedate>20200527T000000</releasedate>
+		<developer>Warner Bros. Discovery</developer>
+		<publisher>Warner Bros. Discovery</publisher>
+		<playcount>4</playcount>
+		<lastplayed>20260605T175520</lastplayed>
+		<gametime>79</gametime>
+		<lang>es</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./netflix.webapp</path>
+		<name>Netflix</name>
+		<desc>El mayor servicio de streaming del mundo, con series, películas y documentales originales disponibles en más de 190 países.</desc>
+		<genre>Streaming</genre>
+		<image>./app-icons/netflix.png</image>
+		<marquee>./app-icons/netflix.png</marquee>
+		<rating>0</rating>
+		<releasedate>20070116T000000</releasedate>
+		<developer>Netflix Inc.</developer>
+		<publisher>Netflix Inc.</publisher>
+		<playcount>2</playcount>
+		<lastplayed>20260605T175409</lastplayed>
+		<gametime>39</gametime>
 		<lang>es</lang>
 		<region>wr</region>
 	</game>
