@@ -12,8 +12,6 @@ from ...batoceraPaths import (
     BATOCERA_SHADERS,
     BIOS,
     CMDFILES_DIR,
-    CONFIGS,
-    EMULATORS,
     HOME,
     OVERLAYS,
     ROMS,
@@ -145,7 +143,7 @@ class LibretroGenerator(Generator):
             # duplicate config to mapping files while ra now split in 2 parts
             remapconfigDir = RETROARCH_CONFIG / "config" / "remaps" / "common"
             mkdir_if_not_exists(remapconfigDir)
-            shutil.copyfile(RETROARCH_CUSTOM, remapconfigDir / "common.rmp")
+            #shutil.copyfile(RETROARCH_CUSTOM, remapconfigDir / "common.rmp")
         # Batocera usa nombres alias; los ficheros upstream de RetroArch usan nombres distintos
 
         libretro_core = libretro_core = RETROARCH_CORES / f"{self._core_filename(system.config.core)}_libretro.so"

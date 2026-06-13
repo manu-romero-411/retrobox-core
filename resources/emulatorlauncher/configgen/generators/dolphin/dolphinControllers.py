@@ -508,24 +508,43 @@ def get_AltMapping(system: Emulator, nplayer: int, anyMapping: Mapping[str, str 
 
 def generateControllerConfig_any(system: Emulator, playersControllers: Controllers, wheels: DeviceInfoMapping, filename: str, anyDefKey: str, anyMapping: Mapping[str, str | None], anyReverseAxes: Mapping[str | None, str], anyReplacements: Mapping[str, str] | None, extraOptions: Mapping[str, str] = {}, wheelMapping: Mapping[str, str | None] | None = None, wheelReverseAxes: Mapping[str | None, str] | None = None, wheelExtraOptions: Mapping[str, str] = {}) -> None:
     configFileName = DOLPHIN_CONFIG / filename
-    with codecs.open(str(configFileName), "w", encoding="utf_8_sig") as f:
-        nsamepad = 0
 
-        # In case of two pads having the same name, dolphin wants a number to handle this
+    # Construir mapa device_path → índice SDL real
+    sdl_index_map: dict[str, int] = {}
+    try:
+        import sdl2
+        sdl2.SDL_Init(sdl2.SDL_INIT_JOYSTICK)
+        n = sdl2.SDL_NumJoysticks()
+        name_count: dict[str, int] = {}
+        for i in range(n):
+            path_bytes = sdl2.SDL_JoystickPathForIndex(i)
+            if path_bytes:
+                path = path_bytes.decode()
+                name_bytes = sdl2.SDL_JoystickNameForIndex(i)
+                name = name_bytes.decode() if name_bytes else ""
+                idx = name_count.get(name, 0)
+                name_count[name] = idx + 1
+                sdl_index_map[path] = idx
+        sdl2.SDL_Quit()
+    except Exception as e:
+        _logger.warning("SDL joystick enumeration failed: %s", e)
+
+    with codecs.open(str(configFileName), "w", encoding="utf_8_sig") as f:
         double_pads: dict[str, int] = {}
 
         for nplayer, pad in enumerate(playersControllers, start=1):
-            # Handle x pads having the same name
-            nsamepad = double_pads.get(pad.real_name.strip(), 0)
-            double_pads[pad.real_name.strip()] = nsamepad+1
-
-            # fix for switch pro controllers
+            # Usar índice SDL real si disponible, si no fallback al contador
             real_name = pad.real_name.strip()
+            if pad.device_path and pad.device_path in sdl_index_map:
+                nsamepad = sdl_index_map[pad.device_path]
+            else:
+                nsamepad = double_pads.get(real_name, 0)
+            double_pads[real_name] = double_pads.get(real_name, 0) + 1
+
             device_name = "Nintendo Switch Pro Controller" if real_name in NINTENDO_PRO_NAMES else real_name
-
             f.write(f"[{anyDefKey}{nplayer}]\n")
-            f.write(f"Device = SDL/{str(nsamepad).strip()}/{device_name}\n")
-
+            f.write(f"Device = SDL/{nsamepad}/{device_name}\n")
+            
             if system.config.get_bool("use_pad_profiles"):
                 if not generateControllerConfig_any_from_profiles(f, pad, system):
                     generateControllerConfig_any_auto(f, pad, anyMapping, anyReverseAxes, anyReplacements, extraOptions, system, nplayer, nsamepad)

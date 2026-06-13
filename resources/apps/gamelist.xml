@@ -153,23 +153,6 @@
 		<region>wr</region>
 	</game>
 	<game>
-		<path>./kodi.kodi</path>
-		<name>Kodi</name>
-		<desc>Centro multimedia de código abierto para reproducir vídeo, música, imágenes y podcasts desde cualquier fuente local o en red.</desc>
-		<genre>Streaming</genre>
-		<image>./app-icons/kodi.png</image>
-		<marquee>./app-icons/kodi.png</marquee>
-		<rating>0</rating>
-		<releasedate>20040101T000000</releasedate>
-		<developer>Kodi Foundation</developer>
-		<publisher>Kodi Foundation</publisher>
-		<playcount>5</playcount>
-		<lastplayed>20260605T175545</lastplayed>
-		<gametime>50</gametime>
-		<lang>es</lang>
-		<region>wr</region>
-	</game>
-	<game>
 		<path>./hbo_max.webapp</path>
 		<name>Max (HBO Max)</name>
 		<desc>Plataforma de streaming de Warner Bros. Discovery con contenido de HBO, DC, Cartoon Network y producciones originales exclusivas.</desc>
@@ -200,6 +183,23 @@
 		<playcount>2</playcount>
 		<lastplayed>20260605T175409</lastplayed>
 		<gametime>39</gametime>
+		<lang>es</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./kodi.kodi</path>
+		<name>Kodi</name>
+		<desc>Centro multimedia de código abierto para reproducir vídeo, música, imágenes y podcasts desde cualquier fuente local o en red.</desc>
+		<genre>Streaming</genre>
+		<image>./app-icons/kodi.png</image>
+		<marquee>./app-icons/kodi.png</marquee>
+		<rating>0</rating>
+		<releasedate>20040101T000000</releasedate>
+		<developer>Kodi Foundation</developer>
+		<publisher>Kodi Foundation</publisher>
+		<playcount>6</playcount>
+		<lastplayed>20260606T192815</lastplayed>
+		<gametime>62</gametime>
 		<lang>es</lang>
 		<region>wr</region>
 	</game>

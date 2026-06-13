@@ -1,14 +1,15 @@
 from __future__ import annotations
 
-from glob import glob
+import logging
 import os
-from pathlib import Path
+import re
 from typing import TYPE_CHECKING, Literal
 
 from configgen.controller import getJoystickHardwareIds
 from configgen.generators.libretro.libretroPaths import RETROARCH_CONFIG
 
 from ...controllersConfig import getAssociatedMouse, getDevicesInformation
+_logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
 
@@ -39,6 +40,7 @@ def writeControllersConfig(
     lightgun: bool,
     /,
 ) -> None:
+    import glob, os, re, struct
 
     cleanControllerConfig(retroconfig, controllers)
 
@@ -68,32 +70,69 @@ def writeControllersConfig(
     retroconfig.save('input_grab_mouse_toggle',   '"nul"')
 
     # --- MAPEO ÚNICO RESILIENTE PARA EL DRIVER UDEV ---
+
     udev_index_map = {}
     try:
-        import glob
-        import os
+        import glob, os, re
 
-        # Listamos y ordenamos numéricamente los eventX una sola vez
-        event_devices = glob.glob('/dev/input/event*')
-        event_devices.sort(key=lambda x: int(x.split('event')[-1]))
+        input_num_to_event = {}
+        for event_path in sorted(glob.glob('/dev/input/event*'),
+                                key=lambda x: int(x.split('event')[-1])):
+            event_name = os.path.basename(event_path)
+            sysfs = f'/sys/class/input/{event_name}'
+            if not os.path.exists(sysfs):
+                continue
 
-        # Resolvemos las rutas reales de los mandos del sistema que existen físicamente
-        valid_system_paths = []
-        for c in controllers:
-            if c.device_path and os.path.exists(c.device_path):
-                valid_system_paths.append(os.path.realpath(c.device_path))
+            device_dir = os.path.realpath(os.path.join(sysfs, 'device'))
 
-        # Ordenamos los mandos según su aparición en los nodos del kernel
-        valid_system_paths.sort(key=lambda x: event_devices.index(x) if x in event_devices else 999)
+            # tiene jsX → gamepad estándar
+            has_js = any(re.match(r'^js\d+$', e) for e in os.listdir(device_dir))
 
-        # Poblamos un diccionario indexando por su ruta real desreferenciada
-        for index, path in enumerate(valid_system_paths):
-            udev_index_map[path] = str(index)
+            # tiene FF → gamepad con rumble (Nintendo, etc.)
+            has_ff = False
+            try:
+                ff_path = f'/sys/class/input/{event_name}/device/capabilities/ff'
+                with open(ff_path) as f:
+                    ff_content = f.read().strip()
+                # puede tener múltiples valores separados por espacio
+                ff_bits = int(ff_content.split()[0] or '0', 16) if ff_content else 0
+                has_ff = ff_bits > 0
+            except Exception:
+                pass
+
+            if not has_js and not has_ff:
+                continue
+
+            # excluir EV_REL (ratones)
+            try:
+                ev_path = f'/sys/class/input/{event_name}/device/capabilities/ev'
+                with open(ev_path) as f:
+                    ev_bits = int(f.read().strip(), 16)
+                if ev_bits & (1 << 0x2):
+                    continue
+            except Exception:
+                continue
+
+            m = re.search(r'input(\d+)', device_dir)
+            if not m:
+                continue
+
+            input_num = int(m.group(1))
+            input_num_to_event[input_num] = os.path.realpath(event_path)
+
+        for retroarch_index, (input_num, event_path) in enumerate(
+            sorted(input_num_to_event.items())
+        ):
+            udev_index_map[event_path] = str(retroarch_index)
+
     except Exception:
-        # Si falla la lectura de I/O, el diccionario se queda vacío y aplicará fallback
         pass
-    # --------------------------------------------------
 
+    for path, idx in sorted(udev_index_map.items(), key=lambda x: int(x[1])):
+        _logger.debug(f"(tests 20260613) udev_index_map: {path} → {idx}")
+    
+    _logger.debug(f"(tests 20260613) udev_index_map completo: {udev_index_map}")
+    # --------------------------------------------------
     for controller in controllers:
         mouseIndex: str | None = None
         if system.name in ['nds', '3ds']:
@@ -103,11 +142,45 @@ def writeControllersConfig(
             mouseIndex = '0'
             
         # Determinamos el joypad_index usando el mapa calculado o fallback del frontend
-        current_real_path = os.path.realpath(controller.device_path) if controller.device_path else ""
+        current_real_path = resolve_to_event_path(controller.device_path) if controller.device_path else ""
         joypad_index = udev_index_map.get(current_real_path, controller.index)
 
         # Pasamos directamente el índice resuelto a la función hija
         writeControllerConfig(retroconfig, controller, controller.player_number, system, joypad_index, lightgun, mouseIndex)    
+        _logger.debug(f"(tests 20260613) P{controller.player_number} device_path={controller.device_path} realpath={current_real_path} → joypad_index={joypad_index}")
+
+def resolve_to_event_path(device_path: str) -> str:
+    if not device_path:
+        return device_path
+
+    real = os.path.realpath(device_path)
+
+    if re.match(r'^/dev/input/event\d+$', real):
+        return real
+
+    base = os.path.basename(real)
+
+    if base.startswith('hidraw'):
+        sysfs = f'/sys/class/hidraw/{base}/device'
+        search_root = os.path.realpath(sysfs) if os.path.exists(sysfs) else None
+    elif '/sys/' in real or real.startswith('/dev') is False:
+        search_root = real
+    else:
+        search_root = None
+
+    if search_root and os.path.exists(search_root):
+        candidates = []
+        for root, dirs, files in os.walk(search_root):
+            for d in dirs:
+                if d.startswith('event'):
+                    event_path = f'/dev/input/{d}'
+                    if os.path.exists(event_path):
+                        candidates.append(event_path)
+        if candidates:
+            # el de menor número es el gamepad principal, no el IMU
+            return min(candidates, key=lambda x: int(x.split('event')[-1]))
+
+    return device_path
 
 # Remove all controller configurations
 def cleanControllerConfig(retroconfig: UnixSettings, controllers: Controllers, /) -> None:
@@ -348,15 +421,15 @@ def generateControllerConfig(
 # Returns the value to write in retroarch config file, depending on the type
 def getConfigValue(input: Input, /) -> str | None:
     if input.type == 'button':
-        return f'"{input.id}"'          # <--- Forzamos las comillas aquí
+        return f'"{input.id}"'
     if input.type == 'axis':
         if input.value == '-1':
-            return f'"-{input.id}"'     # <--- Forzamos las comillas aquí
-        return f'"+{input.id}"'         # <--- Forzamos las comillas aquí
+            return f'"-{input.id}"'
+        return f'"+{input.id}"'
     if input.type == 'hat':
-        return f'"h{input.id}{hatstoname[input.value]}"' # <--- Forzamos las comillas aquí
+        return f'"h{input.id}{hatstoname[input.value]}"'
     if input.type == 'key':
-        return f'"{input.id}"'          # <--- Forzamos las comillas aquí
+        return f'"{input.id}"'
     return None
 
 # Return the retroarch analog_dpad_mode

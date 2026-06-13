@@ -32,6 +32,12 @@ from ctypes import create_string_buffer
 
 _logger = logging.getLogger(__name__)
 
+NINTENDO_GUIDS = {
+    "050000007e0500000620000001800000",
+    "050000007e0500000720000001800000",
+    "050000007e0500000920000001800000",
+}
+
 if TYPE_CHECKING:
     from configgen.batoceraTypes import HotkeysContext
 
@@ -274,9 +280,9 @@ def list_sdl_gamepads(sdlversion):
                 "guid": guidstring,
                 "name": name,
                 "mapping": mapping,
-                "path": joy_path
+                "path": joy_path,
+                "sdl_index": i,
             }
-
             _logger.warning(
                 "SDL DEVICE index=%d name='%s' guid='%s'",
                 i,
@@ -468,239 +474,160 @@ class RyujinxGenerator(Generator):
                 _logger.debug("")
 
             input_config = []
-            index_of_convuuid = {}
-            for index, controller in enumerate(playersControllers, start=0):
-                    NINTENDO_GUIDS = {
-                        "050000007e0500000620000001800000",
-                        "050000007e0500000720000001800000",
-                        "050000007e0500000920000001800000",
-                    }
 
-                    found_sdl_guid = None
+            # --- FASE 1: resolver GUIDs para todos los controllers ---
+            pad_pure_guid = {}
 
-                    batocera_ctrl_name = getattr(
-                        controller,
-                        'real_name',
-                        getattr(controller, 'name', None)
-                    )
+            for controller in playersControllers:
+                found_sdl_guid = None
+                batocera_ctrl_name = getattr(controller, 'real_name', getattr(controller, 'name', None))
 
-                    if batocera_ctrl_name:
-                        target_name = str(batocera_ctrl_name).strip().lower()
-
-                        for sdl_path, sdl_ctrl in sdl_gamepads.items():
-                            sdl_name = sdl_ctrl.get("name", "").strip().lower()
-
-                            if sdl_name == target_name:
-                                found_sdl_guid = sdl_ctrl.get("guid")
-                                found_sdl_mapping = sdl_ctrl.get("mapping")
-
-                                _logger.warning(
-                                    "Matched SDL controller '%s' -> GUID %s",
-                                    target_name,
-                                    found_sdl_guid
-                                )
-                                break
-
-                    # ----------------------------------------------------
-                    # VALIDACIÓN GUID
-                    # ----------------------------------------------------
-
-                    def is_valid_sdl_guid(g):
-                        if not g:
-                            return False
-
-                        #g = re.sub(r'[^0-9a-f]', '', str(g).lower())
-                        g = normalize_sdl_guid_for_emulator(g.lower().replace('-', ''))
-                        
-                        if len(g) != 32:
-                            return False
-
-                        if g.startswith("00000000"):
-                            return False
-
-                        return True
-
-                    # ----------------------------------------------------
-                    # SELECCIÓN FINAL DE GUID (prioridad SDL)
-                    # ----------------------------------------------------
-
-                    controller_guid = getattr(controller, 'guid', None)
-
-                    if is_valid_sdl_guid(found_sdl_guid):
-                        pure_guid = found_sdl_guid
-                    elif is_valid_sdl_guid(controller_guid):
-                        pure_guid = controller_guid
-                    else:
-                        pure_guid = "00000000000000000000000000000000"
-
-                    _logger.debug(
-                        f"FINAL GUID SOURCE: controller.guid={controller_guid} "
-                        f"found_sdl_guid={found_sdl_guid}"
-                    )
-
-                    # ----------------------------------------------------
-                    # NORMALIZACIÓN GUID (HEX PURO 32 CHARS)
-                    # ----------------------------------------------------
-
-                    pure_guid = re.sub(r'[^0-9a-f]', '', str(pure_guid).lower())
-                    pure_guid = pure_guid[:32].ljust(32, "0")
-
-                    # ----------------------------------------------------
-                    # CONVERSIÓN AL FORMATO RYUJINX
-                    # ----------------------------------------------------
-
-                    pure_guid = RyujinxGenerator.sdl_guid_to_ryujinx_guid(pure_guid)
-
-                    # ----------------------------------------------------
-                    # FORMATO RYUJINX (SIN INDEX TODAVÍA)
-                    # ----------------------------------------------------
-
-                    formatted_guid = (
-                        f"{pure_guid[0:8]}-"
-                        f"{pure_guid[8:12]}-"
-                        f"{pure_guid[12:16]}-"
-                        f"{pure_guid[16:20]}-"
-                        f"{pure_guid[20:32]}"
-                    )
-
-                    _logger.warning(
-                        "Formatted GUID (no index): %s",
-                        formatted_guid
-                    )
-
-                    # ----------------------------------------------------
-                    # CONTROL DE DUPLICADOS (INDEX)
-                    # ----------------------------------------------------
-
-                    guid_key = pure_guid
-
-                    if guid_key in index_of_convuuid:
-                        index_of_convuuid[guid_key] += 1
-                    else:
-                        index_of_convuuid[guid_key] = 0
-
-                    current_idx = index_of_convuuid[guid_key]
-
-                    # ----------------------------------------------------
-                    # GUID FINAL PARA RYUJINX
-                    # ----------------------------------------------------
-
-                    final_guid = f"{current_idx}-{formatted_guid}"
-
-                    _logger.warning(
-                        "Final controller GUID for Ryujinx: %s",
-                        final_guid
-                    )
-
-                    _logger.warning("SDL MATCH? target='%s'", target_name)
-
+                if batocera_ctrl_name:
+                    target_name = str(batocera_ctrl_name).strip().lower()
                     for sdl_path, sdl_ctrl in sdl_gamepads.items():
-                        _logger.warning("SDL DEVICE: '%s'", sdl_ctrl.get("name"))
+                        if sdl_ctrl.get("name", "").strip().lower() == target_name:
+                            found_sdl_guid = sdl_ctrl.get("guid")
+                            _logger.warning("Matched SDL controller '%s' -> GUID %s", target_name, found_sdl_guid)
+                            break
 
-                    _logger.debug(f"RAW controller.guid={controller_guid} | SDL found_sdl_guid={found_sdl_guid}")
-                    
-                    # Sub-bloque: Stick Izquierdo
-                    left_joycon_stick = {}
-                    left_joycon_stick['joystick'] = "Left"
-                    left_joycon_stick['rotate90_cw'] = bool(0)
-                    left_joycon_stick['invert_stick_x'] = bool(0)
-                    left_joycon_stick['invert_stick_y'] = bool(0)
-                    left_joycon_stick['stick_button'] = "LeftStick"            
+                def is_valid_sdl_guid(g):
+                    if not g:
+                        return False
+                    g = re.sub(r'[^0-9a-f]', '', str(g).lower())
+                    if len(g) != 32:
+                        return False
+                    if g.startswith("00000000"):
+                        return False
+                    return True
 
-                    # Sub-bloque: Stick Derecho
-                    right_joycon_stick = {}
-                    right_joycon_stick['joystick'] = "Right"
-                    right_joycon_stick['rotate90_cw'] = bool(0)
-                    right_joycon_stick['invert_stick_x'] = bool(0)
-                    right_joycon_stick['invert_stick_y'] = bool(0)
-                    right_joycon_stick['stick_button'] = "RightStick" 
+                controller_guid = getattr(controller, 'guid', None)
 
-                    # Sub-bloque: Movimiento (Motion)
-                    motion = {}
-                    motion['motion_backend'] = "GamepadDriver"
-                    motion['sensitivity'] = 100
-                    motion['gyro_deadzone'] = 1
-                    motion['enable_motion'] = bool(1)
+                if is_valid_sdl_guid(found_sdl_guid):
+                    pure_guid = found_sdl_guid
+                elif is_valid_sdl_guid(controller_guid):
+                    pure_guid = controller_guid
+                else:
+                    pure_guid = "00000000000000000000000000000000"
 
-                    # Sub-bloque: Vibración (Rumble)
-                    rumble = {}
-                    rumble['strong_rumble'] = 1
-                    rumble['weak_rumble'] = 1
-                    rumble['enable_rumble'] = bool(1)
+                pure_guid = re.sub(r'[^0-9a-f]', '', str(pure_guid).lower())
+                pure_guid = pure_guid[:32].ljust(32, "0")
+                pure_guid = RyujinxGenerator.sdl_guid_to_ryujinx_guid(pure_guid)
+                pad_pure_guid[id(controller)] = pure_guid
 
-                    # Sub-bloque: Botones Izquierdos
-                    left_joycon = {}
-                    left_joycon['button_minus'] = "Back"
-                    left_joycon['button_l'] = "LeftShoulder"
-                    left_joycon['button_zl'] = "LeftTrigger"
-                    left_joycon['button_sl'] = "SingleLeftTrigger0"
-                    left_joycon['button_sr'] = "SingleRightTrigger0"
-                    left_joycon['dpad_up'] = "DpadUp"
-                    left_joycon['dpad_down'] = "DpadDown"
-                    left_joycon['dpad_left'] = "DpadLeft"
-                    left_joycon['dpad_right'] = "DpadRight"
+            # --- FASE 2: calcular idx relativo por GUID ---
+            from collections import defaultdict
+            guid_groups = defaultdict(list)
+            for controller in sorted(playersControllers, key=lambda c: int(c.player_number)):
+                guid_groups[pad_pure_guid[id(controller)]].append(controller)
 
-                    # Sub-bloque: Botones Derechos
-                    right_joycon = {}
-                    right_joycon['button_plus'] = "Start"
-                    right_joycon['button_r'] = "RightShoulder"
-                    right_joycon['button_zr'] = "RightTrigger"
-                    right_joycon['button_sl'] = "SingleLeftTrigger1"
-                    right_joycon['button_sr'] = "SingleRightTrigger1"
+            controller_idx_map = {}
+            for guid, group in guid_groups.items():
+                for idx, controller in enumerate(group):
+                    controller_idx_map[id(controller)] = idx
 
-                    # Lógica de inversión de botones
-                    ryu_inverse_button = system.config.get('ryu_inverse_button', 'false').lower() == 'true'
-                    if controller.real_name and ( \
-                        "Nintendo" in controller.real_name or controller.guid in NINTENDO_GUIDS):
-                        right_joycon['button_x'] = "X"
-                        right_joycon['button_b'] = "B"
-                        right_joycon['button_y'] = "Y"
-                        right_joycon['button_a'] = "A" 
-                    elif ryu_inverse_button:
-                        right_joycon['button_x'] = "X"
-                        right_joycon['button_b'] = "B"
-                        right_joycon['button_y'] = "Y"
-                        right_joycon['button_a'] = "A" 
-                    else:
-                        right_joycon['button_x'] = "Y"
-                        right_joycon['button_b'] = "A"
-                        right_joycon['button_y'] = "X"
-                        right_joycon['button_a'] = "B"
+            # --- FASE 3: construir input_config ordenado por player_number ---
+            for controller in sorted(playersControllers, key=lambda c: int(c.player_number)):
+                pure_guid = pad_pure_guid[id(controller)]
+                current_idx = controller_idx_map[id(controller)]
 
-                    # Formateo de guiones canónicos para el ID del mando
-                    if len(pure_guid) == 32:
-                        formatted_guid = f"{pure_guid[0:8]}-{pure_guid[8:12]}-{pure_guid[12:16]}-{pure_guid[16:20]}-{pure_guid[20:32]}"
-                    else:
-                        formatted_guid = pure_guid
+                formatted_guid = (
+                    f"{pure_guid[0:8]}-"
+                    f"{pure_guid[8:12]}-"
+                    f"{pure_guid[12:16]}-"
+                    f"{pure_guid[16:20]}-"
+                    f"{pure_guid[20:32]}"
+                )
 
-                    # CONSTRUCCIÓN LINEAL FINAL DEL DICCIONARIO PRINCIPAL DE CONTROL
-                    cvalue = {}
-                    cvalue['controller_type'] = "ProController"
-                    cvalue['left_joycon_stick'] = left_joycon_stick          
-                    cvalue['right_joycon_stick'] = right_joycon_stick
-                    cvalue['deadzone_left'] = 0.1           
-                    cvalue['deadzone_right'] = 0.1 
-                    cvalue['range_left'] = 1          
-                    cvalue['range_right'] = 1 
-                    cvalue['trigger_threshold'] = 0.5  
-                    cvalue['motion'] = motion
-                    cvalue['rumble'] = rumble
-                    cvalue['led'] = {
-                        'enable_led': False,
-                        'turn_off_led': False,
-                        'use_rainbow': False,
-                        'led_color': 0
-                    }
-                    cvalue['left_joycon'] = left_joycon
-                    cvalue['right_joycon'] = right_joycon
-                    cvalue['version'] = 1
-                    cvalue['backend'] = "GamepadSDL2"
-                    cvalue['id'] = final_guid
-                    cvalue['name'] = f"{getattr(controller, 'real_name', 'Gamepad')} ({str(current_idx)})"
-                    cvalue['player_index'] = "Player" + str(int(controller.player_number))
-                    
-                    input_config.append(cvalue)
-            
+                final_guid = f"{current_idx}-{formatted_guid}"
+
+                left_joycon_stick = {}
+                left_joycon_stick['joystick'] = "Left"
+                left_joycon_stick['rotate90_cw'] = bool(0)
+                left_joycon_stick['invert_stick_x'] = bool(0)
+                left_joycon_stick['invert_stick_y'] = bool(0)
+                left_joycon_stick['stick_button'] = "LeftStick"
+
+                right_joycon_stick = {}
+                right_joycon_stick['joystick'] = "Right"
+                right_joycon_stick['rotate90_cw'] = bool(0)
+                right_joycon_stick['invert_stick_x'] = bool(0)
+                right_joycon_stick['invert_stick_y'] = bool(0)
+                right_joycon_stick['stick_button'] = "RightStick"
+
+                motion = {}
+                motion['motion_backend'] = "GamepadDriver"
+                motion['sensitivity'] = 100
+                motion['gyro_deadzone'] = 1
+                motion['enable_motion'] = bool(1)
+
+                rumble = {}
+                rumble['strong_rumble'] = 1
+                rumble['weak_rumble'] = 1
+                rumble['enable_rumble'] = bool(1)
+
+                left_joycon = {}
+                left_joycon['button_minus'] = "Back"
+                left_joycon['button_l'] = "LeftShoulder"
+                left_joycon['button_zl'] = "LeftTrigger"
+                left_joycon['button_sl'] = "SingleLeftTrigger0"
+                left_joycon['button_sr'] = "SingleRightTrigger0"
+                left_joycon['dpad_up'] = "DpadUp"
+                left_joycon['dpad_down'] = "DpadDown"
+                left_joycon['dpad_left'] = "DpadLeft"
+                left_joycon['dpad_right'] = "DpadRight"
+
+                right_joycon = {}
+                right_joycon['button_plus'] = "Start"
+                right_joycon['button_r'] = "RightShoulder"
+                right_joycon['button_zr'] = "RightTrigger"
+                right_joycon['button_sl'] = "SingleLeftTrigger1"
+                right_joycon['button_sr'] = "SingleRightTrigger1"
+
+                ryu_inverse_button = system.config.get('ryu_inverse_button', 'false').lower() == 'true'
+                if controller.real_name and ( \
+                    "Nintendo" in controller.real_name or controller.guid in NINTENDO_GUIDS):
+                    right_joycon['button_x'] = "X"
+                    right_joycon['button_b'] = "B"
+                    right_joycon['button_y'] = "Y"
+                    right_joycon['button_a'] = "A"
+                elif ryu_inverse_button:
+                    right_joycon['button_x'] = "X"
+                    right_joycon['button_b'] = "B"
+                    right_joycon['button_y'] = "Y"
+                    right_joycon['button_a'] = "A"
+                else:
+                    right_joycon['button_x'] = "Y"
+                    right_joycon['button_b'] = "A"
+                    right_joycon['button_y'] = "X"
+                    right_joycon['button_a'] = "B"
+
+                cvalue = {}
+                cvalue['controller_type'] = "ProController"
+                cvalue['left_joycon_stick'] = left_joycon_stick
+                cvalue['right_joycon_stick'] = right_joycon_stick
+                cvalue['deadzone_left'] = 0.1
+                cvalue['deadzone_right'] = 0.1
+                cvalue['range_left'] = 1
+                cvalue['range_right'] = 1
+                cvalue['trigger_threshold'] = 0.5
+                cvalue['motion'] = motion
+                cvalue['rumble'] = rumble
+                cvalue['led'] = {
+                    'enable_led': False,
+                    'turn_off_led': False,
+                    'use_rainbow': False,
+                    'led_color': 0
+                }
+                cvalue['left_joycon'] = left_joycon
+                cvalue['right_joycon'] = right_joycon
+                cvalue['version'] = 1
+                cvalue['backend'] = "GamepadSDL2"
+                cvalue['id'] = final_guid
+                cvalue['name'] = f"{getattr(controller, 'real_name', 'Gamepad')} ({str(current_idx)})"
+                cvalue['player_index'] = "Player" + str(int(controller.player_number))
+
+                input_config.append(cvalue)
+
             data['input_config'] = input_config
 
         # Resolution Scale

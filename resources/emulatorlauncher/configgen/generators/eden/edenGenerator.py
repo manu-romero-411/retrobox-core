@@ -24,7 +24,7 @@ import sdl2
 from sdl2 import joystick
 from ctypes import create_string_buffer
 
-eslog = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from configgen.batoceraTypes import HotkeysContext
@@ -218,7 +218,8 @@ def eden_list_sdl_gamepads(sdlversion):
 
             mapping = sdl2.SDL_GameControllerMapping(pad)
             controller = sdlmapping_to_controller(str(mapping), guidstring)
-
+            controller['sdl_index'] = i
+            
             normalized_guid = normalize_sdl_guid(guidstring)
             normalized_guid = normalized_guid[:4] + "0000" + normalized_guid[8:]
 
@@ -234,7 +235,7 @@ def eden_list_sdl_gamepads(sdlversion):
                         name=direction, type="button",
                         id=str(btn_idx), value=1, code=0
                     )
-                    eslog.debug("dpad fix: %s → %d", direction, btn_idx)            
+                    _logger.debug("dpad fix: %s → %d", direction, btn_idx)            
                             
             sdl_devices[joy_path] = controller
 
@@ -262,7 +263,7 @@ class EdenGenerator(Generator):
         }
 
     def generate(self, system, rom, playersControllers, metadata, guns, wheels, gameResolution):
-        eslog.warning("DEBUG: generate() llamado, emulator=%s", system.config['emulator'])
+        _logger.warning("DEBUG: generate() llamado, emulator=%s", system.config['emulator'])
         emulator = system.config['emulator']
 
         sdlversion = 2
@@ -298,7 +299,7 @@ class EdenGenerator(Generator):
     
     @staticmethod
     def writeYuzuConfig(yuzuConfigFile, yuzuConfigTemplateFile, system, playersControllers, sdlversion, emulator):
-        eslog.warning("DEBUG: writeYuzuConfig() llamado, nplayers=%d", len(playersControllers))        # pads
+        _logger.warning("DEBUG: writeYuzuConfig() llamado, nplayers=%d", len(playersControllers))        # pads
 
         yuzuButtonsMapping = {
              "button_a":      "a",
@@ -672,40 +673,22 @@ class EdenGenerator(Generator):
             eden_config.set("System", "use_docked_mode\\default", "true")
 
         # controls section
-        # Al inicio de writeYuzuConfig, antes de escribir nada en Controls:
-        # controls section
         if not eden_config.has_section("Controls"):
             eden_config.add_section("Controls")
       
-        eslog.warning("DEBUG: entrando bloque mandos, yuzu_auto=%s", system.config.get('yuzu_auto_controller_config'))
         if not system.isOptSet('yuzu_auto_controller_config') or system.config["yuzu_auto_controller_config"] != "0":
-            # 1. Obtener los mapeos de hardware
             evdev_hidraw = evdev_to_hidraw()
             sdl_gamepads = eden_list_sdl_gamepads(sdlversion)
 
-            # 2. Inicializar TODOS los puertos posibles de Eden por defecto como desconectados
-            # Esto evita que se queden mandos "fantasmas" de sesiones anteriores
             for slot in range(8):
                 eden_config.set("Controls", f"player_{slot}_connected", "false")
                 eden_config.set("Controls", f"player_{slot}_connected\\default", "false")
 
-            guid_port = {}
-            global_port_counter = {}  # puerto SDL real, independiente del slot de Eden
-            
-            # 3. Iterar respetando el ID de jugador real asignado por Batocera
-            for pad in playersControllers:
-                # Batocera cuenta desde 1 (P1, P2, P3...), Eden cuenta desde 0 (player_0, player_1...)
-                # Si pad.player no está disponible, hacemos fallback seguro al orden de la lista
-                real_player_index = (pad.player - 1) if hasattr(pad, 'player') else playersControllers.index(pad)
-                if real_player_index < 0 or real_player_index > 7:
-                    continue
+            sorted_pads = sorted(playersControllers, key=lambda p: p.player_number)
 
-                player_nb_str = f"player_{real_player_index}"
-
-                # ← AQUÍ, antes de tocar nada de inputs o botones
-                current_buttons_mapping = dict(yuzuButtonsMapping)
-                
-                # Resolver rutas de hardware para extraer inputs del gamepad
+            # Paso 1
+            pad_sdl_index = {}  # id(pad) -> sdl_index
+            for pad in sorted_pads:
                 hidraw_path = None
                 if pad.device_path in evdev_hidraw:
                     hidraw_path = evdev_hidraw[pad.device_path]
@@ -713,32 +696,49 @@ class EdenGenerator(Generator):
                 if hidraw_path and hidraw_path in sdl_gamepads:
                     pad.guid = sdl_gamepads[hidraw_path]['guid']
                     pad.inputs = sdl_gamepads[hidraw_path]['inputs']
+                    pad_sdl_index[id(pad)] = sdl_gamepads[hidraw_path].get('sdl_index', 0)
                 elif pad.device_path in sdl_gamepads:
                     pad.guid = sdl_gamepads[pad.device_path]['guid']
                     pad.inputs = sdl_gamepads[pad.device_path]['inputs']
+                    pad_sdl_index[id(pad)] = sdl_gamepads[pad.device_path].get('sdl_index', 0)
                 else:
+                    pad_sdl_index[id(pad)] = 0
                     for path, gamepad in sdl_gamepads.items():
                         if gamepad['guid'] == pad.guid:
                             pad.inputs = gamepad['inputs']
+                            pad_sdl_index[id(pad)] = gamepad.get('sdl_index', 0)
                             break
 
-                # Configurar tipo de mando basándonos en su índice real de Batocera
+            # Paso 2: ordenar por sdl_index real, no por player_number
+            guid_counter = {}
+            guid_port_map = {}
+            for pad in sorted(sorted_pads, key=lambda p: pad_sdl_index[id(p)]):
+                eden_guid = normalize_sdl_guid(pad.guid)
+                eden_guid = eden_guid[:4] + "0000" + eden_guid[8:]
+                if eden_guid not in guid_counter:
+                    guid_counter[eden_guid] = 0
+                guid_port_map[id(pad)] = guid_counter[eden_guid]
+                guid_counter[eden_guid] += 1
+
+            # Paso 3: escribir config
+            for pad in sorted_pads:
+                real_player_index = pad.player_number - 1
+                if real_player_index < 0 or real_player_index > 7:
+                    continue
+
+                player_nb_str = f"player_{real_player_index}"
+                current_buttons_mapping = dict(yuzuButtonsMapping)
+
                 eden_config.set("Controls", player_nb_str + "_type\\default", "false")
                 if system.isOptSet('p{}_pad'.format(real_player_index)):
                     eden_config.set("Controls", player_nb_str + "_type", system.config["p{}_pad".format(real_player_index)])
                 else:
                     eden_config.set("Controls", player_nb_str + "_type", "0")
 
-                # Normalización del GUID — ANTES de usarlo
                 eden_guid = normalize_sdl_guid(pad.guid)
                 eden_guid = eden_guid[:4] + "0000" + eden_guid[8:]
 
-                # Puerto — ANTES de usarlo
-                if eden_guid not in global_port_counter:
-                    global_port_counter[eden_guid] = 0
-                else:
-                    global_port_counter[eden_guid] += 1
-                port = global_port_counter[eden_guid]
+                port = guid_port_map[id(pad)]
 
                 yuzu_inverse_button = system.config.get('yuzu_inverse_button', 'false').lower() == 'true'
                 if yuzu_inverse_button:
@@ -747,7 +747,6 @@ class EdenGenerator(Generator):
                     current_buttons_mapping["button_x"] = "y"
                     current_buttons_mapping["button_y"] = "x"
 
-                # UN solo loop de botones — current_buttons_mapping, no yuzuButtonsMapping
                 for x in current_buttons_mapping:
                     eden_config.set("Controls", player_nb_str + "_" + x,
                         '"{}"'.format(EdenGenerator.setButton(emulator, current_buttons_mapping[x],
@@ -758,7 +757,6 @@ class EdenGenerator(Generator):
                         '"{}"'.format(EdenGenerator.setAxis(yuzuAxisMapping[x],
                                     eden_guid, pad.inputs, port)))
 
-                # Extras y activación
                 eden_config.set("Controls", player_nb_str + "_button_screenshot\\default", "false")
                 eden_config.set("Controls", player_nb_str + "_button_screenshot", "[empty]")
                 eden_config.set("Controls", player_nb_str + "_motionleft\\default", "false")
@@ -768,7 +766,6 @@ class EdenGenerator(Generator):
                 eden_config.set("Controls", player_nb_str + "_connected", "true")
                 eden_config.set("Controls", player_nb_str + "_connected\\default", "false")
 
-                # Configuración de vibración
                 if system.isOptSet('yuzu_rumble'):
                     eden_config.set("Controls", player_nb_str + "_vibration_enabled", system.config["yuzu_rumble"])
                     eden_config.set("Controls", player_nb_str + "_vibration_enabled\\default", "false")
@@ -801,7 +798,7 @@ class EdenGenerator(Generator):
     def setButton(emulator, key, padGuid, padInputs, port):
         if key in padInputs:
             input_data = padInputs[key]
-            eslog.debug("setButton: key=%s type=%s id=%s value=%s",
+            _logger.debug("setButton: key=%s type=%s id=%s value=%s",
                         key, input_data.type, input_data.id, input_data.value)
             if input_data.type == "button":
                 return f"engine:sdl,port:{port},guid:{padGuid},button:{input_data.id}"
