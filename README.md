@@ -95,6 +95,7 @@ It's expected to add support for other browsers such as Brave, since all Chromiu
 
 `gamepadly` is used to map the Player1 gamepad to bring control to the webpages:
 
+* `Left Analog`: move mouse cursor.
 * `B` button (SNES layout): left click.
 * `A` button (SNES layout): go to previous webpage (sends `Alt+Left Arrow`)
 * `Y` button (SNES layout): nothing -- TODO: I'm planning to implement access to KDE Plasma's native On-Screen Keyboard
