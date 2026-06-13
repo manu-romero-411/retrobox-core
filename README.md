@@ -11,9 +11,9 @@ Batocera is excellent as a dedicated gaming system, but it needs to be booted as
 This project brings the parts that matter most to a desktop Linux installation:
 
 - `batocera-configgen` writing emulator configs automatically on game launch
-- Bezels work in Vulkan-powered emulators via a patched MangoHud build (the same approach batocera uses)
-- Shader support via RetroArch's slang pipeline
-- Adapted ontroller autoconfiguration for RetroArch, Flycast, Dolphin, PCSX2, PPSSPP, Cemu, Ryujinx and Eden. More to come.
+- Bezels work in Vulkan-powered emulators (and RetroArch no matter the graphics API) via a patched MangoHud build -- the same approach batocera uses.
+- Shader support on libretro 
+- Adapted controller autoconfiguration for RetroArch, Flycast, Dolphin, PCSX2, PPSSPP, Cemu, Ryujinx and Eden. More to come.
 
 ## Architecture
 
@@ -24,8 +24,7 @@ EmulationStation
             └── configgen          (writes emulator configs, launches game)
                     ├── batocera-resolution  (stub → kscreen-doctor)
                     ├── batocera-vulkan      (stub → vulkaninfo)
-                    ├── hotkeygen            (stub, no-op)
-                    └── batocera-mouse       (stub, no-op)
+                    └── gamepadly (custom-made new solution for hotkeys and pad2key configs on supported emulators and platforms)
 ```
 
 This repo can be cloned and used everywhere. Paths have been adapted to replace `/userdata` hierarchy. The `retrobox.sh` adapts paths if the directory is moved.
@@ -40,12 +39,13 @@ All `/userdata` paths are redirected to XDG-compliant locations:
 |---|---|
 | `/userdata` | `.` |
 | `/userdata/system` | no equivalent |
-| `/userdata/system/configs` | `./emuconfigs` |
+| `/userdata/system/configs` | no global equivalent -- all emulators have a `config` directory with all their config data |
 | `/userdata/bios` | `./bios` |
 | `/userdata/saves` | `./saves` |
 | `/userdata/roms` | `./roms` |
 | `/var/run/*` | `/tmp/batocera-run/*` |
 | `/usr/share/batocera` | `./resources` |
+| `/usr/share/batocera/evmapy` | `./resources/utils/gamepadly/profiles` |
 
 ### Stubs for batocera-only binaries
 
@@ -53,7 +53,6 @@ batocera ships several system-specific binaries that don't exist on a standard L
 
 - **`batocera-resolution`** — reimplemented in bash using `kscreen-doctor` (KDE Wayland)
 - **`batocera-vulkan`** — reimplemented using `vulkaninfo`
-- **`hotkeygen`** — no-op stub (hotkey context switching is batocera-daemon-specific)
 - **`batocera-mouse`** — no-op stub
 
 ### ES settings sync
@@ -76,15 +75,40 @@ A missing call to `bezelsUtil.getBezelInfos()` in the `else` branch of `writeBez
 
 `system.renderconfig` could be `None` when no `rendering-defaults.yml` is found. Added a fallback `or {}` to prevent `TypeError` on shader lookup.
 
-### Hotkeys rewrite (`libretroControllers.py`)
-
-The upstream hotkey writer used raw `.id` values and hardcoded `_btn` suffixes. Rewritten to use `getConfigValue()` and a type-aware helper (`_hotkey_save`) that emits `_axis` for analog triggers and `_btn` for buttons and hats.
-
-The other emulators (with the exception of eden) don't use gamepad shortcuts and rely on AntiMicroX for basic things like exiting.
-
 ### Emulators of a well-known Nvidia Tegra X1 powered console (Eden, Ryujinx)
 
 Generators adapted from a third-party batocera package. Paths converted to this environment standard, AppImage-specific HOME handling resolved.
+
+## New components
+
+### Gamepadly
+
+A replacement for evmapy that only requires `python3-sdl` and `python3-pygame` to run. It takes evmapy mappings generated in EmulationStation (or made by hand, since they are JSON) and is able to map every gamepad button to keyboard keys or shortcuts, as well as mouse events. It's used by the majority of emulators to send Alt+F4 with Hotkey+Start combo.
+
+### Apps
+
+A set of app-like shortcuts to a number of web streaming services, as well as Kodi Media Center.
+
+Chrome or Firefox must be installed for these services to work (except for Kodi, which, well, requires Kodi LOL).
+
+It's expected to add support for other browsers such as Brave, since all Chromium browsers offer the kiosk mode I'm using in this feature.
+
+`gamepadly` is used to map the Player1 gamepad to bring control to the webpages:
+
+* `B` button (SNES layout): left click.
+* `A` button (SNES layout): go to previous webpage (sends `Alt+Left Arrow`)
+* `Y` button (SNES layout): nothing -- TODO: I'm planning to implement access to KDE Plasma's native On-Screen Keyboard
+* `X` button (SNES layout): nothing -- TODO: I want it as a screenshot button.
+* `D-Pad`: arrow keys.
+* `Start`: Play/Pause button on media players.
+* `Select`: `Tab`
+* `L1`: PageUp
+* `R1`: PageDown
+* `Hotkey+L1`: Previous media
+* `Hotkey+R1`: Next media
+* `Hotkey+Up`: Increase system volume (sends `KEY_VOLUMEUP`)
+* `Hotkey+Down`: Decrease system volume (sends `KEY_VOLUMEDOWN`)
+* `Hotkey+Start`: Exit and go back to EmulationStation
 
 ## Setup
 
