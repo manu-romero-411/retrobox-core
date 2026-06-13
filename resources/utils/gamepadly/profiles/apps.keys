@@ -92,6 +92,14 @@
             "trigger": "right",
             "type": "key",
             "target": "KEY_RIGHT"
+        },
+        {
+            "trigger": "joystick2up",
+            "type": "scroll",
+            "speed": 8,
+            "deadzone": 0.20,
+            "acceleration": 1.2,
+            "description": "Scroll vertical con stick derecho"
         }
     ]
 }

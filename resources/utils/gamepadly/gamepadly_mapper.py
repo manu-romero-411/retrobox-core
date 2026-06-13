@@ -52,35 +52,39 @@ Formato del perfil JSON:
 """
 
 from __future__ import annotations
+from pathlib import Path
+import sys
+
+parent_dir = Path(__file__).parents[2]
+sys.path.append(f"{parent_dir}/emulatorlauncher")
 
 import argparse
 import json
 import logging
 import math
 import os
-import sys
 import time
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
 from typing import Callable
 
+from configgen.exceptions import BatoceraException
+
 os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
 os.environ.setdefault("SDL_AUDIODRIVER", "dummy")
 _logger = logging.getLogger(__name__)
+
 
 try:
     import pygame
     import pygame.joystick
 except ImportError:
-    _logger.error("Falta pygame.\n  pip install pygame")
-    sys.exit(1)
+    raise BatoceraException("pygame missing.\nInstall through pip or your OS package manager (apt, dnf...)")
 
 try:
     from evdev import ecodes as ec, UInput
 except ImportError:
-    _logger.error("Falta evdev.\n  pip install evdev")
-    sys.exit(1)
-
+    raise BatoceraException("python3-evdev missing.\nInstall through pip or your OS package manager (apt, dnf...)")
 
 # ══════════════════════════════════════════════════════════════════════
 #  RESOLUCIÓN DE NOMBRES DE ECODES
@@ -142,6 +146,14 @@ class ClickAction:
     def uinput_rel(self) -> set[int]:
         return set()
 
+@dataclass
+class AxisScrollConfig:
+    axis_y:       str
+    axis_x:       str | None = None
+    speed:        float = 8.0
+    deadzone:     float = 0.15
+    acceleration: float = 1.2
+    condition:    tuple[str, ...] | None = None
 
 @dataclass
 class CallbackAction:
@@ -195,7 +207,7 @@ _STICK_AXES = {
     "joystick2": ("joystick2left", "joystick2up"),
 }
 
-def load_profile(path: str, player: int = 1) -> tuple[AbstractHotkeys, AxisMouseList, float]:
+def load_profile(path: str, player: int = 1) -> tuple[AbstractHotkeys, AxisMouseList, list[AxisScrollConfig], float]:
     """
     Carga un perfil en formato evmapy nativo y devuelve:
         (hotkeys_abstractos, lista_axis_mouse, cooldown)
@@ -239,6 +251,7 @@ def load_profile(path: str, player: int = 1) -> tuple[AbstractHotkeys, AxisMouse
     cooldown: float = float(data.get("cooldown", 0.5))
     hotkeys:         AbstractHotkeys              = {}
     axis_mouse:      AxisMouseList                = []
+    axis_scroll: list[AxisScrollConfig] = []
     combo_cooldowns: dict[tuple[str,...], float]  = {}
 
     # Buscar la lista de acciones para el jugador indicado.
@@ -350,7 +363,28 @@ def load_profile(path: str, player: int = 1) -> tuple[AbstractHotkeys, AxisMouse
                 f"  Mapping #{i}: {' + '.join(combo)}  →  {action}  "
                 f"(cd={combo_cooldowns[combo]}s)"
             )
-
+        elif atype == "scroll":
+            axis_y_name = None
+            axis_x_name = None
+            if len(triggers) == 1:
+                t = triggers[0]
+                if t in _STICK_AXES:
+                    _, axis_y_name = _STICK_AXES[t]
+                else:
+                    axis_y_name = t
+            elif len(triggers) == 2:
+                axis_y_name, axis_x_name = triggers[0], triggers[1]
+            else:
+                _logger.warning(f"  Mapping #{i}: type 'scroll' acepta 1 o 2 ejes → ignorado.")
+                continue
+            axis_scroll.append(AxisScrollConfig(
+                axis_y       = axis_y_name,
+                axis_x       = axis_x_name,
+                speed        = float(entry.get("speed",        8.0)),
+                deadzone     = float(entry.get("deadzone",     0.15)),
+                acceleration = float(entry.get("acceleration", 1.2)),
+                condition    = tuple(condition) if condition else None,
+            ))
         else:
             _logger.warning(f"  Mapping #{i}: tipo '{atype}' desconocido → ignorado.")
 
@@ -360,7 +394,7 @@ def load_profile(path: str, player: int = 1) -> tuple[AbstractHotkeys, AxisMouse
         f"{len(axis_mouse)} eje(s) de ratón, "
         f"cooldown global={cooldown}s"
     )
-    return hotkeys, axis_mouse, combo_cooldowns
+    return hotkeys, axis_mouse, axis_scroll, combo_cooldowns
 
 
 # ══════════════════════════════════════════════════════════════════════
@@ -439,9 +473,8 @@ def parse_es_input(xml_path: str, guid: str) -> ESInputMap:
         tree = ET.parse(xml_path)
         root = tree.getroot()
     except Exception as e:
-        _logger.error(f"Error al parsear el archivo XML {xml_path}: {e}")
-        raise
-
+        raise BatoceraException(f"Error while parsing XML {xml_path}: {e}")
+        
     cfg = None
     target_guid = guid.lower().replace("-", "")
 
@@ -576,6 +609,53 @@ def resolve_axis_mouse(configs: list[AxisMouseConfig], es_map: ESInputMap) -> li
         )
     return result
 
+@dataclass
+class ResolvedAxisScroll:
+    axis_id_y:    int
+    axis_sign_y:  int
+    axis_id_x:    int | None
+    axis_sign_x:  int | None
+    speed:        float
+    deadzone:     float
+    acceleration: float
+    condition:    frozenset[int] | None
+
+
+def resolve_axis_scroll(configs: list[AxisScrollConfig], es_map: ESInputMap) -> list[ResolvedAxisScroll]:
+    result = []
+    for cfg in configs:
+        names_to_check = [cfg.axis_y] + ([cfg.axis_x] if cfg.axis_x else [])
+        missing = [n for n in names_to_check if n not in es_map]
+        if missing:
+            _logger.warning(f"AxisScroll: {missing!r} no está en el mapa ES — ignorado.")
+            continue
+        inp_y = es_map[cfg.axis_y]
+        if not isinstance(inp_y, AxisInput):
+            _logger.warning(f"AxisScroll: '{cfg.axis_y}' debe ser un eje analógico.")
+            continue
+        inp_x = None
+        if cfg.axis_x:
+            inp_x = es_map.get(cfg.axis_x)
+            if not isinstance(inp_x, AxisInput):
+                inp_x = None
+        cond = None
+        if cfg.condition:
+            missing_c = [n for n in cfg.condition if n not in es_map]
+            if missing_c:
+                _logger.warning(f"AxisScroll condición: {missing_c!r} no en mapa ES — ignorada.")
+                continue
+            cond = frozenset(input_to_virtual(es_map[n]) for n in cfg.condition)
+        result.append(ResolvedAxisScroll(
+            axis_id_y   = inp_y.axis_id,
+            axis_sign_y = inp_y.value,
+            axis_id_x   = inp_x.axis_id if inp_x else None,
+            axis_sign_x = inp_x.value   if inp_x else None,
+            speed       = cfg.speed,
+            deadzone    = cfg.deadzone,
+            acceleration= cfg.acceleration,
+            condition   = cond,
+        ))
+    return result
 
 # ══════════════════════════════════════════════════════════════════════
 #  PERFIL POR DEFECTO (fallback si no se pasa --profile)
@@ -642,8 +722,9 @@ def list_gamepads():
     pygame.joystick.init()
     count = pygame.joystick.get_count()
     if count == 0:
-        _logger.error("No se encontraron gamepads.")
-        _logger.error("Comprueba: sudo usermod -aG input $USER  (y vuelve a iniciar sesión)")
+        _logger.error("No gamepads found.")
+        _logger.error("Check if your user belongs to the input group: groups $USER | grep -w 'input'")
+        _logger.error("If not, then run: sudo usermod -aG input $USER . After that, reboot your PC")
         return
     guid_counters: dict[str, int] = {}
     for i in range(count):
@@ -712,11 +793,12 @@ class UInputPair:
         if self.mouse: self.mouse.close()
 
 
-def build_uinput(hotkeys: ResolvedHotkeys, axis_mouse: list[ResolvedAxisMouse], player) -> UInputPair:
+def build_uinput(hotkeys: ResolvedHotkeys, axis_mouse: list[ResolvedAxisMouse], axis_scroll: list[ResolvedAxisScroll], player) -> UInputPair:
     kbd_keys:   set[int] = set()
     mouse_btns: set[int] = set()
     has_rel = bool(axis_mouse)
-
+    has_scroll = bool(axis_scroll)
+    
     for action in hotkeys.values():
         for code in action.uinput_keys():
             if _is_btn(code):
@@ -739,13 +821,16 @@ def build_uinput(hotkeys: ResolvedHotkeys, axis_mouse: list[ResolvedAxisMouse], 
         )
         _logger.debug(f"UInput teclado: {sorted(kbd_keys)}")
 
-    if mouse_btns or has_rel:
+    if mouse_btns or has_rel or has_scroll:
         mouse_cap: dict[int, list[int]] = {}
         if mouse_btns: mouse_cap[ec.EV_KEY] = list(mouse_btns)
-        mouse_cap[ec.EV_REL] = [ec.REL_X, ec.REL_Y]
+        rel_axes = [ec.REL_X, ec.REL_Y]
+        if has_scroll:
+            rel_axes += [ec.REL_WHEEL, ec.REL_HWHEEL]
+        mouse_cap[ec.EV_REL] = rel_axes
         mouse_uinput = UInput(mouse_cap, name=f"gamepad-mapper-mouse-{player}")
         _logger.debug(f"UInput ratón: BTNs={sorted(mouse_btns)}")
-
+        
     return UInputPair(kbd=kbd_uinput, mouse=mouse_uinput)
 
 
@@ -753,11 +838,12 @@ def mapper_loop(
     joystick:   pygame.joystick.Joystick,
     hotkeys:    ResolvedHotkeys,
     axis_mouse: list[ResolvedAxisMouse],
+    axis_scroll: list[ResolvedAxisScroll],
     cd_map:     CooldownMap,
     player
 ):
-    ui = build_uinput(hotkeys, axis_mouse, player)
-
+    ui = build_uinput(hotkeys, axis_mouse, axis_scroll, player)
+    
     pressed:      set[int]              = set()
     last_fired:   dict[frozenset, float] = {}
     fired_combos: set[frozenset]         = set()
@@ -768,6 +854,8 @@ def mapper_loop(
 
     mouse_accum_x = 0.0
     mouse_accum_y = 0.0
+    scroll_accum_y = 0.0
+    scroll_accum_x = 0.0
 
     last_tick = time.monotonic()
 
@@ -853,6 +941,34 @@ def mapper_loop(
             if iy: ui.write_rel(ec.REL_Y, iy)
             ui.syn(has_mouse=True)
 
+    def tick_scroll(dt: float):
+        nonlocal scroll_accum_y, scroll_accum_x
+        for cfg in axis_scroll:
+            if cfg.condition is not None and not cfg.condition.issubset(pressed):
+                continue
+            raw_y = axis_values.get(cfg.axis_id_y, 0.0) * cfg.axis_sign_y
+            raw_x = 0.0
+            if cfg.axis_id_x is not None and cfg.axis_sign_x is not None:
+                raw_x = axis_values.get(cfg.axis_id_x, 0.0) * cfg.axis_sign_x
+
+            def apply_curve(v, dz=cfg.deadzone, acc=cfg.acceleration):
+                if abs(v) < dz:
+                    return 0.0
+                norm = (abs(v) - dz) / (1.0 - dz)
+                return math.copysign(norm ** acc, v)
+
+            scroll_accum_y += apply_curve(raw_y) * cfg.speed * dt
+            scroll_accum_x += apply_curve(raw_x) * cfg.speed * dt
+
+        # Fuera del for: emitir píxeles enteros acumulados
+        iy, ix = int(scroll_accum_y), int(scroll_accum_x)
+        if iy or ix:
+            scroll_accum_y -= iy
+            scroll_accum_x -= ix
+            if iy: ui.write_rel(ec.REL_WHEEL,  iy)
+            if ix: ui.write_rel(ec.REL_HWHEEL, ix)
+            ui.syn(has_mouse=True)
+        
     try:
         while True:
             now = time.monotonic()
@@ -908,7 +1024,10 @@ def mapper_loop(
                         _logger.debug(f"JOYDEVICEREMOVED — mando ajeno (instance_id={event.instance_id}), ignorado.")
             if axis_mouse:
                 tick_mouse(dt)
-
+                
+            if axis_scroll:
+                tick_scroll(dt)
+            
             elapsed = time.monotonic() - now
             sleep   = LOOP_DT - elapsed
             if sleep > 0:
@@ -974,15 +1093,15 @@ ejemplos:
     # ── Cargar configuración ─────────────────────────────────────────
     if args.profile:
         try:
-            hotkeys_abstract, axis_mouse_config, combo_cooldowns = load_profile(args.profile, args.player)
+            hotkeys_abstract, axis_mouse_config, axis_scroll_config, combo_cooldowns = load_profile(args.profile, args.player)
         except (FileNotFoundError, json.JSONDecodeError, ValueError) as ex:
-            _logger.error(f"Error leyendo perfil: {ex}")
             pygame.quit()
-            sys.exit(1)
+            raise BatoceraException(f"Error reading pad2key profile: {ex}")
     else:
         _logger.info("No se especificó --profile, usando perfil por defecto.")
         hotkeys_abstract  = DEFAULT_HOTKEYS
         axis_mouse_config = DEFAULT_AXIS_MOUSE
+        axis_scroll_config = []
         # Perfil por defecto: botones únicos sin cooldown, combos con 0.5 s
         combo_cooldowns   = {
             names: (0.0 if len(names) == 1 else DEFAULT_COOLDOWN)
@@ -993,17 +1112,19 @@ ejemplos:
     try:
         es_map = parse_es_input(args.es_input, args.guid)
     except (FileNotFoundError, ET.ParseError, ValueError) as ex:
-        _logger.error(f"Error leyendo es_input: {ex}")
         pygame.quit()
-        sys.exit(1)
+        raise BatoceraException(f"Error reading es_input: {ex}")
 
     _logger.debug("Resolución de hotkeys:")
     hotkeys, cd_map = resolve_hotkeys(hotkeys_abstract, es_map, combo_cooldowns)
 
     _logger.debug("Resolución de ejes de ratón:")
     axis_mouse = resolve_axis_mouse(axis_mouse_config, es_map)
+    
+    _logger.debug("Resolución de ejes de scroll:")
+    axis_scroll = resolve_axis_scroll(axis_scroll_config, es_map)
 
-    if not hotkeys and not axis_mouse:
+    if not hotkeys and not axis_mouse and not axis_scroll:
         _logger.error("No se resolvió ninguna acción.")
         pygame.quit()
         sys.exit(1)
@@ -1033,7 +1154,7 @@ ejemplos:
                 f"(player={args.player}, sdl_id={args.sdl_id})"
             )
             try:
-                mapper_loop(joystick, hotkeys, axis_mouse, cd_map, args.player)
+                mapper_loop(joystick, hotkeys, axis_mouse, axis_scroll, cd_map, args.player)
             except Exception as exc:
                 _logger.error(f"Error inesperado: {exc}", exc_info=True)
             finally:

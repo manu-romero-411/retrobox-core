@@ -119,40 +119,6 @@
 		<region>wr</region>
 	</game>
 	<game>
-		<path>./youtube.webapp</path>
-		<name>YouTube</name>
-		<desc>Plataforma de vídeo online con millones de vídeos subidos por usuarios y creadores de todo el mundo.</desc>
-		<genre>Streaming</genre>
-		<image>./app-icons/youtube.png</image>
-		<marquee>./app-icons/youtube.png</marquee>
-		<rating>0</rating>
-		<releasedate>20050214T000000</releasedate>
-		<developer>Google LLC</developer>
-		<publisher>Google LLC</publisher>
-		<playcount>16</playcount>
-		<lastplayed>20260605T145234</lastplayed>
-		<gametime>441</gametime>
-		<lang>es</lang>
-		<region>wr</region>
-	</game>
-	<game>
-		<path>./spotify.webapp</path>
-		<name>Spotify</name>
-		<desc>Servicio de música en streaming con acceso a millones de canciones, podcasts y listas de reproducción personalizadas.</desc>
-		<genre>Streaming</genre>
-		<image>./app-icons/spotify.png</image>
-		<marquee>./app-icons/spotify.png</marquee>
-		<rating>0</rating>
-		<releasedate>20081007T000000</releasedate>
-		<developer>Spotify AB</developer>
-		<publisher>Spotify AB</publisher>
-		<playcount>9</playcount>
-		<lastplayed>20260605T174612</lastplayed>
-		<gametime>2347</gametime>
-		<lang>es</lang>
-		<region>wr</region>
-	</game>
-	<game>
 		<path>./hbo_max.webapp</path>
 		<name>Max (HBO Max)</name>
 		<desc>Plataforma de streaming de Warner Bros. Discovery con contenido de HBO, DC, Cartoon Network y producciones originales exclusivas.</desc>
@@ -200,6 +166,40 @@
 		<playcount>6</playcount>
 		<lastplayed>20260606T192815</lastplayed>
 		<gametime>62</gametime>
+		<lang>es</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./spotify.webapp</path>
+		<name>Spotify</name>
+		<desc>Servicio de música en streaming con acceso a millones de canciones, podcasts y listas de reproducción personalizadas.</desc>
+		<genre>Streaming</genre>
+		<image>./app-icons/spotify.png</image>
+		<marquee>./app-icons/spotify.png</marquee>
+		<rating>0</rating>
+		<releasedate>20081007T000000</releasedate>
+		<developer>Spotify AB</developer>
+		<publisher>Spotify AB</publisher>
+		<playcount>10</playcount>
+		<lastplayed>20260613T174915</lastplayed>
+		<gametime>2633</gametime>
+		<lang>es</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./youtube.webapp</path>
+		<name>YouTube</name>
+		<desc>Plataforma de vídeo online con millones de vídeos subidos por usuarios y creadores de todo el mundo.</desc>
+		<genre>Streaming</genre>
+		<image>./app-icons/youtube.png</image>
+		<marquee>./app-icons/youtube.png</marquee>
+		<rating>0</rating>
+		<releasedate>20050214T000000</releasedate>
+		<developer>Google LLC</developer>
+		<publisher>Google LLC</publisher>
+		<playcount>24</playcount>
+		<lastplayed>20260613T183455</lastplayed>
+		<gametime>1954</gametime>
 		<lang>es</lang>
 		<region>wr</region>
 	</game>
