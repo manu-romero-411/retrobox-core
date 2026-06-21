@@ -110,8 +110,8 @@ if [[ -f "$GOG_JSON" ]]; then
         ((total++))
     done < <(
         jq -r '
-            .[]
-            | [ .appName, .title ]
+            .installed[]
+            | [ .appName, (.install_path | split("/") | last) ]
             | @tsv
         ' "$GOG_JSON" 2>/dev/null
     )
