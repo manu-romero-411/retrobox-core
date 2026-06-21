@@ -1,6 +1,22 @@
 <?xml version="1.0"?>
 <gameList>
 	<game>
+		<path>./YouTube.webapp</path>
+		<name>YouTube</name>
+		<playcount>5</playcount>
+		<lastplayed>20260531T174841</lastplayed>
+		<gametime>154</gametime>
+		<lang>en</lang>
+	</game>
+	<game>
+		<path>./Twitch.webapp</path>
+		<name>Twitch</name>
+		<playcount>11</playcount>
+		<lastplayed>20260531T173912</lastplayed>
+		<gametime>94</gametime>
+		<lang>en</lang>
+	</game>
+	<game>
 		<path>./atresplayer.webapp</path>
 		<name>Atresplayer</name>
 		<desc>Plataforma de streaming de Atresmedia con contenido de Antena 3, laSexta y canales temáticos, incluyendo series exclusivas.</desc>

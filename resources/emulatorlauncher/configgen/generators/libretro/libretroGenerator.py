@@ -441,12 +441,16 @@ class LibretroGenerator(Generator):
 def gfx_backend_check(backend: str) -> str:
     if backend == "vulkan":
         if videoMode.supportsVulkan():
-            return gfx_backend_check("glcore")
-    elif backend == "glcore":
+            return "vulkan"
+        # Fallback si no soporta Vulkan: pasamos a evaluar glcore
+        backend = "glcore"
+
+    if backend == "glcore":
         if videoMode.getGLVendor() in ["nvidia", "amd"] and videoMode.getGLVersion() >= 3.1:
             return "glcore"
-    else:
-        return "gl"
+
+    # Caso base o fallback final
+    return "gl"
 
 def gfx_backend_get(system: Emulator) -> str:
     backend = system.config.get("gfxbackend")
@@ -456,7 +460,7 @@ def gfx_backend_get(system: Emulator) -> str:
         backend = gfx_backend_check(backend)
     else:
         setManually = False
-        backend = gfx_backend_check("glcore")
+        backend = gfx_backend_check("vulkan")
     
     # Retroarch has flipped between using opengl or gl, correct the setting here if needed.
     if backend == "opengl":

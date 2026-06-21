@@ -1,6 +1,91 @@
 <?xml version="1.0"?>
 <gameList>
 	<game>
+		<path>./citron.menu</path>
+		<name>Citron (Switch)</name>
+		<desc>Run Citron (Switch). This software is not provided by RetroBat.</desc>
+		<image>./media/citron-logo.png</image>
+		<marquee>./media/citron-logo.png</marquee>
+		<rating>0</rating>
+		<releasedate />
+		<developer>Zephyron</developer>
+		<publisher />
+		<genre>Emulator</genre>
+		<playcount />
+		<lastplayed />
+		<gametime />
+		<lang>en</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./dolphin-triforce.menu</path>
+		<name>Dolphin Triforce</name>
+		<desc>Run Dolphin Emulator (Triforce).</desc>
+		<image>./media/dolphin-logo.png</image>
+		<marquee>./media/dolphin-logo.png</marquee>
+		<rating>0</rating>
+		<releasedate />
+		<developer>Dolphin Community</developer>
+		<publisher>Dolphin Community</publisher>
+		<genre>Emulator</genre>
+		<playcount />
+		<lastplayed />
+		<gametime />
+		<lang>en</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./sudachi.menu</path>
+		<name>Sudachi (Switch)</name>
+		<desc>Run Sudachi (Switch). This software is not provided by RetroBat.</desc>
+		<image>./media/sudachi-logo.jpg</image>
+		<marquee>./media/sudachi-logo.jpg</marquee>
+		<rating>0</rating>
+		<releasedate />
+		<developer>Jarrod Norwell</developer>
+		<publisher>Sudachi</publisher>
+		<genre>Emulator</genre>
+		<playcount />
+		<lastplayed />
+		<gametime />
+		<lang>en</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./suyu.menu</path>
+		<name>Suyu (Switch)</name>
+		<desc>Run Suyu (Switch). This software is not provided by RetroBat.</desc>
+		<image>./media/suyu-logo.png</image>
+		<marquee>./media/suyu-logo.png</marquee>
+		<rating>0</rating>
+		<releasedate />
+		<developer>Suyu Team</developer>
+		<publisher>Suyu Team</publisher>
+		<genre>Emulator</genre>
+		<playcount />
+		<lastplayed />
+		<gametime />
+		<lang>en</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./yuzu.menu</path>
+		<name>Yuzu (Switch)</name>
+		<desc>Run Yuzu (Switch). This software is not provided by RetroBat.</desc>
+		<image>./media/yuzu-logo.png</image>
+		<marquee>./media/yuzu-logo.png</marquee>
+		<rating>0</rating>
+		<releasedate />
+		<developer>Yuzu Team</developer>
+		<publisher>Yuzu Team</publisher>
+		<genre>Emulator</genre>
+		<playcount />
+		<lastplayed />
+		<gametime />
+		<lang>en</lang>
+		<region>wr</region>
+	</game>
+	<game>
 		<path>./xenia_edge.menu</path>
 		<name>Xenia Edge (XBOX 360)</name>
 		<desc>Run Xenia Edge (Xbox 360).</desc>
@@ -138,9 +223,9 @@
 		<rating>0</rating>
 		<developer>Cemu Team</developer>
 		<publisher>Cemu Team</publisher>
-		<playcount />
-		<lastplayed />
-		<gametime />
+		<playcount></playcount>
+		<lastplayed></lastplayed>
+		<gametime></gametime>
 		<lang>en</lang>
 		<region>wr</region>
 	</game>
@@ -179,9 +264,9 @@
 		<rating>0</rating>
 		<developer>PPSSPP Team</developer>
 		<publisher>PPSSPP Team</publisher>
-		<playcount />
-		<lastplayed />
-		<gametime />
+		<playcount></playcount>
+		<lastplayed></lastplayed>
+		<gametime></gametime>
 		<lang>en</lang>
 		<region>wr</region>
 	</game>
@@ -310,9 +395,9 @@
 		<marquee>./media/m2emulator-logo.png</marquee>
 		<developer>Nebula Team</developer>
 		<publisher>Nebula Team</publisher>
-		<playcount />
-		<lastplayed />
-		<gametime />
+		<playcount></playcount>
+		<lastplayed></lastplayed>
+		<gametime></gametime>
 		<lang>en</lang>
 		<region>wr</region>
 	</game>
@@ -498,8 +583,8 @@
 		<rating>0</rating>
 		<developer>Geod Studio</developer>
 		<publisher>Geod Studio</publisher>
-		<playcount />
-		<lastplayed />
+		<playcount></playcount>
+		<lastplayed></lastplayed>
 		<lang>en</lang>
 		<region>wr</region>
 	</game>
@@ -715,9 +800,9 @@
 		<rating>0</rating>
 		<developer>Ryujinx Team</developer>
 		<publisher>Ryujinx Team</publisher>
-		<playcount />
-		<lastplayed />
-		<gametime />
+		<playcount></playcount>
+		<lastplayed></lastplayed>
+		<gametime></gametime>
 		<lang>en</lang>
 		<region>wr</region>
 	</game>
@@ -756,9 +841,9 @@
 		<rating>0</rating>
 		<developer>Libretro Team</developer>
 		<publisher>Libretro Team</publisher>
-		<playcount />
-		<lastplayed />
-		<gametime />
+		<playcount></playcount>
+		<lastplayed></lastplayed>
+		<gametime></gametime>
 		<lang>en</lang>
 		<region>wr</region>
 	</game>
@@ -863,9 +948,9 @@
 		<rating>0</rating>
 		<developer>Dolphin Team</developer>
 		<publisher>Dolphin Team</publisher>
-		<playcount />
-		<lastplayed />
-		<gametime />
+		<playcount></playcount>
+		<lastplayed></lastplayed>
+		<gametime></gametime>
 		<lang>en</lang>
 		<region>wr</region>
 	</game>
@@ -916,9 +1001,9 @@
 		<marquee>./media/eden-logo.png</marquee>
 		<rating>0</rating>
 		<developer>The Eden Team</developer>
-		<playcount />
-		<lastplayed />
-		<gametime />
+		<playcount></playcount>
+		<lastplayed></lastplayed>
+		<gametime></gametime>
 		<lang>en</lang>
 		<region>wr</region>
 	</game>
@@ -1009,9 +1094,9 @@
 		<rating>0</rating>
 		<developer>PCSX2 Team</developer>
 		<publisher>PCSX2 Team</publisher>
-		<playcount />
-		<lastplayed />
-		<gametime />
+		<playcount></playcount>
+		<lastplayed></lastplayed>
+		<gametime></gametime>
 		<lang>en</lang>
 		<region>wr</region>
 	</game>

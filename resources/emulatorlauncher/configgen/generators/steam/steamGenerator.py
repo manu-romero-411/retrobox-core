@@ -130,8 +130,8 @@ class SteamGenerator(Generator):
 
         wrapper_path = _make_wrapper(steam_bin, app_id)
 
-        env = {"SDL_JOYSTICK_HIDAPI_XBOX": "0"}
-
+        #env = {"SDL_JOYSTICK_HIDAPI_XBOX": "0"}
+        env = {}
         # runCommand hará Popen([wrapper_path]) + communicate() → bloqueante
         return Command.Command(array=[wrapper_path], env=env)
 

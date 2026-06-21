@@ -86,6 +86,6 @@ EOF
 
 cd "${USERDATA}/frontend" || exit 1
 
-"${HOME}/.local/bin/display-only-hdmi" 1080p
+#"${HOME}/.local/bin/display-only-hdmi" 1080p
 "${USERDATA}/frontend/emulationstation" --home "${USERDATA}/frontend" "$@"
 exit $?

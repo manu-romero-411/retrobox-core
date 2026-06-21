@@ -1,13 +1,82 @@
 {
   "version": "0.2.0",
   "configurations": [
-    //>
-{
+    {
+      "name": "sgdb-artwork: todos los sistemas",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/resources/utils/steamgriddb_downloader/sgdb-artwork.py",
+      "envFile": "${workspaceFolder}/.env",
+      "args": [
+        "--roms",
+        "/var/penguin/juegos/retrobox/roms",
+        "--apikey",
+        "a8974d29e7f2a1db3ff3317fdd1396e5",
+        "--systems",
+        "steam",
+        "heroic",
+        "lutris"
+      ],
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "sgdb-artwork: solo heroic",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/resources/utils/steamgriddb_downloader/sgdb-artwork.py",
+      "envFile": "${workspaceFolder}/.env",
+      "args": [
+        "--roms",
+        "/var/penguin/juegos/retrobox/roms",
+        "--apikey",
+        "a8974d29e7f2a1db3ff3317fdd1396e5",
+        "--systems",
+        "heroic"
+      ],
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "sgdb-artwork: solo steam",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/resources/utils/steamgriddb_downloader/sgdb-artwork.py",
+      "envFile": "${workspaceFolder}/.env",
+      "args": [
+        "--roms",
+        "/var/penguin/juegos/retrobox/roms",
+        "--apikey",
+        "a8974d29e7f2a1db3ff3317fdd1396e5",
+        "--systems",
+        "steam"
+      ],
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "sgdb-artwork: --force (sobreescribe todo)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/resources/utils/steamgriddb_downloader/sgdb-artwork.py",
+      "envFile": "${workspaceFolder}/.env",
+      "args": [
+        "--roms",
+        "/var/penguin/juegos/retrobox/roms",
+        "--apikey",
+        "a8974d29e7f2a1db3ff3317fdd1396e5",
+        "--systems",
+        "steam",
+        "heroic",
+        "lutris",
+        "--force"
+      ],
+      "console": "integratedTerminal"
+    },
+    {
       "name": "configgen: gamepadly",
       "type": "debugpy",
       "request": "launch",
       "module": "mapper",
       "cwd": "${workspaceFolder}/resources/utils/gamepadly",
+      "envFile": "${workspaceFolder}/.env",
       "args": [
         "--guid",
         "0600b7926f0e0000a802000000010000",
@@ -18,7 +87,7 @@
         "--es-input",
         "/var/penguin/juegos/retrobox/frontend/.emulationstation/es_input.cfg",
         "--profile",
-        "/var/penguin/juegos/retrobox/resources/apps/youtube.webapp.keys",
+        "/var/penguin/juegos/retrobox/resources/apps/youtube.webapp.keys"
       ],
       "env": {
         "PYTHONPATH": "${workspaceFolder}"
@@ -32,6 +101,7 @@
       "request": "launch",
       "module": "configgen.emulatorlauncher",
       "cwd": "${workspaceFolder}/resources/emulatorlauncher",
+      "envFile": "${workspaceFolder}/.env",
       "args": [
         "-p1index",
         "1",
@@ -78,26 +148,21 @@
       "request": "launch",
       "module": "configgen.emulatorlauncher",
       "cwd": "${workspaceFolder}/resources/emulatorlauncher",
-      "args": [
-        "-system",
-        "wii",
-        "-rom",
-        "config",
-        "-emulator",
-        "dolphin"
-      ],
+      "envFile": "${workspaceFolder}/.env",
+      "args": ["-system", "wii", "-rom", "config", "-emulator", "dolphin"],
       "env": {
         "PYTHONPATH": "${workspaceFolder}"
       },
       "console": "integratedTerminal",
       "justMyCode": false
-    }, 
+    },
     {
       "name": "configgen: HEROIC ()",
       "type": "debugpy",
       "request": "launch",
       "module": "configgen.emulatorlauncher",
       "cwd": "${workspaceFolder}/resources/emulatorlauncher",
+      "envFile": "${workspaceFolder}/.env",
       "args": [
         "-system",
         "heroic",
@@ -120,11 +185,12 @@
       "request": "launch",
       "module": "configgen.emulatorlauncher",
       "cwd": "${workspaceFolder}/resources/emulatorlauncher",
+      "envFile": "${workspaceFolder}/.env",
       "args": [
         "-system",
         "lutris",
         "-rom",
-        "../roms/lutris/Zuma Deluxe.lynx",
+        "/var/penguin/juegos/retrobox/roms/lutris/Rayman Legends.lynx",
         "-gameinfoxml",
         "/tmp/game.xml",
         "-systemname",
@@ -142,6 +208,7 @@
       "request": "launch",
       "module": "configgen.emulatorlauncher",
       "cwd": "${workspaceFolder}/resources/emulatorlauncher",
+      "envFile": "${workspaceFolder}/.env",
       "args": [
         "-p1index",
         "1",
@@ -170,7 +237,7 @@
         "-system",
         "switch",
         "-rom",
-        "/run/media/manuel/penguinTB/juegos/roms/switch/Donkey Kong Country Returns HD [01009D901BC56000][v0][US](nsw2u.com).nsp",
+        "/var/penguintb/juegos/roms/switch/Donkey Kong Country Returns HD [01009D901BC56000][v0][US](nsw2u.com).nsp",
         "-gameinfoxml",
         "/tmp/game.xml",
         "-systemname",
@@ -178,7 +245,7 @@
       ],
       "env": {
         "PYTHONPATH": "${workspaceFolder}",
-        "PATH": "/home/manuel/proyectos/batocera-configgen:/home/manuel/.local/bin:/usr/local/bin:/usr/bin:/bin",
+        "PATH": "/var/penguin/juegos/retrobox:/home/manuel/.local/bin:/usr/local/bin:/usr/bin:/bin",
         "SDL_JOYSTICK_HIDAPI": "1",
         "SDL_JOYSTICK_HIDAPI_SWITCH": "1",
         "SDL_JOYSTICK_HIDAPI_XBOX": "1"
@@ -192,6 +259,7 @@
       "request": "launch",
       "module": "configgen.emulatorlauncher",
       "cwd": "${workspaceFolder}/resources/emulatorlauncher",
+      "envFile": "${workspaceFolder}/.env",
       "args": [
         "-p1index",
         "0",
@@ -221,7 +289,7 @@
         "-system",
         "gamecube",
         "-rom",
-        "/run/media/manuel/penguinTB/juegos/roms/gamecube/Mario Kart - Double Dash!! (Europe) (En,Fr,De,Es,It).rvz",
+        "/var/penguintb/juegos/roms/gamecube/Mario Kart - Double Dash!! (Europe) (En,Fr,De,Es,It).rvz",
         "-gameinfoxml",
         "/tmp/game.xml",
         "-systemname",
@@ -229,7 +297,7 @@
       ],
       "env": {
         "PYTHONPATH": "${workspaceFolder}",
-        "PATH": "/home/manuel/proyectos/batocera-configgen:/home/manuel/.local/bin:/usr/local/bin:/usr/bin:/bin"
+        "PATH": "/var/penguin/juegos/retrobox:/home/manuel/.local/bin:/usr/local/bin:/usr/bin:/bin"
       },
       "console": "integratedTerminal",
       "justMyCode": false
@@ -240,6 +308,7 @@
       "request": "launch",
       "module": "configgen.emulatorlauncher",
       "cwd": "${workspaceFolder}/resources/emulatorlauncher",
+      "envFile": "${workspaceFolder}/.env",
       "args": [
         "-p1index",
         "0",
@@ -256,7 +325,7 @@
         "-system",
         "wii",
         "-rom",
-        "/run/media/manuel/penguinTB/juegos/roms/wii/Sonic Colours (Europe) (En,Ja,Fr,De,Es,It).rvz",
+        "/var/penguintb/juegos/roms/wii/Sonic Colours (Europe) (En,Ja,Fr,De,Es,It).rvz",
         "-gameinfoxml",
         "/tmp/game.xml",
         "-systemname",
@@ -264,7 +333,7 @@
       ],
       "env": {
         "PYTHONPATH": "${workspaceFolder}",
-        "PATH": "/home/manuel/proyectos/batocera-configgen:/home/manuel/.local/bin:/usr/local/bin:/usr/bin:/bin"
+        "PATH": "/var/penguin/juegos/retrobox:/home/manuel/.local/bin:/usr/local/bin:/usr/bin:/bin"
       },
       "console": "integratedTerminal",
       "justMyCode": false
@@ -275,6 +344,7 @@
       "request": "launch",
       "module": "configgen.emulatorlauncher",
       "cwd": "${workspaceFolder}/resources/emulatorlauncher",
+      "envFile": "${workspaceFolder}/.env",
       "args": [
         "-p1index",
         "0",
@@ -291,7 +361,7 @@
         "-system",
         "psp",
         "-rom",
-        "/run/media/manuel/penguinTB/juegos/roms/psp/Pac-Man Championship Edition (Spain) (Minis).iso",
+        "/var/penguintb/juegos/roms/psp/Pac-Man Championship Edition (Spain) (Minis).iso",
         "-gameinfoxml",
         "/tmp/game.xml",
         "-systemname",
@@ -299,7 +369,7 @@
       ],
       "env": {
         "PYTHONPATH": "${workspaceFolder}",
-        "PATH": "/home/manuel/proyectos/batocera-configgen:/home/manuel/.local/bin:/usr/local/bin:/usr/bin:/bin"
+        "PATH": "/var/penguin/juegos/retrobox:/home/manuel/.local/bin:/usr/local/bin:/usr/bin:/bin"
       },
       "console": "integratedTerminal",
       "justMyCode": false
@@ -310,6 +380,7 @@
       "request": "launch",
       "module": "configgen.emulatorlauncher",
       "cwd": "${workspaceFolder}/resources/emulatorlauncher",
+      "envFile": "${workspaceFolder}/.env",
       "args": [
         "-p1index",
         "0",
@@ -334,7 +405,7 @@
       ],
       "env": {
         "PYTHONPATH": "${workspaceFolder}",
-        "PATH": "/home/manuel/proyectos/batocera-configgen:/home/manuel/.local/bin:/usr/local/bin:/usr/bin:/bin"
+        "PATH": "/var/penguin/juegos/retrobox:/home/manuel/.local/bin:/usr/local/bin:/usr/bin:/bin"
       },
       "console": "integratedTerminal",
       "justMyCode": false
@@ -345,6 +416,7 @@
       "request": "launch",
       "module": "configgen.emulatorlauncher",
       "cwd": "${workspaceFolder}/resources/emulatorlauncher",
+      "envFile": "${workspaceFolder}/.env",
       "args": [
         "-p1index",
         "0",
@@ -369,7 +441,7 @@
       ],
       "env": {
         "PYTHONPATH": "${workspaceFolder}",
-        "PATH": "/home/manuel/proyectos/batocera-configgen:/home/manuel/.local/bin:/usr/local/bin:/usr/bin:/bin"
+        "PATH": "/var/penguin/juegos/retrobox:/home/manuel/.local/bin:/usr/local/bin:/usr/bin:/bin"
       },
       "console": "integratedTerminal",
       "justMyCode": false
@@ -380,6 +452,7 @@
       "request": "launch",
       "module": "configgen.emulatorlauncher",
       "cwd": "${workspaceFolder}/resources/emulatorlauncher",
+      "envFile": "${workspaceFolder}/.env",
       "args": [
         "-p1index",
         "0",
@@ -396,7 +469,7 @@
         "-system",
         "ps2",
         "-rom",
-        "/run/media/manuel/penguinTB/juegos/roms/ps2/Dragon Quest - The Journey of the Cursed King (Europe, Australia) (En,Fr,De,Es,It).chd",
+        "/var/penguintb/juegos/roms/ps2/Dragon Quest - The Journey of the Cursed King (Europe, Australia) (En,Fr,De,Es,It).chd",
         "-gameinfoxml",
         "/tmp/game.xml",
         "-systemname",
@@ -404,7 +477,7 @@
       ],
       "env": {
         "PYTHONPATH": "${workspaceFolder}",
-        "PATH": "/home/manuel/proyectos/batocera-configgen:/home/manuel/.local/bin:/usr/local/bin:/usr/bin:/bin"
+        "PATH": "/var/penguin/juegos/retrobox:/home/manuel/.local/bin:/usr/local/bin:/usr/bin:/bin"
       },
       "console": "integratedTerminal",
       "justMyCode": false
@@ -415,6 +488,7 @@
       "request": "launch",
       "module": "configgen.emulatorlauncher",
       "cwd": "${workspaceFolder}/resources/emulatorlauncher",
+      "envFile": "${workspaceFolder}/.env",
       "args": [
         "-p1index",
         "1",
@@ -444,7 +518,30 @@
         "-system",
         "megadrive",
         "-rom",
-        "/run/media/manuel/penguinTB/juegos/roms/megadrive/Sonic The Hedgehog 2 (World) (Rev B).zip",
+        "/var/penguintb/juegos/roms/megadrive/Sonic The Hedgehog 2 (World) (Rev B).zip",
+        "-gameinfoxml",
+        "/tmp/game.xml",
+        "-systemname",
+        "Mega Drive"
+      ],
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}"
+      },
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      "name": "configgen: Mega Drive (Sonic 2 sin mando)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "configgen.emulatorlauncher",
+      "cwd": "${workspaceFolder}/resources/emulatorlauncher",
+      "envFile": "${workspaceFolder}/.env",
+      "args": [
+        "-system",
+        "megadrive",
+        "-rom",
+        "/var/penguintb/juegos/roms/megadrive/Sonic The Hedgehog 2 (World) (Rev B).zip",
         "-gameinfoxml",
         "/tmp/game.xml",
         "-systemname",
@@ -462,6 +559,7 @@
       "request": "launch",
       "module": "configgen.emulatorlauncher",
       "cwd": "${workspaceFolder}/resources/emulatorlauncher",
+      "envFile": "${workspaceFolder}/.env",
       "args": [
         "-p1index",
         "1",
@@ -478,7 +576,7 @@
         "-system",
         "pcengine",
         "-rom",
-        "/run/media/manuel/penguinTB/juegos/roms/pcengine/Bonk's Adventure (USA).zip",
+        "/var/penguintb/juegos/roms/pcengine/Bonk's Adventure (USA).zip",
         "-gameinfoxml",
         "/tmp/game.xml",
         "-systemname",
@@ -496,6 +594,7 @@
       "request": "launch",
       "module": "configgen.emulatorlauncher",
       "cwd": "${workspaceFolder}/resources/emulatorlauncher",
+      "envFile": "${workspaceFolder}/.env",
       "args": [
         "-p1index",
         "0",
@@ -525,7 +624,7 @@
         "-system",
         "megadrive",
         "-rom",
-        "/run/media/manuel/penguinTB/juegos/roms/megadrive/Sonic The Hedgehog 2 (World) (Rev B).zip",
+        "/var/penguintb/juegos/roms/megadrive/Sonic The Hedgehog 2 (World) (Rev B).zip",
         "-gameinfoxml",
         "/tmp/game.xml",
         "-systemname",
@@ -543,6 +642,7 @@
       "request": "launch",
       "module": "configgen.emulatorlauncher",
       "cwd": "${workspaceFolder}/resources/emulatorlauncher",
+      "envFile": "${workspaceFolder}/.env",
       "args": [
         "-p1index",
         "0",
@@ -577,6 +677,7 @@
       "request": "launch",
       "module": "configgen.emulatorlauncher",
       "cwd": "${workspaceFolder}/resources/emulatorlauncher",
+      "envFile": "${workspaceFolder}/.env",
       "args": ["-system", "config", "-emulator", "libretro", "-rom", "config"],
       "env": {
         "PYTHONPATH": "${workspaceFolder}"
