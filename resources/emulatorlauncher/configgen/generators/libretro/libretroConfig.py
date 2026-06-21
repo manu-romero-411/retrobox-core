@@ -14,7 +14,7 @@ from ...utils import bezels as bezelsUtil, esSettings, metadata as metadataUtils
 from ..hatari.hatariGenerator import HATARI_CONFIG
 from . import libretroMAMEConfig, libretroOptions
 from .libretroPaths import (
-    RETROARCH_CONFIG,
+    _RETROARCH_CONFIG,
     RETROARCH_CORE_CUSTOM,
     RETROARCH_CORES,
     RETROARCH_OVERLAY_CONFIG,
@@ -212,8 +212,8 @@ def createLibretroConfig(
     retroarchConfig['video_black_frame_insertion'] = 'false'    # don't use anymore this value while it doesn't allow the shaders to work
     retroarchConfig['pause_nonactive'] = 'false'                # required at least on x86 x86_64 otherwise, the game is paused at launch
 
-    mkdir_if_not_exists(RETROARCH_CONFIG / 'cache')
-    retroarchConfig['cache_directory'] = RETROARCH_CONFIG / 'cache'
+    mkdir_if_not_exists(_RETROARCH_CONFIG / 'cache')
+    retroarchConfig['cache_directory'] = _RETROARCH_CONFIG / 'cache'
 
     # require for core informations
     retroarchConfig['libretro_directory'] = RETROARCH_CORES

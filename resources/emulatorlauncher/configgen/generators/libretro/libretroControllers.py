@@ -6,7 +6,7 @@ import re
 from typing import TYPE_CHECKING, Literal
 
 from configgen.controller import getJoystickHardwareIds
-from configgen.generators.libretro.libretroPaths import RETROARCH_CONFIG
+from configgen.generators.libretro.libretroPaths import _RETROARCH_CONFIG
 
 from ...controllersConfig import getAssociatedMouse, getDevicesInformation
 _logger = logging.getLogger(__name__)
@@ -294,7 +294,7 @@ def generateControllerConfig(
         vendor_dec, product_dec = hw_ids
         
         hw_cfg_name = f"{vendor_dec}-{product_dec}.cfg"
-        hw_cfg_path = RETROARCH_CONFIG / 'autoconfig' / hw_cfg_name
+        hw_cfg_path = _RETROARCH_CONFIG / 'autoconfig' / hw_cfg_name
         
         if hw_cfg_path.exists():
             p_num = controller.player_number

@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any
 
 import yaml
 
-from .batoceraPaths import BATOCERA_SHADERS, DEFAULTS_DIR, ES_SETTINGS, USER_SHADERS, configure_emulator
+from .batoceraPaths import DEFAULTS_DIR, ES_SETTINGS, SHADERS_DIR, configure_emulator
 from .config import Config, SystemConfig
 from .exceptions import MissingEmulator
 from .settings.unixSettings import UnixSettings
@@ -245,11 +245,11 @@ class Emulator:
         render_data: dict[str, Any] = {}
         if (shader_set := self.config.get('shaderset')) is not self.config.MISSING:
             if shader_set == 'none':
-                rendering_defaults = BATOCERA_SHADERS / 'configs' / 'rendering-defaults.yml'
+                rendering_defaults = SHADERS_DIR / 'configs' / 'rendering-defaults.yml'
             else:
-                rendering_defaults = USER_SHADERS / 'configs' / shader_set / 'rendering-defaults.yml'
+                rendering_defaults = SHADERS_DIR / 'configs' / shader_set / 'rendering-defaults.yml'
                 if not rendering_defaults.exists():
-                    rendering_defaults = BATOCERA_SHADERS / 'configs' / shader_set / 'rendering-defaults.yml'
+                    rendering_defaults = SHADERS_DIR / 'configs' / shader_set / 'rendering-defaults.yml'
 
             render_data = _load_defaults(
                 args.system, rendering_defaults, rendering_defaults.with_name('rendering-defaults-arch.yml')

@@ -55,7 +55,6 @@ USER_SCRIPTS:  Final = HOME / 'user_scripts'
 # Configs de emuladores → ~/.config  (XDG; retroarch ya vive en ~/.config/retroarch)
 # ---------------------------------------------------------------------------
 CONFIGS: Final = USERDATA / 'emuconfigs'
-
 SAVES:       Final = USERDATA / 'saves'
 SCREENSHOTS: Final = USERDATA / 'screenshots'
 RECORDINGS:  Final = USERDATA / 'recordings'
@@ -63,8 +62,8 @@ BIOS:        Final = USERDATA / 'bios'       # "system directory" de retroarch
 OVERLAYS:    Final = USERDATA / 'overlay'
 CHEATS:      Final = USERDATA / 'cheats'
 
-USER_SHADERS:    Final = USERDATA / 'shaders'
-USER_DECORATIONS:  Final = USERDATA / 'decorations'
+SHADERS_DIR:    Final = USERDATA / 'shaders'
+DECORATIONS_DIR:  Final = USERDATA / 'decorations'
 # ---------------------------------------------------------------------------
 # EmulationStation
 # ---------------------------------------------------------------------------
@@ -80,7 +79,6 @@ ES_WHEELS_METADATA:  Final = _ES_RESOURCES_DIR / 'wheelgames.xml'
 ES_GAMES_METADATA:   Final = _ES_RESOURCES_DIR / 'gamesdb.xml'
 ES_GUNS_ART_METADATA: Final = DEFAULTS_DIR / 'data' / 'gamesbuttonsdb.xml'
 
-BATOCERA_SHADERS:    Final = BATOCERA_SHARE_DIR / 'shaders'
 SYSTEM_DECORATIONS:  Final = DATAINIT_DIR / 'decorations'
 SYSTEM_SCRIPTS:      Final = BATOCERA_SHARE_DIR / 'system_scripts'
 
