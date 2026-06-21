@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, NotRequired, TypedDict, cast
 import qrcode
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 
-from ..batoceraPaths import BATOCERA_SHARE_DIR, ES_GUNS_ART_METADATA, SYSTEM_DECORATIONS, USER_DECORATIONS
+from ..batoceraPaths import BATOCERA_SHARE_DIR, ES_GUNS_ART_METADATA, SYSTEM_DECORATIONS, DECORATIONS_DIR
 from ..exceptions import BatoceraException
 from . import metadata
 from .videoMode import getAltDecoration
@@ -51,41 +51,41 @@ def getBezelInfos(rom: str | Path, bezel: str, systemName: str, emulator: str) -
     # mamezip files are for MAME-specific advanced artwork (bezels with overlays and backdrops, animated LEDs, etc)
     altDecoration = getAltDecoration(systemName, rom, emulator)
     romBase = Path(rom).stem # filename without extension
-    overlay_info_file = USER_DECORATIONS / bezel / "games" / systemName / f"{romBase}.info"
-    overlay_png_file  = USER_DECORATIONS / bezel / "games" / systemName / f"{romBase}.png"
-    overlay_layout_file  = USER_DECORATIONS / bezel / "games" / systemName / f"{romBase}.lay"
-    overlay_mamezip_file  = USER_DECORATIONS / bezel / "games" / systemName / f"{romBase}.zip"
+    overlay_info_file = DECORATIONS_DIR / bezel / "games" / systemName / f"{romBase}.info"
+    overlay_png_file  = DECORATIONS_DIR / bezel / "games" / systemName / f"{romBase}.png"
+    overlay_layout_file  = DECORATIONS_DIR / bezel / "games" / systemName / f"{romBase}.lay"
+    overlay_mamezip_file  = DECORATIONS_DIR / bezel / "games" / systemName / f"{romBase}.zip"
     bezel_game = True
     if not overlay_png_file.exists():
         overlay_info_file = SYSTEM_DECORATIONS / bezel / "games" / systemName / f"{romBase}.info"
         overlay_png_file  = SYSTEM_DECORATIONS / bezel / "games" / systemName / f"{romBase}.png"
-        overlay_layout_file  = USER_DECORATIONS / bezel / "games" / systemName / f"{romBase}.lay"
-        overlay_mamezip_file  = USER_DECORATIONS / bezel / "games" / systemName / f"{romBase}.zip"
+        overlay_layout_file  = DECORATIONS_DIR / bezel / "games" / systemName / f"{romBase}.lay"
+        overlay_mamezip_file  = DECORATIONS_DIR / bezel / "games" / systemName / f"{romBase}.zip"
         bezel_game = True
         if not overlay_png_file.exists():
-            overlay_info_file = USER_DECORATIONS / bezel / "games" / f"{romBase}.info"
-            overlay_png_file  = USER_DECORATIONS / bezel / "games" / f"{romBase}.png"
-            overlay_layout_file  = USER_DECORATIONS / bezel / "games" / f"{romBase}.lay"
-            overlay_mamezip_file  = USER_DECORATIONS / bezel / "games" / f"{romBase}.zip"
+            overlay_info_file = DECORATIONS_DIR / bezel / "games" / f"{romBase}.info"
+            overlay_png_file  = DECORATIONS_DIR / bezel / "games" / f"{romBase}.png"
+            overlay_layout_file  = DECORATIONS_DIR / bezel / "games" / f"{romBase}.lay"
+            overlay_mamezip_file  = DECORATIONS_DIR / bezel / "games" / f"{romBase}.zip"
             bezel_game = True
             if not overlay_png_file.exists():
                 overlay_info_file = SYSTEM_DECORATIONS / bezel / "games" / f"{romBase}.info"
                 overlay_png_file  = SYSTEM_DECORATIONS / bezel / "games" / f"{romBase}.png"
-                overlay_layout_file  = USER_DECORATIONS / bezel / "games" / f"{romBase}.lay"
-                overlay_mamezip_file  = USER_DECORATIONS / bezel / "games" / f"{romBase}.zip"
+                overlay_layout_file  = DECORATIONS_DIR / bezel / "games" / f"{romBase}.lay"
+                overlay_mamezip_file  = DECORATIONS_DIR / bezel / "games" / f"{romBase}.zip"
                 bezel_game = True
                 if not overlay_png_file.exists():
                     if altDecoration != "0":
-                        overlay_info_file = USER_DECORATIONS / bezel / "systems" / f"{systemName}-{altDecoration!s}.info"
-                        overlay_png_file  = USER_DECORATIONS / bezel / "systems" / f"{systemName}-{altDecoration!s}.png"
-                        overlay_layout_file  = USER_DECORATIONS / bezel / "systems" / f"{systemName}-{altDecoration!s}.lay"
-                        overlay_mamezip_file  = USER_DECORATIONS / bezel / "systems" / f"{systemName}-{altDecoration!s}.zip"
+                        overlay_info_file = DECORATIONS_DIR / bezel / "systems" / f"{systemName}-{altDecoration!s}.info"
+                        overlay_png_file  = DECORATIONS_DIR / bezel / "systems" / f"{systemName}-{altDecoration!s}.png"
+                        overlay_layout_file  = DECORATIONS_DIR / bezel / "systems" / f"{systemName}-{altDecoration!s}.lay"
+                        overlay_mamezip_file  = DECORATIONS_DIR / bezel / "systems" / f"{systemName}-{altDecoration!s}.zip"
                         bezel_game = False
                     if not overlay_png_file.exists():
-                        overlay_info_file = USER_DECORATIONS / bezel / "systems" / f"{systemName}.info"
-                        overlay_png_file  = USER_DECORATIONS / bezel / "systems" / f"{systemName}.png"
-                        overlay_layout_file  = USER_DECORATIONS / bezel / "systems" / f"{systemName}.lay"
-                        overlay_mamezip_file  = USER_DECORATIONS / bezel / "systems" / f"{systemName}.zip"
+                        overlay_info_file = DECORATIONS_DIR / bezel / "systems" / f"{systemName}.info"
+                        overlay_png_file  = DECORATIONS_DIR / bezel / "systems" / f"{systemName}.png"
+                        overlay_layout_file  = DECORATIONS_DIR / bezel / "systems" / f"{systemName}.lay"
+                        overlay_mamezip_file  = DECORATIONS_DIR / bezel / "systems" / f"{systemName}.zip"
                         bezel_game = False
                         if not overlay_png_file.exists():
                             if altDecoration != "0":
@@ -101,16 +101,16 @@ def getBezelInfos(rom: str | Path, bezel: str, systemName: str, emulator: str) -
                                 overlay_mamezip_file  = SYSTEM_DECORATIONS / bezel / "systems" / f"{systemName}.zip"
                                 bezel_game = False
                                 if not overlay_png_file.exists():
-                                    overlay_info_file = USER_DECORATIONS / bezel / f"default-{altDecoration!s}.info"
-                                    overlay_png_file  = USER_DECORATIONS / bezel / f"default-{altDecoration!s}.png"
-                                    overlay_layout_file  = USER_DECORATIONS / bezel / f"default-{altDecoration!s}.lay"
-                                    overlay_mamezip_file  = USER_DECORATIONS / bezel / f"default-{altDecoration!s}.zip"
+                                    overlay_info_file = DECORATIONS_DIR / bezel / f"default-{altDecoration!s}.info"
+                                    overlay_png_file  = DECORATIONS_DIR / bezel / f"default-{altDecoration!s}.png"
+                                    overlay_layout_file  = DECORATIONS_DIR / bezel / f"default-{altDecoration!s}.lay"
+                                    overlay_mamezip_file  = DECORATIONS_DIR / bezel / f"default-{altDecoration!s}.zip"
                                     bezel_game = True
                                     if not overlay_png_file.exists():
-                                        overlay_info_file = USER_DECORATIONS / bezel / "default.info"
-                                        overlay_png_file  = USER_DECORATIONS / bezel / "default.png"
-                                        overlay_layout_file  = USER_DECORATIONS / bezel / "default.lay"
-                                        overlay_mamezip_file  = USER_DECORATIONS / bezel / "default.zip"
+                                        overlay_info_file = DECORATIONS_DIR / bezel / "default.info"
+                                        overlay_png_file  = DECORATIONS_DIR / bezel / "default.png"
+                                        overlay_layout_file  = DECORATIONS_DIR / bezel / "default.lay"
+                                        overlay_mamezip_file  = DECORATIONS_DIR / bezel / "default.zip"
                                         bezel_game = True
                                         if not overlay_png_file.exists():
                                             overlay_info_file = SYSTEM_DECORATIONS / bezel / f"default-{altDecoration!s}.info"
