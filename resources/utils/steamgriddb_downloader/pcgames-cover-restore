@@ -1,0 +1,7 @@
+#!/bin/bash
+set -x
+for i in steam lutris heroic; do
+    rm -f ${USERDATA}/roms/"$i"/images/*thumb.*
+    cp ${USERDATA}/roms/_scrap_backups/"$i"/* ${USERDATA}/roms/"$i"/images
+done
+set +x

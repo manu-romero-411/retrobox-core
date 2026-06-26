@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Stub de batocera-vulkan para Debian
+
+case "$1" in
+    hasVulkan)
+        # Comprueba si vulkaninfo existe y funciona
+        if command -v vulkaninfo &>/dev/null && vulkaninfo --summary &>/dev/null 2>&1; then
+            echo "true"
+        else
+            echo "false"
+        fi
+        ;;
+    *)
+        echo "false"
+        ;;
+esac
