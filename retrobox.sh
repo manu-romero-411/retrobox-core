@@ -6,23 +6,21 @@
 # sudo dnf install freeimage SDL2_mixer vlc-libs jq p7zip
 # sudo dnf install python3-pyudev python3-pyudev python3-pip python3-virtualenv python3-pysdl2 python3-yaml python3-qrcode python3-pillow python3-evdev python3-qrcode python3-pygame
 
-trap '${HOME}/.local/bin/display-restore-layout' EXIT
+trapfunc(){
+    pcgames-cover-backup
+    "${HOME}/.local/bin/display-restore-layout"
+}
+trap trapfunc EXIT
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd -P)"
 
 export USERDATA="${HERE:-$HOME/.local/share/batocera}"
 export BATOCERA_ROOT="${USERDATA}"
-export PATH="${USERDATA}/resources/system_scripts:${USERDATA}/resources/user_scripts:$PATH"
-
-# Parámetro --shell / -s
-if [[ "$1" == "-s" || "$1" == "--shell" ]]; then
-    exec env \
-        USERDATA="$USERDATA" \
-        BATOCERA_ROOT="$BATOCERA_ROOT" \
-        PATH="${USERDATA}/resources/system_scripts:${USERDATA}/resources/user_scripts:$PATH" \
-        PS1="🎮 \[\e[1;32m\]\u@\h\[\e[0m\]:\[\e[1;34m\]\w\[\e[0m\]\n\$ " \
-        bash --norc --noprofile
-fi
+for i in "${USERDATA}/resources/utils/"*; do
+    if [ -f "$i/.bash" ] && [ ! -x "$i/.bash" ]; then
+        PATH="$i:$PATH"
+    fi
+done
 
 # Comprobar que el directorio de Retrobox es real
 if [ ! -d "${USERDATA}" ]; then
@@ -34,6 +32,22 @@ fi
 if [ ! -d "${USERDATA}/frontend/.emulationstation" ]; then
     mkdir -p "${USERDATA}/frontend/.emulationstation"
     cp -r "${USERDATA}/frontend/share/emulationstation/." "${USERDATA}/frontend/.emulationstation/" 2>/dev/null
+fi
+
+
+# Parámetro --shell / -s
+if [[ "$1" == "-s" || "$1" == "--shell" ]]; then
+    exec env \
+        USERDATA="$USERDATA" \
+        BATOCERA_ROOT="$BATOCERA_ROOT" \
+        PATH="${USERDATA}/resources/system_scripts:${USERDATA}/resources/user_scripts:$PATH" \
+        PS1="🎮 \[\e[1;32m\]\u@\h\[\e[0m\]:\[\e[1;34m\]\w\[\e[0m\]\n\$ " \
+        bash --norc --noprofile
+fi
+
+# Parámetro --disable-internal-display / -i
+if [[ "$1" == "-i" || "$1" == "--disable-internal-display" ]]; then
+	"${HOME}/.local/bin/display-only-hdmi" 1080p
 fi
 
 cat << EOF > "${USERDATA}/frontend/.emulationstation/emulationstation.ini"
@@ -49,28 +63,25 @@ saves=${USERDATA}/saves
 screenshots=${USERDATA}/screenshots
 
 # Temas
-system.themes=${USERDATA}/resources/themes
-themes=${USERDATA}/frontend/.emulationstation/themes
+themes=${USERDATA}/frontend/themes
 
 # Música
-system.music=${USERDATA}/resources/music
-music=${USERDATA}/music
+music=${USERDATA}/frontend/music
 
 # Decoraciones/bezels
-system.decorations=${USERDATA}/resources/datainit/decorations
 decorations=${USERDATA}/decorations
 
 # Shaders
-system.shaders=${USERDATA}/resources/shaders/configs
 shaders=${USERDATA}/shaders/configs
 
 # Videofilters
-system.videofilters=${USERDATA}/resources/videofilters
-videofilters=${USERDATA}/videofilters
+videofilters=${USERDATA}/emulators/retroarch/RetroArch-Linux-x86_64.AppImage.home/.config/retroarch/filters/video
+
+# Videofilters
+audiofilters=${USERDATA}/emulators/retroarch/RetroArch-Linux-x86_64.AppImage.home/.config/retroarch/filters/audio
 
 # RetroAchievement sounds
-system.retroachievementsounds=${USERDATA}/resources/sounds/retroachievements
-retroachievementsounds=${USERDATA}/sounds/retroachievements
+retroachievementsounds=${USERDATA}/frontend/retroachievements-sounds
 
 # Padtokey (gamepadly)
 system.padtokey=${USERDATA}/resources/utils/gamepadly/profiles
@@ -80,12 +91,12 @@ padtokey=${USERDATA}/resources/utils/gamepadly/user_profiles
 timezones=/usr/share/zoneinfo
 EOF
 
-"${USERDATA}/resources/system_scripts/heroic-es-sync" || true
-"${USERDATA}/resources/system_scripts/lutris-es-sync" || true
-"${USERDATA}/resources/system_scripts/steam-es-sync" || true
+pcgames-cover-restore
+"${USERDATA}/resources/utils/pcgames-sync/heroic-es-sync" || true
+"${USERDATA}/resources/utils/pcgames-sync/lutris-es-sync" || true
+"${USERDATA}/resources/utils/pcgames-sync/steam-es-sync" || true
 
 cd "${USERDATA}/frontend" || exit 1
 
-#"${HOME}/.local/bin/display-only-hdmi" 1080p
 "${USERDATA}/frontend/emulationstation" --home "${USERDATA}/frontend" "$@"
 exit $?
