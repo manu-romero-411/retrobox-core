@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from ...batoceraPaths import BATOCERA_SHARE_DIR, CONFIGS, mkdir_if_not_exists, USERDATA
 from ...settings.unixSettings import UnixSettings
-from .libretroPaths import _RETROARCH_CONFIG, RETROARCH_CUSTOM
+from .libretroPaths import RETROARCH_CONFIG, RETROARCH_CUSTOM
 
 def generateRetroarchCustom() -> None:
     # retroarchcustom.cfg
@@ -30,7 +30,7 @@ def generateRetroarchCustom() -> None:
 
     # Input
     retroarchSettings.save('input_autodetect_enable',           '"false"')
-    retroarchSettings.save('input_joypad_driver',               '"udev"')
+    retroarchSettings.save('input_joypad_driver',               '"sdl2"')
     retroarchSettings.save('input_player1_analog_dpad_mode',    '"1"')
     retroarchSettings.save('input_player2_analog_dpad_mode',    '"1"')
     retroarchSettings.save('input_player3_analog_dpad_mode',    '"1"')
@@ -84,8 +84,8 @@ def generateRetroarchCustom() -> None:
 
 def generateRetroarchCustomPathes(retroarchSettings: UnixSettings) -> None:
     # Path Retroarch
-    retroarchSettings.save('core_options_path',             f'"{_RETROARCH_CONFIG}/cores/retroarch-core-options.cfg"')
-    retroarchSettings.save('assets_directory',              f'"{_RETROARCH_CONFIG}/assets"')
+    retroarchSettings.save('core_options_path',             f'"{RETROARCH_CONFIG}/cores/retroarch-core-options.cfg"')
+    retroarchSettings.save('assets_directory',              f'"{RETROARCH_CONFIG}/assets"')
     retroarchSettings.save('screenshot_directory',          f'"{USERDATA}/screenshots/"')
     retroarchSettings.save('recording_output_directory',    f'"{USERDATA}/screenshots/"')
     retroarchSettings.save('savestate_directory',           f'"{USERDATA}/saves/"')
@@ -94,7 +94,7 @@ def generateRetroarchCustomPathes(retroarchSettings: UnixSettings) -> None:
     retroarchSettings.save('cheat_database_path',           f'"{USERDATA}/cheats/cht/"')
     retroarchSettings.save('cheat_settings_path',           f'"{USERDATA}/cheats/saves/"')
     retroarchSettings.save('system_directory',              f'"{USERDATA}/bios/"')
-    retroarchSettings.save('joypad_autoconfig_dir',         f'"{_RETROARCH_CONFIG}/autoconfig/"')
+    retroarchSettings.save('joypad_autoconfig_dir',         f'"{RETROARCH_CONFIG}/autoconfig/"')
     retroarchSettings.save('video_shader_dir',              f'"{USERDATA}/resources/shaders/"')
     retroarchSettings.save('video_font_path',               '"/usr/share/fonts/dejavu/DejaVuSansMono.ttf"')
     retroarchSettings.save('video_filter_dir',              f'"{BATOCERA_SHARE_DIR}/video_filters"')

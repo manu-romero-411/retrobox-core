@@ -251,6 +251,8 @@ frontend/locale/
 frontend/locale/*
 frontend/resources/
 frontend/resources/*
+frontend/themes/
+frontend/themes/*
 frontend/share/
 frontend/share/*
 frontend/emulationstation
@@ -280,3 +282,4 @@ shaders/*
 *.AppImage
 
 .vscode/launch.json
+*.pdf

@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 from xml.dom import minidom
 
-from ...batoceraPaths import BIOS, CMDFILES_DIR, CONFIGS, DEFAULTS_DIR, MAME_ARTWORK_DIR, MAME_SOFTWARE_DIR, ROMS, SAVES, DECORATIONS_DIR, mkdir_if_not_exists
+from ...batoceraPaths import BIOS, CMDFILES_DIR, CONFIGS, DEFAULTS_DIR, MAME_ARTWORK_DIR, MAME_SOFTWARE_DIR, ROMS, SAVES, USER_DECORATIONS, mkdir_if_not_exists
 from ..mame.mameCommon import is_atom_floppy
 
 if TYPE_CHECKING:
@@ -428,7 +428,7 @@ def generateMAMEConfigs(playersControllers: Controllers, system: Emulator, rom: 
     # By default, will ignore standalone MAME's art paths.
     if system.config.core != 'same_cdi':
         if system.config.get_bool("sharemameart", True):
-            artPath = f"{MAME_ARTWORK_DIR}/;/usr/bin/mame/artwork/;{BIOS / 'lr-mame' / 'artwork'};{BIOS / 'mame' / 'artwork'};{DECORATIONS_DIR}"
+            artPath = f"{MAME_ARTWORK_DIR}/;/usr/bin/mame/artwork/;{BIOS / 'lr-mame' / 'artwork'};{BIOS / 'mame' / 'artwork'};{USER_DECORATIONS}"
         else:
             artPath = f"{MAME_ARTWORK_DIR}/;/usr/bin/mame/artwork/;{BIOS / 'lr-mame' / 'artwork'}"
         if system.name != "ti99":

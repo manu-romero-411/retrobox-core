@@ -63,7 +63,11 @@ OVERLAYS:    Final = USERDATA / 'overlay'
 CHEATS:      Final = USERDATA / 'cheats'
 
 SHADERS_DIR:    Final = USERDATA / 'shaders'
+# Compatibilidad con nombres usados por algunos generadores de Batocera
+BATOCERA_SHADERS: Final = SHADERS_DIR
+USER_SHADERS: Final = SHADERS_DIR
 DECORATIONS_DIR:  Final = USERDATA / 'decorations'
+USER_DECORATIONS: Final = DECORATIONS_DIR
 # ---------------------------------------------------------------------------
 # EmulationStation
 # ---------------------------------------------------------------------------

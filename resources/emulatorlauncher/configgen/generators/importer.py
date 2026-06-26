@@ -18,6 +18,7 @@ _LEGACY_GENERATOR_MAP: Final[dict[str, dict[str, tuple[str, str]]]] = {
 }
 
 _GENERATOR_MAP: Final[dict[str, tuple[str, str]]] = {
+    'libretro': ('libretro.libretroGenerator', 'LibretroGenerator'),
     'applewin': ('applewin.applewinGenerator', 'AppleWinGenerator'),
     'bigpemu': ('bigpemu.bigpemuGenerator', 'BigPEmuGenerator'),
     'bstone': ('bstone.bstoneGenerator', 'BstoneGenerator'),

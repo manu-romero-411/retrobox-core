@@ -1,27 +1,21 @@
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Final
 
-from ...batoceraPaths import EMULATORS
+from ...batoceraPaths import CONF_INIT, CONFIGS, EMULATORS
 
-# directorios y ejecutable de retroarch y su config
-_RETROARCH_DIR: Final = EMULATORS / "retroarch"
-_RETROARCH_BIN: Final = _RETROARCH_DIR / "RetroArch-Linux-x86_64.AppImage"
-_RETROARCH_XDG: Final = _RETROARCH_DIR / "RetroArch-Linux-x86_64.AppImage.home" / ".config"
-_RETROARCH_CONFIG: Final = _RETROARCH_XDG / "retroarch"
+#RETROARCH_CONFIG: Final = CONFIGS / 'retroarch'
+RETROARCH_CONFIG: Final = EMULATORS / "retroarch" / "RetroArch-Linux-x86_64.AppImage.home" / ".config" / "retroarch"
+RETROARCH_CUSTOM: Final = RETROARCH_CONFIG / 'retroarchcustom.cfg'
+RETROARCH_CORE_CUSTOM: Final = RETROARCH_CONFIG / 'cores' / 'retroarch-core-options.cfg'
+RETROARCH_OVERLAY_CONFIG: Final = RETROARCH_CONFIG / 'overlay.cfg'
 
-# como estamos tirando de appimage, el root de retroarch (donde están los assets, shaders, etc.) es el mismo que la config.
-# Separo ambas variables por si alguien prefiere instalar retroarch en modo sistema (como lo trae batocera) o quiere explorar alternativas como flatpak.
-_RETROARCH_ROOT: Final = _RETROARCH_CONFIG
+RETROARCH_BIN: Final = EMULATORS / "retroarch" / "RetroArch-Linux-x86_64.AppImage"
 
-# configs de retroarch que generamos en el configgen
-RETROARCH_CUSTOM: Final = _RETROARCH_CONFIG / 'retroarchcustom.cfg'
-RETROARCH_CORE_CUSTOM: Final = _RETROARCH_CONFIG / 'cores' / 'retroarch-core-options.cfg'
-RETROARCH_OVERLAY_CONFIG: Final = _RETROARCH_CONFIG / 'overlay.cfg'
-
-# assets de retroarch
-RETROARCH_CORES: Final = _RETROARCH_ROOT / 'cores'
-RETROARCH_SHARE: Final = _RETROARCH_ROOT / 'cores'   # los .info están aquí también en instalación normal
-RETROARCH_ASSETS:    Final = _RETROARCH_ROOT / 'assets'
-RETROARCH_AUTOCONFIG: Final = _RETROARCH_ROOT / 'autoconfig'
-RETROARCH_SHADERS: Final = _RETROARCH_ROOT / 'shaders'
+_RETROARCH: Final = EMULATORS / "retroarch" / "RetroArch-Linux-x86_64.AppImage.home" / ".config" / "retroarch"
+_RETROARCH_XDG: Final = EMULATORS / "retroarch" / "RetroArch-Linux-x86_64.AppImage.home" / ".config"
+RETROARCH_CORES: Final = _RETROARCH / 'cores'
+RETROARCH_SHARE: Final = _RETROARCH / 'cores'   # los .info están aquí también en instalación normal
+RETROARCH_ASSETS:    Final = _RETROARCH / 'assets'
+RETROARCH_AUTOCONFIG: Final = _RETROARCH / 'autoconfig'

@@ -1,12 +1,16 @@
 from __future__ import annotations
 
 import glob
+import logging
 import os
+import pdb
 import xml.etree.ElementTree as ET
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import InitVar, dataclass, field, replace
 from pathlib import Path
 from typing import TYPE_CHECKING, Final, Literal, Self, TypedDict, Unpack, cast
+
+_logger: Final = logging.getLogger(__name__)
 
 from .batoceraPaths import BATOCERA_ES_DIR, HOME, USER_ES_DIR
 from .exceptions import BatoceraException
@@ -484,7 +488,8 @@ class Controller:
         button_count_calc = getattr(args, f'p{player_number}nbbuttons')
         hat_count_calc = getattr(args, f'p{player_number}nbhats')
         axis_count_calc = getattr(args, f'p{player_number}nbaxes')
-
+        _logger.warning("resolve_device_path player=%s → %s", player_number, device_path_calc)
+        #pdb.set_trace()
         if not device_path_calc:
             device_path_calc = device_path_calc = cls.resolve_device_path(
                 guid,

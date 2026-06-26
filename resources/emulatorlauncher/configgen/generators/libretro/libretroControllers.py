@@ -1,12 +1,17 @@
 from __future__ import annotations
 
+import glob
 import logging
 import os
+import pdb
 import re
+import subprocess
 from typing import TYPE_CHECKING, Literal
 
+import pyudev
+
 from configgen.controller import getJoystickHardwareIds
-from configgen.generators.libretro.libretroPaths import _RETROARCH_CONFIG
+from configgen.generators.libretro.libretroPaths import RETROARCH_CONFIG
 
 from ...controllersConfig import getAssociatedMouse, getDevicesInformation
 _logger = logging.getLogger(__name__)
@@ -31,6 +36,84 @@ typetoname = {'button': 'btn', 'hat': 'btn', 'axis': 'axis', 'key': 'key'}
 # Map an emulationstation input hat to the corresponding retroarch hat value
 hatstoname = {'1': 'up', '2': 'right', '4': 'down', '8': 'left'}
 
+def _get_retroarch_udev_order() -> dict[str, int]:
+    context = pyudev.Context()
+    joysticks = []
+    for device in context.list_devices(subsystem='input'):
+        if device.get('ID_INPUT_JOYSTICK') != '1':
+            continue
+        devname = device.get('DEVNAME')
+        if not devname or not re.match(r'/dev/input/event\d+$', devname):
+            continue
+        usec = int(device.get('USEC_INITIALIZED', '0'))
+        joysticks.append((usec, devname))
+    joysticks.sort(key=lambda x: x[0])
+    return {path: idx for idx, (_, path) in enumerate(joysticks)}
+
+
+def _get_udev_index_by_guid(controllers) -> dict[int, int]:
+    from collections import defaultdict
+    import subprocess
+
+    udev_order = _get_retroarch_udev_order()
+
+    # Leer VID:PID de cada joystick udev
+    vidpid_to_events: dict[tuple[str, str], list[str]] = defaultdict(list)
+    for event_path in udev_order:
+        try:
+            out = subprocess.check_output(
+                ['udevadm', 'info', event_path],
+                stderr=subprocess.DEVNULL, text=True
+            )
+            vid, pid = None, None
+            for line in out.splitlines():
+                if line.startswith('E: ID_VENDOR_ID='):
+                    vid = line.split('=', 1)[1].strip().lower().zfill(4)
+                elif line.startswith('E: ID_MODEL_ID='):
+                    pid = line.split('=', 1)[1].strip().lower().zfill(4)
+            if not (vid and pid):
+                basename = os.path.basename(event_path)
+                uevent = f'/sys/class/input/{basename}/device/uevent'
+                with open(uevent, encoding='utf-8') as f:
+                    content = f.read()
+                for line in content.splitlines():
+                    if line.startswith('PRODUCT='):
+                        parts = line.split('=')[1].split('/')
+                        vid = parts[1].zfill(4).lower()
+                        pid = parts[2].zfill(4).lower()
+                        break
+            if vid and pid:
+                vidpid_to_events[(vid, pid)].append(event_path)
+        except (subprocess.CalledProcessError, OSError):
+            pass
+
+    # Cada grupo ya está en orden udev_order porque iteramos udev_order en orden
+    # Extraer VID:PID del GUID de cada controller
+    vidpid_to_players: dict[tuple[str, str], list] = defaultdict(list)
+    for controller in controllers:
+        guid = controller.guid.lower()
+        vid = guid[10:12] + guid[8:10]
+        pid = guid[18:20] + guid[16:18]
+        vidpid_to_players[(vid, pid)].append(controller)
+
+    result: dict[int, int] = {}
+    for (vid, pid), player_list in vidpid_to_players.items():
+        events = vidpid_to_events.get((vid, pid), [])
+        sorted_players = sorted(player_list, key=lambda c: c.index)
+        for i, controller in enumerate(sorted_players):
+            if i < len(events):
+                result[controller.player_number] = udev_order[events[i]]
+            else:
+                result[controller.player_number] = controller.index
+
+    #_logger.warning("UDEV ORDER: %s", udev_order)
+    #_logger.warning("VIDPID EVENTS: %s", dict(vidpid_to_events))
+    #_logger.warning(
+        # "VIDPID PLAYERS: %s", {
+            # k: [(c.player_number, c.index) for c in v] for k, v in vidpid_to_players.items()})
+    #_logger.warning("RESULT: %s", result)
+    return result
+
 # Write a configuration for a specified controller
 # Warning, function used by amiberry because it reads the same retroarch formatting
 def writeControllersConfig(
@@ -40,8 +123,6 @@ def writeControllersConfig(
     lightgun: bool,
     /,
 ) -> None:
-    import glob, os, re, struct
-
     cleanControllerConfig(retroconfig, controllers)
 
     # hotkeys, forced to match with the hotkeys system
@@ -69,70 +150,12 @@ def writeControllersConfig(
     retroconfig.save('input_audio_mute',          '"nul"')
     retroconfig.save('input_grab_mouse_toggle',   '"nul"')
 
-    # --- MAPEO ÚNICO RESILIENTE PARA EL DRIVER UDEV ---
+    # EmulationStation ya decide qué mando es el Player 1, Player 2, etc.
+    # RetroArch debe conservar el índice que ES pasó para ese controlador.
+    # Solo usamos UDEV como fallback si ese dato no llega.
 
-    udev_index_map = {}
-    try:
-        import glob, os, re
+    udev_indices = _get_udev_index_by_guid(controllers)
 
-        input_num_to_event = {}
-        for event_path in sorted(glob.glob('/dev/input/event*'),
-                                key=lambda x: int(x.split('event')[-1])):
-            event_name = os.path.basename(event_path)
-            sysfs = f'/sys/class/input/{event_name}'
-            if not os.path.exists(sysfs):
-                continue
-
-            device_dir = os.path.realpath(os.path.join(sysfs, 'device'))
-
-            # tiene jsX → gamepad estándar
-            has_js = any(re.match(r'^js\d+$', e) for e in os.listdir(device_dir))
-
-            # tiene FF → gamepad con rumble (Nintendo, etc.)
-            has_ff = False
-            try:
-                ff_path = f'/sys/class/input/{event_name}/device/capabilities/ff'
-                with open(ff_path) as f:
-                    ff_content = f.read().strip()
-                # puede tener múltiples valores separados por espacio
-                ff_bits = int(ff_content.split()[0] or '0', 16) if ff_content else 0
-                has_ff = ff_bits > 0
-            except Exception:
-                pass
-
-            if not has_js and not has_ff:
-                continue
-
-            # excluir EV_REL (ratones)
-            try:
-                ev_path = f'/sys/class/input/{event_name}/device/capabilities/ev'
-                with open(ev_path) as f:
-                    ev_bits = int(f.read().strip(), 16)
-                if ev_bits & (1 << 0x2):
-                    continue
-            except Exception:
-                continue
-
-            m = re.search(r'input(\d+)', device_dir)
-            if not m:
-                continue
-
-            input_num = int(m.group(1))
-            input_num_to_event[input_num] = os.path.realpath(event_path)
-
-        for retroarch_index, (input_num, event_path) in enumerate(
-            sorted(input_num_to_event.items())
-        ):
-            udev_index_map[event_path] = str(retroarch_index)
-
-    except Exception:
-        pass
-
-    for path, idx in sorted(udev_index_map.items(), key=lambda x: int(x[1])):
-        _logger.debug(f"(tests 20260613) udev_index_map: {path} → {idx}")
-    
-    _logger.debug(f"(tests 20260613) udev_index_map completo: {udev_index_map}")
-    # --------------------------------------------------
     for controller in controllers:
         mouseIndex: str | None = None
         if system.name in ['nds', '3ds']:
@@ -141,46 +164,10 @@ def writeControllersConfig(
         if mouseIndex is None:
             mouseIndex = '0'
             
-        # Determinamos el joypad_index usando el mapa calculado o fallback del frontend
-        current_real_path = resolve_to_event_path(controller.device_path) if controller.device_path else ""
-        joypad_index = udev_index_map.get(current_real_path, controller.index)
+        joypad_index = str(udev_indices.get(controller.player_number, controller.index))
+        writeControllerConfig(retroconfig, controller, controller.player_number, system, joypad_index, lightgun, mouseIndex)
 
-        # Pasamos directamente el índice resuelto a la función hija
-        writeControllerConfig(retroconfig, controller, controller.player_number, system, joypad_index, lightgun, mouseIndex)    
-        _logger.debug(f"(tests 20260613) P{controller.player_number} device_path={controller.device_path} realpath={current_real_path} → joypad_index={joypad_index}")
-
-def resolve_to_event_path(device_path: str) -> str:
-    if not device_path:
-        return device_path
-
-    real = os.path.realpath(device_path)
-
-    if re.match(r'^/dev/input/event\d+$', real):
-        return real
-
-    base = os.path.basename(real)
-
-    if base.startswith('hidraw'):
-        sysfs = f'/sys/class/hidraw/{base}/device'
-        search_root = os.path.realpath(sysfs) if os.path.exists(sysfs) else None
-    elif '/sys/' in real or real.startswith('/dev') is False:
-        search_root = real
-    else:
-        search_root = None
-
-    if search_root and os.path.exists(search_root):
-        candidates = []
-        for root, dirs, files in os.walk(search_root):
-            for d in dirs:
-                if d.startswith('event'):
-                    event_path = f'/dev/input/{d}'
-                    if os.path.exists(event_path):
-                        candidates.append(event_path)
-        if candidates:
-            # el de menor número es el gamepad principal, no el IMU
-            return min(candidates, key=lambda x: int(x.split('event')[-1]))
-
-    return device_path
+    #pdb.set_trace()
 
 # Remove all controller configurations
 def cleanControllerConfig(retroconfig: UnixSettings, controllers: Controllers, /) -> None:
@@ -270,8 +257,6 @@ def writeControllerConfig(
     /,
 ):
     generatedConfig = generateControllerConfig(controller, system, lightgun, mouseIndex)
-    print(f"[DEBUG5] escribiendo {len(generatedConfig)} claves para player{playerIndex} ({controller.real_name})")
-    print(f"[DEBUG5] joypad_index para retroarch/udev: {joypad_index}")
     for key in generatedConfig:
         retroconfig.save(key, generatedConfig[key])
 
@@ -294,11 +279,11 @@ def generateControllerConfig(
         vendor_dec, product_dec = hw_ids
         
         hw_cfg_name = f"{vendor_dec}-{product_dec}.cfg"
-        hw_cfg_path = _RETROARCH_CONFIG / 'autoconfig' / hw_cfg_name
+        hw_cfg_path = RETROARCH_CONFIG / 'autoconfig' / hw_cfg_name
         
         if hw_cfg_path.exists():
             p_num = controller.player_number
-            print(f"[DEBUG_HW] Aplicando perfil {hw_cfg_name} al Player {p_num}")
+            _logger.debug("Aplicando perfil %s al Player %s", hw_cfg_name, p_num)
             
             cfg_hotkey = None
             cfg_select = None
@@ -337,7 +322,7 @@ def generateControllerConfig(
                 return config
                 
             except Exception as e:
-                print(f"[DEBUG_HW] Falló la lectura del perfil {hw_cfg_name}: {e}") 
+                _logger.debug("Falló la lectura del perfil %s: %s", hw_cfg_name, e)
     # Si no detectamos mapping manual de mando, seguimos
     # Map an emulationstation button name to the corresponding retroarch name
     retroarchbtns = {'a': 'a', 'b': 'b', 'x': 'x', 'y': 'y', \

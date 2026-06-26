@@ -7,15 +7,18 @@ import shutil
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from configgen.controller import generate_sdl_game_controller_config
+
 from ... import Command
 from ...batoceraPaths import (
+    BATOCERA_SHADERS,
     BIOS,
     CMDFILES_DIR,
     HOME,
     OVERLAYS,
     ROMS,
     SAVES,
-    SHADERS_DIR,
+    USER_SHADERS,
     USERDATA,
     configure_emulator,
     mkdir_if_not_exists,
@@ -27,11 +30,10 @@ from ..Generator import Generator
 from . import libretroConfig, libretroControllers, libretroRetroarchCustom
 from .libretroPaths import (
     _RETROARCH_XDG,
-    _RETROARCH_BIN,
-    _RETROARCH_CONFIG,
+    RETROARCH_BIN,
+    RETROARCH_CONFIG,
     RETROARCH_CORES,
     RETROARCH_CUSTOM,
-    RETROARCH_SHADERS,
     RETROARCH_SHARE,
 )
 
@@ -99,23 +101,16 @@ class LibretroGenerator(Generator):
                 gameShader = renderConfig['shader']
         if 'shader' in renderConfig and gameShader is not None:
             if (gfxBackend == 'glcore' or gfxBackend == 'vulkan') or (system.config.core in libretroConfig.coreForceSlangShaders):
-                shader_type = "slang"
                 shaderFilename = f"{gameShader}.slangp"
             else:
-                shader_type = "glsl"
                 shaderFilename = f"{gameShader}.glslp"
             _logger.debug("searching shader %s", shaderFilename)
-            if (SHADERS_DIR / shaderFilename).exists():
-                video_shader_dir = SHADERS_DIR
-                # no sabemos bien cómo vienen los shaders de terceros (los de la tienda de batocera, por ejemplo).
-                # asi que aquí van todos juntos (glsl y slang)
-                video_shader = video_shader_dir / shaderFilename
-                _logger.debug("shader %s found in %s", shaderFilename, SHADERS_DIR)
+            if (USER_SHADERS / shaderFilename).exists():
+                video_shader_dir = USER_SHADERS
+                _logger.debug("shader %s found in %s", shaderFilename, USER_SHADERS)
             else:
-                video_shader_dir = RETROARCH_SHADERS
-                # en retroarch appimage los shaders vienen separados en glsl o slang
-                video_shader = video_shader_dir / f"shaders_{shader_type}" / shaderFilename
-                
+                video_shader_dir = BATOCERA_SHADERS
+            video_shader = video_shader_dir / shaderFilename
             # If the shader filename contains noBezel, activate Shader Bezel mode.
             if "noBezel" in video_shader.name:
                 shaderBezel = True
@@ -148,7 +143,7 @@ class LibretroGenerator(Generator):
             retroconfig.write()
 
             # duplicate config to mapping files while ra now split in 2 parts
-            remapconfigDir = _RETROARCH_CONFIG / "config" / "remaps" / "common"
+            remapconfigDir = RETROARCH_CONFIG / "config" / "remaps" / "common"
             mkdir_if_not_exists(remapconfigDir)
             #shutil.copyfile(RETROARCH_CUSTOM, remapconfigDir / "common.rmp")
         # Batocera usa nombres alias; los ficheros upstream de RetroArch usan nombres distintos
@@ -168,7 +163,7 @@ class LibretroGenerator(Generator):
         dontAppendROM = False
         # For the NeoGeo CD (lr-fbneo) it is necessary to add the parameter: --subsystem neocd
         if system.name == 'neogeocd' and system.config.core == "fbneo":
-            command_array = [_RETROARCH_BIN, "-L", libretro_core, "--subsystem", "neocd", "--config", system.config['configfile']]
+            command_array = [RETROARCH_BIN, "-L", libretro_core, "--subsystem", "neocd", "--config", system.config['configfile']]
         # Set up GB/GBC Link games to use 2 different ROMs if needed
         if system.name == 'gb2players' or system.name == 'gbc2players':
             GBMultiROM: list[Path] = []
@@ -199,10 +194,10 @@ class LibretroGenerator(Generator):
                     GBMultiSys.append("gbc")
             # If there are at least 2 games in the list, use the alternate command line
             if len(GBMultiROM) >= 2:
-                command_array = [_RETROARCH_BIN, "-L", libretro_core, GBMultiROM[0], "--subsystem", "gb_link_2p", GBMultiROM[1], "--config", system.config['configfile']]
+                command_array = [RETROARCH_BIN, "-L", libretro_core, GBMultiROM[0], "--subsystem", "gb_link_2p", GBMultiROM[1], "--config", system.config['configfile']]
                 dontAppendROM = True
             else:
-                command_array = [_RETROARCH_BIN, "-L", libretro_core, "--config", system.config['configfile']]
+                command_array = [RETROARCH_BIN, "-L", libretro_core, "--config", system.config['configfile']]
             # Handling for the save copy
             if system.config.get('sync_saves') == '1':
                 if len(GBMultiROM) >= 2:
@@ -258,17 +253,17 @@ class LibretroGenerator(Generator):
                     exe = rom / "dosbox.bat"
                 else:
                     exe = rom
-                command_array = [_RETROARCH_BIN, "-L", libretro_core, "--config", system.config['configfile'], exe]
+                command_array = [RETROARCH_BIN, "-L", libretro_core, "--config", system.config['configfile'], exe]
                 dontAppendROM = True
             else:
-                command_array = [_RETROARCH_BIN, "-L", libretro_core, "--config", system.config['configfile']]
+                command_array = [RETROARCH_BIN, "-L", libretro_core, "--config", system.config['configfile']]
         # Pico-8 multi-carts (might work only with official Lexaloffe engine right now)
         elif system.name == 'pico8':
             if rom.suffix.lower() == ".m3u":
                 with rom.open("r") as fpin:
                     lines = fpin.readlines()
                 rom = rom.absolute().parent / lines[0].strip()
-            command_array = [_RETROARCH_BIN, "-L", libretro_core, "--config", system.config['configfile']]
+            command_array = [RETROARCH_BIN, "-L", libretro_core, "--config", system.config['configfile']]
         # tyrquake - set directory
         elif system.name == 'quake':
             if "scourge" in rom.name.lower():
@@ -277,7 +272,7 @@ class LibretroGenerator(Generator):
                 rom = Path(f'{USERDATA}/roms/quake/rogue/pak0.pak')
             else:
                 rom = Path(f'{USERDATA}/roms/quake/id1/pak0.pak')
-            command_array = [_RETROARCH_BIN, "-L", libretro_core, "--config", system.config['configfile']]
+            command_array = [RETROARCH_BIN, "-L", libretro_core, "--config", system.config['configfile']]
         # vitaquake2 - choose core based on directory
         elif system.name == 'quake2':
             if "reckoning" in rom.name.lower():
@@ -293,7 +288,7 @@ class LibretroGenerator(Generator):
                 rom = Path(f'{USERDATA}/roms/quake2/baseq2/pak0.pak')
             # set the updated core name
             libretro_core = RETROARCH_CORES / f"{system.config.core}_libretro.so"
-            command_array = [_RETROARCH_BIN, "-L", libretro_core, "--config", system.config['configfile']]
+            command_array = [RETROARCH_BIN, "-L", libretro_core, "--config", system.config['configfile']]
         # doom3
         elif system.name == 'doom3':
             with rom.open('r') as file:
@@ -306,7 +301,7 @@ class LibretroGenerator(Generator):
             if "d3xp" in directory_parts:
                 system.config['core'] = "boom3_xp"
             libretro_core = RETROARCH_CORES / f"{system.config.core}_libretro.so"
-            command_array = [_RETROARCH_BIN, "-L", libretro_core, "--config", system.config['configfile']]
+            command_array = [RETROARCH_BIN, "-L", libretro_core, "--config", system.config['configfile']]
         # super mario wars - verify assets from Content Downloader
         elif system.name == 'superbroswar':
             romdir = rom.absolute().parent
@@ -332,25 +327,25 @@ class LibretroGenerator(Generator):
                 _logger.error("ERROR: Game assets not installed. You can get them from the Batocera Content Downloader.")
                 raise BatoceraException("Game assets not installed. You can get them from the Batocera Content Downloader.") from e
 
-            command_array = [_RETROARCH_BIN, "-L", libretro_core, "--config", system.config['configfile']]
+            command_array = [RETROARCH_BIN, "-L", libretro_core, "--config", system.config['configfile']]
         else:
             # lógica para abrir retroarch sin rom desde el menú de config de emuladores
             if configure_emulator(rom):
                 dontAppendROM = True
-                command_array = [_RETROARCH_BIN, "--config", system.config['configfile']]
+                command_array = [RETROARCH_BIN, "--config", system.config['configfile']]
             else:
                 # caso general para la mayoría de emuladores y cores
-                command_array = [_RETROARCH_BIN, "-L", libretro_core, "--config", system.config['configfile']]
+                command_array = [RETROARCH_BIN, "-L", libretro_core, "--config", system.config['configfile']]
 
         configToAppend: list[Path] = []
 
         # Custom configs - per core
-        custom_cfg = _RETROARCH_CONFIG / f"{system.name}.cfg"
+        custom_cfg = RETROARCH_CONFIG / f"{system.name}.cfg"
         if custom_cfg.is_file():
             configToAppend.append(custom_cfg)
 
         # Custom configs - per game
-        custom_game_cfg = _RETROARCH_CONFIG / system.name / f"{rom.name}.cfg"
+        custom_game_cfg = RETROARCH_CONFIG / system.name / f"{rom.name}.cfg"
         if custom_game_cfg.is_file():
             configToAppend.append(custom_game_cfg)
 
@@ -434,6 +429,7 @@ class LibretroGenerator(Generator):
 
         return Command.Command(array=command_array, env={
             "XDG_CONFIG_HOME": _RETROARCH_XDG,
+            "SDL_GAMECONTROLLERCONFIG": generate_sdl_game_controller_config(playersControllers),
 #            "WAYLAND_DISPLAY" : "",
 #            "SDL_VIDEODRIVER" : "x11"
         })
@@ -441,16 +437,12 @@ class LibretroGenerator(Generator):
 def gfx_backend_check(backend: str) -> str:
     if backend == "vulkan":
         if videoMode.supportsVulkan():
-            return "vulkan"
-        # Fallback si no soporta Vulkan: pasamos a evaluar glcore
-        backend = "glcore"
-
-    if backend == "glcore":
+            return gfx_backend_check("glcore")
+    elif backend == "glcore":
         if videoMode.getGLVendor() in ["nvidia", "amd"] and videoMode.getGLVersion() >= 3.1:
             return "glcore"
-
-    # Caso base o fallback final
-    return "gl"
+    else:
+        return "gl"
 
 def gfx_backend_get(system: Emulator) -> str:
     backend = system.config.get("gfxbackend")
@@ -460,7 +452,7 @@ def gfx_backend_get(system: Emulator) -> str:
         backend = gfx_backend_check(backend)
     else:
         setManually = False
-        backend = gfx_backend_check("vulkan")
+        backend = gfx_backend_check("glcore")
     
     # Retroarch has flipped between using opengl or gl, correct the setting here if needed.
     if backend == "opengl":
