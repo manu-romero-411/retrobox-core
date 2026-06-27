@@ -283,3 +283,17 @@ shaders/*
 
 .vscode/launch.json
 *.pdf
+
+# Ignorar todo el contenido de retrohook.d/
+retrohook.d/**
+
+# Excepto la jerarquía _global/_platform/ y su contenido
+!retrohook.d/_global/
+!retrohook.d/_global/_platform/
+!retrohook.d/_global/_platform/**
+
+# Excepto el hook de setup del frontend
+!retrohook.d/_frontend/
+!retrohook.d/_frontend/emulationstation/
+!retrohook.d/_frontend/emulationstation/on-frontend-start/
+!retrohook.d/_frontend/emulationstation/on-frontend-start/00_setup.sh
