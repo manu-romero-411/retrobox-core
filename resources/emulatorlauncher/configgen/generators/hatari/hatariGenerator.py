@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Final
 
 from ... import Command
 from ...batoceraPaths import BIOS, CONFIGS, mkdir_if_not_exists
-from ...exceptions import BatoceraException
+from ...exceptions import RetroboxException
 from ...utils.configparser import CaseSensitiveConfigParser
 from ..Generator import Generator
 
@@ -190,4 +190,4 @@ class HatariGenerator(Generator):
 
                     _logger.warning("tos filename %s not found", tos_path.name)
 
-        raise BatoceraException(f"No bios found for machine {machine}")
+        raise RetroboxException(f"No bios found for machine {machine}")

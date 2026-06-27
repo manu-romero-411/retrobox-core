@@ -10,8 +10,8 @@ from typing import TYPE_CHECKING, NotRequired, TypedDict, cast
 import qrcode
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 
-from ..batoceraPaths import BATOCERA_SHARE_DIR, ES_GUNS_ART_METADATA, SYSTEM_DECORATIONS, DECORATIONS_DIR
-from ..exceptions import BatoceraException
+from ..batoceraPaths import RESOURCES_DIR, ES_GUNS_ART_METADATA, SYSTEM_DECORATIONS, DECORATIONS_DIR
+from ..exceptions import RetroboxException
 from . import metadata
 from .videoMode import getAltDecoration
 
@@ -200,10 +200,10 @@ def tatooImage(input_png: Path, output_png: Path, system: Emulator) -> None:
     tattoo_file: ImageFile | None = None
 
     if system.config['bezel.tattoo'] == 'system':
-        tattoo_path = BATOCERA_SHARE_DIR / 'controller-overlays' / f'{system.name}.png'
+        tattoo_path = RESOURCES_DIR / 'controller-overlays' / f'{system.name}.png'
         try:
             if not tattoo_path.exists():
-                tattoo_path = BATOCERA_SHARE_DIR / 'controller-overlays' / 'generic.png'
+                tattoo_path = RESOURCES_DIR / 'controller-overlays' / 'generic.png'
             tattoo_file = Image.open(tattoo_path)
         except Exception:
             _logger.error("Error opening controller overlay: %s", tattoo_path)
@@ -213,14 +213,14 @@ def tatooImage(input_png: Path, output_png: Path, system: Emulator) -> None:
         except Exception:
             _logger.error("Error opening custom file: %s", tattoo_path)
     else:
-        tattoo_path = BATOCERA_SHARE_DIR / 'controller-overlays' / 'generic.png'
+        tattoo_path = RESOURCES_DIR / 'controller-overlays' / 'generic.png'
         try:
             tattoo_file = Image.open(tattoo_path)
         except Exception:
             _logger.error("Error opening custom file: %s", tattoo_path)
 
     if tattoo_file is None:
-        raise BatoceraException(f'Tattoo image could not be opened: {tattoo_path}')
+        raise RetroboxException(f'Tattoo image could not be opened: {tattoo_path}')
 
     # Open the existing bezel...
     back = Image.open(input_png)
@@ -271,7 +271,7 @@ def alphaPaste(input_png: str | Path, output_png: str | Path, imgin: ImageFile, 
     # TheBezelProject have Palette + alpha, not RGBA. PIL can't convert from P+A to RGBA.
     # Even if it can load P+A, it can't save P+A as PNG. So we have to recreate a new image to adapt it.
     if 'transparency' not in imgin.info:
-        raise BatoceraException("No transparent pixels in the bezel image")
+        raise RetroboxException("No transparent pixels in the bezel image")
     alpha = imgin.split()[-1]  # alpha from original palette + alpha
     ix,iy = fast_image_size(input_png)
     sx,sy = screensize

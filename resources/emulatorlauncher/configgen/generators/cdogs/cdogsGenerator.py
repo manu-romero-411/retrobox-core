@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 from ... import Command
 from ...batoceraPaths import ROMS
 from ...controller import generate_sdl_game_controller_config
-from ...exceptions import BatoceraException
+from ...exceptions import RetroboxException
 from ..Generator import Generator
 
 if TYPE_CHECKING:
@@ -231,7 +231,7 @@ class CdogsGenerator(Generator):
             os.chdir(romdir)
         except FileNotFoundError as e:
             _logger.error("ERROR: Game assets not installed. You can get them from the Batocera Content Downloader.")
-            raise BatoceraException("Game assets not installed. You can get them from the Batocera Content Downloader.") from e
+            raise RetroboxException("Game assets not installed. You can get them from the Batocera Content Downloader.") from e
 
         commandArray = ["cdogs"]
 

@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Final
 
 from ..batoceraPaths import mkdir_if_not_exists, OVERLAY_BASE_DIR
-from ..exceptions import BatoceraException
+from ..exceptions import RetroboxException
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -111,7 +111,7 @@ def mount_overlayfs(read_only_dir: Path, writable_dir: Path, /) -> Iterator[Path
     mkdir_if_not_exists(mount_point)
 
     if not _mount(read_only_dir, writable_upper_dir, writable_work_dir, mount_point):
-        raise BatoceraException(f"Unable to setup writable overlay for '{read_only_dir}'")
+        raise RetroboxException(f"Unable to setup writable overlay for '{read_only_dir}'")
     try:
         yield mount_point / maybe_rom_file if maybe_rom_file else mount_point
 

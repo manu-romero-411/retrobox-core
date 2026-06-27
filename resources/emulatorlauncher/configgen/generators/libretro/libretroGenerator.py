@@ -23,7 +23,7 @@ from ...batoceraPaths import (
     configure_emulator,
     mkdir_if_not_exists,
 )
-from ...exceptions import BatoceraException, MissingCore
+from ...exceptions import RetroboxException, MissingCore
 from ...settings.unixSettings import UnixSettings
 from ...utils import videoMode as videoMode
 from ..Generator import Generator
@@ -323,7 +323,7 @@ class LibretroGenerator(Generator):
                 os.chdir(romdir)
             except FileNotFoundError as e:
                 _logger.error("ERROR: Game assets not installed. You can get them from the Batocera Content Downloader.")
-                raise BatoceraException("Game assets not installed. You can get them from the Batocera Content Downloader.") from e
+                raise RetroboxException("Game assets not installed. You can get them from the Batocera Content Downloader.") from e
 
             command_array = [_RETROARCH_BIN, "-L", libretro_core, "--config", system.config['configfile']]
         else:

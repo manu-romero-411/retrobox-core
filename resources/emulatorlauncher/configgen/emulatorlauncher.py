@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from .batoceraPaths import BATOCERA_SHARE_DIR, ES_GAMES_METADATA, HOOKS, SAVES, GUN_OVERLAYS_DIR, HUD_CONFIG_FILE, USERDATA
+from .batoceraPaths import RESOURCES_DIR, ES_GAMES_METADATA, HOOKS, SAVES, GUN_OVERLAYS_DIR, HUD_CONFIG_FILE, USERDATA
 import sys
 
 sys.path.append(str(USERDATA))
@@ -27,13 +27,14 @@ import time
 from copy import deepcopy
 from pathlib import Path
 from typing import TYPE_CHECKING
+from datetime import datetime
 
 import pyudev
 import sdl2
 
 from .controller import Controller
 from .Emulator import Emulator
-from .exceptions import BadCommandLineArguments, BaseBatoceraException, BatoceraException, UnexpectedEmulatorExit
+from .exceptions import BadCommandLineArguments, BaseRetroboxException, RetroboxException, UnexpectedEmulatorExit
 from .generators import get_generator
 from .gun import Gun
 from .utils import bezels as bezelsUtil, metadata, videoMode, wheelsUtils
@@ -608,10 +609,9 @@ def launch() -> None:
         proc = None
         signal.signal(signal.SIGINT, signal_handler)
 
-        batocera_version = 'UNKNOWN'
-        if (version_file := BATOCERA_SHARE_DIR / 'batocera.version').exists():
-            batocera_version = version_file.read_text().strip()
-        _logger.info('Batocera version: %s', batocera_version)
+        launch_timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        _logger.info('=' * 20 + ' Retrobox ' + '=' * 20)
+        _logger.info('emulatorlauncher started at: %s', launch_timestamp)
 
         parser = argparse.ArgumentParser(description='emulator-launcher script')
 
@@ -645,14 +645,16 @@ def launch() -> None:
         parser.add_argument("-spinner",        help="configure spinner",           action="store_true")
 
         args = parser.parse_args()
+        _logger.debug('args: %s', {k: v for k, v in vars(args).items() if v is not None and v is not False})
+        
         exitcode = 0
         try:
             exitcode = main(args, maxnbplayers)
-        except BaseBatoceraException as e:
+        except BaseRetroboxException as e:
             _logger.exception("configgen exception: ")
             exitcode = e.exit_code
 
-            if isinstance(e, BatoceraException):
+            if isinstance(e, RetroboxException):
                 Path('/tmp/launch_error.log').write_text(e.args[0])
         except Exception:
             _logger.exception("configgen exception: ")

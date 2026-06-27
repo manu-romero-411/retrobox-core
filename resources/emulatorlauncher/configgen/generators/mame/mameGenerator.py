@@ -15,7 +15,7 @@ from PIL import Image
 
 from ... import Command
 from ...batoceraPaths import (
-    BATOCERA_SHARE_DIR,
+    RESOURCES_DIR,
     BIOS,
     CONFIGS,
     DEFAULTS_DIR,
@@ -28,7 +28,7 @@ from ...batoceraPaths import (
     USERDATA,
     mkdir_if_not_exists,
 )
-from ...exceptions import BatoceraException
+from ...exceptions import RetroboxException
 from ...utils import bezels as bezelsUtil, videoMode
 from ..Generator import Generator
 from . import mameControllers
@@ -737,9 +737,9 @@ class MameGenerator(Generator):
             tattoo: Image.Image | None = None
 
             if bezel_tattoo == 'system':
-                tattoo_file = BATOCERA_SHARE_DIR / 'controller-overlays' / f'{system.name}.png'
+                tattoo_file = RESOURCES_DIR / 'controller-overlays' / f'{system.name}.png'
                 if not tattoo_file.exists():
-                    tattoo_file = BATOCERA_SHARE_DIR / 'controller-overlays' / 'generic.png'
+                    tattoo_file = RESOURCES_DIR / 'controller-overlays' / 'generic.png'
                 try:
                     tattoo = Image.open(tattoo_file)
                 except Exception:
@@ -750,7 +750,7 @@ class MameGenerator(Generator):
                 except Exception:
                     _logger.error("Error opening custom file: %s", tattoo_file)
             else:
-                tattoo_file = BATOCERA_SHARE_DIR / 'controller-overlays' / 'generic.png'
+                tattoo_file = RESOURCES_DIR / 'controller-overlays' / 'generic.png'
                 try:
                     tattoo = Image.open(tattoo_file)
                 except Exception:
@@ -805,7 +805,7 @@ class MameGenerator(Generator):
         exitcode = proc.returncode
 
         if exitcode != 0:
-            raise BatoceraException(f"mame -listxml {machine} failed")
+            raise RetroboxException(f"mame -listxml {machine} failed")
 
         infofile = tmpdir / "infos.xml"
         f = infofile.open("w")
@@ -821,7 +821,7 @@ class MameGenerator(Generator):
             irotate = element.getAttribute("rotate")
             return int(iwidth), int(iheight), int(irotate)
 
-        raise BatoceraException("Display element not found")
+        raise RetroboxException("Display element not found")
 
 def getMameControlScheme(system: Emulator, rom_path: Path) -> MameControlScheme:
     # Game list files

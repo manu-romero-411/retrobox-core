@@ -8,14 +8,14 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, ClassVar, Final, cast
 
-from .batoceraPaths import BATOCERA_SHARE_DIR, CONFIGS, SAVES, mkdir_if_not_exists
+from .batoceraPaths import RESOURCES_DIR, CONFIGS, SAVES, mkdir_if_not_exists
 
 if TYPE_CHECKING:
     from .Emulator import Emulator
 
 _logger = logging.getLogger(__name__)
 _input_re: Final = re.compile(r'^/dev/input/event([0-9]*)$')
-_PRECALIBRATION_DIR: Final = BATOCERA_SHARE_DIR / 'guns-precalibrations'
+_PRECALIBRATION_DIR: Final = RESOURCES_DIR / 'guns-precalibrations'
 
 def _copy_file(src: Path, dst: Path) -> None:
     if src.exists() and not dst.exists():

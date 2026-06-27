@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING, Final, cast
 import evdev
 
 from .. import controllersConfig
-from ..exceptions import BatoceraException
+from ..exceptions import RetroboxException
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator
@@ -281,7 +281,7 @@ def _reconfigure_angle_rotation(
 ) -> tuple[str, subprocess.Popen[bytes]] | None:
 
     if "joystick1left" not in controller.inputs:
-        raise BatoceraException(f"Wheel {controller.real_name} has no joystick1left configured. Strange for a wheel.")
+        raise RetroboxException(f"Wheel {controller.real_name} has no joystick1left configured. Strange for a wheel.")
 
     wheel_axis = int(controller.inputs["joystick1left"].id)
     input_device = evdev.InputDevice(controller.device_path)

@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from configgen.exceptions import BatoceraException
+from configgen.exceptions import RetroboxException
 
 from ... import Command
 from ..Generator import Generator
@@ -35,7 +35,7 @@ class KodiGenerator(Generator):
         if lines:
             first_line = lines[0].strip()
             if first_line != "kodi":
-                raise BatoceraException(f'Invalid launcher for kodi')
+                raise RetroboxException(f'Invalid launcher for kodi')
 
         kodiConfig.writeKodiConfig(playersControllers)
         commandArray = [f"{_find_kodi_binary()}"]

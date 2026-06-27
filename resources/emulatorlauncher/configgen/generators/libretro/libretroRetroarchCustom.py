@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from ...batoceraPaths import BATOCERA_SHARE_DIR, mkdir_if_not_exists, USERDATA
+from ...batoceraPaths import RESOURCES_DIR, mkdir_if_not_exists, USERDATA
 from ...settings.unixSettings import UnixSettings
 from .libretroPaths import _RETROARCH_CONFIG, RETROARCH_CUSTOM
 
@@ -97,5 +97,5 @@ def generate_rarch_custom_paths(retroarch_settings: UnixSettings) -> None:
     retroarch_settings.save('joypad_autoconfig_dir',         f'"{_RETROARCH_CONFIG}/autoconfig/"')
     retroarch_settings.save('video_shader_dir',              f'"{_RETROARCH_CONFIG}/shaders/"')
     retroarch_settings.save('video_font_path',               '"/usr/share/fonts/liberation-mono-fonts/LiberationMono-Regular.ttf"')
-    retroarch_settings.save('video_filter_dir',              f'"{BATOCERA_SHARE_DIR}/video_filters"')
-    retroarch_settings.save('audio_filter_dir',              f'"{BATOCERA_SHARE_DIR}/audio_filters"')
+    retroarch_settings.save('video_filter_dir',              f'"{RESOURCES_DIR}/video_filters"')
+    retroarch_settings.save('audio_filter_dir',              f'"{RESOURCES_DIR}/audio_filters"')

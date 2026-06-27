@@ -27,11 +27,11 @@ _SYSTEM_LOCAL_SHARE: Final = Path('/usr/local/share')
 BATOCERA_ROOT: Final = Path(os.environ.get('BATOCERA_ROOT', str("/var/penguin/juegos/retrobox")))
 USERDATA: Final = Path(os.environ.get('USERDATA', str(BATOCERA_ROOT)))
 
-BATOCERA_SHARE_DIR:  Final = BATOCERA_ROOT / 'resources'
-DATAINIT_DIR:        Final = BATOCERA_SHARE_DIR / 'datainit'
+RESOURCES_DIR:  Final = BATOCERA_ROOT / 'resources'
+DATAINIT_DIR:        Final = RESOURCES_DIR / 'datainit'
 #BATOCERA_ES_DIR:     Final = Path('/home/manuel/proyectos/batocera-emulationstation/appimage/es')
 BATOCERA_ES_DIR:     Final = BATOCERA_ROOT / 'frontend'
-DEFAULTS_DIR: Final = BATOCERA_SHARE_DIR / 'configgen'
+DEFAULTS_DIR: Final = RESOURCES_DIR / 'configgen'
 
 HOME_INIT:  Final = DATAINIT_DIR / 'system'
 CONF_INIT:  Final = HOME_INIT / 'configs'
@@ -84,7 +84,7 @@ ES_GAMES_METADATA:   Final = _ES_RESOURCES_DIR / 'gamesdb.xml'
 ES_GUNS_ART_METADATA: Final = DEFAULTS_DIR / 'data' / 'gamesbuttonsdb.xml'
 
 SYSTEM_DECORATIONS:  Final = DATAINIT_DIR / 'decorations'
-SYSTEM_SCRIPTS:      Final = BATOCERA_SHARE_DIR / 'utils' / 'batocera-stubs'
+SYSTEM_SCRIPTS:      Final = RESOURCES_DIR / 'utils' / 'batocera-stubs'
 
 # Runtime dir (en batocera es /var/run, en Debian usamos /tmp)
 RUNTIME_DIR: Final = Path('/tmp/batocera-run')

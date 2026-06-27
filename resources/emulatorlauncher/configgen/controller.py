@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING, Final, Literal, Self, TypedDict, Unpack, cast
 _logger: Final = logging.getLogger(__name__)
 
 from .batoceraPaths import BATOCERA_ES_DIR, HOME, USER_ES_DIR
-from .exceptions import BatoceraException
+from .exceptions import RetroboxException
 from .input import Input, InputDict, InputMapping
 
 if TYPE_CHECKING:
@@ -75,7 +75,7 @@ def _key_to_sdl_game_controller_config(keyname: str, input: Input, /) -> str | N
     if input.type == 'key':
         return None
 
-    raise BatoceraException(f'Unknown controller input type: {input.type!r}')
+    raise RetroboxException(f'Unknown controller input type: {input.type!r}')
 
 def _find_input_config(roots: Iterable[ET.Element], name: str, guid: str, /) -> ET.Element:
     path = './inputConfig'
@@ -95,7 +95,7 @@ def _find_input_config(roots: Iterable[ET.Element], name: str, guid: str, /) -> 
         if element is not None:
             return element
 
-    raise BatoceraException(f'Could not find controller data for "{name}" with GUID "{guid}"')
+    raise RetroboxException(f'Could not find controller data for "{name}" with GUID "{guid}"')
 
 
 _HIDAPI_BUS = "0300"  # lo que SDL+HIDAPI reporta siempre vía kernel HID

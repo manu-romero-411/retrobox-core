@@ -9,7 +9,7 @@ from ruamel.yaml import YAML
 
 from ... import Command
 from ...batoceraPaths import BIOS, CACHE, CONFIGS, configure_emulator, mkdir_if_not_exists
-from ...exceptions import BatoceraException
+from ...exceptions import RetroboxException
 from ...utils import vulkan
 from ...utils.configparser import CaseSensitiveConfigParser
 from ..Generator import Generator
@@ -254,7 +254,7 @@ class Rpcs3Generator(Generator):
                         romName = RPCS3_CONFIG_DIR / "dev_hdd0" / "game" / line.strip().upper() / "USRDIR" / "EBOOT.BIN"
 
             if romName is None:
-                raise BatoceraException(f'No game ID found in {rom}')
+                raise RetroboxException(f'No game ID found in {rom}')
         
         elif rom.suffix.lower() == ".iso":
             romName = rom

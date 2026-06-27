@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Final
 
 from ..batoceraPaths import mkdir_if_not_exists, SQUASHFS_DIR
-from ..exceptions import BatoceraException
+from ..exceptions import RetroboxException
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -45,7 +45,7 @@ def mount_squashfs(rom: Path, /) -> Iterator[Path]:
             mount_point.rmdir()
         except (FileNotFoundError, OSError):
             pass
-        raise BatoceraException(f"Unable to mount the file {rom}")
+        raise RetroboxException(f"Unable to mount the file {rom}")
 
     try:
         # if the squashfs contains a single file with the same name, take it as the rom file
@@ -68,7 +68,7 @@ def mount_squashfs(rom: Path, /) -> Iterator[Path]:
         return_code = subprocess.call(["umount", mount_point])
         if return_code != 0:
             _logger.debug("mount_squashfs: unmounting %s failed", mount_point)
-            raise BatoceraException(f"Unable to unmount the file {mount_point}")
+            raise RetroboxException(f"Unable to unmount the file {mount_point}")
 
         # cleaning the empty directory
         mount_point.rmdir()

@@ -68,7 +68,7 @@ import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
 from typing import Callable
 
-from configgen.exceptions import BatoceraException
+from configgen.exceptions import RetroboxException
 
 os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
 os.environ.setdefault("SDL_AUDIODRIVER", "dummy")
@@ -79,12 +79,12 @@ try:
     import pygame
     import pygame.joystick
 except ImportError:
-    raise BatoceraException("pygame missing.\nInstall through pip or your OS package manager (apt, dnf...)")
+    raise RetroboxException("pygame missing.\nInstall through pip or your OS package manager (apt, dnf...)")
 
 try:
     from evdev import ecodes as ec, UInput
 except ImportError:
-    raise BatoceraException("python3-evdev missing.\nInstall through pip or your OS package manager (apt, dnf...)")
+    raise RetroboxException("python3-evdev missing.\nInstall through pip or your OS package manager (apt, dnf...)")
 
 # ══════════════════════════════════════════════════════════════════════
 #  RESOLUCIÓN DE NOMBRES DE ECODES
@@ -473,7 +473,7 @@ def parse_es_input(xml_path: str, guid: str) -> ESInputMap:
         tree = ET.parse(xml_path)
         root = tree.getroot()
     except Exception as e:
-        raise BatoceraException(f"Error while parsing XML {xml_path}: {e}")
+        raise RetroboxException(f"Error while parsing XML {xml_path}: {e}")
         
     cfg = None
     target_guid = guid.lower().replace("-", "")
@@ -1096,7 +1096,7 @@ ejemplos:
             hotkeys_abstract, axis_mouse_config, axis_scroll_config, combo_cooldowns = load_profile(args.profile, args.player)
         except (FileNotFoundError, json.JSONDecodeError, ValueError) as ex:
             pygame.quit()
-            raise BatoceraException(f"Error reading pad2key profile: {ex}")
+            raise RetroboxException(f"Error reading pad2key profile: {ex}")
     else:
         _logger.info("No se especificó --profile, usando perfil por defecto.")
         hotkeys_abstract  = DEFAULT_HOTKEYS
@@ -1113,7 +1113,7 @@ ejemplos:
         es_map = parse_es_input(args.es_input, args.guid)
     except (FileNotFoundError, ET.ParseError, ValueError) as ex:
         pygame.quit()
-        raise BatoceraException(f"Error reading es_input: {ex}")
+        raise RetroboxException(f"Error reading es_input: {ex}")
 
     _logger.debug("Resolución de hotkeys:")
     hotkeys, cd_map = resolve_hotkeys(hotkeys_abstract, es_map, combo_cooldowns)

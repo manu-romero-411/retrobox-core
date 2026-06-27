@@ -9,7 +9,7 @@ from configgen.batoceraPaths import BIOS
 
 from ... import Command
 from ...controller import generate_sdl_game_controller_config
-from ...exceptions import BatoceraException
+from ...exceptions import RetroboxException
 from ..Generator import Generator
 
 if TYPE_CHECKING:
@@ -56,7 +56,7 @@ class ClkGenerator(Generator):
         romzip = _openzip_file(rom)
 
         if romzip is None:
-            raise BatoceraException(f'ROM is a directory: {rom}')
+            raise RetroboxException(f'ROM is a directory: {rom}')
 
         commandArray = ["clksignal", romzip,  f"--rompath={BIOS}"]
 

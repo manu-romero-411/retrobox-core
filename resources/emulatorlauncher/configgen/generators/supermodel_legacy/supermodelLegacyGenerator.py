@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Final
 from ... import Command
 from ...batoceraPaths import CONFIGS, SAVES, USERDATA, ensure_parents_and_open, mkdir_if_not_exists
 from ...controller import Controller, generate_sdl_game_controller_config
-from ...exceptions import BatoceraException
+from ...exceptions import RetroboxException
 from ...gun import Guns, guns_need_crosses
 from ...utils.configparser import CaseSensitiveConfigParser
 from ..Generator import Generator
@@ -418,7 +418,7 @@ def joy2realjoyid(playersControllers: Controllers, joy: str):
     if pad := Controller.find_player_number(playersControllers, joy_number):
         return pad.index
 
-    raise BatoceraException(f'Cannot find joystick {joy}')
+    raise RetroboxException(f'Cannot find joystick {joy}')
 
 def hatOrAxis(playersControllers: Controllers, player: str):
     player_number = int(player)

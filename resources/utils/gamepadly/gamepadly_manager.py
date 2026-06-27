@@ -23,7 +23,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Final
 
-from configgen.batoceraPaths import BATOCERA_SHARE_DIR, USER_ES_DIR
+from configgen.batoceraPaths import RESOURCES_DIR, USER_ES_DIR
 
 if TYPE_CHECKING:
     from types import TracebackType
@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 
 _logger = logging.getLogger(__name__)
 
-_GAMEPADLY_DIR: Final = BATOCERA_SHARE_DIR / "utils" / "gamepadly"
+_GAMEPADLY_DIR: Final = RESOURCES_DIR / "utils" / "gamepadly"
 _PROFILES_DIR:  Final = _GAMEPADLY_DIR / "profiles"
 _PROFILES_USER_DIR:  Final = _GAMEPADLY_DIR / "user_profiles"
 _MAPPER_SCRIPT: Final = _GAMEPADLY_DIR / "gamepadly_mapper.py"

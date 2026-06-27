@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from ... import Command
 from ...batoceraPaths import CONFIGS, mkdir_if_not_exists
 from ...controller import generate_sdl_game_controller_config
-from ...exceptions import BatoceraException
+from ...exceptions import RetroboxException
 from ..Generator import Generator
 
 if TYPE_CHECKING:
@@ -25,7 +25,7 @@ class DXX_RebirthGenerator(Generator):
         elif rom.suffix == ".d2x":
             dxx_rebirth = "d2x-rebirth"
         else:
-            raise BatoceraException(f"Unknown rom type: {rom}")
+            raise RetroboxException(f"Unknown rom type: {rom}")
 
         ## Configuration
         rebirthConfigDir = CONFIGS / dxx_rebirth

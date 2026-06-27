@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Final
 
 from ..batoceraPaths import ROTATION_FILE, DEFAULTS_DIR, SYSTEM_SCRIPTS
-from ..exceptions import BatoceraException
+from ..exceptions import RetroboxException
 
 if TYPE_CHECKING:
     from ..config import SystemConfig
@@ -38,7 +38,7 @@ def changeMode(videomode: str) -> None:
             except subprocess.CalledProcessError as e:
                 _logger.error("Error setting video mode: %s", e.stderr)
                 if i == max_tries - 1:
-                    raise BatoceraException("Error setting video mode") from e
+                    raise RetroboxException("Error setting video mode") from e
                 time.sleep(1)
 
 def getCurrentMode() -> str:  # noqa: RET503

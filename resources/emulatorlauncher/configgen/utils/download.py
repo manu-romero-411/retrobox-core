@@ -5,7 +5,7 @@ from contextlib import contextmanager
 from tempfile import NamedTemporaryFile
 from typing import IO, TYPE_CHECKING
 
-from ..exceptions import BatoceraException
+from ..exceptions import RetroboxException
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 _logger = logging.getLogger(__name__)
 
-class DownloadException(BatoceraException): ...
+class DownloadException(RetroboxException): ...
 
 @contextmanager
 def download(url: str, directory: Path, /) -> Iterator[IO[bytes]]:

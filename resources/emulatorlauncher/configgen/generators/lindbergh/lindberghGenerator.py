@@ -29,7 +29,7 @@ from evdev import ecodes
 from ... import Command
 from ...batoceraPaths import _USER_HOME, SAVES, USERDATA, mkdir_if_not_exists
 from ...controller import Controller, Controllers, generate_sdl_game_controller_config
-from ...exceptions import BatoceraException, InvalidConfiguration
+from ...exceptions import RetroboxException, InvalidConfiguration
 from ...utils import bezels as bezelsUtil
 from ...utils.download import download
 from ..Generator import Generator
@@ -629,7 +629,7 @@ class LindberghGenerator(Generator):
                                     input_value += ":MAX"
                                 self.setConf(conf, f"PLAYER_{player_input}_{button_name}", f"{controller_name}:{input_value}")
                         else:
-                            raise BatoceraException(f"invalid input type: {pad.inputs[input_base_name].type}")
+                            raise RetroboxException(f"invalid input type: {pad.inputs[input_base_name].type}")
                 nplayer += 1
 
     def getMappingForJoystickOrWheel(  # noqa: RET503

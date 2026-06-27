@@ -22,7 +22,7 @@ from typing import TYPE_CHECKING
 from ... import Command
 from ...batoceraPaths import CONFIGS, mkdir_if_not_exists
 from ...controller import generate_sdl_game_controller_config
-from ...exceptions import BatoceraException
+from ...exceptions import RetroboxException
 from ..Generator import Generator
 
 if TYPE_CHECKING:
@@ -61,7 +61,7 @@ class OpenJKGenerator(Generator):
         else:
             _logger.info("Could not determine which game you're using!")
             _logger.info("Rename your .jedi file as per the _infot.txt file")
-            raise BatoceraException('Could not determine game')
+            raise RetroboxException('Could not determine game')
 
         ## Configuration
         mkdir_if_not_exists(config_path)

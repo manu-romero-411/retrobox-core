@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 
 from ... import Command
 from ...controller import generate_sdl_game_controller_config
-from ...exceptions import BatoceraException
+from ...exceptions import RetroboxException
 from ..Generator import Generator
 
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ class HeroicGenerator(Generator):
             with open(rom, 'r', encoding='utf-8') as f:
                 enlace = f.read().strip()
         except Exception as e:
-            raise BatoceraException(f"No se pudo leer el archivo de enlace: {e}")
+            raise RetroboxException(f"No se pudo leer el archivo de enlace: {e}")
 
         # Sustituir batocera-wine por heroic y pasarle el enlace leído
         commandArray = ["heroic", "--no-gui", enlace]

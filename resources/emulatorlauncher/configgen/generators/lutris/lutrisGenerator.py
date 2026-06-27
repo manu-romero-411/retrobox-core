@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING
 from configgen.utils.language import _detect_language
 
 from ... import Command
-from ...exceptions import BatoceraException
+from ...exceptions import RetroboxException
 from ...controller import generate_sdl_game_controller_config
 from ..Generator import Generator
 
@@ -75,14 +75,14 @@ def _get_lutris_info(game_id: str) -> tuple[str, str]:
             ["lutris", "-l"], text=True, stderr=subprocess.DEVNULL
         )
     except (subprocess.CalledProcessError, FileNotFoundError) as e:
-        raise BatoceraException(f"No se pudo ejecutar 'lutris -l': {e}")
+        raise RetroboxException(f"No se pudo ejecutar 'lutris -l': {e}")
 
     for line in output.splitlines():
         parts = [p.strip() for p in line.split("|")]
         if len(parts) >= 3 and parts[0] == game_id:
             return parts[2], parts[1]  # (slug, nombre)
 
-    raise BatoceraException(
+    raise RetroboxException(
         f"No se encontró ningún juego con ID {game_id} en 'lutris -l'"
     )
 
@@ -99,7 +99,7 @@ def _parse_lutris_yml(slug: str) -> tuple[str, str]:
         reverse=True,
     )
     if not candidates:
-        raise BatoceraException(
+        raise RetroboxException(
             f"No se encontró archivo .yml para el slug '{slug}' en {conf_dir}"
         )
 
@@ -115,7 +115,7 @@ def _parse_lutris_yml(slug: str) -> tuple[str, str]:
                 wine_prefix = line.removeprefix("  prefix: ").strip()
 
     if not exe_path:
-        raise BatoceraException(f"No se encontró 'exe:' en {yml_path}")
+        raise RetroboxException(f"No se encontró 'exe:' en {yml_path}")
 
     exe_name = Path(exe_path).name
     return exe_name, wine_prefix
@@ -285,10 +285,10 @@ class LutrisGenerator(Generator):
             with open(rom, "r", encoding="utf-8") as f:
                 lutris_link = f.read().strip()
         except OSError as e:
-            raise BatoceraException(f"No se pudo leer el archivo .rom: {e}")
+            raise RetroboxException(f"No se pudo leer el archivo .rom: {e}")
 
         if not lutris_link.startswith("lutris:rungameid/"):
-            raise BatoceraException(
+            raise RetroboxException(
                 f"Formato de enlace no reconocido: '{lutris_link}'"
             )
 

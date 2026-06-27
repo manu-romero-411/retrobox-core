@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 from ... import Command
 from ...batoceraPaths import BIOS, CONFIGS, USERDATA, ensure_parents_and_open
 from ...controller import generate_sdl_game_controller_config, write_sdl_controller_db
-from ...exceptions import BatoceraException
+from ...exceptions import RetroboxException
 from ...utils.configparser import CaseSensitiveConfigParser
 from ..Generator import Generator
 
@@ -123,7 +123,7 @@ class DuckstationLegacyGenerator(Generator):
                 biosFound = True
                 break
         if not biosFound:
-            raise BatoceraException("No PSX1 BIOS found")
+            raise RetroboxException("No PSX1 BIOS found")
         if USbiosFile is not None:
             settings.set("BIOS", "PathNTSCU", USbiosFile)
         if EUbiosFile is not None:

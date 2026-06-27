@@ -2,14 +2,14 @@ from __future__ import annotations
 
 from typing import ClassVar
 
-class BaseBatoceraException(Exception):
+class BaseRetroboxException(Exception):
     EXIT_CODE: ClassVar = 1
 
     @property
     def exit_code(self) -> int:
         return self.EXIT_CODE
 
-class BatoceraException(BaseBatoceraException):
+class RetroboxException(BaseRetroboxException):
     @property
     def exit_code(self) -> int:
         if self.args and isinstance(self.args[0], str):
@@ -17,20 +17,20 @@ class BatoceraException(BaseBatoceraException):
 
         return self.EXIT_CODE
 
-class UnexpectedEmulatorExit(BaseBatoceraException):
+class UnexpectedEmulatorExit(BaseRetroboxException):
     EXIT_CODE = 200
 
-class BadCommandLineArguments(BaseBatoceraException):
+class BadCommandLineArguments(BaseRetroboxException):
     EXIT_CODE = 201
 
-class InvalidConfiguration(BaseBatoceraException):
+class InvalidConfiguration(BaseRetroboxException):
     EXIT_CODE = 202
 
-class UnknownEmulator(BaseBatoceraException):
+class UnknownEmulator(BaseRetroboxException):
     EXIT_CODE = 203
 
-class MissingEmulator(BaseBatoceraException):
+class MissingEmulator(BaseRetroboxException):
     EXIT_CODE = 204
 
-class MissingCore(BaseBatoceraException):
+class MissingCore(BaseRetroboxException):
     EXIT_CODE = 205

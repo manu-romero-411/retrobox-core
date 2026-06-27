@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 from ... import Command
 from ...batoceraPaths import ROMS
 from ...controller import generate_sdl_game_controller_config
-from ...exceptions import BatoceraException
+from ...exceptions import RetroboxException
 from ..Generator import Generator
 
 if TYPE_CHECKING:
@@ -33,7 +33,7 @@ class VKQuake2Generator(Generator):
         if vkquake2SourcePath.exists():
             shutil.copytree(vkquake2SourcePath, vkquake2RomPath, dirs_exist_ok=True, copy_function=shutil.copy2)
         else:
-            raise BatoceraException(f"Source directory {vkquake2SourcePath} does not exist.")
+            raise RetroboxException(f"Source directory {vkquake2SourcePath} does not exist.")
 
         # Change to the rom directory before running
         os.chdir(vkquake2RomPath)

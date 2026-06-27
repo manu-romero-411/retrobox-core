@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 
 from ... import Command
 from ...batoceraPaths import mkdir_if_not_exists
-from ...exceptions import BatoceraException
+from ...exceptions import RetroboxException
 from ..Generator import Generator
 
 if TYPE_CHECKING:
@@ -132,7 +132,7 @@ class MugenGenerator(Generator):
         mkdir_if_not_exists(settings_path.parent)
 
         if not settings_path.exists():
-            raise BatoceraException(f"Configuration file not found: {settings_path}")
+            raise RetroboxException(f"Configuration file not found: {settings_path}")
 
         mugen_version = get_mugen_version(settings_path)
         sections_to_update = presets[mugen_version]

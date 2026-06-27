@@ -6,7 +6,7 @@ import shlex
 from typing import TYPE_CHECKING, Final
 
 from ... import Command
-from ...batoceraPaths import BATOCERA_SHARE_DIR, CONFIGS, LOGS, mkdir_if_not_exists
+from ...batoceraPaths import RESOURCES_DIR, CONFIGS, LOGS, mkdir_if_not_exists
 from ...controller import generate_sdl_game_controller_config
 from ..Generator import Generator
 
@@ -91,7 +91,7 @@ class GZDoomGenerator(Generator):
 
     def _determine_api_config(self, system) -> str:
         gzdoom_api = system.config.get("gz_api", "0")
-        arch_path = BATOCERA_SHARE_DIR / "batocera.arch"
+        arch_path = RESOURCES_DIR / "batocera.arch"
 
         # Default to GLES on non-x86_64 architectures if API is auto ("0")
         if gzdoom_api == "0" and arch_path.exists():

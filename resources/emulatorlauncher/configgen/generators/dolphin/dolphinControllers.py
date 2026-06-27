@@ -5,7 +5,7 @@ import logging
 import re
 from typing import TYPE_CHECKING
 
-from ...exceptions import BatoceraException
+from ...exceptions import RetroboxException
 from ...utils.configparser import CaseSensitiveConfigParser
 from .dolphinPaths import DOLPHIN_CONFIG
 
@@ -59,7 +59,7 @@ def generateControllerConfig(system: Emulator, playersControllers: Controllers, 
             used_wheels = wheels
         generateControllerConfig_triforce(system, playersControllers, used_wheels, rom)
     else:
-        raise BatoceraException(f"Invalid system name: '{system.name}'")
+        raise RetroboxException(f"Invalid system name: '{system.name}'")
 
 # https://docs.libretro.com/library/dolphin/
 
