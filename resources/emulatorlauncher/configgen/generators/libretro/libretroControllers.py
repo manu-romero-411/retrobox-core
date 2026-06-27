@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-import glob
+from collections import defaultdict
 import logging
 import os
-import pdb
 import re
 import subprocess
 from typing import TYPE_CHECKING, Literal
@@ -11,7 +10,7 @@ from typing import TYPE_CHECKING, Literal
 import pyudev
 
 from configgen.controller import getJoystickHardwareIds
-from configgen.generators.libretro.libretroPaths import RETROARCH_CONFIG
+from configgen.generators.libretro.libretroPaths import _RETROARCH_CONFIG
 
 from ...controllersConfig import getAssociatedMouse, getDevicesInformation
 _logger = logging.getLogger(__name__)
@@ -52,8 +51,6 @@ def _get_retroarch_udev_order() -> dict[str, int]:
 
 
 def _get_udev_index_by_guid(controllers) -> dict[int, int]:
-    from collections import defaultdict
-    import subprocess
 
     udev_order = _get_retroarch_udev_order()
 
@@ -279,7 +276,7 @@ def generateControllerConfig(
         vendor_dec, product_dec = hw_ids
         
         hw_cfg_name = f"{vendor_dec}-{product_dec}.cfg"
-        hw_cfg_path = RETROARCH_CONFIG / 'autoconfig' / hw_cfg_name
+        hw_cfg_path = _RETROARCH_CONFIG / 'autoconfig' / hw_cfg_name
         
         if hw_cfg_path.exists():
             p_num = controller.player_number
@@ -363,36 +360,36 @@ def generateControllerConfig(
     for btnkey in retroarchbtns:
         btnvalue = retroarchbtns[btnkey]
         if btnkey in controller.inputs:
-            input = controller.inputs[btnkey]
-            config[f'input_player{controller.player_number}_{btnvalue}_{typetoname[input.type]}'] = getConfigValue(
-                input)
+            input_btn = controller.inputs[btnkey]
+            config[f'input_player{controller.player_number}_{btnvalue}_{typetoname[input_btn.type]}'] = getConfigValue(
+                input_btn)
     if lightgun:
         for btnkey in retroarchGunbtns: # Gun Mapping
             btnvalue = retroarchGunbtns[btnkey]
             if btnkey in controller.inputs:
-                input = controller.inputs[btnkey]
-                config[f'input_player{controller.player_number}_gun_{btnvalue}_{typetoname[input.type]}'] = getConfigValue(
-                    input)
+                input_btn = controller.inputs[btnkey]
+                config[f'input_player{controller.player_number}_gun_{btnvalue}_{typetoname[input_btn.type]}'] = getConfigValue(
+                    input_btn)
     for dirkey in retroarchdirs:
         dirvalue = retroarchdirs[dirkey]
         if dirkey in controller.inputs:
-            input = controller.inputs[dirkey]
-            config[f'input_player{controller.player_number}_{dirvalue}_{typetoname[input.type]}'] = getConfigValue(
-                input)
+            input_btn = controller.inputs[dirkey]
+            config[f'input_player{controller.player_number}_{dirvalue}_{typetoname[input_btn.type]}'] = getConfigValue(
+                input_btn)
             if lightgun:
                 # Gun Mapping
-                config[f'input_player{controller.player_number}_gun_dpad_{dirvalue}_{typetoname[input.type]}'] = getConfigValue(
-                    input)
+                config[f'input_player{controller.player_number}_gun_dpad_{dirvalue}_{typetoname[input_btn.type]}'] = getConfigValue(
+                    input_btn)
     for jskey in retroarchjoysticks:
         jsvalue = retroarchjoysticks[jskey]
         if jskey in controller.inputs:
-            input = controller.inputs[jskey]
-            if input.value == '-1':
-                config[f'input_player{controller.player_number}_{jsvalue}_minus_axis'] = f'-{input.id}'
-                config[f'input_player{controller.player_number}_{jsvalue}_plus_axis'] = f'+{input.id}'
+            input_btn = controller.inputs[jskey]
+            if input_btn.value == '-1':
+                config[f'input_player{controller.player_number}_{jsvalue}_minus_axis'] = f'-{input_btn.id}'
+                config[f'input_player{controller.player_number}_{jsvalue}_plus_axis'] = f'+{input_btn.id}'
             else:
-                config[f'input_player{controller.player_number}_{jsvalue}_minus_axis'] = f'+{input.id}'
-                config[f'input_player{controller.player_number}_{jsvalue}_plus_axis'] = f'-{input.id}'
+                config[f'input_player{controller.player_number}_{jsvalue}_minus_axis'] = f'+{input_btn.id}'
+                config[f'input_player{controller.player_number}_{jsvalue}_plus_axis'] = f'-{input_btn.id}'
 
     if not lightgun:
         config[f'input_player{controller.player_number}_mouse_index'] = mouseIndex
@@ -404,17 +401,17 @@ def generateControllerConfig(
     return config
 
 # Returns the value to write in retroarch config file, depending on the type
-def getConfigValue(input: Input, /) -> str | None:
-    if input.type == 'button':
-        return f'"{input.id}"'
-    if input.type == 'axis':
-        if input.value == '-1':
-            return f'"-{input.id}"'
-        return f'"+{input.id}"'
-    if input.type == 'hat':
-        return f'"h{input.id}{hatstoname[input.value]}"'
-    if input.type == 'key':
-        return f'"{input.id}"'
+def getConfigValue(input_btn: Input, /) -> str | None:
+    if input_btn.type == 'button':
+        return f'"{input_btn.id}"'
+    if input_btn.type == 'axis':
+        if input_btn.value == '-1':
+            return f'"-{input_btn.id}"'
+        return f'"+{input_btn.id}"'
+    if input_btn.type == 'hat':
+        return f'"h{input_btn.id}{hatstoname[input_btn.value]}"'
+    if input_btn.type == 'key':
+        return f'"{input_btn.id}"'
     return None
 
 # Return the retroarch analog_dpad_mode

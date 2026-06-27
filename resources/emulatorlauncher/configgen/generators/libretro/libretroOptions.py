@@ -1153,7 +1153,7 @@ def _melondsds_options(
     _set_from_system(coreSettings, 'melonds_touch_mode', system, 'melondsds_touchmode', default='auto')
     # set 1 screen for now top/botton
     _set(coreSettings, 'melonds_number_of_screen_layouts', '1')
-    _set(coreSettings, 'melonds_screen_gap', '0')
+    _set_from_system(coreSettings, 'melonds_screen_gap', system, 'melondsds_screen_gap', default='0')
     _set(coreSettings, 'melonds_screen_layout1', 'top-bottom')
 
     # Firmware Settings
