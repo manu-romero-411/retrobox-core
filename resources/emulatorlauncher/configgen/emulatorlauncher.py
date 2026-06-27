@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from .batoceraPaths import BATOCERA_SHARE_DIR, ES_GAMES_METADATA, SAVES, USER_SCRIPTS, GUN_OVERLAYS_DIR, HUD_CONFIG_FILE, USERDATA
+from .batoceraPaths import BATOCERA_SHARE_DIR, ES_GAMES_METADATA, HOOKS, SAVES, GUN_OVERLAYS_DIR, HUD_CONFIG_FILE, USERDATA
 import sys
 
 sys.path.append(str(USERDATA))
@@ -26,8 +26,7 @@ import threading
 import time
 from copy import deepcopy
 from pathlib import Path
-from sys import exit
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING
 
 import pyudev
 import sdl2
@@ -162,15 +161,10 @@ def start_rom(args: argparse.Namespace, maxnbplayers: int, rom: Path, original_r
                     system.config["sdlvsync"] = '1'
                 os.environ.update({'SDL_RENDER_VSYNC': system.config["sdlvsync"]})
 
-                # antimicro start
-                #launch_antimicrox(
-                #    profile_path=f"{BATOCERA_SHARE_DIR}/antimicro-mapping.gamecontroller.amgp",
-                #    guid=args.p1guid
-                #)
-
                 # run a script before emulator starts
-                #callExternalScripts(SYSTEM_SCRIPTS, "gameStart", [systemName, system.config.emulator, effectiveCore, rom])
-                callExternalScripts(USER_SCRIPTS, "gameStart", [systemName, system.config.emulator, effectiveCore, rom])
+                call_retrohook("_global", "_platform", "on-start-game", [system.config.emulator, effectiveCore])
+                call_retrohook(systemName, "_platform", "on-start-game", [system.config.emulator, effectiveCore])
+                call_retrohook(systemName, rom, "on-start-game", [system.config.emulator, effectiveCore])
 
                 # run the emulator
                 with (
@@ -234,12 +228,11 @@ def start_rom(args: argparse.Namespace, maxnbplayers: int, rom: Path, original_r
                         monitor_thread.start()
                         exitCode = runCommand(cmd)
 
-                # antimicro stop
-                #stop_antimicrox(True)
-
                 # run a script after emulator shuts down
-                callExternalScripts(USER_SCRIPTS, "gameStop", [systemName, system.config.emulator, effectiveCore, rom])
-                #callExternalScripts(SYSTEM_SCRIPTS, "gameStop", [systemName, system.config.emulator, effectiveCore, rom])
+                call_retrohook("_global", "_platform", "on-close-game", [system.config.emulator, effectiveCore])
+                call_retrohook(systemName, "_platform", "on-close-game", [system.config.emulator, effectiveCore])
+                call_retrohook(systemName, rom, "on-close-game", [system.config.emulator, effectiveCore])
+
             finally:
                 # always restore the resolution
                 if resolutionChanged:
@@ -406,18 +399,42 @@ def getHudBezel(system: Emulator, generator: Generator, rom: Path, gameResolutio
     _logger.debug("applying bezel %s", overlay_png_file)
     return overlay_png_file
 
-def callExternalScripts(folder: Path, event: str, args: Iterable[str | Path]) -> None:
-    if not folder.is_dir():
+import re
+
+def _sanitize_hook_name(name: str) -> str:
+    """
+    Sanitiza un nombre para usarlo como componente de ruta en retrohook.d/.
+    Solo afecta a la búsqueda del directorio de hooks, no a los args pasados al script.
+    """
+    name = name.replace("/", "_")          # único caracter realmente ilegal en Linux
+    name = re.sub(r"[\x00-\x1f\x7f]", "", name)  # control chars
+    return name[:255]                      # límite de filename en ext4/btrfs
+
+def call_retrohook(
+    platform: str,
+    game: str | Path,
+    state: str,  # "on-start-game" | "on-close-game"
+    extra_args: Iterable[str | Path] = (),
+) -> None:
+    """
+    Invoca el sistema de hooks de retrobox.
+    Delega toda la lógica de jerarquía y ejecución al script bash retrohook.
+    """
+    
+    if not HOOKS.is_file() or not os.access(HOOKS, os.X_OK):
+        _logger.debug("retrohook not found or not executable: %s", HOOKS)
         return
 
-    for file in folder.iterdir():
-        if file.is_dir():
-            callExternalScripts(file, event, args)
-        else:
-            if os.access(file, os.X_OK):
-                _logger.debug("calling external script: %s", [file, event, *args])
-                subprocess.call([file, event, *args])
+    game_stem = Path(game).stem
+    game_hook_name = _sanitize_hook_name(game_stem)  # para la ruta
 
+    cmd = [str(HOOKS), platform, game_hook_name, state, str(game), *map(str, extra_args)]
+
+    _logger.info("[retrohook] %s %s %s", platform, game_hook_name, state)
+    result = subprocess.run(cmd, check=False)
+    if result.returncode != 0:
+        _logger.warning("[retrohook] exited with code %s", result.returncode)
+        
 def hudConfig_protectStr(string: str | Path | None) -> str:
     if string is None:
         return ""

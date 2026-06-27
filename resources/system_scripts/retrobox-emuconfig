@@ -1,3 +1,0 @@
-#!/bin/bash
-
-exec "${USERDATA}/resources/emuconfig_scripts/batocera-config-$(cat "$1")"

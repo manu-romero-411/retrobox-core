@@ -41,8 +41,6 @@ NINTENDO_GUIDS = {
 if TYPE_CHECKING:
     from configgen.batoceraTypes import HotkeysContext
 
-#subprocess.run(["batocera-mouse", "show"], check=False)
-
 # copiar todo lo de una carpeta a otra (sincronizar .keys)
 def sync_keys(src_dir: Path, dst_dir: Path):
     if not src_dir.is_dir():

@@ -284,16 +284,19 @@ shaders/*
 .vscode/launch.json
 *.pdf
 
+# Ignorar el ini generado en runtime
+frontend/.emulationstation/emulationstation.ini
+
 # Ignorar todo el contenido de retrohook.d/
-retrohook.d/**
+resources/hooks/retrohook.d/**
 
 # Excepto la jerarquía _global/_platform/ y su contenido
-!retrohook.d/_global/
-!retrohook.d/_global/_platform/
-!retrohook.d/_global/_platform/**
+!resources/hooks/retrohook.d/_global/
+!resources/hooks/retrohook.d/_global/_platform/
+!resources/hooks/retrohook.d/_global/_platform/**
 
 # Excepto el hook de setup del frontend
-!retrohook.d/_frontend/
-!retrohook.d/_frontend/emulationstation/
-!retrohook.d/_frontend/emulationstation/on-frontend-start/
-!retrohook.d/_frontend/emulationstation/on-frontend-start/00_setup.sh
+!resources/hooks/retrohook.d/_frontend/
+!resources/hooks/retrohook.d/_frontend/emulationstation/
+!resources/hooks/retrohook.d/_frontend/emulationstation/on-frontend-start/
+!resources/hooks/retrohook.d/_frontend/emulationstation/on-frontend-start/00_setup.sh

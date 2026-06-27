@@ -1,0 +1,33 @@
+#!/bin/bash
+set -e # If a script exits with an error, we should as well.
+#
+# Author: Manu Romero (manu4.2012@gmail.com)
+#
+# Hook system for retrobox project. Run scripts before/after running a game or a specific platform, or when retrobox launches/exits.
+# Heavily inspired in Sebastiaan Meijer's (sebastiaan@passthroughpo.st) Qemuhooks script for KVM and VFIO
+
+PLATFORM="$1"
+GAME="$2"
+STATE="$3"
+USERDATA="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd)"
+
+HOOKPATH="$USERDATA/resources/hooks/retrohook.d/$PLATFORM/$GAME/$STATE"
+mkdir -p "$HOOKPATH"
+
+# check if it's a non-empty executable file
+if [ -f "$HOOKPATH" ] \
+&& [ -s "$HOOKPATH" ] \
+&& [ -x "$HOOKPATH" ]; then
+	"$HOOKPATH" "$@" || exit 1
+elif [ -d "$HOOKPATH" ]; then
+	while IFS= read -r file; do
+		# check for null string
+		if [ -f "$file" ] \
+		&& [ -s "$file" ] \
+		&& [ -x "$file" ]; then
+			"$file" "$@" || exit 1
+		fi
+	done < <(find -L "$HOOKPATH" -maxdepth 1 -type f -executable -print | sort)
+fi
+
+exit 0

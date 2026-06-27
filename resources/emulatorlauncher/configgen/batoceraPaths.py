@@ -49,7 +49,7 @@ HOME:  Final = USERDATA
 CACHE: Final = _XDG_CACHE / 'batocera'
 LOGS:  Final = HOME / 'logs'
 
-USER_SCRIPTS:  Final = HOME / 'user_scripts'
+HOOKS = USERDATA / "resources" / "hooks" / "retrohook"
 
 # ---------------------------------------------------------------------------
 # Configs de emuladores → ~/.config  (XDG; retroarch ya vive en ~/.config/retroarch)
@@ -84,7 +84,7 @@ ES_GAMES_METADATA:   Final = _ES_RESOURCES_DIR / 'gamesdb.xml'
 ES_GUNS_ART_METADATA: Final = DEFAULTS_DIR / 'data' / 'gamesbuttonsdb.xml'
 
 SYSTEM_DECORATIONS:  Final = DATAINIT_DIR / 'decorations'
-SYSTEM_SCRIPTS:      Final = BATOCERA_SHARE_DIR / 'system_scripts'
+SYSTEM_SCRIPTS:      Final = BATOCERA_SHARE_DIR / 'utils' / 'batocera-stubs'
 
 # Runtime dir (en batocera es /var/run, en Debian usamos /tmp)
 RUNTIME_DIR: Final = Path('/tmp/batocera-run')

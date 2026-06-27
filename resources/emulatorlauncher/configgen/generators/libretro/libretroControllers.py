@@ -183,25 +183,29 @@ def cleanControllerConfig(retroconfig: UnixSettings, controllers: Controllers, /
 # Write the hotkey for player 1
 def _hotkey_save(key: str, input_obj: Input, config: dict[str, object] | None = None, /) -> tuple[str, str]:
     """Devuelve la tupla (clave, valor) con el sufijo correcto buscando en el Plan B o en el objeto Input."""
-    
+
     # RAMA PLAN B: Buscamos en las claves que el parseador del archivo ya inyectó en config
     if config is not None:
         # Traducimos el nombre genérico de ES (pagedown/pageup) al botón real de RetroArch (r/l)
-        ra_btn = 'r' if input_obj == 'pagedown' else ('l' if input_obj == 'pageup' else input_obj)
-        
-        btn_key = f"input_player1_{ra_btn.name}_btn"
-        axis_key = f"input_player1_{ra_btn.name}_axis"
-        
-        if btn_key in config:
-            return f"{key}_btn", str(config[btn_key])
-        elif axis_key in config:
-            return f"{key}_axis", str(config[axis_key])
-            
-        # Fallback de seguridad: Si por lo que sea no se indexó, devolvemos tupla vacía para no romper
+        ra_btn = (
+            'r' if input_obj.name == 'pagedown' else
+            'l' if input_obj.name == 'pageup' else
+            input_obj.name  # <-- era input_obj, pero ya queremos el nombre (str)
+        )
+
+        btn_key  = f"input_player1_{ra_btn}_btn"   # ra_btn ya es str, sin .name
+        axis_key = f"input_player1_{ra_btn}_axis"
+
+        if btn_key in config and (value := config[btn_key]) is not None:
+            return f"{key}_btn", str(value)
+        if axis_key in config and (value := config[axis_key]) is not None:
+            return f"{key}_axis", str(value)
+
+        # Fallback de seguridad
         return "", ""
 
     # RAMA PLAN A: Mapeo tradicional por EmulationStation
-    value = getConfigValue(input_obj)
+    value = getConfigValue(input_obj) or ""
     suffix = '_axis' if input_obj.type == 'axis' else '_btn'
     return f'{key}{suffix}', value
 
