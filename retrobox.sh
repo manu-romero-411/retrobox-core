@@ -1,9 +1,4 @@
 #!/usr/bin/env bash
-# sudo apt install libfreeimage3 libsdl2-2.0-0 libsdl2-mixer-2.0-0 libvlc5 p7zip-full jq python3-pyudev \
-# python3-pip python3-venv python3-sdl2 python3-yaml python3-qrcode python3-pil python3-evdev python3-pygame
-# sudo apt update && sudo apt install -y libice6 libsm6 libxtst6 libxi6 inotify-tools antimicro
-# sudo dnf install freeimage SDL2_mixer vlc-libs jq p7zip
-# sudo dnf install python3-pyudev python3-pip python3-virtualenv python3-pysdl2 python3-yaml python3-qrcode python3-pillow python3-evdev python3-pygame
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd -P)"
 export USERDATA="${HERE:-$HOME/.local/share/batocera}"

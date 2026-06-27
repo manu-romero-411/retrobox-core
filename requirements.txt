@@ -1,6 +1,16 @@
+# Dependencias Python de Retrobox.
+# Útil para distros inmutables (Bazzite, Silverblue, etc.) o entornos virtuales
+# donde se prefiere pip sobre los paquetes del sistema.
+#
+# Uso:
+#   pip install -r requirements.txt
+#   # o en distros con protección del sistema:
+#   pip install --user -r requirements.txt
+
 pyudev
 pysdl2
 PyYAML
-qrcode
+qrcode[pil]
 Pillow
 evdev
+pygame
