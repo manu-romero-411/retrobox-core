@@ -3,7 +3,6 @@ from __future__ import annotations
 import glob
 import logging
 import os
-import pdb
 import xml.etree.ElementTree as ET
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import InitVar, dataclass, field, replace
@@ -115,15 +114,16 @@ def normalize_sdl_guid_for_emulator(raw_guid: str) -> str:
     # cualquier otro bus → USB HID, igual que lo ve SDL+HIDAPI
     return _HIDAPI_BUS + g[4:]
 
-def map_hidraw_to_evdev():
+def map_hidraw_to_evdev() -> dict[str, str]:
     """
-    Correspondencia entre nodos hidraw y event, para poder leer capacidades evdev de mandos que SDL expone vía hidraw.
+    Correspondencia entre nodos hidraw y event, para poder leer
+    capacidades evdev de mandos que SDL expone vía hidraw.
     """
-    mapping = {}
+    mapping: dict[str, str] = {}
     for h in glob.glob("/sys/class/hidraw/hidraw*"):
         hid = os.path.basename(h)
         devpath = os.path.realpath(os.path.join(h, "device"))
-        for root, dirs, files in os.walk(devpath):
+        for root, dirs, _files in os.walk(devpath):
             for d in dirs:
                 if d.startswith("event"):
                     mapping[f"/dev/{hid}"] = f"/dev/input/{d}"
@@ -153,7 +153,7 @@ def get_dpad_button_indices_evdev(evdev_path):
             if code in btn_codes
         }
     except Exception as e:
-        print("get_dpad_button_indices(%s): %s", evdev_path, e)
+        _logger.debug("get_dpad_button_indices(%s): %s", evdev_path, e)
         return {}
 
 def get_dpad_button_indices_sysfs(evdev_path):
@@ -432,13 +432,16 @@ class Controller:
         relaxed_values: list[int] = [int(cache_content[i]) for i in range(1, n+1)]
 
         # get full list of axis (in case one is not used in es)
-        caps = evdev.InputDevice(self.device_path).capabilities()
-        code_values: dict[int, int]  = {}
+
+        caps = evdev.InputDevice(self.device_path).capabilities(absinfo=True)
+        abs_caps = cast('list[tuple[int, object]]', caps.get(evdev.ecodes.EV_ABS, []))
+
+        code_values: dict[int, int] = {}
         i = 0
-        for code, _ in caps[evdev.ecodes.EV_ABS]:
+        for code, _absinfo in abs_caps:
             if code < evdev.ecodes.ABS_HAT0X:
                 code_values[code] = relaxed_values[i]
-                i = i+1
+                i += 1
 
         # dict with es input names
         res: dict[str, _RelaxedDict] = {}
@@ -457,8 +460,9 @@ class Controller:
     def load_for_players(cls, max_players: int, args: Namespace, /) -> ControllerList:
         cfg_roots = []
         for conffile in (USER_ES_DIR / 'es_input.cfg', BATOCERA_ES_DIR / 'es_input.cfg'):
-            print(f"[DEBUG] buscando cfg en: {conffile} → existe={conffile.exists()}")
-            if conffile.exists():
+            es_input_exists = conffile.exists()
+            print(f"[DEBUG] buscando es_input.cfg en: {conffile} → {es_input_exists}")
+            if es_input_exists:
                 cfg_roots.append(ET.parse(conffile).getroot())
 
         return [
@@ -489,9 +493,9 @@ class Controller:
         hat_count_calc = getattr(args, f'p{player_number}nbhats')
         axis_count_calc = getattr(args, f'p{player_number}nbaxes')
         _logger.warning("resolve_device_path player=%s → %s", player_number, device_path_calc)
-        #pdb.set_trace()
+
         if not device_path_calc:
-            device_path_calc = device_path_calc = cls.resolve_device_path(
+            device_path_calc = cls.resolve_device_path(
                 guid,
                 index,
                 real_name,
@@ -499,6 +503,13 @@ class Controller:
                 button_count_calc,
                 hat_count_calc,
             )
+
+        if device_path_calc is None:
+            raise ValueError(
+                f"No se pudo resolver device_path para player{player_number} "
+                f"(guid={guid}, name={real_name})"
+            )
+            
         return cls(
             name=cast('str', input_config.get("deviceName")),
             type=cast('Literal["keyboard", "joystick"]', input_config.get("type")),
