@@ -21,6 +21,8 @@ sudo dnf install -y \
     python3-qrcode \
     python3-pillow \
     python3-evdev \
-    python3-pygame
+    python3-pygame \
+    python-ruamel-yaml \
+    python3-tomlkit
 
 echo "[retrobox] System dependencies sucessfully installed."

@@ -29,7 +29,8 @@ class FirefoxGenerator(Generator):
     def generate(self, system, rom, playersControllers, metadata, guns, wheels, gameResolution):
         firefox_bin = _find_firefox_binary()
         url = "about:blank"
-
+        user_agent = ""
+        
         if rom.name != "Firefox.firefox":
             with rom.open() as f:
                 lines = f.read().splitlines()
@@ -40,7 +41,7 @@ class FirefoxGenerator(Generator):
             firefox_bin,
             "--kiosk",
             "--no-remote",
-            *(["--override-user-agent", user_agent] if user_agent else []),
+            *(["--override-user-agent", user_agent] if user_agent == "" else []),
             url,
         ]
         env = {

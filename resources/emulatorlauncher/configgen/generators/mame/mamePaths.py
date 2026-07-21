@@ -2,9 +2,14 @@ from __future__ import annotations
 
 from typing import Final
 
-from ...batoceraPaths import BIOS, CHEATS, CONFIGS, DEFAULTS_DIR, ROMS, SAVES
+from configgen.retrobox_paths import BIOS, CHEATS, DEFAULTS_DIR, EMULATORS, ROMS, SAVES
 
-MAME_CONFIG: Final = CONFIGS / "mame"
+# directorios y ejecutable de retroarch y su config
+_MAME_DIR: Final = EMULATORS / "mame"
+_MAME_BIN: Final = _MAME_DIR / "mame.AppImage"
+_MAME_XDG: Final = _MAME_DIR / "configs"
+MAME_CONFIG: Final = _MAME_XDG / "retroarch"
+
 MAME_SAVES: Final = SAVES / "mame"
 MAME_BIOS: Final = BIOS / "mame"
 MAME_CHEATS: Final = CHEATS / "mame"

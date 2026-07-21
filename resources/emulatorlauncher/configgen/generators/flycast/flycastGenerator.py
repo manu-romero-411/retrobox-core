@@ -1,20 +1,31 @@
 from __future__ import annotations
 
 from shutil import copyfile
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Generator
 
+from configgen import Command
+from configgen.controller import generate_sdl_game_controller_config
 from configgen.controllersConfig import _logger
-
-from ... import Command
-from ...batoceraPaths import _SYSTEM_LOCAL_BIN, CONFIGS, configure_emulator, ensure_parents_and_open, mkdir_if_not_exists
-from ...controller import generate_sdl_game_controller_config
-from ...utils.configparser import CaseSensitiveConfigParser
-from ..Generator import Generator
-from . import flycastControllers
-from .flycastPaths import _FLYCAST_XDG, FLYCAST_BIN, FLYCAST_BIOS, FLYCAST_CONFIG, FLYCAST_SAVES, FLYCAST_VMU_BLANK, FLYCAST_VMUA1, FLYCAST_VMUA2
+from configgen.generators.flycast import flycastControllers
+from configgen.generators.flycast.flycastPaths import (
+    _FLYCAST_XDG,
+    FLYCAST_BIN,
+    FLYCAST_BIOS,
+    FLYCAST_CONFIG,
+    FLYCAST_SAVES,
+    FLYCAST_VMU_BLANK,
+    FLYCAST_VMUA1,
+    FLYCAST_VMUA2
+)
+from configgen.retrobox_paths import (
+    configure_emulator,
+    ensure_parents_and_open,
+    mkdir_if_not_exists
+)
+from configgen.utils.configparser import CaseSensitiveConfigParser
 
 if TYPE_CHECKING:
-    from ...batoceraTypes import HotkeysContext
+    from configgen.batoceraTypes import HotkeysContext
 
 class FlycastGenerator(Generator):
 

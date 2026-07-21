@@ -747,22 +747,6 @@
 		<region>wr</region>
 	</game>
 	<game>
-		<path>./retroarch.menu</path>
-		<name>RetroArch (Multi Cores Emulator)</name>
-		<desc>Run RetroArch (Multi Cores Emulator).</desc>
-		<genre>Emulator</genre>
-		<image>./media/retroarch-logo.png</image>
-		<marquee>./media/retroarch-logo.png</marquee>
-		<rating>0</rating>
-		<developer>Libretro Team</developer>
-		<publisher>Libretro Team</publisher>
-		<playcount />
-		<lastplayed />
-		<gametime />
-		<lang>en</lang>
-		<region>wr</region>
-	</game>
-	<game>
 		<path>./fbneo.menu</path>
 		<name>FBNEO (Multi-System emulator)</name>
 		<desc>Run FBNEO.</desc>
@@ -1113,6 +1097,22 @@
 		<marquee>./media/kronos-logo.png</marquee>
 		<rating>0</rating>
 		<developer>François Caron</developer>
+		<lang>en</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./retroarch.menu</path>
+		<name>RetroArch (Multi Cores Emulator)</name>
+		<desc>Run RetroArch (Multi Cores Emulator).</desc>
+		<genre>Emulator</genre>
+		<image>./media/retroarch-logo.png</image>
+		<marquee>./media/retroarch-logo.png</marquee>
+		<rating>0</rating>
+		<developer>Libretro Team</developer>
+		<publisher>Libretro Team</publisher>
+		<playcount>2</playcount>
+		<lastplayed>20260721T104213</lastplayed>
+		<gametime>120</gametime>
 		<lang>en</lang>
 		<region>wr</region>
 	</game>

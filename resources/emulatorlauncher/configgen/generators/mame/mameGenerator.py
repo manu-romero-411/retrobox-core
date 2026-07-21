@@ -14,10 +14,9 @@ from xml.dom import minidom
 from PIL import Image
 
 from ... import Command
-from ...batoceraPaths import (
+from ...retrobox_paths import (
     RESOURCES_DIR,
     BIOS,
-    CONFIGS,
     DEFAULTS_DIR,
     MAME_ARTWORK_DIR,
     MAME_SOFTWARE_DIR,
@@ -33,7 +32,7 @@ from ...utils import bezels as bezelsUtil, videoMode
 from ..Generator import Generator
 from . import mameControllers
 from .mameCommon import is_atom_floppy
-from .mamePaths import MAME_BIOS, MAME_CHEATS, MAME_CONFIG, MAME_DEFAULT_DATA, MAME_ROMS, MAME_SAVES
+from .mamePaths import _MAME_XDG, MAME_BIOS, MAME_CHEATS, MAME_CONFIG, MAME_DEFAULT_DATA, MAME_ROMS, MAME_SAVES
 
 if TYPE_CHECKING:
     from ...Emulator import Emulator
@@ -377,10 +376,10 @@ class MameGenerator(Generator):
                 if system.name == "macintosh" and boot_disk:
                     if boot_disk in [ "macos30", "macos608", "macos701", "macos75" ]:
                         bootType = "-flop1"
-                        bootDisk = f"{USERDATA}/bios/{boot_disk}.img"
+                        bootDisk = f"{BIOS}/{boot_disk}.img"
                     else:
                         bootType = "-hard"
-                        bootDisk = f"{USERDATA}/bios/{boot_disk}.chd"
+                        bootDisk = f"{BIOS}/{boot_disk}.chd"
                     commandArray += [ bootType, bootDisk ]
 
                 # Alternate ROM type for systems with mutiple media (ie cassette & floppy)
@@ -635,7 +634,7 @@ class MameGenerator(Generator):
             array=commandArray,
             env={
                 "PWD":"/usr/bin/mame/",
-                "XDG_CONFIG_HOME": CONFIGS,
+                "XDG_CONFIG_HOME": _MAME_XDG,
                 "XDG_CACHE_HOME": SAVES
                 }
             )

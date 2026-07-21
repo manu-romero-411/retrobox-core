@@ -4,7 +4,7 @@ import shutil
 from typing import TYPE_CHECKING, Final
 
 from ... import Command
-from ...batoceraPaths import CONFIGS
+from ...retrobox_paths import CONFIGS
 from ...utils.configparser import CaseSensitiveConfigParser
 from ..Generator import Generator
 

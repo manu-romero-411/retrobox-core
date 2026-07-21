@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Final
 
 from ... import Command
-from ...batoceraPaths import CONFIGS, USERDATA, mkdir_if_not_exists
+from ...retrobox_paths import EMULATORS, USERDATA, mkdir_if_not_exists
 from ...controller import generate_sdl_game_controller_config, write_sdl_controller_db
 from ...settings.unixSettings import UnixSettings
 from ..Generator import Generator
@@ -17,15 +17,17 @@ if TYPE_CHECKING:
 
 _logger = logging.getLogger(__name__)
 
-_CONFIG_DIR: Final = CONFIGS / 'amiberry'
+_AMIBERRY_PATH: Final = EMULATORS / 'amiberry' 
+_AMIBERRY_XDG: Final = _AMIBERRY_PATH / 'configs'
+_CONFIG_DIR: Final = _AMIBERRY_XDG / 'amiberry'
 _CONFIG: Final = _CONFIG_DIR / 'amiberry.conf'
 _RETROARCH_CUSTOM: Final = _CONFIG_DIR / 'retroarch' / 'overlay.cfg'
 _RETROARCH_INPUTS_DIR: Final = _CONFIG_DIR / 'retroarch' / 'inputs'
 _AMIBERRY_PLUGINS: Final = _CONFIG_DIR / 'plugins'
 _WHDBOOT_DIR: Final = _CONFIG_DIR / 'whdboot'
-_SAVES_DIR: Final = Path(f'{USERDATA}/saves/amiga')
-_SCREENSHOTS_DIR: Final = Path(f'{USERDATA}/screenshots')
-_BIOS_DIR: Final = Path(f'{USERDATA}/bios/amiga')
+_SAVES_DIR: Final = Path(f'{SAVES}/amiga')
+_SCREENSHOTS_DIR: Final = Path(f'{SCREENSHOTS}')
+_BIOS_DIR: Final = Path(f'{BIOS}/amiga')
 _LOG_FILE: Final = Path(f'{USERDATA}/system/logs/amiberry.log')
 _AMIBERRY_BIN: Final = Path('/usr/bin/amiberry')
 _AMIBERRY_DATA: Final = Path('/usr/share/amiberry/data')
@@ -189,8 +191,8 @@ class AmiberryGenerator(Generator):
                     "AMIBERRY_HOME_DIR": _CONFIG_DIR,
                     "AMIBERRY_CONFIG_DIR": _CONFIG_DIR,
                     "AMIBERRY_PLUGINS_DIR": _AMIBERRY_PLUGINS,
-                    "XDG_DATA_HOME": CONFIGS,
-                    "XDG_CONFIG_HOME": CONFIGS,
+                    "XDG_DATA_HOME": _AMIBERRY_XDG,
+                    "XDG_CONFIG_HOME": _AMIBERRY_XDG,
                     "SDL_GAMECONTROLLERCONFIG": generate_sdl_game_controller_config(playersControllers),
                     "SDL_JOYSTICK_HIDAPI": "0"
                 }

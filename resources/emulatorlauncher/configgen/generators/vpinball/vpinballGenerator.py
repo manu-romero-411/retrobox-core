@@ -6,7 +6,7 @@ import shutil
 from typing import TYPE_CHECKING
 
 from ... import Command
-from ...batoceraPaths import CONFIGS, mkdir_if_not_exists
+from ...retrobox_paths import CONFIGS, mkdir_if_not_exists
 from ...controller import generate_sdl_game_controller_config
 from ...utils.batoceraServices import batoceraServices
 from ...utils.configparser import CaseSensitiveConfigParser

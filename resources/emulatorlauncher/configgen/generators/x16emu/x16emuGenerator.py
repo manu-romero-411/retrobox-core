@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from ... import Command
-from ...batoceraPaths import CONFIGS, USERDATA
+from ...retrobox_paths import CONFIGS, USERDATA
 from ...controller import generate_sdl_game_controller_config
 from ..Generator import Generator
 
@@ -28,7 +28,7 @@ class X16emuGenerator(Generator):
         # default options
         commandArray: list[str | Path] = [
             "x16emu",
-            "-rom", f"{USERDATA}/bios/commanderx16/rom.bin", # bios
+            "-rom", f"{BIOS}/commanderx16/rom.bin", # bios
             "-fsroot", romdir, # file system
             "-ram", "2048", # specify 2MB of RAM by default
             "-rtc", # realtime clock

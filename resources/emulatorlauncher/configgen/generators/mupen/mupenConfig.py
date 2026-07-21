@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from ...batoceraPaths import BIOS, SCREENSHOTS
+from ...retrobox_paths import BIOS, SCREENSHOTS
 from .mupenPaths import MUPEN_CONFIG_DIR, MUPEN_SAVES
 
 if TYPE_CHECKING:

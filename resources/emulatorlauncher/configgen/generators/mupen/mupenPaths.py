@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Final
 
-from ...batoceraPaths import CONFIGS, DATAINIT_DIR, SAVES
+from ...retrobox_paths import CONFIGS, DATAINIT_DIR, SAVES
 
 MUPEN_CONFIG_DIR: Final = CONFIGS / 'mupen64'
 MUPEN_CUSTOM: Final = MUPEN_CONFIG_DIR / 'mupen64plus.cfg'

@@ -3,16 +3,16 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Final
 
-from ...batoceraPaths import mkdir_if_not_exists
+from ...retrobox_paths import mkdir_if_not_exists
 from ...utils.configparser import CaseSensitiveConfigParser
-from .ppssppPaths import PPSSPP_CONFIG_INIT, PPSSPP_PSP_SYSTEM_DIR
+from .ppssppPaths import PPSSPP_CONFIG_INIT, _PPSSPP_SYSDIR
 
 if TYPE_CHECKING:
     from ...controller import Controller
 
 _logger = logging.getLogger(__name__)
 
-ppssppControlsIni: Final  = PPSSPP_PSP_SYSTEM_DIR / 'controls.ini'
+ppssppControlsIni: Final  = _PPSSPP_SYSDIR / 'controls.ini'
 ppssppControlsInit: Final = PPSSPP_CONFIG_INIT / 'controls.ini'
 
 PPSSPP_NINTENDO_CONTROLLERS = {

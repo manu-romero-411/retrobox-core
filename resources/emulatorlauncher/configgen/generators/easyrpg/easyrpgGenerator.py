@@ -4,7 +4,7 @@ import codecs
 from typing import TYPE_CHECKING
 
 from ... import Command
-from ...batoceraPaths import CONFIGS, SAVES, mkdir_if_not_exists
+from ...retrobox_paths import CONFIGS, SAVES, mkdir_if_not_exists
 from ...controller import Controller
 from ..Generator import Generator
 

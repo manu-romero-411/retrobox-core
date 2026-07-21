@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Final
 
-from ...batoceraPaths import mkdir_if_not_exists
+from ...retrobox_paths import mkdir_if_not_exists
 from ...utils.configparser import CaseSensitiveRawConfigParser
 
 if TYPE_CHECKING:

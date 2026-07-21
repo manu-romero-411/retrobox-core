@@ -9,12 +9,12 @@ from typing import TYPE_CHECKING, cast
 from xml.dom import minidom
 
 from ... import Command
-from ...batoceraPaths import _SYSTEM_LOCAL_BIN, CONFIGS, SAVES, configure_emulator, mkdir_if_not_exists
+from ...retrobox_paths import SAVES, configure_emulator, mkdir_if_not_exists
 from ...controller import generate_sdl_game_controller_config
 from ...utils import vulkan
 from ..Generator import Generator
 from . import cemuControllers
-from .cemuPaths import _CEMU_XDG, CEMU_BIN, CEMU_BIOS, CEMU_CONFIG, CEMU_CONTROLLER_PROFILES, CEMU_ROMDIR, CEMU_SAVES, _CEMU_EMUDIR
+from .cemuPaths import _CEMU_XDG, CEMU_BIN, CEMU_BIOS, CEMU_CONFIG, CEMU_CONTROLLER_PROFILES, CEMU_ROMDIR, CEMU_SAVES
 
 if TYPE_CHECKING:
     from pathlib import Path

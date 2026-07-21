@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from ... import Command
-from ...batoceraPaths import BIOS
+from ...retrobox_paths import BIOS
 from ..Generator import Generator
 
 if TYPE_CHECKING:

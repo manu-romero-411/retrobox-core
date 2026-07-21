@@ -23,7 +23,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Final
 
-from configgen.batoceraPaths import RESOURCES_DIR, USER_ES_DIR
+from configgen.retrobox_paths import RESOURCES_DIR, USER_ES_DIR
 
 if TYPE_CHECKING:
     from types import TracebackType

@@ -1,22 +1,20 @@
 from __future__ import annotations
 
 import shutil
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, Generator, cast
 
 import ruamel.yaml
 import ruamel.yaml.util
 
-from ... import Command
-from ...batoceraPaths import CACHE, CONFIGS, SAVES, mkdir_if_not_exists
-from ...controller import generate_sdl_game_controller_config
-from ..Generator import Generator
+from configgen import Command
+from configgen.controller import generate_sdl_game_controller_config
+from configgen.generators.vita3k.vita3k_paths import _VITA3K_CFGDIR, _VITA3K_SAVES, _VITA3K_XDG, VITA3K_BIN, VITA3K_CFG
+from configgen.retrobox_paths import CACHE, SAVES, mkdir_if_not_exists
+
 
 if TYPE_CHECKING:
-    from ...batoceraTypes import HotkeysContext
+    from configgen.batoceraTypes import HotkeysContext
 
-vitaConfig = CONFIGS / 'vita3k'
-vitaSaves = SAVES / 'psvita'
-vitaConfigFile = vitaConfig / 'config.yml'
 
 class Vita3kGenerator(Generator):
 
@@ -29,24 +27,24 @@ class Vita3kGenerator(Generator):
     def generate(self, system, rom, playersControllers, metadata, guns, wheels, gameResolution):
 
         # Create save folder
-        mkdir_if_not_exists(vitaSaves)
+        mkdir_if_not_exists(_VITA3K_SAVES)
 
         # Move saves if necessary
-        if (vitaConfig / 'ux0').is_dir():
+        if (_VITA3K_CFGDIR / 'ux0').is_dir():
             # Move all folders from vitaConfig to vitaSaves except "data", "lang", and "shaders-builtin"
-            for item in vitaConfig.iterdir():
+            for item in _VITA3K_CFGDIR.iterdir():
                 if item.name not in ['data', 'lang', 'shaders-builtin'] and item.is_dir():
-                    shutil.move(item, vitaSaves)
+                    shutil.move(item, _VITA3K_SAVES)
 
         # Create the config.yml file if it doesn't exist
-        mkdir_if_not_exists(vitaConfig)
+        mkdir_if_not_exists(_VITA3K_CFGDIR)
 
         vita3kymlconfig: dict[str, Any] | None = None
         indent: int | None = None
         block_seq_indent: int | None = None
 
-        if vitaConfigFile.is_file():
-            with vitaConfigFile.open('r') as stream:
+        if VITA3K_CFG.is_file():
+            with VITA3K_CFG.open('r') as stream:
                 vita3kymlconfig, indent, block_seq_indent = cast('tuple[dict[str, Any] | None, int | None, int | None]', ruamel.yaml.util.load_yaml_guess_indent(stream))
 
         if vita3kymlconfig is None:
@@ -59,7 +57,7 @@ class Vita3kGenerator(Generator):
             block_seq_indent = 0
 
         # ensure the correct path is set
-        vita3kymlconfig["pref-path"] = f"{vitaSaves!s}"
+        vita3kymlconfig["pref-path"] = f"{_VITA3K_SAVES!s}"
 
         # Set the renderer
         vita3kymlconfig["backend-renderer"] = system.config.get("vita3k_gfxbackend", "OpenGL")
@@ -89,7 +87,7 @@ class Vita3kGenerator(Generator):
         yaml.explicit_end = True
         yaml.indent(mapping=indent, sequence=indent, offset=block_seq_indent)
 
-        with vitaConfigFile.open('w') as fp:
+        with VITA3K_CFG.open('w') as fp:
             yaml.dump(vita3kymlconfig, fp)
 
         # Simplify the rom name (strip the directory & extension)
@@ -98,18 +96,18 @@ class Vita3kGenerator(Generator):
         # because of the yml formatting, we don't allow Vita3k to modify it
         # using the -w & -f options prevents Vita3k from re-writing & prompting the user in GUI
         # we want to avoid that so roms load straight away
-        if (vitaSaves / 'ux0' / 'app' / smplromname).is_dir():
-            commandArray = ["/usr/bin/vita3k/Vita3K", "-F", "-w", "-f", "-c", vitaConfigFile, "-r", smplromname]
+        if (_VITA3K_SAVES / 'ux0' / 'app' / smplromname).is_dir():
+            commandArray = [VITA3K_BIN, "-F", "-w", "-f", "-c", VITA3K_CFG, "-r", smplromname]
         else:
             # Game not installed yet, let's open the menu
-            commandArray = ["/usr/bin/vita3k/Vita3K", "-F", "-w", "-f", "-c", vitaConfigFile, rom]
+            commandArray = [VITA3K_BIN, "-F", "-w", "-f", "-c", VITA3K_CFG, rom]
 
         return Command.Command(
             array=commandArray,
             env={
                 "SDL_GAMECONTROLLERCONFIG": generate_sdl_game_controller_config(playersControllers),
                 "SDL_JOYSTICK_HIDAPI": "0",
-                "XDG_CONFIG_HOME": CONFIGS,
+                "XDG_CONFIG_HOME": _VITA3K_XDG,
                 "XDG_DATA_HOME": SAVES,
                 "XDG_CACHE_HOME": CACHE
             }

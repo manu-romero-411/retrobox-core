@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, NotRequired, TypedDict, cast
 import qrcode
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 
-from ..batoceraPaths import RESOURCES_DIR, ES_GUNS_ART_METADATA, SYSTEM_DECORATIONS, DECORATIONS_DIR
+from ..retrobox_paths import RESOURCES_DIR, ES_GUNS_ART_METADATA, SYSTEM_DECORATIONS, DECORATIONS_DIR
 from ..exceptions import RetroboxException
 from . import metadata
 from .videoMode import getAltDecoration

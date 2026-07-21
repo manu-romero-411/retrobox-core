@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Final
 
-from ...batoceraPaths import EMULATORS
+from ...retrobox_paths import EMULATORS
 
 # directorios y ejecutable de retroarch y su config
 _RETROARCH_DIR: Final = EMULATORS / "retroarch"
@@ -20,6 +20,7 @@ _RETROARCH_ROOT: Final = _RETROARCH_CONFIG
 RETROARCH_CUSTOM: Final = _RETROARCH_CONFIG / 'retroarchcustom.cfg'
 RETROARCH_CORE_CUSTOM: Final = _RETROARCH_CONFIG / 'cores' / 'retroarch-core-options.cfg'
 RETROARCH_OVERLAY_CONFIG: Final = _RETROARCH_CONFIG / 'overlay.cfg'
+RETROARCH_BASE_CONFIG: Final = _RETROARCH_CONFIG / 'retroarch.cfg'
 
 # assets de retroarch
 RETROARCH_CORES: Final = _RETROARCH_ROOT / 'cores'

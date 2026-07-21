@@ -3,11 +3,11 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from ... import Command
-from ...batoceraPaths import CONFIGS, SAVES, configure_emulator
+from ...retrobox_paths import SAVES, configure_emulator, ensure_symlink
 from ...controller import Controller, generate_sdl_game_controller_config
 from ..Generator import Generator
 from . import ppssppConfig, ppssppControllers
-from .ppssppPaths import _PPSSPP_XDG, PPSSPP_CONFIG_DIR, PPSSPP_BIN
+from .ppssppPaths import _PPSSPP_PSPDIR, _PPSSPP_XDG, _PPSSPP_CFGDIR, PPSSPP_BIN
 
 if TYPE_CHECKING:
     from ...batoceraTypes import HotkeysContext, Resolution
@@ -24,10 +24,12 @@ class PPSSPPGenerator(Generator):
     # Main entry of the module
     # Configure fba and return a command
     def generate(self, system, rom, playersControllers, metadata, guns, wheels, gameResolution):
+        ensure_symlink(_PPSSPP_PSPDIR, _PPSSPP_CFGDIR / 'PSP')
+
         ppssppConfig.writePPSSPPConfig(system)
 
         # Remove the old gamecontrollerdb.txt file
-        dbpath = PPSSPP_CONFIG_DIR / "gamecontrollerdb.txt"
+        dbpath = _PPSSPP_CFGDIR / "gamecontrollerdb.txt"
         if dbpath.exists():
             dbpath.unlink()
 

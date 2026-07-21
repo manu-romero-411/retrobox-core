@@ -3,8 +3,10 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Final
 
+from configgen.generators.hatari.hatari_paths import _HATARI_CFGDIR, HATARI_CFG
+
 from ... import Command
-from ...batoceraPaths import BIOS, CONFIGS, mkdir_if_not_exists
+from ...retrobox_paths import BIOS, mkdir_if_not_exists
 from ...exceptions import RetroboxException
 from ...utils.configparser import CaseSensitiveConfigParser
 from ..Generator import Generator
@@ -17,10 +19,6 @@ if TYPE_CHECKING:
     from ...batoceraTypes import HotkeysContext
 
 _logger = logging.getLogger(__name__)
-
-# libretro generator uses this, so it needs to be public
-HATARI_CONFIG: Final = CONFIGS / "hatari"
-
 class HatariGenerator(Generator):
 
     def getHotkeysContext(self) -> HotkeysContext:
@@ -82,7 +80,7 @@ class HatariGenerator(Generator):
         if rom_extension == ".hd":
             commandArray += ["--acsi" if system.config.get("hatari_drive") == "ACSI" else "--ide-master", rom]
         elif rom_extension == ".gemdos":
-            blank_file = HATARI_CONFIG / "blank.st"
+            blank_file = _HATARI_CFGDIR / "blank.st"
             if not blank_file.exists():
                 with blank_file.open('w'):
                     pass
@@ -108,10 +106,10 @@ class HatariGenerator(Generator):
             3: "a"
         }
 
-        mkdir_if_not_exists(HATARI_CONFIG)
-        configFileName = HATARI_CONFIG / "hatari.cfg"
-        if configFileName.is_file():
-            config.read(configFileName)
+        mkdir_if_not_exists(_HATARI_CFGDIR)
+        
+        if HATARI_CFG.is_file():
+            config.read(HATARI_CFG)
 
         # pads
         # disable previous configuration
@@ -151,7 +149,7 @@ class HatariGenerator(Generator):
             config.add_section("Screen")
         config.set("Screen", "bShowStatusbar", str(system.config.show_fps).upper())
 
-        with configFileName.open('w') as configfile:
+        with HATARI_CFG.open('w') as configfile:
             config.write(configfile)
 
     @staticmethod

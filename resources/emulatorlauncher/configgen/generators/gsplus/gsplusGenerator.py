@@ -1,18 +1,17 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Generator
 
-from ... import Command
-from ...batoceraPaths import BIOS, CONFIGS, mkdir_if_not_exists
-from ...controller import generate_sdl_game_controller_config
-from ...settings.unixSettings import UnixSettings
-from ..Generator import Generator
+from configgen import Command
+from configgen.controller import generate_sdl_game_controller_config
+from configgen.generators.gsplus.gsplus_paths import _GSPLUS_CFGDIR, GSPLUS_CFG
+from configgen.retrobox_paths import BIOS, mkdir_if_not_exists
+from configgen.settings.unixSettings import UnixSettings
+
 
 if TYPE_CHECKING:
-    from ...batoceraTypes import HotkeysContext
+    from configgen.batoceraTypes import HotkeysContext
 
-_CONFIGDIR  = CONFIGS / 'GSplus'
-_CONFIGFILE = _CONFIGDIR / 'config.txt'
 
 class GSplusGenerator(Generator):
 
@@ -23,9 +22,9 @@ class GSplusGenerator(Generator):
         }
 
     def generate(self, system, rom, playersControllers, metadata, guns, wheels, gameResolution):
-        mkdir_if_not_exists(_CONFIGDIR)
+        mkdir_if_not_exists(_GSPLUS_CFGDIR)
 
-        config = UnixSettings(_CONFIGFILE, separator=' ')
+        config = UnixSettings(GSPLUS_CFG, separator=' ')
 
         if (rom.suffix.lower() in ['.dsk', '.do', '.nib']):
             config.save("s6d1", rom)
@@ -102,7 +101,8 @@ class GSplusGenerator(Generator):
             config.save("bram3[f0]", '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00')
             config.save("g_limit_speed", "2")
 
-        config.save("g_cfg_rom_path", f"""{BIOS}/{system.config.get('gsplus_bios_filename', 'ROM.03')}""")
+        config.save("g_cfg_rom_path", 
+                    f"""{BIOS}/{system.config.get('gsplus_bios_filename', 'ROM.03')}""")
 
         config.write()
         commandArray = ["GSplus", "-fullscreen"]

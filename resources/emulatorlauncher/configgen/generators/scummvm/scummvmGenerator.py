@@ -2,21 +2,18 @@ from __future__ import annotations
 
 import os
 import re
-from typing import TYPE_CHECKING, Final
+from typing import TYPE_CHECKING
 
-from ... import Command
-from ...batoceraPaths import BIOS, CACHE, CONFIGS, SAVES, SCREENSHOTS, USERDATA, ensure_parents_and_open, mkdir_if_not_exists
-from ...controller import Controller, generate_sdl_game_controller_config
-from ...utils.configparser import CaseSensitiveConfigParser
-from ..Generator import Generator
+from configgen import Command
+from configgen.controller import Controller, generate_sdl_game_controller_config
+from configgen.generators.Generator import Generator
+from configgen.generators.scummvm.scummvm_paths import _SCUMMVM_EXTRA, _SCUMMVM_SAVES, _SCUMMVM_XDG, SCUMMVM_CFG
+from configgen.retrobox_paths import CACHE, SCREENSHOTS, USERDATA, ensure_parents_and_open, mkdir_if_not_exists
+from configgen.utils.configparser import CaseSensitiveConfigParser
 
 if TYPE_CHECKING:
-    from ...batoceraTypes import HotkeysContext
+    from configgen.batoceraTypes import HotkeysContext
 
-scummConfigDir: Final = CONFIGS / "scummvm"
-scummConfigFile: Final = scummConfigDir / "scummvm.ini"
-scummExtra: Final = BIOS / "scummvm" / "extra"
-scummSave: Final = SAVES / "scummvm"
 
 class ScummVMGenerator(Generator):
 
@@ -28,12 +25,12 @@ class ScummVMGenerator(Generator):
 
     def generate(self, system, rom, playersControllers, metadata, guns, wheels, gameResolution):
         # create /userdata/bios/scummvm/extra folder if it doesn't exist
-        mkdir_if_not_exists(scummExtra)
+        mkdir_if_not_exists(_SCUMMVM_EXTRA)
 
         # create / modify scummvm config file as needed
         scummConfig = CaseSensitiveConfigParser()
-        if scummConfigFile.exists():
-            scummConfig.read(scummConfigFile)
+        if SCUMMVM_CFG.exists():
+            scummConfig.read(SCUMMVM_CFG)
 
         if not scummConfig.has_section("scummvm"):
             scummConfig.add_section("scummvm")
@@ -41,7 +38,7 @@ class ScummVMGenerator(Generator):
         scummConfig.set("scummvm", "gui_browser_native", "false")
 
         # save the ini file
-        with ensure_parents_and_open(scummConfigFile, 'w') as configfile:
+        with ensure_parents_and_open(SCUMMVM_CFG, 'w') as configfile:
             scummConfig.write(configfile)
 
         # Find rom path
@@ -101,8 +98,8 @@ class ScummVMGenerator(Generator):
         commandArray.extend(
             [f"--joystick={id}",
             f"--screenshotspath={SCREENSHOTS}",
-            f"--extrapath={scummExtra}",
-            f"--savepath={scummSave}",
+            f"--extrapath={_SCUMMVM_EXTRA}",
+            f"--savepath={_SCUMMVM_SAVES}",
             f"--path={rom_path}",
             f"{target}"]
         )
@@ -114,7 +111,7 @@ class ScummVMGenerator(Generator):
             array=commandArray,
             env={
                 "SDL_VIDEODRIVER": sdl_videodriver,
-                "XDG_CONFIG_HOME": CONFIGS,
+                "XDG_CONFIG_HOME": _SCUMMVM_XDG,
                 "XDG_CACHE_HOME": CACHE,
                 "SDL_GAMECONTROLLERCONFIG": generate_sdl_game_controller_config(playersControllers)
             }

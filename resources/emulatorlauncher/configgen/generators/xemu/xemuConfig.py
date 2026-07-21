@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from ...batoceraPaths import USERDATA, ensure_parents_and_open
+from ...retrobox_paths import USERDATA, ensure_parents_and_open
 from ...utils import vulkan
 from ...utils.configparser import CaseSensitiveConfigParser
 from .xemuPaths import XEMU_CONFIG
@@ -65,20 +65,20 @@ def createXemuConfig(iniConfig: CaseSensitiveConfigParser, system: Emulator, rom
     iniConfig.set("general", "show_welcome", "false")
 
     # Set Screenshot directory
-    iniConfig.set("general", "screenshot_dir", f'"{USERDATA}/screenshots"')
+    iniConfig.set("general", "screenshot_dir", f'"{SCREENSHOTS}"')
 
     # Fill sys sections
     iniConfig.set("sys", "mem_limit", f'"{system.config.get("xemu_memory", "64")}"')
 
     if system.name == "chihiro":
         iniConfig.set("sys", "mem_limit", '"128"')
-        iniConfig.set("sys.files", "flashrom_path", f'"{USERDATA}/bios/cerbios.bin"')
+        iniConfig.set("sys.files", "flashrom_path", f'"{BIOS}/cerbios.bin"')
     else:
-        iniConfig.set("sys.files", "flashrom_path", f'"{USERDATA}/bios/Complex_4627.bin"')
+        iniConfig.set("sys.files", "flashrom_path", f'"{BIOS}/Complex_4627.bin"')
 
-    iniConfig.set("sys.files", "bootrom_path", f'"{USERDATA}/bios/mcpx_1.0.bin"')
-    iniConfig.set("sys.files", "hdd_path", f'"{USERDATA}/saves/xbox/xbox_hdd.qcow2"')
-    iniConfig.set("sys.files", "eeprom_path", f'"{USERDATA}/saves/xbox/xemu_eeprom.bin"')
+    iniConfig.set("sys.files", "bootrom_path", f'"{BIOS}/mcpx_1.0.bin"')
+    iniConfig.set("sys.files", "hdd_path", f'"{SAVES}/xbox/xbox_hdd.qcow2"')
+    iniConfig.set("sys.files", "eeprom_path", f'"{SAVES}/xbox/xemu_eeprom.bin"')
     iniConfig.set("sys.files", "dvd_path", f'"{rom}"')
 
     # Audio quality

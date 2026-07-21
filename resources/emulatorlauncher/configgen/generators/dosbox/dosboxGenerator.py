@@ -2,69 +2,68 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Final
 
+from configgen.generators.Generator import Generator
+from configgen.generators.dosbox.dosbox_paths import DOSBOX_BIN, DOSBOX_CFG
+from configgen.utils.configparser import CaseSensitiveConfigParser
+
 from ... import Command
-from ...batoceraPaths import CONFIGS
-from ...utils.configparser import CaseSensitiveConfigParser
-from ..Generator import Generator
 
 if TYPE_CHECKING:
     from pathlib import Path
 
     from ...batoceraTypes import HotkeysContext
 
-_CONFIG_DIR: Final = CONFIGS / 'dosbox'
-# Use a separate file from dosbox.conf to avoid overwriting by dosbox
-_CUSTOM_CONFIG: Final = _CONFIG_DIR / 'dosbox-custom.conf'
 
 class DosBoxGenerator(Generator):
 
     # Main entry of the module
     # Return command
     def generate(self, system, rom, playersControllers, metadata, guns, wheels, gameResolution):
+        
         # Find rom path
-        batFile = rom / "dosbox.bat"
-        gameConfFile = rom / "dosbox.cfg"
+        game_bat_file = rom / "dosbox.bat"
+        game_cfg_file = rom / "dosbox.cfg"
 
         # configuration file
-        iniSettings = CaseSensitiveConfigParser(interpolation=None)
+        ini_settings = CaseSensitiveConfigParser(interpolation=None)
 
-        if _CUSTOM_CONFIG.exists():
-            iniSettings.read(_CUSTOM_CONFIG)
+        if DOSBOX_CFG.exists():
+            ini_settings.read(DOSBOX_CFG)
 
         # section sdl
-        if not iniSettings.has_section("sdl"):
-            iniSettings.add_section("sdl")
-        iniSettings.set("sdl", "output", "opengl")
+        if not ini_settings.has_section("sdl"):
+            ini_settings.add_section("sdl")
+        ini_settings.set("sdl", "output", "opengl")
 
         # section cpu
-        if not iniSettings.has_section("cpu"):
-            iniSettings.add_section("cpu")
+        if not ini_settings.has_section("cpu"):
+            ini_settings.add_section("cpu")
 
-        iniSettings.set("cpu", "core", system.config.get("dosbox_cpu_core", "auto"))
-        iniSettings.set("cpu", "cputype", system.config.get("dosbox_cpu_cputype", "auto"))
-        iniSettings.set("cpu", "cycles", system.config.get("dosbox_cpu_cycles", "auto"))
+        ini_settings.set("cpu", "core", system.config.get("dosbox_cpu_core", "auto"))
+        ini_settings.set("cpu", "cputype", system.config.get("dosbox_cpu_cputype", "auto"))
+        ini_settings.set("cpu", "cycles", system.config.get("dosbox_cpu_cycles", "auto"))
 
         # save
-        with _CUSTOM_CONFIG.open('w') as config:
-            iniSettings.write(config)
+        with DOSBOX_CFG.open('w') as config:
+            ini_settings.write(config)
 
         commandArray: list[str | Path] = [
-            '/usr/bin/dosbox',
+            DOSBOX_BIN,
             "-fullscreen",
             # This loads _CONFIG_DIR / dosbox.conf
             "-userconf",
             "-exit",
-            batFile,
+            game_bat_file,
             "-c", f"""set ROOT={rom}""",
         ]
 
-        if gameConfFile.exists():
+        if game_cfg_file.exists():
             # Then load gameConfFile if it exists
-            commandArray.extend(['-conf', gameConfFile])
+            commandArray.extend(['-conf', game_cfg_file])
 
         commandArray.extend([
             # Then load _CUSTOM_CONFIG after all the others
-            "-conf", _CUSTOM_CONFIG
+            "-conf", DOSBOX_CFG
         ])
 
         return Command.Command(array=commandArray)

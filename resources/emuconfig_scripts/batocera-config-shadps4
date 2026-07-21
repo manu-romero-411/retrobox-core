@@ -7,7 +7,7 @@ fi
 
 # Define the directory paths
 configPath="${USERDATA}/emuconfigs/shadps4"
-dlcPath="${USERDATA}/roms/ps4/DLC"
+dlcPath="${ROMS}/ps4/DLC"
 
 # Check if the directory exists, and create it if it doesn't
 if [ ! -d "$configPath" ]; then

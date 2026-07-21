@@ -3,10 +3,10 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Final
 
-from ...batoceraPaths import ensure_parents_and_open
+from ...retrobox_paths import ensure_parents_and_open
 from ...utils import vulkan
 from ...utils.configparser import CaseSensitiveConfigParser
-from .ppssppPaths import PPSSPP_PSP_SYSTEM_DIR
+from .ppssppPaths import _PPSSPP_SYSDIR
 import getpass
     
 if TYPE_CHECKING:
@@ -14,9 +14,9 @@ if TYPE_CHECKING:
 
 _logger = logging.getLogger(__name__)
 
-ppssppConfig: Final   = PPSSPP_PSP_SYSTEM_DIR / 'ppsspp.ini'
-ppssppControls: Final = PPSSPP_PSP_SYSTEM_DIR / 'controls.ini'
-ppssppRetroach: Final = PPSSPP_PSP_SYSTEM_DIR / 'ppsspp_retroachievements.dat'
+ppssppConfig: Final   = _PPSSPP_SYSDIR / 'ppsspp.ini'
+ppssppControls: Final = _PPSSPP_SYSDIR / 'controls.ini'
+ppssppRetroach: Final = _PPSSPP_SYSDIR / 'ppsspp_retroachievements.dat'
 
 def writePPSSPPConfig(system: Emulator):
     iniConfig = CaseSensitiveConfigParser(interpolation=None)

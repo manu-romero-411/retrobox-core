@@ -4,8 +4,8 @@ import codecs
 import logging
 from typing import TYPE_CHECKING, Final, TypedDict
 
-from ...batoceraPaths import mkdir_if_not_exists
-from .rpcs3Paths import RPCS3_CONFIG_DIR
+from ...retrobox_paths import mkdir_if_not_exists
+from .rpcs3Paths import _RPCS3_CFGDIR
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 _logger = logging.getLogger(__name__)
 
-_RPCS3_INPUT_DIR: Final = RPCS3_CONFIG_DIR / "input_configs" / "global"
+_RPCS3_INPUT_DIR: Final = _RPCS3_CFGDIR / "input_configs" / "global"
 
 class _InputMapping(TypedDict):
     config_name: str

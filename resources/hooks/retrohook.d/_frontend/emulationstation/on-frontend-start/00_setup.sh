@@ -40,7 +40,7 @@ timezones=/usr/share/zoneinfo
 EOF
 
 # Sincronización de juegos de PC
-pcgames-cover-restore
-heroic-es-sync  || true
-lutris-es-sync  || true
-steam-es-sync   || true
+"${USERDATA}/resources/utils/steamgriddb_downloader/pcgames-cover-restore"
+"${USERDATA}/resources/utils/pcgames-sync/heroic-es-sync" || true
+"${USERDATA}/resources/utils/pcgames-sync/lutris-es-sync"  || true
+"${USERDATA}/resources/utils/pcgames-sync/steam-es-sync"   || true

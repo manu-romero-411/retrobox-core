@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from .batoceraPaths import RESOURCES_DIR, ES_GAMES_METADATA, HOOKS, SAVES, GUN_OVERLAYS_DIR, HUD_CONFIG_FILE, USERDATA
+from .retrobox_paths import RESOURCES_DIR, ES_GAMES_METADATA, HOOKS, SAVES, GUN_OVERLAYS_DIR, HUD_CONFIG_FILE, USERDATA
 import sys
 
 sys.path.append(str(USERDATA))

@@ -4,8 +4,10 @@ import logging
 from os import environ
 from typing import TYPE_CHECKING
 
+from configgen.generators.azahar.azahar_paths import _AZAHAR_XDG, AZAHAR_INI, AZAHAR_SAVES
+
 from ... import Command
-from ...batoceraPaths import CACHE, CONFIGS, SAVES, USERDATA, ensure_parents_and_open
+from ...retrobox_paths import CACHE, SAVES, USERDATA, ensure_parents_and_open
 from ...controller import Controller, generate_sdl_game_controller_config
 from ...utils import vulkan
 from ...utils.configparser import CaseSensitiveRawConfigParser
@@ -31,15 +33,15 @@ class AzaharGenerator(Generator):
 
     # Main entry of the module
     def generate(self, system, rom, playersControllers, metadata, guns, wheels, gameResolution):
-        AzaharGenerator.writeAZAHARConfig(CONFIGS / "azahar-emu" / "qt-config.ini", system, playersControllers)
+        AzaharGenerator.writeAZAHARConfig(AZAHAR_INI, system, playersControllers)
 
         commandArray = ['/usr/bin/azahar', rom]
 
         return Command.Command(array=commandArray, env={
-            "XDG_CONFIG_HOME": CONFIGS,
-            "XDG_DATA_HOME": SAVES / "3ds",
+            "XDG_CONFIG_HOME": _AZAHAR_XDG,
+            "XDG_DATA_HOME": AZAHAR_SAVES,
             "XDG_CACHE_HOME": CACHE,
-            "XDG_RUNTIME_DIR": SAVES / "3ds" / "azahar-emu",
+            "XDG_RUNTIME_DIR": AZAHAR_SAVES / "azahar-emu",
             "SDL_GAMECONTROLLERCONFIG": generate_sdl_game_controller_config(playersControllers),
             "SDL_JOYSTICK_HIDAPI": "0"
             }
@@ -133,7 +135,7 @@ class AzaharGenerator(Generator):
         azaharConfig.set("UI", r"confirmClose\default", "false")
 
         # screenshots
-        azaharConfig.set("UI", r"Paths\screenshotPath", f"{USERDATA}/screenshots")
+        azaharConfig.set("UI", r"Paths\screenshotPath", f"{SCREENSHOTS}")
         azaharConfig.set("UI", r"Paths\screenshotPath\default", "false")
 
         ## [MISCELLANEOUS]

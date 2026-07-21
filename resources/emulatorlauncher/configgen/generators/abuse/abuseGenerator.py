@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from configgen.batoceraPaths import USERDATA
+from configgen.retrobox_paths import USERDATA
 
 from ... import Command
 from ...controller import generate_sdl_game_controller_config
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 class AbuseGenerator(Generator):
 
     def generate(self, system, rom, playersControllers, metadata, guns, wheels, gameResolution):
-        commandArray = ["abuse", "-datadir", f"{USERDATA}/roms/abuse/abuse_data"]
+        commandArray = ["abuse", "-datadir", f"{ROMS}/abuse/abuse_data"]
 
         return Command.Command(
             array=commandArray,

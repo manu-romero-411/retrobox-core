@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Final
 
-from configgen.batoceraPaths import _SYSTEM_LOCAL_BIN, CONFIGS, DEFAULTS_DIR, EMULATORS, ROMS, SAVES
+from configgen.retrobox_paths import DEFAULTS_DIR, EMULATORS, ROMS, SAVES
 
 _RYUJINX_EMUDIR: Final = EMULATORS / "ryujinx"
 RYUJINX_BIN: Final = _RYUJINX_EMUDIR / "ryujinx.AppImage"

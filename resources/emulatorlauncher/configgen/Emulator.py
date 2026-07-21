@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any
 
 import yaml
 
-from .batoceraPaths import DEFAULTS_DIR, ES_SETTINGS, SHADERS_DIR, configure_emulator
+from .retrobox_paths import DEFAULTS_DIR, ES_SETTINGS, SHADERS_DIR, configure_emulator
 from .config import Config, SystemConfig
 from .exceptions import MissingEmulator
 from .settings.unixSettings import UnixSettings

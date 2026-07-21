@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from ... import Command
-from ...batoceraPaths import _XDG_CONFIG, CACHE, CONFIGS, SAVES, USERDATA, configure_emulator, mkdir_if_not_exists
+from ...retrobox_paths import ROMS, SAVES, USERDATA, configure_emulator, mkdir_if_not_exists
 from ...utils import vulkan
 from ...utils.configparser import CaseSensitiveConfigParser
 from ..Generator import Generator
@@ -79,8 +79,8 @@ class DolphinGenerator(Generator):
 
         # Define default games path
         if "ISOPaths" not in dolphinSettings["General"]:
-            dolphinSettings.set("General", "ISOPath0", f"{USERDATA}/roms/wii")
-            dolphinSettings.set("General", "ISOPath1", f"{USERDATA}/roms/gamecube")
+            dolphinSettings.set("General", "ISOPath0", f"{ROMS}/wii")
+            dolphinSettings.set("General", "ISOPath1", f"{ROMS}/gamecube")
             dolphinSettings.set("General", "ISOPaths", "2")
 
         # increment savestates

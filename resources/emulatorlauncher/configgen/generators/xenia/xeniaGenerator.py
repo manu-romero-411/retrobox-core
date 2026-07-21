@@ -9,12 +9,12 @@ import sys
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-import toml
+import tomlkit
 
 from ... import Command
-from ...batoceraPaths import CACHE, CONFIGS, SAVES, configure_emulator, mkdir_if_not_exists
+from ...retrobox_paths import CACHE, SAVES, configure_emulator, mkdir_if_not_exists
 from ...controller import generate_sdl_game_controller_config
-from ...utils import vulkan, wine
+from ...utils import vulkan
 from ..Generator import Generator
 
 if TYPE_CHECKING:

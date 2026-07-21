@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import filecmp
 import logging
 import glob
 import os
@@ -14,17 +13,13 @@ from shutil import copyfile
 from pathlib import Path
 from typing import TYPE_CHECKING
 from configgen import Command as Command
-from configgen.batoceraPaths import DEFAULTS_DIR, SAVES, configure_emulator, ensure_symlink, mkdir_if_not_exists
-from configgen.controller import generate_sdl_game_controller_config, normalize_sdl_guid_for_emulator
+from configgen.retrobox_paths import DEFAULTS_DIR, SAVES, configure_emulator, ensure_symlink, mkdir_if_not_exists
+from configgen.controller import generate_sdl_game_controller_config
 from configgen.generators.Generator import Generator
 from configgen.generators.eden.edenPaths import SWITCH_FIRMWARE, SWITCH_KEYS, SWITCH_MODS_DIR, SWITCH_ROMS
 from configgen.generators.ryujinx.ryujinxPaths import _RYUJINX_XDG, RYUJINX_BIN, RYUJINX_BIS, RYUJINX_CONFIG, RYUJINX_CONFIG_FILE, RYUJINX_CONFIG_FILE_BFR, RYUJINX_CONFIG_FILE_TPL, RYUJINX_MODS_LINK, RYUJINX_SAVE_BASE, RYUJINX_SYSTEM_CONFIG_DIR, RYUJINX_SYSTEM_DIR, RYUJINX_USER_DIR, RYUJINX_SYSTEM_SAVES, RYUJINX_USER_SAVES
 from configgen.input import Input
 import hashlib
-
-#os.environ["PYSDL2_DLL_PATH"] = f"{BATOCERA_SHARE_DIR}/switch_sdl2/"
-#os.environ["PATH"] = "/userdata/system/switch/extra/xdgfix:" + os.environ.get("PATH", "")
-
 import sdl2
 from sdl2 import joystick
 from ctypes import create_string_buffer
@@ -394,13 +389,13 @@ class RyujinxGenerator(Generator):
         data = {}
 
         if os.path.exists(f"{RYUJINX_CONFIG_FILE_TPL}"):
-            with open(f"{RYUJINX_CONFIG_FILE_TPL}", "r+") as read_file:
+            with open(f"{RYUJINX_CONFIG_FILE_TPL}", "r+", encoding="utf-8") as read_file:
                 data = json.load(read_file)
 
         # if manual controller configuration, keep current config
         if system.isOptSet('ryu_auto_controller_config') and system.config["ryu_auto_controller_config"] == "0":
             if os.path.exists(f"{RYUJINX_CONFIG_FILE}"):
-                with open(f"{RYUJINX_CONFIG_FILE}", "r+") as read_file:
+                with open(f"{RYUJINX_CONFIG_FILE}", "r+", encoding="utf-8") as read_file:
                     current_data = json.load(read_file)
                     data['input_config'] = current_data['input_config']
 
@@ -444,7 +439,7 @@ class RyujinxGenerator(Generator):
         else:
             data['graphics_backend'] = 'Vulkan'
 
-        data['language_code'] = str(getLangFromEnvironment())
+        data['language_code'] = str(get_lang_from_sys_env())
         data['game_dirs'] = [f"{SWITCH_ROMS}"]
 
         sdl_mapping = generate_sdl_game_controller_config(playersControllers)
@@ -656,19 +651,34 @@ class RyujinxGenerator(Generator):
         else:
             data['enable_texture_recompression'] = False
 
-        with open(RyujinxConfigFile, "w") as outfile:
+        with open(RyujinxConfigFile, "w", encoding="utf-8") as outfile:
             outfile.write(json.dumps(data, indent=2))
 
         # just to be able to do diff to be sure than the emu is not changing values
-        with open(RyujinxConfigFileBefore, "w") as outfile:
+        with open(RyujinxConfigFileBefore, "w", encoding="utf-8") as outfile:
             outfile.write(json.dumps(data, indent=2))
 
         return sdl_mapping
 
-def getLangFromEnvironment():
+def get_lang_from_sys_env():
+    """Checks the current system locale and if it's available for the emulator and games.
+    If not, we fallback to en_US.
+    """
+
     lang = os.environ['LANG'][:5]
-    availableLanguages = [ "en_US", "pt_BR", "es_ES", "fr_FR", "de_DE","it_IT", "el_GR", "tr_TR", "zh_CN"]
-    if lang in availableLanguages:
+    available_langs = [
+        "en_US",
+        "pt_BR",
+        "es_ES",
+        "fr_FR",
+        "de_DE",
+        "it_IT",
+        "el_GR",
+        "tr_TR",
+        "zh_CN"
+    ]
+
+    if lang in available_langs:
         return lang
     else:
         return "en_US"

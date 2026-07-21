@@ -5,7 +5,7 @@ import subprocess
 from pathlib import Path
 from typing import Final
 
-from configgen.batoceraPaths import SYSTEM_SCRIPTS, USERDATA
+from configgen.retrobox_paths import SYSTEM_SCRIPTS, USERDATA
 
 _logger: Final = logging.getLogger(__name__)
 

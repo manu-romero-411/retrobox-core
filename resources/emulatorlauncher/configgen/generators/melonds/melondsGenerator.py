@@ -1,21 +1,18 @@
 from __future__ import annotations
 
+from abc import abstractmethod
 from typing import TYPE_CHECKING, Any, Final
 
-import toml
+import tomlkit
 
-from ... import Command
-from ...batoceraPaths import BIOS, CHEATS, CONFIGS, ROMS, SAVES, mkdir_if_not_exists
-from ...controller import Controller
-from ..Generator import Generator
+from configgen import Command
+from configgen.controller import Controller
+from configgen.generators.Generator import Generator
+from configgen.generators.melonds.melonds_paths import _MELONDS_CHEATS, _MELONDS_CFGDIR, _MELONDS_ROMS, _MELONDS_SAVES, _MELONDS_XDG, DSI_ARM7_BIOS, DSI_ARM9_BIOS, DSI_FIRMWARE, DSI_NAND, MELONDS_CFG, NDS_ARM7_BIOS, NDS_ARM9_BIOS, NDS_FIRMWARE
+from configgen.retrobox_paths import BIOS, mkdir_if_not_exists
 
 if TYPE_CHECKING:
-    from ...batoceraTypes import HotkeysContext
-
-_MELONDS_SAVES: Final = SAVES / "nds"
-_MELONDS_ROMS: Final = ROMS / "nds"
-_MELONDS_CHEATS: Final = CHEATS / "melonDS"
-_MELONDS_CONFIG: Final = CONFIGS / "melonDS"
+    from configgen.batoceraTypes import HotkeysContext
 
 class MelonDSGenerator(Generator):
 
@@ -25,19 +22,17 @@ class MelonDSGenerator(Generator):
             "keys": {"exit": ["KEY_LEFTALT", "KEY_F4"]}
         }
 
+    @abstractmethod
     def generate(self, system, rom, playersControllers, metadata, guns, wheels, gameResolution):
         # Verify paths
         mkdir_if_not_exists(_MELONDS_SAVES)
         mkdir_if_not_exists(_MELONDS_CHEATS)
-        mkdir_if_not_exists(_MELONDS_CONFIG)
-
-        # Config file path
-        configFileName = _MELONDS_CONFIG / "melonDS.toml"
+        mkdir_if_not_exists(_MELONDS_CFGDIR)
 
         # Load existing config if file exists
-        if configFileName.exists():
-            with configFileName.open() as toml_file:
-                config = toml.load(toml_file)
+        if MELONDS_CFG.exists():
+            with MELONDS_CFG.open() as toml_file:
+                config = tomlkit.load(toml_file)
         else:
             config = {}
 
@@ -49,9 +44,9 @@ class MelonDSGenerator(Generator):
             "LastROMFolder": str(_MELONDS_ROMS),
             "MouseHideSeconds": 5,
             "DS": {
-                "FirmwarePath": str(BIOS / "firmware.bin"),
-                "BIOS7Path": str(BIOS / "bios7.bin"),
-                "BIOS9Path": str(BIOS / "bios9.bin")
+                "FirmwarePath": str(NDS_FIRMWARE),
+                "BIOS7Path": str(NDS_ARM7_BIOS),
+                "BIOS9Path": str(NDS_ARM9_BIOS)
             },
             "DLDI": {
                 "FolderPath": str(_MELONDS_SAVES),
@@ -60,10 +55,10 @@ class MelonDSGenerator(Generator):
             },
             "DSi": {
                 "FullBIOSBoot": False,
-                "FirmwarePath": str(BIOS / "dsi_firmware.bin"),
-                "BIOS9Path": str(BIOS / "dsi_bios9.bin"),
-                "BIOS7Path": str(BIOS / "dsi_bios7.bin"),
-                "NANDPath": str(BIOS / "dsi_nand.bin"),
+                "FirmwarePath": str(DSI_FIRMWARE),
+                "BIOS9Path": str(DSI_ARM9_BIOS),
+                "BIOS7Path": str(DSI_ARM7_BIOS),
+                "NANDPath": str(DSI_NAND),
                 "SD": {
                     "FolderPath": str(_MELONDS_SAVES),
                     "ImagePath": "dsisd.bin",
@@ -231,14 +226,14 @@ class MelonDSGenerator(Generator):
         config.update(base_config)
 
         # Write updated configuration back to the file
-        with configFileName.open("w") as toml_file:
-            toml.dump(config, toml_file)
+        with MELONDS_CFG.open("w") as toml_file:
+            tomlkit.dump(config, toml_file)
 
         commandArray = ["/usr/bin/melonDS", "-f", rom]
         return Command.Command(
             array=commandArray,
             env={
-                "XDG_CONFIG_HOME": CONFIGS,
-                "XDG_DATA_HOME": SAVES
+                "XDG_CONFIG_HOME": _MELONDS_XDG,
+                "XDG_DATA_HOME": _MELONDS_SAVES
             }
         )

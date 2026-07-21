@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from configgen import Command as Command
-from configgen.batoceraPaths import DEFAULTS_DIR, SAVES, configure_emulator
+from configgen.retrobox_paths import DEFAULTS_DIR, SAVES, configure_emulator
 from configgen.controller import get_dpad_button_indices_evdev, get_dpad_button_indices_sysfs, map_hidraw_to_evdev
 from configgen.generators.Generator import Generator
 from configgen.utils.configparser import CaseSensitiveRawConfigParser

@@ -2,12 +2,14 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from ... import Command
-from ...controller import generate_sdl_game_controller_config, write_sdl_controller_db
-from ..Generator import Generator
+from configgen import Command
+from configgen.controller import generate_sdl_game_controller_config, write_sdl_controller_db
+from configgen.generators.Generator import Generator
+from configgen.retrobox_paths import EMULATORS
+
 
 if TYPE_CHECKING:
-    from ...batoceraTypes import HotkeysContext
+    from configgen.batoceraTypes import HotkeysContext
 
 class ShGenerator(Generator):
 
@@ -25,8 +27,9 @@ class ShGenerator(Generator):
         # PortMaster uses this.
         write_sdl_controller_db(playersControllers)
 
-        commandArray = ["/bin/bash", shrom]
-        return Command.Command(array=commandArray,env={
+        command_array = ["/bin/bash", shrom]
+        return Command.Command(array=command_array,env={
+            #"XDG_CONFIG_HOME": EMULATORS,
             "SDL_GAMECONTROLLERCONFIG": generate_sdl_game_controller_config(playersControllers)
         })
 

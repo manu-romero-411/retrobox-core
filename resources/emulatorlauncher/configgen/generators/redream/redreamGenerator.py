@@ -1,22 +1,15 @@
 from __future__ import annotations
 
-import codecs
-import filecmp
-from pathlib import Path
-from shutil import copyfile
-from typing import TYPE_CHECKING, Final
+from typing import TYPE_CHECKING
 
-from ... import Command
-from ...batoceraPaths import CONFIGS, ROMS, mkdir_if_not_exists
-from ...controller import generate_sdl_game_controller_config
-from ..Generator import Generator
+from configgen import Command
+from configgen.controller import generate_sdl_game_controller_config
+from configgen.generators.Generator import Generator
+from configgen.generators.redream.redream_paths import _REDREAM_ROMS, REDREAM_BIN, REDREAM_CFG, REDREAM_DIR
+from configgen.retrobox_paths import mkdir_if_not_exists
 
 if TYPE_CHECKING:
     from ...batoceraTypes import HotkeysContext
-
-redream_file: Final = Path("/usr/bin/redream")
-redreamConfig: Final = CONFIGS / "redream"
-redreamRoms: Final = ROMS / "dreamcast"
 
 class RedreamGenerator(Generator):
 
@@ -27,18 +20,12 @@ class RedreamGenerator(Generator):
         }
 
     def generate(self, system, rom, playersControllers, metadata, guns, wheels, gameResolution):
-        redream_exec = redreamConfig / "redream"
 
-        mkdir_if_not_exists(redreamConfig)
+        mkdir_if_not_exists(REDREAM_DIR)
 
-        if not redream_exec.exists() or not filecmp.cmp(redream_file, redream_exec):
-            copyfile(redream_file, redream_exec)
-            redream_exec.chmod(0o0775)
-
-        configFileName = redreamConfig / "redream.cfg"
-        with codecs.open(str(configFileName), "w") as f:
+        with open(REDREAM_CFG, "w", encoding="utf-8") as f:
             # set the roms path
-            f.write(f"gamedir={redreamRoms}\n")
+            f.write(f"gamedir={_REDREAM_ROMS}\n")
             # force fullscreen
             f.write("mode=exclusive fullscreen\n")
             f.write("fullmode=exclusive fullscreen\n")
@@ -134,7 +121,7 @@ class RedreamGenerator(Generator):
             f.write(f"broadcast={system.config.get('redreamBroadcast', 'ntsc')}\n")
             f.write(f"cable={system.config.get('redreamCable', 'vga')}\n")
 
-        commandArray = [redream_exec, rom]
+        commandArray = [REDREAM_BIN, rom]
         return Command.Command(
             array=commandArray,
             env={

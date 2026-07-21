@@ -5,7 +5,7 @@ import subprocess
 from typing import TYPE_CHECKING
 
 from ... import Command
-from ...batoceraPaths import BIOS, CONFIGS, mkdir_if_not_exists
+from ...retrobox_paths import BIOS, CONFIGS, mkdir_if_not_exists
 from ...controller import generate_sdl_game_controller_config
 from ..Generator import Generator
 

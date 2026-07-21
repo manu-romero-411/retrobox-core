@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from ...batoceraPaths import RESOURCES_DIR, mkdir_if_not_exists, USERDATA
+from ...retrobox_paths import BIOS, CHEATS, RECORDINGS, RESOURCES_DIR, SAVES, SCREENSHOTS, mkdir_if_not_exists, USERDATA
 from ...settings.unixSettings import UnixSettings
-from .libretroPaths import _RETROARCH_CONFIG, RETROARCH_CUSTOM
+from .libretroPaths import _RETROARCH_CONFIG, _RETROARCH_ROOT, RETROARCH_ASSETS, RETROARCH_CUSTOM, RETROARCH_SHADERS
 
 def generate_retroarch_custom() -> None:
     # retroarchcustom.cfg
@@ -30,7 +30,7 @@ def generate_retroarch_custom() -> None:
 
     # Input
     retroarch_settings.save('input_autodetect_enable',           '"false"')
-    retroarch_settings.save('input_joypad_driver',               '"sdl2"')
+    retroarch_settings.save('input_joypad_driver',               '"udev"')
     retroarch_settings.save('input_player1_analog_dpad_mode',    '"1"')
     retroarch_settings.save('input_player2_analog_dpad_mode',    '"1"')
     retroarch_settings.save('input_player3_analog_dpad_mode',    '"1"')
@@ -85,17 +85,17 @@ def generate_retroarch_custom() -> None:
 def generate_rarch_custom_paths(retroarch_settings: UnixSettings) -> None:
     # Path Retroarch
     retroarch_settings.save('core_options_path',             f'"{_RETROARCH_CONFIG}/cores/retroarch-core-options.cfg"')
-    retroarch_settings.save('assets_directory',              f'"{_RETROARCH_CONFIG}/assets"')
-    retroarch_settings.save('screenshot_directory',          f'"{USERDATA}/screenshots/"')
-    retroarch_settings.save('recording_output_directory',    f'"{USERDATA}/screenshots/"')
-    retroarch_settings.save('savestate_directory',           f'"{USERDATA}/saves/"')
-    retroarch_settings.save('savefile_directory',            f'"{USERDATA}/saves/"')
-    retroarch_settings.save('extraction_directory',          f'"{USERDATA}/extractions/"')
-    retroarch_settings.save('cheat_database_path',           f'"{USERDATA}/cheats/cht/"')
-    retroarch_settings.save('cheat_settings_path',           f'"{USERDATA}/cheats/saves/"')
-    retroarch_settings.save('system_directory',              f'"{USERDATA}/bios/"')
+    retroarch_settings.save('assets_directory',              f'"{RETROARCH_ASSETS}"')
+    retroarch_settings.save('screenshot_directory',          f'"{SCREENSHOTS}/"')
+    retroarch_settings.save('recording_output_directory',    f'"{RECORDINGS}/"')
+    retroarch_settings.save('savestate_directory',           f'"{SAVES}/"')
+    retroarch_settings.save('savefile_directory',            f'"{SAVES}/"')
+    retroarch_settings.save('extraction_directory',          f'"{_RETROARCH_ROOT}/extractions/"')
+    retroarch_settings.save('cheat_database_path',           f'"{CHEATS}/cht/"')
+    retroarch_settings.save('cheat_settings_path',           f'"{CHEATS}/saves/"')
+    retroarch_settings.save('system_directory',              f'"{BIOS}/"')
     retroarch_settings.save('joypad_autoconfig_dir',         f'"{_RETROARCH_CONFIG}/autoconfig/"')
-    retroarch_settings.save('video_shader_dir',              f'"{_RETROARCH_CONFIG}/shaders/"')
+    retroarch_settings.save('video_shader_dir',              f'"{RETROARCH_SHADERS}/"')
     retroarch_settings.save('video_font_path',               '"/usr/share/fonts/liberation-mono-fonts/LiberationMono-Regular.ttf"')
-    retroarch_settings.save('video_filter_dir',              f'"{RESOURCES_DIR}/video_filters"')
-    retroarch_settings.save('audio_filter_dir',              f'"{RESOURCES_DIR}/audio_filters"')
+    retroarch_settings.save('video_filter_dir',              f'"{_RETROARCH_ROOT}/filters/video"')
+    retroarch_settings.save('audio_filter_dir',              f'"{_RETROARCH_ROOT}/filters/audio"')

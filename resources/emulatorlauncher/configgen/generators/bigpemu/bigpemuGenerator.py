@@ -3,8 +3,10 @@ from __future__ import annotations
 import json
 from typing import TYPE_CHECKING, Any, NotRequired, TypedDict
 
+from configgen.generators.bigpemu.bigpemu_paths import BIGPEMU_CFG
+
 from ... import Command
-from ...batoceraPaths import CONFIGS, mkdir_if_not_exists
+from ...retrobox_paths import mkdir_if_not_exists
 from ...controller import generate_sdl_game_controller_config
 from ...utils import videoMode
 from ..Generator import Generator
@@ -12,9 +14,7 @@ from ..Generator import Generator
 if TYPE_CHECKING:
     from ...input import Input
     from ...batoceraTypes import HotkeysContext
-
-bigPemuConfig = CONFIGS / "bigpemu" / "BigPEmuConfig.bigpcfg"
-
+    
 class _ButtonSequence(TypedDict):
     button: str
     keyboard: NotRequired[str]
@@ -229,13 +229,13 @@ class BigPEmuGenerator(Generator):
 
     def generate(self, system, rom, playersControllers, metadata, guns, wheels, gameResolution):
 
-        mkdir_if_not_exists(bigPemuConfig.parent)
+        mkdir_if_not_exists(BIGPEMU_CFG.parent)
 
         # Delete the config file to update controllers
         # As it doesn't like to be updated
         # ¯\_(ツ)_/¯
-        if bigPemuConfig.exists():
-            bigPemuConfig.unlink()
+        if BIGPEMU_CFG.exists():
+            BIGPEMU_CFG.unlink()
 
         config: dict[str, Any] = {}
 
@@ -394,10 +394,10 @@ class BigPEmuGenerator(Generator):
         config["BigPEmuConfig"]["Input"]["InputVer"] = 2
         config["BigPEmuConfig"]["Input"]["InputPluginVer"] = 666
 
-        bigPemuConfig.write_text(json.dumps(config, indent=4))
+        BIGPEMU_CFG.write_text(json.dumps(config, indent=4))
 
         # Run the emulator
-        commandArray = ["/usr/bigpemu/bigpemu", rom, "-cfgpathabs", str(bigPemuConfig)]
+        commandArray = ["/usr/bigpemu/bigpemu", rom, "-cfgpathabs", str(BIGPEMU_CFG)]
 
         environment = {
             "SDL_GAMECONTROLLERCONFIG": generate_sdl_game_controller_config(playersControllers),

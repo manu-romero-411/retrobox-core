@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Final, cast
 
 from ... import Command
-from ...batoceraPaths import BIOS, CONFIGS, SCREENSHOTS, USERDATA, mkdir_if_not_exists
+from ...retrobox_paths import BIOS, CONFIGS, SCREENSHOTS, USERDATA, mkdir_if_not_exists
 from ..Generator import Generator
 
 if TYPE_CHECKING:

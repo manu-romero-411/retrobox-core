@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Final
 
-from ...batoceraPaths import BIOS, EMULATORS, ROMS, SAVES
+from ...retrobox_paths import BIOS, EMULATORS, ROMS, SAVES
 
 _CEMU_EMUDIR: Final  = EMULATORS / 'cemu'
 _CEMU_XDG: Final = _CEMU_EMUDIR / 'config'

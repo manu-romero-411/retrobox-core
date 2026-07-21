@@ -12,7 +12,7 @@ import time
 from pathlib import Path
 from typing import TYPE_CHECKING, Final
 
-from ..batoceraPaths import ROTATION_FILE, DEFAULTS_DIR, SYSTEM_SCRIPTS
+from ..retrobox_paths import ROTATION_FILE, DEFAULTS_DIR, SYSTEM_SCRIPTS
 from ..exceptions import RetroboxException
 
 if TYPE_CHECKING:

@@ -4,7 +4,7 @@ import os
 from typing import TYPE_CHECKING, Final
 
 from ... import Command
-from ...batoceraPaths import BIOS, HOME, ROMS, SCREENSHOTS, ensure_parents_and_open
+from ...retrobox_paths import BIOS, HOME, ROMS, SCREENSHOTS, ensure_parents_and_open
 from ...controller import generate_sdl_game_controller_config
 from ...exceptions import RetroboxException
 from ..Generator import Generator

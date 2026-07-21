@@ -7,7 +7,7 @@ import pyudev
 
 from configgen.controller import normalize_sdl_guid_for_emulator
 
-from ...batoceraPaths import mkdir_if_not_exists
+from ...retrobox_paths import mkdir_if_not_exists
 from .cemuPaths import CEMU_CONTROLLER_PROFILES
 
 if TYPE_CHECKING:

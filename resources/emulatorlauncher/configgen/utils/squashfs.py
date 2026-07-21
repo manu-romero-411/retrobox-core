@@ -6,7 +6,7 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import TYPE_CHECKING, Final
 
-from ..batoceraPaths import mkdir_if_not_exists, SQUASHFS_DIR
+from ..retrobox_paths import mkdir_if_not_exists, SQUASHFS_DIR
 from ..exceptions import RetroboxException
 
 if TYPE_CHECKING:

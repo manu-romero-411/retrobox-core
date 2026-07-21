@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Final, Literal, Self, TypedDict, Unpack, cast
 
 _logger: Final = logging.getLogger(__name__)
 
-from .batoceraPaths import BATOCERA_ES_DIR, HOME, USER_ES_DIR
+from .retrobox_paths import BATOCERA_ES_DIR, HOME, USER_ES_DIR
 from .exceptions import RetroboxException
 from .input import Input, InputDict, InputMapping
 

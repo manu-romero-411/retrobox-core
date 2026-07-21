@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from ...batoceraPaths import BIOS, ES_GAMES_METADATA, ROMS, ensure_parents_and_open
+from ...retrobox_paths import BIOS, ES_GAMES_METADATA, ROMS, ensure_parents_and_open
 from ...gun import Guns, guns_need_crosses
 from ...utils import metadata as _metadataUtils, videoMode
 from ...utils.configparser import CaseSensitiveConfigParser
@@ -1152,9 +1152,10 @@ def _melondsds_options(
     _set_from_system(coreSettings, 'melonds_cursor_timeout', system, 'melondsds_cursor_timeout', default='3')
     _set_from_system(coreSettings, 'melonds_touch_mode', system, 'melondsds_touchmode', default='auto')
     # set 1 screen for now top/botton
-    _set(coreSettings, 'melonds_number_of_screen_layouts', '1')
+    _set(coreSettings, 'melonds_number_of_screen_layouts', '2')
     _set_from_system(coreSettings, 'melonds_screen_gap', system, 'melondsds_screen_gap', default='0')
     _set(coreSettings, 'melonds_screen_layout1', 'top-bottom')
+    _set(coreSettings, 'melonds_screen_layout2', 'right-left')
 
     # Firmware Settings
     _set_from_system(coreSettings, 'melonds_firmware_wfc_dns', system, 'melondsds_dns', default='178.62.43.212')

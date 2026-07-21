@@ -2,7 +2,7 @@
 import os
 from pathlib import Path
 from typing import Final
-from configgen.batoceraPaths import _SYSTEM_LOCAL_BIN, BIOS, CONFIGS, EMULATORS, ROMS, SAVES, _XDG_DATA, ensure_symlink, mkdir_if_not_exists
+from configgen.retrobox_paths import _SYSTEM_LOCAL_BIN, BIOS, EMULATORS, ROMS, SAVES, _XDG_DATA, ensure_symlink, mkdir_if_not_exists
 
 # --- Base ---
 SWITCH_BIOS: Final = BIOS / "switch"
@@ -32,8 +32,6 @@ SYSTEM_SAVE_TARGET: Final = SAVE_BASE / "save/save_system"
 EDEN_USER_SAVE_LINK: Final = EDEN_DATA / "nand/user/save"
 EDEN_SYSTEM_SAVE_LINK: Final = EDEN_DATA / "nand/system/save"
 EDEN_MODS_LINK: Final = EDEN_DATA / "load"
-
-YUZU_CONFIG_FILE: Final = CONFIGS / "yuzu/qt-config.ini"
 
 # GAMEPAD RARE CONFIG
 # Mandos que exponen el dpad como BTN_DPAD_* pero SDL los virtualiza como hat

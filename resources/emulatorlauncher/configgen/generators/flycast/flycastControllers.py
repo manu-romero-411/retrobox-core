@@ -4,11 +4,11 @@ import configparser
 import logging
 from typing import TYPE_CHECKING, Final, Literal
 
-from ...batoceraPaths import mkdir_if_not_exists
-from .flycastPaths import FLYCAST_MAPPING
+from configgen.generators.flycast.flycastPaths import FLYCAST_MAPPING
+from configgen.retrobox_paths import mkdir_if_not_exists
 
 if TYPE_CHECKING:
-    from ...controller import Controller
+    from configgen.controller import Controller
 
 _logger = logging.getLogger(__name__)
 

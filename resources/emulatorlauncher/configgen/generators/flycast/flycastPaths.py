@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Final
 
-from ...batoceraPaths import BIOS, CONFIGS, DEFAULTS_DIR, EMULATORS, SAVES
+from ...retrobox_paths import BIOS, DEFAULTS_DIR, EMULATORS, SAVES
 
 _FLYCAST_EMUDIR: Final = EMULATORS / 'flycast'
 FLYCAST_BIN: Final = _FLYCAST_EMUDIR / 'flycast.AppImage'

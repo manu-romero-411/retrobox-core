@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Final
 
-from ...batoceraPaths import CONFIGS, SAVES
+from ...retrobox_paths import SAVES
 
 XEMU_BIN: Final = Path('/usr/bin/xemu')
 XEMU_SAVES: Final = SAVES / 'xbox'

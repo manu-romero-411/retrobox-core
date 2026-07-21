@@ -8,13 +8,13 @@ from typing import TYPE_CHECKING, Any, cast
 from ruamel.yaml import YAML
 
 from ... import Command
-from ...batoceraPaths import BIOS, CACHE, CONFIGS, configure_emulator, mkdir_if_not_exists
+from ...retrobox_paths import BIOS, CACHE, configure_emulator, mkdir_if_not_exists
 from ...exceptions import RetroboxException
 from ...utils import vulkan
 from ...utils.configparser import CaseSensitiveConfigParser
 from ..Generator import Generator
 from . import rpcs3Controllers
-from .rpcs3Paths import RPCS3_BIN, RPCS3_CONFIG, RPCS3_CONFIG_DIR, RPCS3_CURRENT_CONFIG
+from .rpcs3Paths import _RPCS3_XDG, RPCS3_BIN, RPCS3_CONFIG, _RPCS3_CFGDIR, RPCS3_CURRENT_CONFIG
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -239,46 +239,46 @@ class Rpcs3Generator(Generator):
             yaml.dump(rpcs3ymlconfig, file)
 
         # copy icon files to config
-        icon_target = RPCS3_CONFIG_DIR / 'Icons'
+        icon_target = _RPCS3_CFGDIR / 'Icons'
         mkdir_if_not_exists(icon_target)
         shutil.copytree('/usr/share/rpcs3/Icons/', icon_target, dirs_exist_ok=True, copy_function=shutil.copy2)
 
         # determine the rom name
 
         if rom.suffix == ".psn":
-            romName: Path | None = None
+            rom_name: Path | None = None
 
             with rom.open() as fp:
                 for line in fp:
                     if len(line) >= 9:
-                        romName = RPCS3_CONFIG_DIR / "dev_hdd0" / "game" / line.strip().upper() / "USRDIR" / "EBOOT.BIN"
+                        rom_name = _RPCS3_CFGDIR / "dev_hdd0" / "game" / line.strip().upper() / "USRDIR" / "EBOOT.BIN"
 
-            if romName is None:
+            if rom_name is None:
                 raise RetroboxException(f'No game ID found in {rom}')
         
         elif rom.suffix.lower() == ".iso":
-            romName = rom
+            rom_name = rom
         elif configure_emulator(rom):
-            romName: Path | None = None
+            rom_name: Path | None = None
         else:
-            romName = rom / "PS3_GAME" / "USRDIR" / "EBOOT.BIN"
+            rom_name = rom / "PS3_GAME" / "USRDIR" / "EBOOT.BIN"
 
-        if romName:
-            commandArray: list[Path | str] = [RPCS3_BIN, romName]
+        if rom_name:
+            command_array: list[Path | str] = [RPCS3_BIN, rom_name]
         else:
-            commandArray: list[Path | str] = [RPCS3_BIN]
+            command_array: list[Path | str] = [RPCS3_BIN]
 
-        if not system.config.get_bool("rpcs3_gui") and romName:
-            commandArray.append("--no-gui")
+        if not system.config.get_bool("rpcs3_gui") and rom_name:
+            command_array.append("--no-gui")
 
         # firmware not installed and available : instead of starting the game, install it
         if Rpcs3Generator.getFirmwareVersion() is None and (BIOS / "PS3UPDAT.PUP").exists():
-            commandArray = [RPCS3_BIN, "--installfw", BIOS / "PS3UPDAT.PUP"]
+            command_array = [RPCS3_BIN, "--installfw", BIOS / "PS3UPDAT.PUP"]
 
         return Command.Command(
-            array=commandArray,
+            array=command_array,
             env={
-                "XDG_CONFIG_HOME": CONFIGS,
+                "XDG_CONFIG_HOME": _RPCS3_XDG,
                 "XDG_CACHE_HOME": CACHE
             }
         )
@@ -295,7 +295,7 @@ class Rpcs3Generator(Generator):
             "Square": 10,
             "Circle": 11
         }
-        with (RPCS3_CONFIG_DIR / "gem_gun.yml").open("w") as f:
+        with (_RPCS3_CFGDIR / "gem_gun.yml").open("w") as f:
             for player in range(1, 5):
                 f.write(f"Player {player}:\n")
                 for psmove, gun_num in gunMapping.items():
@@ -314,7 +314,7 @@ class Rpcs3Generator(Generator):
     @staticmethod
     def getFirmwareVersion() -> str | None:
         try:
-            with (RPCS3_CONFIG_DIR / "dev_flash" / "vsh" / "etc" / "version.txt").open("r") as stream:
+            with (_RPCS3_CFGDIR / "dev_flash" / "vsh" / "etc" / "version.txt").open("r") as stream:
                 lines = stream.readlines()
             for line in lines:
                 matches = re.match("^release:(.*):", line)

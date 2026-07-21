@@ -4,7 +4,7 @@ import hashlib
 from typing import TYPE_CHECKING, Final
 from xml.dom import minidom
 
-from ...batoceraPaths import _USER_HOME, HOME, ensure_parents_and_open, mkdir_if_not_exists
+from ...retrobox_paths import _USER_HOME, ensure_parents_and_open, mkdir_if_not_exists
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -153,4 +153,4 @@ def writeKodiConfig(controllersFromES: Controllers) -> None:
             f.write("<advancedsettings><splash>false</splash></advancedsettings>")
 
 def vidpid(guid: str) -> tuple[str, str]:
-  return guid[10:12]+guid[8:10], guid[18:20]+guid[16:18]
+    return guid[10:12]+guid[8:10], guid[18:20]+guid[16:18]

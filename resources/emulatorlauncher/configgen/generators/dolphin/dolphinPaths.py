@@ -1,7 +1,7 @@
 from __future__ import annotations
 from pathlib import Path
 from typing import Final
-from ...batoceraPaths import BIOS, CONFIGS, EMULATORS, SAVES
+from ...retrobox_paths import BIOS, EMULATORS, SAVES
 
 DOLPHIN_BIN:     Final = EMULATORS / 'dolphin-emu' / 'dolphin.AppImage'
 DOLPHIN_XDG:  Final = EMULATORS / 'dolphin-emu' / 'config'

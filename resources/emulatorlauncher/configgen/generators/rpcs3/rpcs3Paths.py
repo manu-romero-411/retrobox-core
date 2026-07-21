@@ -3,11 +3,14 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Final
 
-from ...batoceraPaths import CONFIGS
+from configgen.retrobox_paths import EMULATORS
 
-RPCS3_CONFIG_DIR: Final = CONFIGS / 'rpcs3'
-RPCS3_CONFIG: Final = RPCS3_CONFIG_DIR / 'config.yml'
-RPCS3_CURRENT_CONFIG: Final = RPCS3_CONFIG_DIR / 'GuiConfigs' / 'CurrentSettings.ini'
-RPCS3_CONFIG_INPUT: Final = RPCS3_CONFIG_DIR / 'config_input.yml'
-RPCS3_CONFIG_EVDEV: Final = RPCS3_CONFIG_DIR / 'InputConfigs' / 'Evdev' / 'Default Profile.yml'
+
+_RPCS3_DIR: Final = EMULATORS / 'rpcs3'
+_RPCS3_XDG: Final = _RPCS3_DIR / 'configs'
+_RPCS3_CFGDIR: Final = _RPCS3_XDG / 'rpcs3'
+RPCS3_CONFIG: Final = _RPCS3_CFGDIR / 'config.yml'
+RPCS3_CURRENT_CONFIG: Final = _RPCS3_CFGDIR / 'GuiConfigs' / 'CurrentSettings.ini'
+RPCS3_CONFIG_INPUT: Final = _RPCS3_CFGDIR / 'config_input.yml'
+RPCS3_CONFIG_EVDEV: Final = _RPCS3_CFGDIR / 'InputConfigs' / 'Evdev' / 'Default Profile.yml'
 RPCS3_BIN: Final = Path('/usr/bin/rpcs3')

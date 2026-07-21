@@ -4,15 +4,16 @@ from os import environ
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from configgen.generators.duckstation.duckstation_generator import _DUCKSTATION_XDG, DUCKSTATION_CFG
+
 from ... import Command
-from ...batoceraPaths import (
+from ...retrobox_paths import (
     BIOS,
     CACHE,
     CHEATS,
-    CONFIGS,
+    ROMS,
     SAVES,
     SCREENSHOTS,
-    USERDATA,
     ensure_parents_and_open,
     mkdir_if_not_exists,
 )
@@ -48,9 +49,8 @@ class DuckstationGenerator(Generator):
             commandArray = ["duckstation-nogui", "-batch", "-fullscreen", "--", rom ]
 
         settings = CaseSensitiveConfigParser(interpolation=None)
-        settings_path = CONFIGS / "duckstation" / "settings.ini"
-        if settings_path.exists():
-            settings.read(settings_path)
+        if DUCKSTATION_CFG.exists():
+            settings.read(DUCKSTATION_CFG)
 
         ## [Main]
         if not settings.has_section("Main"):
@@ -114,7 +114,7 @@ class DuckstationGenerator(Generator):
         ## [BIOS]
         if not settings.has_section("BIOS"):
             settings.add_section("BIOS")
-        settings.set("BIOS", "SearchDirectory", f"{USERDATA}/bios")
+        settings.set("BIOS", "SearchDirectory", f"{BIOS}")
         # Boot Logo
         settings.set("BIOS", "PatchFastBoot", system.config.get("duckstation_PatchFastBoot", "false"))
         # Find & populate BIOS
@@ -219,7 +219,7 @@ class DuckstationGenerator(Generator):
         ## [GameList]
         if not settings.has_section("GameList"):
             settings.add_section("GameList")
-        settings.set("GameList" , "RecursivePaths", f"{USERDATA}/roms/psx")
+        settings.set("GameList" , "RecursivePaths", f"{ROMS}/psx")
 
         ## [Cheevos]
         if not settings.has_section("Cheevos"):
@@ -427,7 +427,7 @@ class DuckstationGenerator(Generator):
         settings.set("UI", "UnofficialBuildWarningConfirmed", "true")
 
         # Save config
-        with ensure_parents_and_open(settings_path, 'w') as configfile:
+        with ensure_parents_and_open(DUCKSTATION_CFG, 'w') as configfile:
             settings.write(configfile)
 
         # write our own gamecontrollerdb.txt file before launching the game
@@ -444,8 +444,8 @@ class DuckstationGenerator(Generator):
         return Command.Command(
             array=commandArray,
             env={
-                "LD_LIBRARY_PATH": "/usr/stenzek-shaderc/lib:/usr/lib",
-                "XDG_CONFIG_HOME": CONFIGS,
+                #"LD_LIBRARY_PATH": "/usr/stenzek-shaderc/lib:/usr/lib",
+                "XDG_CONFIG_HOME": _DUCKSTATION_XDG,
                 "QT_QPA_PLATFORM": qt_qpa_platform,
                 "SDL_GAMECONTROLLERCONFIG": generate_sdl_game_controller_config(playersControllers),
                 "SDL_JOYSTICK_HIDAPI": "0"

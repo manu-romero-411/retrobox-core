@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from ... import Command
-from ...batoceraPaths import ensure_parents_and_open, mkdir_if_not_exists
+from ...retrobox_paths import ensure_parents_and_open, mkdir_if_not_exists
 from ...utils.configparser import CaseSensitiveConfigParser
 from ..Generator import Generator
 from . import mupenConfig, mupenControllers

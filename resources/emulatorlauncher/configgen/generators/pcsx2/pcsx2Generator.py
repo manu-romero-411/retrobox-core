@@ -8,10 +8,9 @@ from pathlib import Path
 from typing import TYPE_CHECKING, ClassVar, Final
 
 from ... import Command
-from ...batoceraPaths import (
+from ...retrobox_paths import (
     BIOS,
     CACHE,
-    CONFIGS,
     DATAINIT_DIR,
     EMULATORS,
     ROMS,
