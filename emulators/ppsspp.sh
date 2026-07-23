@@ -66,6 +66,14 @@ function install_appimage(){
     chmod +x "$INSTALL_DIR/ppsspp.AppImage"
     mkdir -p "${INSTALL_DIR}/config"
 
+    echo "[INFO] Extrayendo AppImage..."
+    (
+        cd "${INSTALL_DIR}" || exit 1
+        "${INSTALL_DIR}/ppsspp.AppImage" --appimage-extract >/dev/null 2>&1
+        mv "${INSTALL_DIR}/squashfs-root" "${INSTALL_DIR}/app"
+        rm "${INSTALL_DIR}/ppsspp.AppImage"
+    )
+
     # 8. Limpiar
     rm -rf "$TMP_DIR"
     echo "[INFO] Instalación de AppImage completada."

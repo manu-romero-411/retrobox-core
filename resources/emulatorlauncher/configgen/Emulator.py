@@ -1,6 +1,10 @@
 from __future__ import annotations
 
 import logging
+import os
+import shlex
+import stat
+import tempfile
 import xml.etree.ElementTree as ET
 from collections.abc import Mapping
 from dataclasses import InitVar, dataclass, field
@@ -84,6 +88,44 @@ def _load_system_config(system_name: str, /) -> dict[str, Any]:
         _dict_merge(data, defaults['options'])
 
     return data
+
+def generate_bash_wrapper(
+    emu_name: str,
+    emu_bin: Path,
+    emu_args: list[str],
+    unset_vars: list[str] | None = None,
+    force_x11: bool = False
+    ) -> str:
+    """This function is used to wrap emulator commands to bash scripts.
+    Useful when an emulator needs to run on a pure shell context
+    to retain environment variables or something else.
+    Created as a workaround for running emulators with OpenGL
+    and MangoHud (a combo that doesn't work by default on AppImage emulators).
+    """
+
+    env_lines = 'export SHARUN_ALLOW_LD_PRELOAD=1\n'
+    if force_x11:
+        env_lines += "export SDL_VIDEODRIVER=x11\n"
+        env_lines += "export GDK_BACKEND=x11\n"
+        env_lines += "export WAYLAND_DISPLAY=\n"
+
+    if unset_vars:
+        for var in unset_vars:
+            env_lines += f'unset {shlex.quote(var)}\n'
+
+    quoted_args = " ".join(shlex.quote(str(a)) for a in emu_args)
+    script = f"""#!/usr/bin/env bash
+set -x
+set -uo pipefail
+{env_lines}
+{shlex.quote(str(emu_bin))} {quoted_args}
+exit $?
+"""
+    fd, path = tempfile.mkstemp(prefix=f"{emu_name}_wrapper_", suffix=".sh")
+    os.write(fd, script.encode())
+    os.close(fd)
+    os.chmod(path, stat.S_IRWXU)
+    return path
 
 @dataclass(slots=True)
 class Emulator:

@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 
 from ...exceptions import RetroboxException
 from ...utils.configparser import CaseSensitiveConfigParser
-from .dolphinPaths import DOLPHIN_CONFIG
+from .dolphinPaths import _DOLPHIN_CFGDIR
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -332,12 +332,12 @@ def generateControllerConfig_triforce(system: Emulator, playersControllers: Cont
     generateControllerConfig_any(system, playersControllers, wheels, "GCPadNew.ini", "GCPad", triforceMapping, triforceReverseAxes, triforceReplacements, wheelMapping=wheelTriforceMapping, wheelReverseAxes=wheelTriforceReverseAxes, wheelExtraOptions=wheelTriforceExtraOptions)
 
 def removeControllerConfig_gamecube() -> None:
-    configFileName = DOLPHIN_CONFIG / "GCPadNew.ini"
+    configFileName = _DOLPHIN_CFGDIR / "GCPadNew.ini"
     if configFileName.is_file():
         configFileName.unlink()
 
 def generateControllerConfig_realwiimotes(filename: str, anyDefKey: str) -> None:
-    configFileName = DOLPHIN_CONFIG / filename
+    configFileName = _DOLPHIN_CFGDIR / filename
     with codecs.open(str(configFileName), "w", encoding="utf_8_sig") as f:
         nplayer = 1
         while nplayer <= 4:
@@ -347,7 +347,7 @@ def generateControllerConfig_realwiimotes(filename: str, anyDefKey: str) -> None
         f.write("[BalanceBoard]\nSource = 2\n")
 
 def generateControllerConfig_guns(filename: str, anyDefKey: str, metadata: Mapping[str, str], guns: Guns) -> None:
-    configFileName = DOLPHIN_CONFIG / filename
+    configFileName = _DOLPHIN_CFGDIR / filename
 
     with codecs.open(str(configFileName), "w", encoding="utf_8_sig") as f:
         # In case of two pads having the same name, dolphin wants a number to handle this
@@ -507,7 +507,7 @@ def get_AltMapping(system: Emulator, nplayer: int, anyMapping: Mapping[str, str 
     return mapping
 
 def generateControllerConfig_any(system: Emulator, playersControllers: Controllers, wheels: DeviceInfoMapping, filename: str, anyDefKey: str, anyMapping: Mapping[str, str | None], anyReverseAxes: Mapping[str | None, str], anyReplacements: Mapping[str, str] | None, extraOptions: Mapping[str, str] = {}, wheelMapping: Mapping[str, str | None] | None = None, wheelReverseAxes: Mapping[str | None, str] | None = None, wheelExtraOptions: Mapping[str, str] = {}) -> None:
-    configFileName = DOLPHIN_CONFIG / filename
+    configFileName = _DOLPHIN_CFGDIR / filename
 
     # Construir mapa device_path → índice SDL real
     sdl_index_map: dict[str, int] = {}
@@ -731,9 +731,9 @@ def generateControllerConfig_any_auto(f: codecs.StreamReaderWriter, pad: Control
 def generateControllerConfig_any_from_profiles(f: codecs.StreamReaderWriter, pad: Controller, system: Emulator) -> bool:
     glob_path: Path | None = None
     if system.name == "gamecube":
-        glob_path = DOLPHIN_CONFIG / "Profiles" / "GCPad"
+        glob_path = _DOLPHIN_CFGDIR / "Profiles" / "GCPad"
     if system.name == "wii":
-        glob_path = DOLPHIN_CONFIG / "Profiles" / "Wiimote"
+        glob_path = _DOLPHIN_CFGDIR / "Profiles" / "Wiimote"
 
     if glob_path is None:
         return False

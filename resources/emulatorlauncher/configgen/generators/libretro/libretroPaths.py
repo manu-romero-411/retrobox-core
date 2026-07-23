@@ -6,8 +6,8 @@ from ...retrobox_paths import EMULATORS
 
 # directorios y ejecutable de retroarch y su config
 _RETROARCH_DIR: Final = EMULATORS / "retroarch"
-_RETROARCH_BIN: Final = _RETROARCH_DIR / "RetroArch-Linux-x86_64.AppImage"
-_RETROARCH_XDG: Final = _RETROARCH_DIR / "RetroArch-Linux-x86_64.AppImage.home" / ".config"
+_RETROARCH_BIN: Final = _RETROARCH_DIR / "app" / "AppRun"
+_RETROARCH_XDG: Final = _RETROARCH_DIR / "configs"
 _RETROARCH_CONFIG: Final = _RETROARCH_XDG / "retroarch"
 
 # como estamos tirando de appimage, el root de retroarch

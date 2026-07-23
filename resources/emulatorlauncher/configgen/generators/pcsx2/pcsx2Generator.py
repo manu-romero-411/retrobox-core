@@ -1,11 +1,16 @@
 from __future__ import annotations
 
 import logging
+import os
 import re
 import shutil
 import time
 from pathlib import Path
 from typing import TYPE_CHECKING, ClassVar, Final
+
+from configgen.Emulator import generate_bash_wrapper
+from configgen.exceptions import RetroboxException
+from configgen.generators.pcsx2.pcsx2_paths import PCSX2_BIN, _PCSX2_BIOS, _PCSX2_CFGDIR, _PCSX2_XDG
 
 from ... import Command
 from ...retrobox_paths import (
@@ -38,11 +43,6 @@ if TYPE_CHECKING:
 
 _logger = logging.getLogger(__name__)
 
-_PCSX2_BIN:           Final = EMULATORS / 'pcsx2' / 'pcsx2.AppImage'
-_PCSX2_XDG:           Final = EMULATORS / 'pcsx2' / 'config'
-_PCSX2_CONFIG:        Final = _PCSX2_XDG / 'PCSX2'
-_PCSX2_BIOS:          Final = BIOS / "pcsx2" / "bios"
-
 class Pcsx2Generator(Generator):
 
     wheelTypeMapping: ClassVar = {
@@ -62,7 +62,10 @@ class Pcsx2Generator(Generator):
                       "next_slot":     "KEY_F2"
                      }
         }
-
+    
+    def usesOpenGLDirectPreload(self, config) -> bool:
+        return config.get("pcsx2_gfxbackend") != "12"
+    
     def getInGameRatio(self, config, gameResolution, rom):
         config_ratio = getGfxRatioFromConfig(config, gameResolution)
         if config_ratio == "16:9" or (config_ratio == "Stretch" and gameResolution["width"] / float(gameResolution["height"]) > ((16.0 / 9.0) - 0.1)):
@@ -97,7 +100,7 @@ class Pcsx2Generator(Generator):
         pcsx2Patches = _PCSX2_BIOS / "patches.zip"
 
         # Remove older config files if present
-        inisDir = _PCSX2_CONFIG / "inis"
+        inisDir = _PCSX2_CFGDIR / "inis"
         files_to_remove = ["PCSX2_ui.ini", "PCSX2_vm.ini", "GS.ini"]
         for filename in files_to_remove:
             file_path = inisDir / filename
@@ -108,15 +111,17 @@ class Pcsx2Generator(Generator):
 
         # Config files
         #configureReg(_PCSX2_CONFIG)
-        configureINI(_PCSX2_CONFIG, _PCSX2_BIOS, system, rom, playersControllers, metadata, guns, wheels, playingWithWheel)
+        configureINI(_PCSX2_CFGDIR, _PCSX2_BIOS, system, rom, playersControllers, metadata, guns, wheels, playingWithWheel)
         #configureAudio(_PCSX2_CONFIG)
 
         # write our own game_controller_db.txt file before launching the game
-        dbfile = _PCSX2_CONFIG / "game_controller_db.txt"
+        dbfile = _PCSX2_CFGDIR / "game_controller_db.txt"
         write_sdl_controller_db(playersControllers, dbfile)
 
-        commandArray = [str(_PCSX2_BIN)] if configure_emulator(rom) else \
-               [str(_PCSX2_BIN), "-nogui", "-batch", str(rom)]
+
+        args = []
+        if not configure_emulator(rom):
+            args = ["-nogui", "-batch", "-fullscreen", str(rom)]
         
         with Path("/proc/cpuinfo").open() as cpuinfo:
             if not re.search(r'^flags\s*:.*\ssse4_1\W', cpuinfo.read(), re.MULTILINE):
@@ -139,18 +144,22 @@ class Pcsx2Generator(Generator):
                 shutil.copy(patch_src, pcsx2Patches)
             else:
                 _logger.debug("patches.zip not found in datainit, skipping")
-       
+
         # state_slot option
         if state_filename := system.config.get('state_filename'):
-            commandArray.extend(["-statefile", state_filename])
+            args.extend(["-statefile", state_filename])
 
         if state_slot := system.config.get_str('state_slot'):
-            commandArray.extend(["-stateindex", state_slot])
+            args.extend(["-stateindex", state_slot])
         #_logger.warning("DEBUG pcsx2 command: %s env: %s", commandArray, envcmd)
-        return Command.Command(
-            array=commandArray,
+
+        command_wrapper = [generate_bash_wrapper(system.config.emulator, PCSX2_BIN, args)]
+        
+        comm = Command.Command(
+            array=command_wrapper,
             env=envcmd
         )
+        return comm
 
 def getGfxRatioFromConfig(config: SystemConfig, gameResolution: Resolution):
     # 2: 4:3 ; 1: 16:9
@@ -164,10 +173,10 @@ def getGfxRatioFromConfig(config: SystemConfig, gameResolution: Resolution):
 def configureReg(config_directory: Path) -> None:
     with ensure_parents_and_open(config_directory / "PCSX2-reg.ini", "w") as f:
         f.write("DocumentsFolderMode=User\n")
-        f.write(f"CustomDocumentsFolder={_PCSX2_CONFIG}\n")
+        f.write(f"CustomDocumentsFolder={_PCSX2_CFGDIR}\n")
         f.write("UseDefaultSettingsFolder=enabled\n")
         f.write(f"SettingsFolder={config_directory / 'inis'}\n")
-        f.write(f"Install_Dir={_PCSX2_CONFIG}\n")
+        f.write(f"Install_Dir={_PCSX2_CFGDIR}\n")
         f.write("RunWizard=0\n")
 
 def configureAudio(config_directory: Path) -> None:
@@ -261,8 +270,8 @@ def configureINI(config_directory: Path, bios_directory: Path, system: Emulator,
     pcsx2INIConfig.set("Folders", "Logs",        str(LOGS))
     pcsx2INIConfig.set("Folders", "Cheats",      str(CHEATS / "ps2"))
     pcsx2INIConfig.set("Folders", "Cache",       str(CACHE / "ps2"))
-    pcsx2INIConfig.set("Folders", "Textures",    str(_PCSX2_CONFIG / "textures"))
-    pcsx2INIConfig.set("Folders", "InputProfiles", str(_PCSX2_CONFIG / "inputprofiles"))
+    pcsx2INIConfig.set("Folders", "Textures",    str(_PCSX2_CFGDIR / "textures"))
+    pcsx2INIConfig.set("Folders", "InputProfiles", str(_PCSX2_CFGDIR / "inputprofiles"))
     pcsx2INIConfig.set("Folders", "Videos",      str(SAVES / "ps2" / "videos"))
     # create cache folder
     mkdir_if_not_exists(CACHE / "ps2")
@@ -314,6 +323,16 @@ def configureINI(config_directory: Path, bios_directory: Path, system: Emulator,
     ## [Filenames]
     if not pcsx2INIConfig.has_section("Filenames"):
         pcsx2INIConfig.add_section("Filenames")
+
+    # abort execution if bios file is not found
+    bios_file = system.config.get("pcsx2_forcebios", "ps2-0230e-20080220.bin")
+    if not Path(f"{_PCSX2_BIOS}/{bios_file}").is_file():
+        raise RetroboxException(
+            f'PS2 BIOS not found: {system.config.get("pcsx2_forcebios")}')
+
+    # set bios file
+    pcsx2INIConfig.set(
+        "Filenames", "BIOS", bios_file)
 
     ## [EMUCORE/GS]
     if not pcsx2INIConfig.has_section("EmuCore/GS"):
@@ -512,20 +531,20 @@ def configureINI(config_directory: Path, bios_directory: Path, system: Emulator,
     # Gun crosshairs
     if pcsx2INIConfig.has_section("USB1"):
         if system.config.get("pcsx2_crosshairs") == "1":
-            pcsx2INIConfig.set("USB1", "guncon2_cursor_path", str(_PCSX2_CONFIG / "crosshairs" / "default.png"))
+            pcsx2INIConfig.set("USB1", "guncon2_cursor_path", str(_PCSX2_CFGDIR / "crosshairs" / "default.png"))
             pcsx2INIConfig.set("USB1", "guncon2_cursor_color", "#0000ff") # blue
         else:
             pcsx2INIConfig.set("USB1", "guncon2_cursor_path", "")
     if pcsx2INIConfig.has_section("USB2"):
         if system.config.get("pcsx2_crosshairs") == "1":
-            pcsx2INIConfig.set("USB2", "guncon2_cursor_path", str(_PCSX2_CONFIG / "crosshairs" / "default.png"))
+            pcsx2INIConfig.set("USB2", "guncon2_cursor_path", str(_PCSX2_CFGDIR / "crosshairs" / "default.png"))
             pcsx2INIConfig.set("USB2", "guncon2_cursor_color", "#ff0000") # red
         else:
             pcsx2INIConfig.set("USB2", "guncon2_cursor_path", "")
     # hack for the fog bug for guns (time crisis - crisis zone)
     fog_files = [
-        _PCSX2_CONFIG / "textures" / "SCES-52530" / "replacements" / "c321d53987f3986d-eadd4df7c9d76527-00005dd4.png",
-        _PCSX2_CONFIG / "textures" / "SLUS-20927" / "replacements" / "c321d53987f3986d-eadd4df7c9d76527-00005dd4.png"
+        _PCSX2_CFGDIR / "textures" / "SCES-52530" / "replacements" / "c321d53987f3986d-eadd4df7c9d76527-00005dd4.png",
+        _PCSX2_CFGDIR / "textures" / "SLUS-20927" / "replacements" / "c321d53987f3986d-eadd4df7c9d76527-00005dd4.png"
     ]
     texture_dir = config_directory / "textures"
     # copy textures if necessary to PCSX2 config folder

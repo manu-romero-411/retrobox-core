@@ -19,7 +19,7 @@ function error() {
 }
 
 function desinstalar() {
-    rm -r "${INSTALL_DIR}"
+    rm -r "${INSTALL_DIR}/app"
 }
 
 function appimage_install(){
@@ -53,9 +53,17 @@ function appimage_install(){
   mv "${TMP_DIR}/pcsx2.AppImage" "${INSTALL_DIR}/pcsx2.AppImage"
   chmod +x "${INSTALL_DIR}/pcsx2.AppImage"
   mkdir -p "${INSTALL_DIR}/config"
+  echo "[INFO] Extrayendo AppImage..."
+  (
+      cd "${INSTALL_DIR}" || exit 1
+      "${INSTALL_DIR}/pcsx2.AppImage" --appimage-extract >/dev/null 2>&1
+      mv "${INSTALL_DIR}/squashfs-root" "${INSTALL_DIR}/app"
+      rm "${INSTALL_DIR}/pcsx2.AppImage"
+  )
 
   # 9. Limpiar
   rm -rf "${TMP_DIR}"
+  echo "[INFO] Instalación completada."
 
 }
 

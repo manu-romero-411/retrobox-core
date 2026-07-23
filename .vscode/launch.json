@@ -1,6 +1,9 @@
 {
   "version": "0.2.0",
   "configurations": [
+
+
+
     {
       "name": "sgdb-artwork: todos los sistemas",
       "type": "debugpy",
@@ -276,7 +279,7 @@
         "-p2index",
         "1",
         "-p2guid",
-        "0600b7926f0e0000a802000000010000",
+        "03004e526f0e0000a802000023020000",
         "-p2name",
         "PDP Xbox One Arctic White",
         "-p2nbbuttons",
@@ -374,6 +377,43 @@
       "console": "integratedTerminal",
       "justMyCode": false
     },
+        {
+      "name": "configgen: NDS (Zuma)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "configgen.emulatorlauncher",
+      "cwd": "${workspaceFolder}/resources/emulatorlauncher",
+      "envFile": "${workspaceFolder}/.env",
+      "args": [
+        "-p1index",
+        "0",
+        "-p1guid",
+        "0500d71f7e0500000920000000006803",
+        "-p1name",
+        "Nintendo Switch Pro Controller",
+        "-p1nbbuttons",
+        "16",
+        "-p1nbhats",
+        "1",
+        "-p1nbaxes",
+        "6",
+        "-system",
+        "nds",
+        "-rom",
+        "/var/penguintb/juegos/roms/nds/Zuma's Revenge (USA).zip",
+        "-gameinfoxml",
+        "/tmp/game.xml",
+        "-systemname",
+        "Nintendo DS"
+      ],
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}",
+        "PATH": "/var/penguin/juegos/retrobox:/home/manuel/.local/bin:/usr/local/bin:/usr/bin:/bin"
+      },
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+
     {
       "name": "configgen: GameCube (Mario Kart Double Dash)",
       "type": "debugpy",
@@ -457,14 +497,26 @@
         "-p1index",
         "0",
         "-p1guid",
-        "03004e526f0e0000a802000023020000",
+        "0500d71f7e0500000920000000006803",
         "-p1name",
-        "PDP Xbox One Arctic White",
+        "Nintendo Switch Pro Controller",
         "-p1nbbuttons",
-        "11",
+        "16",
         "-p1nbhats",
         "1",
         "-p1nbaxes",
+        "6",
+        "-p2index",
+        "1",
+        "-p2guid",
+        "03004e526f0e0000a802000023020000",
+        "-p2name",
+        "PDP Xbox One Arctic White",
+        "-p2nbbuttons",
+        "11",
+        "-p2nbhats",
+        "1",
+        "-p2nbaxes",
         "6",
         "-system",
         "ps2",

@@ -85,37 +85,37 @@ def writeKodiConfigs(kodiJoystick: Path, currentControllers: Controllers, provid
                     xmlsens.attributes["axis"] = val
                     sticksNode[kodiaxismapping[sens]["name"]].appendChild(xmlsens)
             elif input.name in kodimapping:
-                    if input.type == 'button':
-                        if f"btn_{int(input.id)}" not in alreadyset:
-                            xmlbutton = config.createElement('feature')
-                            xmlbutton.attributes["name"] = kodimapping[input.name]
-                            xmlbutton.attributes["button"] = str(int(input.id))
-                            xmlcontroller.appendChild(xmlbutton)
-                            alreadyset[f"btn_{int(input.id)}"] = True
+                if input.type == 'button':
+                    if f"btn_{int(input.id)}" not in alreadyset:
+                        xmlbutton = config.createElement('feature')
+                        xmlbutton.attributes["name"] = kodimapping[input.name]
+                        xmlbutton.attributes["button"] = str(int(input.id))
+                        xmlcontroller.appendChild(xmlbutton)
+                        alreadyset[f"btn_{int(input.id)}"] = True
 
-                    elif input.type == 'hat' and int(input.value) in kodihatspositions:
-                        xmlhat = config.createElement('feature')
-                        if kodihatspositions[int(input.value)] == "left" or kodihatspositions[int(input.value)] == "right":
-                            val = f'{cur.axis_count}'
-                        else:
-                            val = f'{cur.axis_count+1}'
-                        if kodihatspositions[int(input.value)] == "down" or kodihatspositions[int(input.value)] == "right":
-                            xmlhat.attributes["axis"] = f"+{val}"
-                        else:
-                            xmlhat.attributes["axis"] = f"-{val}"
-                        xmlhat.attributes["name"] = kodihatspositions[int(input.value)]
-                        xmlcontroller.appendChild(xmlhat)
+                elif input.type == 'hat' and int(input.value) in kodihatspositions:
+                    xmlhat = config.createElement('feature')
+                    if kodihatspositions[int(input.value)] == "left" or kodihatspositions[int(input.value)] == "right":
+                        val = f'{cur.axis_count}'
+                    else:
+                        val = f'{cur.axis_count+1}'
+                    if kodihatspositions[int(input.value)] == "down" or kodihatspositions[int(input.value)] == "right":
+                        xmlhat.attributes["axis"] = f"+{val}"
+                    else:
+                        xmlhat.attributes["axis"] = f"-{val}"
+                    xmlhat.attributes["name"] = kodihatspositions[int(input.value)]
+                    xmlcontroller.appendChild(xmlhat)
 
-                    elif input.type == 'axis':
-                        xmlaxis = config.createElement('feature')
-                        val = input.id
-                        if int(input.value) >= 0:
-                            val =  f"+{val}"
-                        else:
-                            val =  f"-{val}"
-                        xmlaxis.attributes["axis"] = val
-                        xmlaxis.attributes["name"] = kodimapping[input.name]
-                        xmlcontroller.appendChild(xmlaxis)
+                elif input.type == 'axis':
+                    xmlaxis = config.createElement('feature')
+                    val = input.id
+                    if int(input.value) >= 0:
+                        val =  f"+{val}"
+                    else:
+                        val =  f"-{val}"
+                    xmlaxis.attributes["axis"] = val
+                    xmlaxis.attributes["name"] = kodimapping[input.name]
+                    xmlcontroller.appendChild(xmlaxis)
 
         for node in sticksNode:
             xmlcontroller.appendChild(sticksNode[node])

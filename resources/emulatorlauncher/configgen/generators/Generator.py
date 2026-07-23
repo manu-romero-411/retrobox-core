@@ -53,6 +53,9 @@ class Generator(metaclass=ABCMeta):
         # put a default value, but it should be overriden by generators
         return 4/3
 
+    def usesOpenGLDirectPreload(self, config) -> bool:
+        return False
+
     @abstractmethod
     def getHotkeysContext(self) -> HotkeysContext:
         ...

@@ -86,7 +86,7 @@ SYSTEM_DECORATIONS:  Final = DATAINIT_DIR / 'decorations'
 SYSTEM_SCRIPTS:      Final = RESOURCES_DIR / 'utils' / 'batocera-stubs'
 
 # Runtime dir (en batocera es /var/run, en Debian usamos /tmp)
-RUNTIME_DIR: Final = Path('/tmp/batocera-run')
+RUNTIME_DIR: Final = Path('/tmp/retrobox-run')
 
 SQUASHFS_DIR:      Final = RUNTIME_DIR / 'squashfs'
 ROTATION_FILE:     Final = RUNTIME_DIR / 'rk-rotation'

@@ -984,22 +984,6 @@
 		<region>wr</region>
 	</game>
 	<game>
-		<path>./pcsx2.menu</path>
-		<name>PCSX2 (PlayStation 2)</name>
-		<desc>Run PCSX2 Emulator (PlayStation 2).</desc>
-		<genre>Emulator</genre>
-		<image>./media/pcsx2-logo.png</image>
-		<marquee>./media/pcsx2-logo.png</marquee>
-		<rating>0</rating>
-		<developer>PCSX2 Team</developer>
-		<publisher>PCSX2 Team</publisher>
-		<playcount />
-		<lastplayed />
-		<gametime />
-		<lang>en</lang>
-		<region>wr</region>
-	</game>
-	<game>
 		<path>./openmsx.menu</path>
 		<name>OpenMSX (MSX)</name>
 		<desc>Run OpenMSX (MSX).</desc>
@@ -1113,6 +1097,22 @@
 		<playcount>2</playcount>
 		<lastplayed>20260721T104213</lastplayed>
 		<gametime>120</gametime>
+		<lang>en</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./pcsx2.menu</path>
+		<name>PCSX2 (PlayStation 2)</name>
+		<desc>Run PCSX2 Emulator (PlayStation 2).</desc>
+		<genre>Emulator</genre>
+		<image>./media/pcsx2-logo.png</image>
+		<marquee>./media/pcsx2-logo.png</marquee>
+		<rating>0</rating>
+		<developer>PCSX2 Team</developer>
+		<publisher>PCSX2 Team</publisher>
+		<playcount>1</playcount>
+		<lastplayed>20260723T105246</lastplayed>
+		<gametime>28</gametime>
 		<lang>en</lang>
 		<region>wr</region>
 	</game>

@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from .retrobox_paths import RESOURCES_DIR, ES_GAMES_METADATA, HOOKS, SAVES, GUN_OVERLAYS_DIR, HUD_CONFIG_FILE, USERDATA
+from .retrobox_paths import RESOURCES_DIR, ES_GAMES_METADATA, HOOKS, RUNTIME_DIR, SAVES, GUN_OVERLAYS_DIR, HUD_CONFIG_FILE, USERDATA, mkdir_if_not_exists
 import sys
 
 sys.path.append(str(USERDATA))
@@ -68,6 +68,8 @@ def main(args: argparse.Namespace, maxnbplayers: int) -> int:
         return start_rom(args, maxnbplayers, original_rom, original_rom)
 
 def start_rom(args: argparse.Namespace, maxnbplayers: int, rom: Path, original_rom: Path) -> int:
+    mkdir_if_not_exists(RUNTIME_DIR)
+    
     global _active_player_controllers
 
     player_controllers = Controller.load_for_players(maxnbplayers, args)
@@ -185,18 +187,36 @@ def start_rom(args: argparse.Namespace, maxnbplayers: int, rom: Path, original_r
                     cmd = generator.generate(system, rom, player_controllers, md, guns, wheels, gameResolution)
 
                     if system.config.get_bool('hud_support'):
-                        hud_bezel = getHudBezel(system, generator, rom, gameResolution, system.guns_borders_size_name(guns), system.guns_border_ratio_type(guns))
-                        if ((hud := system.config.get('hud')) and hud != "none") or hud_bezel is not None:
+                        hud_bezel = getHudBezel(
+                            system,
+                            generator,
+                            rom,
+                            gameResolution,
+                            system.guns_borders_size_name(guns),
+                            system.guns_border_ratio_type(guns))
+
+                        if ((hud := system.config.get('hud')) and hud.lower() != 'none') or hud_bezel is not None:
+                            cmd.env["MANGOHUD"] = "1"
                             cmd.env["MANGOHUD_DLSYM"] = "1"
-                            hudconfig = getHudConfig(system, args.systemname, system.config.emulator, effectiveCore, rom, hud_bezel)
-                            hud_config_file = HUD_CONFIG_FILE
-                            with hud_config_file.open('w') as f:
+                            cmd.env["MANGOHUD_CONFIGFILE"] = HUD_CONFIG_FILE
+
+                            hudconfig = getHudConfig(
+                                system, args.systemname, system.config.emulator,
+                                effectiveCore, rom, hud_bezel
+                            )
+
+                            with HUD_CONFIG_FILE.open('w') as f:
                                 f.write(hudconfig)
-                            cmd.env["MANGOHUD_CONFIGFILE"] = hud_config_file
-                            #cmd.env["LD_PRELOAD"] = "/usr/local/lib64/mangohud/libMangoHud_dlsym.so"
-                            if not generator.hasInternalMangoHUDCall():
+
+                            if generator.usesOpenGLDirectPreload(system.config):
+                                # OpenGL: LD_PRELOAD directo, sin pasar por el wrapper mangohud
+                                # (que lo pisaría con su propio shim vía --dlsym)
+                                cmd.env["LD_PRELOAD"] = "/usr/local/lib64/mangohud/libMangoHud_opengl.so"
+                            elif not generator.hasInternalMangoHUDCall():
+                                # Vulkan (u otros): dejamos que mangohud gestione el layer/preload él mismo
                                 cmd.array.insert(0, "--dlsym")
                                 cmd.array.insert(0, "mangohud")
+
                     # generate the gun help
                     try:
                         default_gun_help_dir = GUN_OVERLAYS_DIR
@@ -468,7 +488,7 @@ def getHudConfig(system: Emulator, systemName: str, emulator: str, core: str, ro
 
     # predefined values
     if mode == "perf":
-        configstr += f"position={hud_position}\nbackground_alpha=0.9\nlegacy_layout=false\ncustom_text=%GAMENAME%\ncustom_text=%SYSTEMNAME%\ncustom_text=%EMULATORCORE%\nfps\ngpu_name\nengine_version\nvulkan_driver\nresolution\nram\ngpu_stats\ngpu_temp\ncpu_stats\ncpu_temp\ncore_load"
+        configstr += f"position={hud_position}\nbackground_alpha=0.4\nlegacy_layout=false\ncustom_text=%GAMENAME%\ncustom_text=%SYSTEMNAME%\ncustom_text=%EMULATORCORE%\nfps\ngpu_name\nengine_version\nvulkan_driver\nresolution\nram\ngpu_stats\ngpu_temp\ncpu_stats\ncpu_temp\ncore_load"
     elif mode == "game":
         configstr += f"position={hud_position}\nbackground_alpha=0\nlegacy_layout=false\nfont_size=32\nimage_max_width=200\nimage=%THUMBNAIL%\ncustom_text=%GAMENAME%\ncustom_text=%SYSTEMNAME%\ncustom_text=%EMULATORCORE%"
     elif mode == "custom" and (hud_custom := system.config.get_str('hud_custom')):
@@ -577,20 +597,38 @@ def runCommand(command: Command) -> int:
     if not command.array:
         raise BadCommandLineArguments
 
-    proc = subprocess.Popen(command.array, env=command.env, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    with open("/tmp/env-launcher.txt", "w", encoding="utf-8") as f:
+        for k, v in sorted(envvars.items()):
+            print(f"{k}={v}", file=f)
+
+    proc = subprocess.Popen(
+        command.array,
+        env=command.env,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+    )
     exitcode = 0
 
     try:
         out, err = proc.communicate()
         exitcode = proc.returncode
-        _logger.debug(out.decode(errors='backslashreplace'))
-        _logger.error(err.decode(errors='backslashreplace'))
+
+        # con stdout=None / stderr=None, communicate() siempre devuelve (None, None):
+        # el proceso hijo hereda los fds directamente y no hay nada que leer aquí.
+        if err is not None:
+            with open("/tmp/retrobox_launcher_stderr.log", "wb") as f:
+                f.write(err)
+            _logger.error(err.decode(errors='backslashreplace'))
+
+        if out is not None:
+            _logger.debug(out.decode(errors='backslashreplace'))
+
     except BrokenPipeError:
         # Seeing BrokenPipeError? This is probably caused by head truncating output in the front-end
         # Examine es-core/src/platform.cpp::runSystemCommand for additional context
         pass
     except BaseException as e:
-        _logger.error("emulator exited")
+        _logger.error("emulator exited: %s: %s", type(e).__name__, e)
 
         raise UnexpectedEmulatorExit from e
 

@@ -2,25 +2,32 @@ from __future__ import annotations
 
 import logging
 from os import environ
+import os
 from pathlib import Path
+import shlex
+import stat
+import tempfile
 from typing import TYPE_CHECKING
 
+from configgen.Emulator import generate_bash_wrapper
+
 from ... import Command
-from ...retrobox_paths import ROMS, SAVES, USERDATA, configure_emulator, mkdir_if_not_exists
+from ...retrobox_paths import HUD_CONFIG_FILE, ROMS, SAVES, USERDATA, configure_emulator, mkdir_if_not_exists
 from ...utils import vulkan
 from ...utils.configparser import CaseSensitiveConfigParser
 from ..Generator import Generator
 from . import dolphinControllers, dolphinSYSCONF
 from .dolphinPaths import (
+    _DOLPHIN_DIR,
     DOLPHIN_BIN,
     DOLPHIN_BIOS,
-    DOLPHIN_CONFIG,
+    _DOLPHIN_CFGDIR,
     DOLPHIN_GFX_INI,
     DOLPHIN_INI,
     DOLPHIN_QT_INI,
     DOLPHIN_SAVES,
     DOLPHIN_SYSCONF,
-    DOLPHIN_XDG,
+    _DOLPHIN_XDG,
 )
 
 if TYPE_CHECKING:
@@ -29,6 +36,8 @@ if TYPE_CHECKING:
 _logger = logging.getLogger(__name__)
 
 class DolphinGenerator(Generator):
+    def usesOpenGLDirectPreload(self, config) -> bool:
+        return config.get("gfxbackend") == "OGL"
 
     def generate(self, system, rom, playersControllers, metadata, guns, wheels, gameResolution):
         mkdir_if_not_exists(DOLPHIN_INI.parent)
@@ -382,7 +391,7 @@ class DolphinGenerator(Generator):
         hotkeyConfig.set('Hotkeys', 'USB Emulation Devices/Show Infinity Base', '@(Ctrl+I)')
         #
         # Write the configuration to the file
-        with (DOLPHIN_CONFIG / 'Hotkeys.ini').open('w') as configfile:
+        with (_DOLPHIN_CFGDIR / 'Hotkeys.ini').open('w') as configfile:
             hotkeyConfig.write(configfile)
 
         ## Retroachievements
@@ -415,7 +424,7 @@ class DolphinGenerator(Generator):
             RacConfig.set('Achievements', 'AchievementsEnabled', 'False')
 
         # Write the configuration to the file
-        with (DOLPHIN_CONFIG / 'RetroAchievements.ini').open('w') as rac_configfile:
+        with (_DOLPHIN_CFGDIR / 'RetroAchievements.ini').open('w') as rac_configfile:
             RacConfig.write(rac_configfile)
 
         # Update SYSCONF
@@ -424,52 +433,31 @@ class DolphinGenerator(Generator):
         except Exception:
             pass # don't fail in case of SYSCONF update
 
-        # Check what version we've got
-        print("========================================================================")
-        print(DOLPHIN_BIN)
-        print("========================================================================")
+        command_array = []
+        dolphin_exec_env = {
+            "APPDIR": f"{_DOLPHIN_DIR}/AppDir",
+            "XDG_CONFIG_HOME": _DOLPHIN_XDG,
+            "XDG_DATA_HOME": SAVES,
+            "SDL_JOYSTICK_HIDAPI": "1",
+            "SDL_JOYSTICK_HIDAPI_SWITCH": "1",
+            "SDL_JOYSTICK_HIDAPI_PRO": "1",
+            "SDL_JOYSTICK_ALLOW_BACKGROUND_EVENTS": "1",
+        }
 
-        """
-        wrapper_script = (
-            f'DESKTOP_DIR="{_XDG_CONFIG}/dolphin-emu"; '
-            f'BATOCERA_DIR="{DOLPHIN_CONFIG}"; '
-            f'BACKUP_DIR="{_XDG_CONFIG}/dolphin-emu.bak"; ' 
-            'if [ -L "$DESKTOP_DIR" ]; then rm "$DESKTOP_DIR"; '
-            'elif [ -d "$DESKTOP_DIR" ]; then rm -rf "$BACKUP_DIR" && mv "$DESKTOP_DIR" "$BACKUP_DIR"; fi; '
-            'mkdir -p "$BATOCERA_DIR" && ln -s "$BATOCERA_DIR" "$DESKTOP_DIR"; '
-            'cleanup() { rm -f "$DESKTOP_DIR"; if [ -d "$BACKUP_DIR" ]; then mv "$BACKUP_DIR" "$DESKTOP_DIR"; fi; }; '
-            'trap cleanup EXIT INT TERM; '
-            '"$0" "$@"'
-        )
-
-        if Path(DOLPHIN_BIN).is_file():
-            # use the -b 'batch' option for nicer exit
-            commandArray = ["bash", "-c", wrapper_script, DOLPHIN_BIN, "-b", "-e", rom]
+        if configure_emulator(rom):
+            dolphin_args = []  # modo config, sin -b -e
         else:
-            commandArray = ["bash", "-c", wrapper_script, "dolphin-emu-nogui", "-b", "-e", rom]
-        """
-        commandArray = []
-        if Path(DOLPHIN_BIN).is_file():
-            if configure_emulator(rom):
-                commandArray.extend([DOLPHIN_BIN])
-            else:
-                # use the -b 'batch' option for nicer exit
-                commandArray.extend([DOLPHIN_BIN, "-b", "-e", rom])
+            dolphin_args = ["-b", "-e", str(rom)]
 
         # state_slot option
         if state_filename := system.config.get('state_filename'):
-            commandArray.extend(["--save_state", state_filename])
+            dolphin_args.extend(["--save_state", state_filename])
+
+        command_wrapper = [generate_bash_wrapper(system.config.emulator, DOLPHIN_BIN, dolphin_args)]
 
         return Command.Command(
-            array=commandArray,
-            env = {
-                "XDG_CONFIG_HOME":f"{DOLPHIN_XDG}",
-                "XDG_DATA_HOME":f"{SAVES}",
-                "SDL_JOYSTICK_HIDAPI": "1",
-                "SDL_JOYSTICK_HIDAPI_SWITCH": "1",
-                "SDL_JOYSTICK_HIDAPI_PRO": "1",
-                "SDL_JOYSTICK_ALLOW_BACKGROUND_EVENTS": "1",
-            }          
+            array=command_wrapper,
+            env=dolphin_exec_env
         )
 
     def getInGameRatio(self, config, gameResolution, rom):

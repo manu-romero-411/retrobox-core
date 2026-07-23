@@ -1151,11 +1151,10 @@ def _melondsds_options(
     _set_from_system(coreSettings, 'melonds_show_cursor', system, 'melondsds_cursor', default='nearest')
     _set_from_system(coreSettings, 'melonds_cursor_timeout', system, 'melondsds_cursor_timeout', default='3')
     _set_from_system(coreSettings, 'melonds_touch_mode', system, 'melondsds_touchmode', default='auto')
-    # set 1 screen for now top/botton
-    _set(coreSettings, 'melonds_number_of_screen_layouts', '2')
     _set_from_system(coreSettings, 'melonds_screen_gap', system, 'melondsds_screen_gap', default='0')
-    _set(coreSettings, 'melonds_screen_layout1', 'top-bottom')
-    _set(coreSettings, 'melonds_screen_layout2', 'right-left')
+    _set(coreSettings, 'melonds_number_of_screen_layouts', '2')
+    _set_from_system(coreSettings, 'melonds_screen_layout1', system, 'melondsds_screen_layout1', default='top-bottom')
+    _set_from_system(coreSettings, 'melonds_screen_layout2', system, 'melondsds_screen_layout2', default='right-left')
 
     # Firmware Settings
     _set_from_system(coreSettings, 'melonds_firmware_wfc_dns', system, 'melondsds_dns', default='178.62.43.212')
@@ -1627,6 +1626,9 @@ def _flycast_options(
 
     # Synchronous rendering
     _set_from_system(coreSettings, 'reicast_synchronous_rendering', system, 'reicast_synchronous_rendering', default='enabled')
+    
+    # alpha sorting
+    _set_from_system(coreSettings, 'reicast_alpha_sorting', system, 'reicast_alpha_sorting', default='per-triangle (normal)')
 
     # DSP audio
     _set_from_system(coreSettings, 'reicast_enable_dsp', system, 'reicast_dsp', default='disabled')
