@@ -46,17 +46,7 @@ def log_stderr(msg):
 
 
 def normalize_sdl_guid(raw_guid: str) -> str:
-    """
-    Bluetooth vía BlueZ+HIDAPI se presenta al kernel como USB HID (0300),
-    aunque SDL lo detecte como BT (0500). Los dispositivos virtuales (0600)
-    son correctos tal cual. Futuros mandos USB/virtual no necesitan remap.
-    """
-    g = raw_guid.lower()
-    bus = g[:4]
-    remap = {
-        "0500": "0300",  # BT → USB HID (BlueZ/HIDAPI)
-    }
-    return remap.get(bus, bus) + g[4:]
+    return raw_guid.lower()
 
 def hidraw_get_guid(devpath):
     try:
@@ -212,7 +202,7 @@ def eden_list_sdl_gamepads(sdlversion):
             guidstring = ((bytes(buff)).decode()).split('\x00', 1)[0]
             joy_path = joystick.SDL_JoystickPathForIndex(i).decode()
 
-            if 'hidraw' in joy_path and sdlversion == 3:
+            if 'hidraw' in joy_path:
                 bustype = detect_bus_from_hidraw(joy_path)
                 guidstring = bustype + guidstring[2:]
 

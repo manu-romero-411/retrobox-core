@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections import defaultdict
 import logging
 import glob
 import os
@@ -370,11 +371,6 @@ class RyujinxGenerator(Generator):
             return sdl_guid
         b = [g[i:i+2] for i in range(0, 32, 2)]
 
-        # Remap bus BT (05 00 LE) → USB (03 00 LE) igual que Eden
-        # b[0]=low byte, b[1]=high byte del bus en little-endian
-        if b[0] == '05' and b[1] == '00':
-            b[0] = '03'
-
         bus_le = b[0:2]
         b[0] = '00'
         b[1] = '00'
@@ -445,13 +441,13 @@ class RyujinxGenerator(Generator):
         sdl_mapping = generate_sdl_game_controller_config(playersControllers)
 
         if not system.isOptSet('ryu_auto_controller_config') or system.config["ryu_auto_controller_config"] != "0":
-            debugcontrollers = True
+            debugcontrollers = False
             sdl_mapping = ""
 
             # get the evdev->hidraw mapping
             evdev_hidraw = evdev_to_hidraw()
             # get sdllib hidapi/hidraw + evdev guid
-            sdl_gamepads = list_sdl_gamepads(2)            
+            sdl_gamepads = list_sdl_gamepads(2)
 
             if debugcontrollers:
                 _logger.debug("=====================================================Start Bato Controller Debug Info=========================================================")
@@ -468,20 +464,21 @@ class RyujinxGenerator(Generator):
 
             input_config = []
 
-            # --- FASE 1: resolver GUIDs para todos los controllers ---
+            # guid resolution for all controllers
             pad_pure_guid = {}
+            pad_sdl_index = {}
 
             for controller in playersControllers:
-                found_sdl_guid = None
-                batocera_ctrl_name = getattr(controller, 'real_name', getattr(controller, 'name', None))
+                matched_sdl_ctrl = None
 
-                if batocera_ctrl_name:
-                    target_name = str(batocera_ctrl_name).strip().lower()
-                    for sdl_path, sdl_ctrl in sdl_gamepads.items():
-                        if sdl_ctrl.get("name", "").strip().lower() == target_name:
-                            found_sdl_guid = sdl_ctrl.get("guid")
-                            _logger.warning("Matched SDL controller '%s' -> GUID %s", target_name, found_sdl_guid)
-                            break
+                hidraw_path = evdev_hidraw.get(controller.device_path)
+                if hidraw_path and hidraw_path in sdl_gamepads:
+                    matched_sdl_ctrl = sdl_gamepads[hidraw_path]
+                elif controller.device_path in sdl_gamepads:
+                    matched_sdl_ctrl = sdl_gamepads[controller.device_path]
+
+                found_sdl_guid = matched_sdl_ctrl.get("guid") if matched_sdl_ctrl else None
+                pad_sdl_index[id(controller)] = matched_sdl_ctrl.get("sdl_index", 0) if matched_sdl_ctrl else 0
 
                 def is_valid_sdl_guid(g):
                     if not g:
@@ -507,10 +504,9 @@ class RyujinxGenerator(Generator):
                 pure_guid = RyujinxGenerator.sdl_guid_to_ryujinx_guid(pure_guid)
                 pad_pure_guid[id(controller)] = pure_guid
 
-            # --- FASE 2: calcular idx relativo por GUID ---
-            from collections import defaultdict
+            # relative idx per guid
             guid_groups = defaultdict(list)
-            for controller in sorted(playersControllers, key=lambda c: int(c.player_number)):
+            for controller in sorted(playersControllers, key=lambda c: pad_sdl_index[id(c)]):
                 guid_groups[pad_pure_guid[id(controller)]].append(controller)
 
             controller_idx_map = {}

@@ -37,78 +37,47 @@ hatstoname = {'1': 'up', '2': 'right', '4': 'down', '8': 'left'}
 
 def _get_retroarch_udev_order() -> dict[str, int]:
     context = pyudev.Context()
-    joysticks = []
+    order: dict[str, int] = {}
+    idx = 0
     for device in context.list_devices(subsystem='input'):
         if device.get('ID_INPUT_JOYSTICK') != '1':
             continue
         devname = device.get('DEVNAME')
         if not devname or not re.match(r'/dev/input/event\d+$', devname):
             continue
-        usec = int(device.get('USEC_INITIALIZED', '0'))
-        joysticks.append((usec, devname))
-    joysticks.sort(key=lambda x: x[0])
-    return {path: idx for idx, (_, path) in enumerate(joysticks)}
+        order[devname] = idx
+        idx += 1
+    return order
 
-
-def _get_udev_index_by_guid(controllers) -> dict[int, int]:
-
+def _get_joypad_index_by_devpath(controllers) -> dict[int, int]:
+    context = pyudev.Context()
     udev_order = _get_retroarch_udev_order()
 
-    # Leer VID:PID de cada joystick udev
-    vidpid_to_events: dict[tuple[str, str], list[str]] = defaultdict(list)
-    for event_path in udev_order:
-        try:
-            out = subprocess.check_output(
-                ['udevadm', 'info', event_path],
-                stderr=subprocess.DEVNULL, text=True
-            )
-            vid, pid = None, None
-            for line in out.splitlines():
-                if line.startswith('E: ID_VENDOR_ID='):
-                    vid = line.split('=', 1)[1].strip().lower().zfill(4)
-                elif line.startswith('E: ID_MODEL_ID='):
-                    pid = line.split('=', 1)[1].strip().lower().zfill(4)
-            if not (vid and pid):
-                basename = os.path.basename(event_path)
-                uevent = f'/sys/class/input/{basename}/device/uevent'
-                with open(uevent, encoding='utf-8') as f:
-                    content = f.read()
-                for line in content.splitlines():
-                    if line.startswith('PRODUCT='):
-                        parts = line.split('=')[1].split('/')
-                        vid = parts[1].zfill(4).lower()
-                        pid = parts[2].zfill(4).lower()
-                        break
-            if vid and pid:
-                vidpid_to_events[(vid, pid)].append(event_path)
-        except (subprocess.CalledProcessError, OSError):
-            pass
-
-    # Cada grupo ya está en orden udev_order porque iteramos udev_order en orden
-    # Extraer VID:PID del GUID de cada controller
-    vidpid_to_players: dict[tuple[str, str], list] = defaultdict(list)
-    for controller in controllers:
-        guid = controller.guid.lower()
-        vid = guid[10:12] + guid[8:10]
-        pid = guid[18:20] + guid[16:18]
-        vidpid_to_players[(vid, pid)].append(controller)
+    # inputNN (syspath padre) -> eventN asociado con ID_INPUT_JOYSTICK=1
+    parent_to_event: dict[str, str] = {}
+    for device in context.list_devices(subsystem='input'):
+        if device.get('ID_INPUT_JOYSTICK') != '1':
+            continue
+        devname = device.get('DEVNAME')
+        if not devname or not re.match(r'/dev/input/event\d+$', devname):
+            continue
+        parent = device.find_parent('input')
+        if parent is not None:
+            parent_to_event[parent.sys_path] = devname
 
     result: dict[int, int] = {}
-    for (vid, pid), player_list in vidpid_to_players.items():
-        events = vidpid_to_events.get((vid, pid), [])
-        sorted_players = sorted(player_list, key=lambda c: c.index)
-        for i, controller in enumerate(sorted_players):
-            if i < len(events):
-                result[controller.player_number] = udev_order[events[i]]
-            else:
-                result[controller.player_number] = controller.index
+    for controller in controllers:
+        try:
+            dev = pyudev.Devices.from_device_file(context, controller.device_path)
+            parent = dev.find_parent('input') or dev
+            event_devname = parent_to_event.get(parent.sys_path)
+            if event_devname and event_devname in udev_order:
+                result[controller.player_number] = udev_order[event_devname]
+                continue
+        except (pyudev.DeviceNotFoundByFileError, OSError):
+            pass
+        result[controller.player_number] = controller.index
 
-    #_logger.warning("UDEV ORDER: %s", udev_order)
-    #_logger.warning("VIDPID EVENTS: %s", dict(vidpid_to_events))
-    #_logger.warning(
-        # "VIDPID PLAYERS: %s", {
-            # k: [(c.player_number, c.index) for c in v] for k, v in vidpid_to_players.items()})
-    #_logger.warning("RESULT: %s", result)
     return result
 
 # Write a configuration for a specified controller
@@ -147,11 +116,7 @@ def writeControllersConfig(
     retroconfig.save('input_audio_mute',          '"nul"')
     retroconfig.save('input_grab_mouse_toggle',   '"nul"')
 
-    # EmulationStation ya decide qué mando es el Player 1, Player 2, etc.
-    # RetroArch debe conservar el índice que ES pasó para ese controlador.
-    # Solo usamos UDEV como fallback si ese dato no llega.
-
-    udev_indices = _get_udev_index_by_guid(controllers)
+    udev_indices = _get_joypad_index_by_devpath(controllers)
 
     for controller in controllers:
         mouseIndex: str | None = None

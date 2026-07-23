@@ -70,7 +70,8 @@ function install_appimage(){
     (
         cd "${INSTALL_DIR}" || exit 1
         "${INSTALL_DIR}/ppsspp.AppImage" --appimage-extract >/dev/null 2>&1
-        mv "${INSTALL_DIR}/squashfs-root" "${INSTALL_DIR}/app"
+        rm -f "${INSTALL_DIR}/squashfs-root"
+        mv "${INSTALL_DIR}/AppDir" "${INSTALL_DIR}/app"
         rm "${INSTALL_DIR}/ppsspp.AppImage"
     )
 
@@ -81,30 +82,12 @@ function install_appimage(){
 
 function uninstall_app() {
     echo "[INFO] Buscando instalaciones de PPSSPP..."
-    local found=0
 
-    # Comprobar Flatpak
-    if command -v flatpak >/dev/null 2>&1 && flatpak list | grep -q "$FLATPAK_ID"; then
-        echo "[INFO] Desinstalando versión Flatpak..."
-        flatpak uninstall -y $FLATPAK_ID
-        flatpak uninstall -y --unused
-        found=1
-    fi
 
     # Comprobar AppImage
-    if [[ -d "$INSTALL_DIR" || -f "$BIN_LINK" ]]; then
+    if [[ -d "$INSTALL_DIR/app" || -f "$BIN_LINK" ]]; then
         echo "[INFO] Desinstalando versión AppImage..."
-        rm -rf "$INSTALL_DIR"
-        rm -f "$BIN_LINK"
-        rm -f "$DESKTOP_FILE"
-        rm -f "$ICON_PATH"
-        found=1
-    fi
-
-    if [[ $found -eq 0 ]]; then
-        echo "[INFO] No se encontró ninguna instalación de PPSSPP."
-    else
-        echo "[INFO] Desinstalación completada de forma limpia."
+        rm -rf "${INSTALL_DIR}/app"
     fi
 }
 

@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from configgen.Emulator import generate_bash_wrapper
+
 from ... import Command
 from ...retrobox_paths import SAVES, configure_emulator, ensure_symlink
 from ...controller import Controller, generate_sdl_game_controller_config
@@ -38,23 +40,23 @@ class PPSSPPGenerator(Generator):
             ppssppControllers.generateControllerConfig(controller)
 
         # The command to run
-        commandArray = []
-        if configure_emulator(rom):
-            commandArray.extend([PPSSPP_BIN])
-        else:
-            commandArray.extend([PPSSPP_BIN, '--fullscreen', str(rom)])
+        args_array = []
+        if not configure_emulator(rom):
+            args_array.extend(['--fullscreen', str(rom)])
 
         # Adapt the menu size to low defenition
         # I've played with this option on PC to fix menu size in Hi-Resolution and it not working fine. I'm almost sure this option break the emulator (Darknior)
         if PPSSPPGenerator.isLowResolution(gameResolution):
-            commandArray.extend(["--dpi", "0.5"])
+            args_array.extend(["--dpi", "0.5"])
 
         # state_slot option
         if state_filename := system.config.get('state_filename'):
-            commandArray.append(f"--state={state_filename}")
+            args_array.append(f"--state={state_filename}")
+
+        command_wrapper = [generate_bash_wrapper(system.config.emulator, PPSSPP_BIN, args_array)]
 
         return Command.Command(
-            array=commandArray,
+            array=command_wrapper,
             env={
                 "XDG_CONFIG_HOME": _PPSSPP_XDG,
                 "XDG_DATA_HOME": SAVES,
