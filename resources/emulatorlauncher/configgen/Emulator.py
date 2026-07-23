@@ -115,8 +115,8 @@ def generate_bash_wrapper(
 
     quoted_args = " ".join(shlex.quote(str(a)) for a in emu_args)
     script = f"""#!/usr/bin/env bash
-set -x
 set -uo pipefail
+trap 'rm -f -- "$0"' EXIT
 {env_lines}
 {shlex.quote(str(emu_bin))} {quoted_args}
 exit $?
