@@ -1532,15 +1532,26 @@ def _mesen_s_options(
     # SuperFX Overclock
     _set_from_system(coreSettings, 'mesen-s_superfx_overclock', system, 'mesen-s_superfx_overclock', default='100%')
 
-# Nintendo Virtual Boy
 def _vb_options(
     coreSettings: UnixSettings, system: Emulator, rom: Path, guns: Guns, wheels: DeviceInfoMapping, /,
 ) -> None:
+    # 3D Mode
+    _set_from_system(coreSettings, 'vb_3dmode', system, '3d_mode', default='anaglyph')
+
     # 2D Color Mode
     _set_from_system(coreSettings, 'vb_color_mode', system, '2d_color_mode', default='black & red')
 
     # 3D Glasses Color Mode
     _set_from_system(coreSettings, 'vb_anaglyph_preset', system, '3d_color_mode', default='disabled')
+
+    # Side-by-side separation
+    _set_from_system(coreSettings, 'vb_sidebyside_separation', system, 'sidebyside_separation', default='0')
+
+    # CPU Emulation
+    _set_from_system(coreSettings, 'vb_cpu_emulation', system, 'cpu_emulation', default='fast')
+
+    # Right Analog to Digital
+    _set_from_system(coreSettings, 'vb_right_analog_to_digital', system, 'right_analog_to_digital', default='disabled')
 
 # Panasonic 3DO
 def _opera_options(
@@ -2398,6 +2409,7 @@ _option_functions: dict[str, Callable[[UnixSettings, Emulator, Path, Guns, Devic
     'snes9x_next': _snes9x_next_options,
     'bsnes': _bsnes_options,
     'mesen-s': _mesen_s_options,
+    'mednafen_vb': _vb_options,
     'vb': _vb_options,
     'opera': _opera_options,
     'xrick': _xrick_options,
