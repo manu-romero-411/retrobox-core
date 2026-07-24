@@ -4,6 +4,7 @@
 
 
 
+
     {
       "name": "sgdb-artwork: todos los sistemas",
       "type": "debugpy",
@@ -593,7 +594,7 @@
         "-system",
         "megadrive",
         "-rom",
-        "/var/penguintb/juegos/roms/megadrive/Sonic The Hedgehog 2 (World) (Rev B).zip",
+        "/media/manuel/penguinTB/juegos/roms/megadrive/Sonic The Hedgehog 2 (World) (Rev B).zip",
         "-gameinfoxml",
         "/tmp/game.xml",
         "-systemname",

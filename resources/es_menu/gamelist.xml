@@ -1085,22 +1085,6 @@
 		<region>wr</region>
 	</game>
 	<game>
-		<path>./retroarch.menu</path>
-		<name>RetroArch (Multi Cores Emulator)</name>
-		<desc>Run RetroArch (Multi Cores Emulator).</desc>
-		<genre>Emulator</genre>
-		<image>./media/retroarch-logo.png</image>
-		<marquee>./media/retroarch-logo.png</marquee>
-		<rating>0</rating>
-		<developer>Libretro Team</developer>
-		<publisher>Libretro Team</publisher>
-		<playcount>2</playcount>
-		<lastplayed>20260721T104213</lastplayed>
-		<gametime>120</gametime>
-		<lang>en</lang>
-		<region>wr</region>
-	</game>
-	<game>
 		<path>./pcsx2.menu</path>
 		<name>PCSX2 (PlayStation 2)</name>
 		<desc>Run PCSX2 Emulator (PlayStation 2).</desc>
@@ -1113,6 +1097,22 @@
 		<playcount>1</playcount>
 		<lastplayed>20260723T105246</lastplayed>
 		<gametime>28</gametime>
+		<lang>en</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./retroarch.menu</path>
+		<name>RetroArch (Multi Cores Emulator)</name>
+		<desc>Run RetroArch (Multi Cores Emulator).</desc>
+		<genre>Emulator</genre>
+		<image>./media/retroarch-logo.png</image>
+		<marquee>./media/retroarch-logo.png</marquee>
+		<rating>0</rating>
+		<developer>Libretro Team</developer>
+		<publisher>Libretro Team</publisher>
+		<playcount>3</playcount>
+		<lastplayed>20260724T234653</lastplayed>
+		<gametime>211</gametime>
 		<lang>en</lang>
 		<region>wr</region>
 	</game>

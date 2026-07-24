@@ -6,11 +6,21 @@ set -eo pipefail
 ## FECHA DE CREACIÓN: 1 de noviembre de 2025
 ## FECHAS DE MODIFICACIÓN:
 
+get_arch(){
+	case $(arch) in
+		"amd64"|"x86_64") GETARCH="x86_64";;
+		*) GETARCH="$(arch)"
+	esac
+	echo "${GETARCH}"
+}
+
 ## VARIABLES
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd -P)"
 INSTALL_DIR="${SCRIPT_DIR}/retroarch"
-URL="https://buildbot.libretro.com/nightly/linux/x86_64/RetroArch.7z"
+GETARCH=$(get_arch)
+URL="https://buildbot.libretro.com/nightly/linux/${GETARCH}/RetroArch.7z"
+CORES_URL="https://buildbot.libretro.com/nightly/linux/${GETARCH}/RetroArch_cores.7z"
 TMPDIR="$(mktemp -d)"
 ARCHIVE="$TMPDIR/RetroArch.7z"
 
@@ -43,17 +53,31 @@ function install_app(){
 	# Extraer archivos; la opción -y responde sí a todas las preguntas si las hubiera
 	7z x -y -o"$EXTRACT_DIR" "$ARCHIVE"
 
-	mkdir -p "${INSTALL_DIR}/configs/retroarch"
-	cp -r "${EXTRACT_DIR}/RetroArch-Linux-x86_64/RetroArch-Linux-x86_64.AppImage.home/.config/retroarch"/* "${INSTALL_DIR}/configs/retroarch"
+	mkdir -p "${INSTALL_DIR}/configs/retroarch/cores"
+	mkdir -p "${INSTALL_DIR}/app"
 
-	chmod +x "${EXTRACT_DIR}/RetroArch-Linux-x86_64/RetroArch-Linux-x86_64.AppImage"
-	(
-		cd "${EXTRACT_DIR}" || exit 1
-		"${EXTRACT_DIR}/RetroArch-Linux-x86_64/RetroArch-Linux-x86_64.AppImage" --appimage-extract >/dev/null 2>&1
-		mkdir -p "${INSTALL_DIR}/app"
-		cp -r "${PWD}/squashfs-root"/* "${INSTALL_DIR}/app"
-	)
+	if [ ${GETARCH} == "x86_64" ]; then
+		cp -r "${EXTRACT_DIR}/RetroArch-Linux-x86_64/RetroArch-Linux-x86_64.AppImage.home/.config/retroarch"/* "${INSTALL_DIR}/configs/retroarch"
 
+		chmod +x "${EXTRACT_DIR}/RetroArch-Linux-x86_64/RetroArch-Linux-x86_64.AppImage"
+		(
+			cd "${EXTRACT_DIR}" || exit 1
+			"${EXTRACT_DIR}/RetroArch-Linux-x86_64/RetroArch-Linux-x86_64.AppImage" --appimage-extract >/dev/null 2>&1
+			mkdir -p "${INSTALL_DIR}/app"
+			cp -r "${PWD}/squashfs-root"/* "${INSTALL_DIR}/app"
+		)
+	else
+		mv "${EXTRACT_DIR}/retroarch" "${INSTALL_DIR}/app/AppRun"
+	fi
+
+	rm -r "${EXTRACT_DIR}"
+	curl -fSL -o "$ARCHIVE" "$CORES_URL"
+	mkdir -p "$EXTRACT_DIR"
+
+	# Extraer archivos; la opción -y responde sí a todas las preguntas si las hubiera
+	7z x -y -o"$EXTRACT_DIR" "$ARCHIVE"
+
+	mv "${EXTRACT_DIR}/RetroArch-Linux-${GETARCH}/RetroArch-Linux-${GETARCH}.AppImage.home/.config/retroarch/cores/"* "${INSTALL_DIR}/configs/retroarch/cores"
 }
 
 function uninstall_app(){
