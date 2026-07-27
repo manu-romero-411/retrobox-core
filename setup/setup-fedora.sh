@@ -25,4 +25,10 @@ sudo dnf install -y \
     python-ruamel-yaml \
     python3-tomlkit
 
+
+sudo cp ../resources/udev/*.rules /etc/udev/rules.d/
+sudo usermod -aG input $(whoami)
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+
 echo "[retrobox] System dependencies sucessfully installed."

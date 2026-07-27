@@ -27,8 +27,11 @@ sudo apt-get install -y \
     python3-evdev \
     python3-pygame
 
-usermod -aG input $USER
-cat << EOF > /etc/udev/rules.d/99-input.rules
+sudo cp ../resources/udev/*.rules /etc/udev/rules.d/
+sudo usermod -aG input $(whoami)
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+cat << EOF | sudo tee /etc/udev/rules.d/99-input.rules
 KERNEL=="uinput", MODE="0660", GROUP="input", OPTIONS+="static_node=uinput"
 EOF
 
