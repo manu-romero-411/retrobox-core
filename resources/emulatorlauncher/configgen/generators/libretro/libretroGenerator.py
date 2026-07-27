@@ -456,6 +456,8 @@ class LibretroGenerator(Generator):
         return Command.Command(array=command_wrapper, env={
             "XDG_CONFIG_HOME": _RETROARCH_XDG,
             "SDL_GAMECONTROLLERCONFIG": generate_sdl_game_controller_config(playersControllers),
+            "KWIN_DRM_NO_AMS": "1",
+            #"PULSE_LATENCY_MSEC": "60"
         })
 
 def _gfx_backend_check(backend: str):

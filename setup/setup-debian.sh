@@ -27,4 +27,9 @@ sudo apt-get install -y \
     python3-evdev \
     python3-pygame
 
+usermod -aG input $USER
+cat << EOF > /etc/udev/rules.d/99-input.rules
+KERNEL=="uinput", MODE="0660", GROUP="input", OPTIONS+="static_node=uinput"
+EOF
+
 echo "[retrobox] System dependencies sucessfully installed."
