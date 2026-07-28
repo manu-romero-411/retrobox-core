@@ -344,7 +344,7 @@ def configureINI(config_directory: Path, bios_directory: Path, system: Emulator,
         _logger.debug("Vulkan driver is available on the system.")
         renderer = "-1"
 
-        if gfxbackend := system.config.get("pcsx2_gfxbackend"):
+        if gfxbackend := system.config.get("pcsx2_gfxbackend", "14"):
             if gfxbackend == "12":
                 _logger.debug("User selected OpenGL")
             if gfxbackend == "13":

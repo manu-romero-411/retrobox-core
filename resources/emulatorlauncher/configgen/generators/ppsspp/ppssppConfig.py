@@ -43,7 +43,7 @@ def createPPSSPPConfig(iniConfig: CaseSensitiveConfigParser, system: Emulator):
         iniConfig.add_section("Graphics")
 
     # Graphics Backend
-    gfxbackend = system.config.get("gfxbackend", "0 (OPENGL)")
+    gfxbackend = system.config.get("gfxbackend", "3 (VULKAN)")
     iniConfig.set("Graphics", "GraphicsBackend", gfxbackend)
     # If Vulkan
     if gfxbackend == "3 (VULKAN)":

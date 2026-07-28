@@ -1,95 +1,85 @@
 from __future__ import annotations
 
-from ctypes import CDLL
-from ctypes.util import find_library
-import glob
+import functools
 import logging
+import re
 import subprocess
-from pathlib import Path
 from typing import Final
-
-from configgen.retrobox_paths import SYSTEM_SCRIPTS, USERDATA
 
 _logger: Final = logging.getLogger(__name__)
 
-_BATOCERA_VULKAN: Final =  f"{SYSTEM_SCRIPTS}/batocera-vulkan"
+_GPU_HEADER_RE = re.compile(r'^GPU(\d+):?\s*$')
+_KV_RE = re.compile(r'^(\w+)\s*=\s*(.+)$')
+_VERSION_RE = re.compile(r'\d+\.\d+\.\d+')
+_DISCRETE_TYPE = 'PHYSICAL_DEVICE_TYPE_DISCRETE_GPU'
+
+
+@functools.lru_cache(maxsize=1)
+def _devices() -> list[dict]:
+    """Launches vulkaninfo --summary once and parses all GPU blocks."""
+    try:
+        output = subprocess.check_output(
+            ['vulkaninfo', '--summary'], text=True, stderr=subprocess.DEVNULL,
+        )
+    except (subprocess.CalledProcessError, FileNotFoundError, OSError):
+        _logger.exception('Error running vulkaninfo.')
+        return []
+
+    devices: list[dict] = []
+    current: dict | None = None
+    for raw_line in output.splitlines():
+        line = raw_line.strip()
+        header = _GPU_HEADER_RE.match(line)
+        if header:
+            current = {'index': int(header.group(1))}
+            devices.append(current)
+            continue
+        if current is None:
+            continue
+        kv = _KV_RE.match(line)
+        if kv:
+            current[kv.group(1)] = kv.group(2).strip()
+
+    devices.sort(key=lambda d: d['index'])
+    return devices
+
+
+def _discrete_device() -> dict | None:
+    return next((d for d in _devices() if d.get('deviceType') == _DISCRETE_TYPE), None)
+
 
 def is_available() -> bool:
-    """Checks if this system/GPU has Vulkan capabilities.
-    TODO: Make a better check on systems with dual graphics. My main PC only has 1 GPU
-    """
-    # 1. Filtro rápido: ¿Está el loader en el sistema?
-    lib_path = find_library("vulkan")
-    if not lib_path:
-        return False
+    """True si vulkaninfo enumera al menos un device real (loader + ICD funcionales)."""
+    return bool(_devices())
 
-    # 2. Comprobación real: ¿Se puede cargar y responde a la API básica?
-    try:
-        vulkan_lib = CDLL(lib_path)
-        # vkCreateInstance es el punto de entrada obligatorio de cualquier app Vulkan
-        if hasattr(vulkan_lib, "vkCreateInstance"):
-            return True
-    except Exception:
-        pass
-
-    # 3. Fallback estático: Buscar manifiestos ICD (Drivers de proveedores)
-    # Usamos glob para evitar bucles anidados con os.listdir
-    icd_patterns = [
-        "/usr/share/vulkan/icd.d/*.json",
-        "/etc/vulkan/icd.d/*.json",
-        "/usr/local/share/vulkan/icd.d/*.json"
-    ]
-    
-    for pattern in icd_patterns:
-        if glob.glob(pattern):
-            return True
-
-    return False
 
 def has_discrete_gpu() -> bool:
-    try:
-        return subprocess.check_output([_BATOCERA_VULKAN, 'hasDiscrete'], text=True).strip() == 'true'
-    except subprocess.CalledProcessError:
-        _logger.exception('Error checking for discrete GPU.')
+    return _discrete_device() is not None
 
-    return False
 
 def get_discrete_gpu_index() -> str | None:
-    try:
-        return subprocess.check_output([_BATOCERA_VULKAN, 'discreteIndex'], text=True).strip() or None
-    except subprocess.CalledProcessError:
-        _logger.exception('Error getting discrete GPU index')
+    d = _discrete_device()
+    return str(d['index']) if d else None
 
-    return None
 
 def get_discrete_gpu_name() -> str | None:
-    try:
-        return subprocess.check_output([_BATOCERA_VULKAN, 'discreteName'], text=True).strip() or None
-    except subprocess.CalledProcessError:
-        _logger.exception('Error getting discrete GPU Name')
+    d = _discrete_device()
+    return d.get('deviceName') if d else None
 
-    return None
-
-def get_default_gpu_name() -> str | None:
-    try:
-        return subprocess.check_output([_BATOCERA_VULKAN, 'defaultName'], text=True).strip() or None
-    except subprocess.CalledProcessError:
-        _logger.exception('Error getting default GPU Name')
-
-    return None
 
 def get_discrete_gpu_uuid() -> str | None:
-    try:
-        return subprocess.check_output([_BATOCERA_VULKAN, 'discreteUUID'], text=True).strip() or None
-    except subprocess.CalledProcessError:
-        _logger.exception('Error getting discrete GPU UUID')
+    d = _discrete_device()
+    return d.get('deviceUUID') if d else None
 
-    return None
+
+def get_default_gpu_name() -> str | None:
+    devices = _devices()
+    return devices[0].get('deviceName') if devices else None
+
 
 def get_version() -> str:
-    try:
-        return subprocess.check_output([_BATOCERA_VULKAN, 'vulkanVersion'], text=True).strip()
-    except subprocess.CalledProcessError:
-        _logger.exception('Error checking for Vulkan version.')
-
-    return ''
+    device = _discrete_device() or (_devices()[0] if _devices() else None)
+    if not device:
+        return ''
+    m = _VERSION_RE.search(device.get('apiVersion', ''))
+    return m.group(0) if m else ''

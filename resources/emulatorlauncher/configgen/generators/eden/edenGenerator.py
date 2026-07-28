@@ -340,12 +340,8 @@ class EdenGenerator(Generator):
         eden_config.set("UI", "check_for_updates_on_start", "false")
         eden_config.set("UI", "check_for_updates_on_start\\default", "false")
 
-        if emulator == "citron-emu":
-            eden_config.set("UI", "UIGameList\\cache_game_list", "false")
-            eden_config.set("UI", "UIGameList\\cache_game_list\\default", "false")
-        else:
-            eden_config.set("UI", "UIGameList\\cache_game_list", "true")
-            eden_config.set("UI", "UIGameList\\cache_game_list\\default", "true")
+        eden_config.set("UI", "UIGameList\\cache_game_list", "true")
+        eden_config.set("UI", "UIGameList\\cache_game_list\\default", "true")
 
         # Common external path (dlc/update)
         eden_config.set("UI", "Paths\\external_content_dirs\\size", "2")
@@ -465,8 +461,8 @@ class EdenGenerator(Generator):
             eden_config.set("Renderer", "aspect_ratio\\default", "true")
 
         # Graphical backend
-        if system.isOptSet('yuzu_backend'):
-            eden_config.set("Renderer", "backend", system.config["yuzu_backend"])
+        if system.isOptSet('gfxbackend'):
+            eden_config.set("Renderer", "backend", system.config.get("gfxbackend"))
             eden_config.set("Renderer", "backend\\default", "false")
         else:
             eden_config.set("Renderer", "backend", "1")
@@ -544,24 +540,14 @@ class EdenGenerator(Generator):
             eden_config.set("Renderer", "fullscreen_mode", "1")
             eden_config.set("Renderer", "fullscreen_mode\\default", "true")
 
-        if emulator == "citron-emu":
-            # Resolution scaler
-            if system.isOptSet('citron_resolution_scale'):
-                print ("Use Resolution Scale for Citron:",system.config["citron_resolution_scale"], file=sys.stderr)
-                eden_config.set("Renderer", "resolution_setup", system.config["citron_resolution_scale"])
-                eden_config.set("Renderer", "resolution_setup\\default", "false")
-            else:
-                eden_config.set("Renderer", "resolution_setup", "2")
-                eden_config.set("Renderer", "resolution_setup\\default", "true")
-        else:        
-            # Resolution scaler
-            if system.isOptSet('resolution_scale'):
-                print ("Use Resolution Scale for Eden :",system.config["resolution_scale"], file=sys.stderr)
-                eden_config.set("Renderer", "resolution_setup", system.config["resolution_scale"])
-                eden_config.set("Renderer", "resolution_setup\\default", "false")
-            else:
-                eden_config.set("Renderer", "resolution_setup", "2")
-                eden_config.set("Renderer", "resolution_setup\\default", "true")
+        # Resolution scaler
+        if system.isOptSet('resolution_scale'):
+            print ("Use Resolution Scale for Eden :",system.config["resolution_scale"], file=sys.stderr)
+            eden_config.set("Renderer", "resolution_setup", system.config["resolution_scale"])
+            eden_config.set("Renderer", "resolution_setup\\default", "false")
+        else:
+            eden_config.set("Renderer", "resolution_setup", "2")
+            eden_config.set("Renderer", "resolution_setup\\default", "true")
 
         # Scaling filter
         if system.isOptSet('scale_filter'):

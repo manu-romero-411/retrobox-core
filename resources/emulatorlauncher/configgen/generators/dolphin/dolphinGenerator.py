@@ -139,8 +139,8 @@ class DolphinGenerator(Generator):
         # Enable MMU
         dolphinSettings.set("Core", "MMU", str(system.config.get_bool("enable_mmu")))
 
-        # Backend - Default OpenGL
-        if system.config.get("gfxbackend") == "Vulkan":
+        # Backend - Default Vulkan, fallback OpenGL
+        if system.config.get("gfxbackend", "Vulkan") == "Vulkan":
             dolphinSettings.set("Core", "GFXBackend", "Vulkan")
             # Check Vulkan
             if not vulkan.is_available():
