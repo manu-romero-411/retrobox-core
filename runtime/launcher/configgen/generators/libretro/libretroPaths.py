@@ -28,3 +28,6 @@ RETROARCH_SHARE: Final = _RETROARCH_ROOT / 'cores'
 RETROARCH_ASSETS:    Final = _RETROARCH_ROOT / 'assets'
 RETROARCH_AUTOCONFIG: Final = _RETROARCH_ROOT / 'autoconfig'
 RETROARCH_SHADERS: Final = _RETROARCH_ROOT / 'shaders'
+
+_RETROARCH_VIDEO_FILTERS: Final = _RETROARCH_ROOT / 'filters' / 'video'
+_RETROARCH_AUDIO_FILTERS: Final = _RETROARCH_ROOT / 'filters' / 'audio'

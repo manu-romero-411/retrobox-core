@@ -1,6 +1,7 @@
 """
 This submodule regenerates es_features.cfg based on YAML configuration files.
 """
+import logging
 from pathlib import Path
 import sys
 import xml.etree.ElementTree as ET
@@ -8,6 +9,15 @@ from xml.dom import minidom
 import yaml
 from yaml.scanner import ScannerError
 from yaml.parser import ParserError
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="[%(levelname)s] %(message)s"
+)
+
+_logger = logging.getLogger(__name__)
+
+from runtime.retrobox_paths import _ES_FEATURES_DIR, ES_FEATURES_CFG
 
 ROOTDIR = Path(__file__).resolve().parents[2]
 sys.path.append(str(ROOTDIR))
@@ -80,10 +90,11 @@ def build_system_elements(parent_elem, systems_list):
                 sys_elem.set(str(k), str(v))
         build_features_elements(sys_elem, sys_data)
 
-def regenerate_es_features(yaml_path: str, output_path: str):
-    yaml_dir = Path(yaml_path)
-    output_cfg = Path(output_path)
-
+def generate_es_features(yaml_dir: Path = _ES_FEATURES_DIR, output_cfg: Path = ES_FEATURES_CFG):
+    """
+    entrypoint to the es_features.cfg generator
+    """
+    _logger.info("Start generating: %s", output_cfg)
     root = ET.Element('features')
 
     yaml_files = sorted(list(yaml_dir.glob('*.yaml')))
@@ -98,9 +109,9 @@ def regenerate_es_features(yaml_path: str, output_path: str):
                 data = yaml.safe_load(f)
                 if not data or not isinstance(data, dict):
                     continue
-                
+
                 emu_name = data.get('emulator_name')
-                
+
                 # Detectar el fichero especial global
                 if emu_name == '_global_config':
                     global_config_data = data
@@ -115,7 +126,7 @@ def regenerate_es_features(yaml_path: str, output_path: str):
                 else:
                     emulator_data_map[emu_name] = data
         except (ScannerError, ParserError) as e:
-            print(f"Error parsing YAML file {yfile.name}: {e}", file=sys.stderr)
+            _logger.error("Error parsing YAML file %s: %s", yfile.name, e)
 
     # 1. Reconstruir <sharedFeatures> y <globalFeatures> si existe el fichero global
     if global_config_data:
@@ -144,7 +155,13 @@ def regenerate_es_features(yaml_path: str, output_path: str):
         emu_elem.set('name', str(emu_name))
 
         for k, v in emu_data.items():
-            if k not in ('emulator_name', 'features', 'sharedFeatures', 'systems', 'groups') and v is not None:
+            if k not in (
+                'emulator_name',
+                'features',
+                'sharedFeatures',
+                'systems',
+                'groups'
+            ) and v is not None:
                 emu_elem.set(str(k), str(v))
 
         build_features_elements(emu_elem, emu_data)
@@ -188,4 +205,4 @@ def regenerate_es_features(yaml_path: str, output_path: str):
     with open(output_cfg, 'w', encoding='utf-8') as f:
         f.write(final_xml + "\n")
 
-    print(f"=> Successfully regenerated: {output_cfg}")
+    _logger.info("Successfully regenerated: %s", output_cfg)

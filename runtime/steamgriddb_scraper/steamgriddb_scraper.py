@@ -28,6 +28,7 @@ Dependencias:
 """
 
 import argparse
+import logging
 import re
 import sys
 import xml.etree.ElementTree as ET
@@ -36,6 +37,9 @@ from pathlib import Path
 import requests
 from steamgrid import SteamGridDB
 
+from runtime.retrobox_paths import ROMS
+
+_logger = logging.getLogger(__name__)
 
 # ── Constantes ───────────────────────────────────────────────────────────────
 
@@ -414,44 +418,36 @@ def parse_gamelist(gamelist_path: Path) -> list[dict]:
 
 SUPPORTED_SYSTEMS = ["steam", "heroic", "lutris"]
 
+def run_steamgriddb_scraper(
+    roms: Path = ROMS,
+    apikey: str = "",
+    systems: list[str] | None = None,
+    force: bool = False,
+    interactive: bool = False,
+) -> int:
+    """Descarga marquee y thumb de SteamGridDB y actualiza gamelist.xml."""
+    systems = systems or SUPPORTED_SYSTEMS
 
-def main():
-    parser = argparse.ArgumentParser(
-        description="Descarga marquee y thumb de SteamGridDB y actualiza gamelist.xml.",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-    )
-    parser.add_argument("--roms",    required=True, help="Ruta a la carpeta roms/")
-    parser.add_argument("--apikey",  required=True, help="API key de SteamGridDB")
-    parser.add_argument(
-        "--systems", nargs="+", choices=SUPPORTED_SYSTEMS, default=SUPPORTED_SYSTEMS,
-        help="Sistemas a procesar (por defecto: todos)",
-    )
-    parser.add_argument(
-        "--force", action="store_true",
-        help="Sobreescribir archivos existentes sin preguntar",
-    )
-    parser.add_argument(
-        "--interactive", action="store_true",
-        help=f"Mostrar {TOP_N_INTERACTIVE} candidatos por asset y dejar elegir",
-    )
-    args = parser.parse_args()
-
-    roms_path = Path(args.roms)
+    roms_path = Path(roms)
     if not roms_path.is_dir():
         print(f"✗ La ruta '{roms_path}' no existe o no es un directorio.")
-        sys.exit(1)
+        return 1
 
-    sgdb_client = SteamGridDB(args.apikey)
+    if apikey == "":
+        print("✗ API key vacía. Comprueba bien el programa.")
+        return 1
 
-    for system in args.systems:
-        system_path  = roms_path / system
-        gamelist     = system_path / "gamelist.xml"
+    sgdb_client = SteamGridDB(apikey)
+
+    for system in systems:
+        system_path = roms_path / system
+        gamelist = system_path / "gamelist.xml"
 
         if not gamelist.exists():
             print(f"\n[{system}] ✗ No se encontró gamelist.xml, saltando.")
             continue
 
-        games      = parse_gamelist(gamelist)
+        games = parse_gamelist(gamelist)
         images_dir = system_path / "images"
 
         print(f"\n{'═'*60}")
@@ -466,12 +462,39 @@ def main():
                 file_stem=game["file_stem"],
                 images_dir=images_dir,
                 gamelist_path=gamelist,
-                force=args.force,
-                interactive=args.interactive,
+                force=force,
+                interactive=interactive,
             )
 
     print("\n✓ Proceso completado.")
+    return 0
+
+
+def _cli() -> None:
+    parser = argparse.ArgumentParser(
+        description="Descarga marquee y thumb de SteamGridDB y actualiza gamelist.xml.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument("--roms", required=True, help="Ruta a la carpeta roms/")
+    parser.add_argument("--apikey", required=True, help="API key de SteamGridDB")
+    parser.add_argument(
+        "--systems", nargs="+", choices=SUPPORTED_SYSTEMS, default=SUPPORTED_SYSTEMS,
+        help="Sistemas a procesar (por defecto: todos)",
+    )
+    parser.add_argument("--force", action="store_true", help="Sobreescribir archivos existentes sin preguntar")
+    parser.add_argument(
+        "--interactive", action="store_true",
+        help=f"Mostrar {TOP_N_INTERACTIVE} candidatos por asset y dejar elegir",
+    )
+    args = parser.parse_args()
+    sys.exit(run_steamgriddb_scraper(
+        roms=Path(args.roms),
+        apikey=args.apikey,
+        systems=args.systems,
+        force=args.force,
+        interactive=args.interactive,
+    ))
 
 
 if __name__ == "__main__":
-    main()
+    _cli()

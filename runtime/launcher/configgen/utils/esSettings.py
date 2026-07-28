@@ -2,12 +2,12 @@ from __future__ import annotations
 
 import xml.etree.ElementTree as ET
 
-from runtime.retrobox_paths import ES_SETTINGS
+from runtime.retrobox_paths import ES_SETTINGS_CFG
 
 # Return value for ES InvertButtons (are confirm/cancel swapped)
 def getInvertButtonsValue() -> bool:
     try:
-        tree = ET.parse(ES_SETTINGS)
+        tree = ET.parse(ES_SETTINGS_CFG)
         root = tree.getroot()
         # Find the InvertButtons element and return value
         elem = root.find(".//bool[@name='InvertButtons']")

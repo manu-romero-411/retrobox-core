@@ -27,14 +27,14 @@ _SYSTEM_LOCAL_SHARE: Final = Path('/usr/local/share')
 RETROBOX_ROOTDIR: Final = Path(
     os.environ.get('RETROBOX_ROOTDIR', Path(__file__).resolve().parents[1])
 )
+USERDATA: Final = RETROBOX_ROOTDIR
+
 ENV_FILE = RETROBOX_ROOTDIR / ".env"
 
-USERDATA: Final = Path(os.environ.get('USERDATA', str(RETROBOX_ROOTDIR)))
-
 RESOURCES_DIR:  Final = RETROBOX_ROOTDIR / 'resources'
-DATAINIT_DIR:        Final = RESOURCES_DIR / 'datainit'
-#BATOCERA_ES_DIR:     Final = Path('/home/manuel/proyectos/batocera-emulationstation/appimage/es')
-BATOCERA_ES_DIR:     Final = RETROBOX_ROOTDIR / 'frontend'
+DATAINIT_DIR: Final = RESOURCES_DIR / 'datainit'
+#BATOCERA_ES_DIR: Final = Path('/home/manuel/proyectos/batocera-emulationstation/appimage/es')
+_FRONTEND_DIR: Final = RETROBOX_ROOTDIR / 'frontend'
 DEFAULTS_DIR: Final = RESOURCES_DIR / 'configgen'
 
 HOME_INIT:  Final = DATAINIT_DIR / 'system'
@@ -48,49 +48,45 @@ ROMS:     Final = USERDATA / 'roms'          # ajusta si los tienes en otro siti
 
 # ---------------------------------------------------------------------------
 # "system" de batocera → ~/.local/share/batocera  (estado interno del port)
-# ---------------------------------------------------------------------------
-HOME:  Final = USERDATA
 CACHE: Final = _XDG_CACHE / 'retrobox'
-LOGS:  Final = HOME / 'logs'
+LOGS:  Final = USERDATA / 'logs'
 
 HOOKS = USERDATA / "resources" / "hooks" / "retrohook"
 
-# ---------------------------------------------------------------------------
-# Configs de emuladores → ~/.config  (XDG; retroarch ya vive en ~/.config/retroarch)
-# ---------------------------------------------------------------------------
+# directories for emulator things
 SAVES:       Final = USERDATA / 'saves'
 SCREENSHOTS: Final = USERDATA / 'screenshots'
 RECORDINGS:  Final = USERDATA / 'recordings'
-BIOS:        Final = USERDATA / 'bios'       # "system directory" de retroarch
+BIOS:        Final = USERDATA / 'bios'
 OVERLAYS:    Final = USERDATA / 'overlay'
 CHEATS:      Final = USERDATA / 'cheats'
 
-SHADERS_DIR:    Final = USERDATA / 'shaders'
-# Compatibilidad con nombres usados por algunos generadores de Batocera
-BATOCERA_SHADERS: Final = SHADERS_DIR
-USER_SHADERS: Final = SHADERS_DIR
-DECORATIONS_DIR:  Final = USERDATA / 'decorations'
-USER_DECORATIONS: Final = DECORATIONS_DIR
-# ---------------------------------------------------------------------------
-# EmulationStation
-# ---------------------------------------------------------------------------
-USER_ES_DIR: Final = USERDATA / "frontend" / '.emulationstation'
-ES_SETTINGS: Final = USER_ES_DIR / 'es_settings.cfg'
-ES_INPUT: Final = USER_ES_DIR  / "es_input.cfg"
+_SHADERS_DIR:    Final = USERDATA / 'shaders'
+_SHADERS_USER_DIR: Final = _SHADERS_DIR
+_DECORATIONS_DIR:  Final = USERDATA / 'decorations'
+_DECORATIONS_USER_DIR: Final = _DECORATIONS_DIR
 
-# ---------------------------------------------------------------------------
+# EmulationStation
+_USER_ES_DIR: Final = _FRONTEND_DIR / '.emulationstation'
+ES_SETTINGS_CFG: Final = _USER_ES_DIR / 'es_settings.cfg'
+ES_FEATURES_CFG: Final = _USER_ES_DIR  / "es_features.cfg"
+ES_SYSTEMS_CFG: Final = _USER_ES_DIR  / "es_systems.cfg"
+ES_INPUT_CFG: Final = _USER_ES_DIR  / "es_input.cfg"
+ES_INI: Final = _USER_ES_DIR / "emulationstation.ini"
+
 # Recursos de ES y configgen (sistema)
-# ---------------------------------------------------------------------------
-_ES_RESOURCES_DIR:   Final = BATOCERA_ES_DIR / 'resources'
+_ES_RESOURCES_DIR:   Final = _FRONTEND_DIR / 'resources'
+_ES_FEATURES_DIR:   Final = _FRONTEND_DIR / 'emu_features'
+_ES_SYSTEMS_DIR:   Final = _FRONTEND_DIR / 'systems_config'
 ES_GUNS_METADATA:    Final = _ES_RESOURCES_DIR / 'gungames.xml'
 ES_WHEELS_METADATA:  Final = _ES_RESOURCES_DIR / 'wheelgames.xml'
 ES_GAMES_METADATA:   Final = _ES_RESOURCES_DIR / 'gamesdb.xml'
 ES_GUNS_ART_METADATA: Final = DEFAULTS_DIR / 'data' / 'gamesbuttonsdb.xml'
 
-SYSTEM_DECORATIONS:  Final = DATAINIT_DIR / 'decorations'
-SYSTEM_SCRIPTS:      Final = RESOURCES_DIR / 'utils' / 'batocera-stubs'
+_SYSTEM_SCRIPTS:      Final = RESOURCES_DIR / 'scripts'
+_UTILS_DIR:      Final = RESOURCES_DIR / 'utils'
 
-# Runtime dir (en batocera es /var/run, en Debian usamos /tmp)
+# Runtime dir
 RUNTIME_DIR: Final = Path('/tmp/retrobox-run')
 
 SQUASHFS_DIR:      Final = RUNTIME_DIR / 'squashfs'
@@ -105,9 +101,9 @@ GUN_OVERLAYS_DIR:  Final = RUNTIME_DIR / 'batocera-overlays'
 
 # GAMEPADLY
 _GAMEPADLY_DIR: Final = USERDATA / "runtime" / "gamepadly"
-_PROFILES_DIR:  Final = RESOURCES_DIR / "pad2key" / "profiles"
-_PROFILES_USER_DIR:  Final = _GAMEPADLY_DIR / "pad2key" / "user_profiles"
-_MAPPER_SCRIPT: Final = _GAMEPADLY_DIR / "gamepadly_mapper.py"
+_GAMEPADLY_PROFILES:  Final = RESOURCES_DIR / "pad2key" / "profiles"
+_GAMEPADLY_USER_PROFILES:  Final = _GAMEPADLY_DIR / "pad2key" / "user_profiles"
+GAMEPADLY_MAPPER: Final = _GAMEPADLY_DIR / "gamepadly_mapper.py"
 
 # Utilidades
 def configure_emulator(rom: Path, /) -> bool:

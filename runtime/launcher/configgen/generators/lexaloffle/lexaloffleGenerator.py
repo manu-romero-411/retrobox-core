@@ -3,8 +3,15 @@ from __future__ import annotations
 import os
 from typing import TYPE_CHECKING, Final
 
+from configgen.generators.lexaloffle.lexaloffle_paths import PICO8_BIN_PATH, PICO8_CONTROLLERS, PICO8_ROOT_PATH, VOX_BIN_PATH, VOX_CONTROLLERS, VOX_ROOT_PATH
+from runtime.retrobox_paths import (
+    BIOS,
+    SCREENSHOTS,
+    ensure_parents_and_open
+)
+
 from ... import Command
-from runtime.retrobox_paths import BIOS, HOME, ROMS, SCREENSHOTS, ensure_parents_and_open
+
 from ...controller import generate_sdl_game_controller_config
 from ...exceptions import RetroboxException
 from ..Generator import Generator
@@ -14,12 +21,7 @@ if TYPE_CHECKING:
 
     from ...batoceraTypes import HotkeysContext
 
-PICO8_BIN_PATH: Final = BIOS / "pico-8" / "pico8"
-PICO8_ROOT_PATH: Final = ROMS / "pico8"
-PICO8_CONTROLLERS: Final = HOME / ".lexaloffle" / "pico-8" / "sdl_controllers.txt"
-VOX_BIN_PATH: Final = BIOS / "voxatron" / "vox"
-VOX_ROOT_PATH: Final = ROMS / "voxatron"
-VOX_CONTROLLERS: Final = HOME / ".lexaloffle" / "Voxatron" / "sdl_controllers.txt"
+
 
 # Generator for the official pico8 binary from Lexaloffle
 class LexaloffleGenerator(Generator):
@@ -31,34 +33,37 @@ class LexaloffleGenerator(Generator):
         }
 
     def generate(self, system, rom, playersControllers, metadata, guns, wheels, gameResolution):
-        if (system.name == "pico8"):
-            LD_LIB=BIOS / "pico-8"
-            BIN_PATH=PICO8_BIN_PATH
-            CONTROLLERS=PICO8_CONTROLLERS
-            ROOT_PATH=PICO8_ROOT_PATH
-        elif (system.name == "voxatron"):
-            LD_LIB=BIOS / "voxatron"
-            BIN_PATH=VOX_BIN_PATH
-            CONTROLLERS=VOX_CONTROLLERS
-            ROOT_PATH=VOX_ROOT_PATH
+        if system.name == "pico8":
+            LD_LIB = PICO8_ROOT_PATH
+            BIN_PATH = PICO8_BIN_PATH
+            CONTROLLERS = PICO8_CONTROLLERS
+            ROOT_PATH = PICO8_ROOT_PATH
+        elif system.name == "voxatron":
+            LD_LIB = VOX_BIN_PATH
+            BIN_PATH = VOX_BIN_PATH
+            CONTROLLERS = VOX_CONTROLLERS
+            ROOT_PATH = VOX_ROOT_PATH
         else:
-            raise RetroboxException(f"The Lexaloffle generator has been called for an unknwon system: {system.name}.")
+            raise RetroboxException(
+                f"The Lexaloffle generator has been called for an unknwon system: {system.name}.")
 
         if not BIN_PATH.exists():
-            raise RetroboxException(f"Lexaloffle official binary not found at {BIN_PATH}")
+            raise RetroboxException(
+                f"Lexaloffle official binary not found at {BIN_PATH}")
 
         if not os.access(BIN_PATH, os.X_OK):
-            raise RetroboxException(f"{BIN_PATH} is not set as executable")
+            raise RetroboxException(
+                f"{BIN_PATH} is not set as executable")
 
         # the command to run
-        commandArray: list[str | Path] = [BIN_PATH]
-        commandArray.extend(["-desktop", SCREENSHOTS])  # screenshots
-        commandArray.extend(["-windowed", "0"])                     # full screen
+        command_array: list[str | Path] = [BIN_PATH]
+        command_array.extend(["-desktop", SCREENSHOTS])  # screenshots
+        command_array.extend(["-windowed", "0"])                     # full screen
         # Display FPS
         if system.config.show_fps:
-                commandArray.extend(["-show_fps", "1"])
+            command_array.extend(["-show_fps", "1"])
         else:
-                commandArray.extend(["-show_fps", "0"])
+            command_array.extend(["-show_fps", "0"])
 
         rombase = rom.stem
 
@@ -67,25 +72,26 @@ class LexaloffleGenerator(Generator):
             with rom.open() as fpin:
                 lines = fpin.readlines()
             fullpath = rom.absolute().parent / lines[0].strip()
-            commandArray.extend(["-root_path", fullpath.parent])
+            command_array.extend(["-root_path", fullpath.parent])
             rom = fullpath
         else:
-            commandArray.extend(["-root_path", ROOT_PATH]) # store carts from splore
+            command_array.extend(["-root_path", ROOT_PATH]) # store carts from splore
 
         if (rombase.lower() == "splore" or rombase.lower() == "console"):
-            commandArray.extend(["-splore"])
+            command_array.extend(["-splore"])
         else:
-            commandArray.extend(["-run", rom])
+            command_array.extend(["-run", rom])
 
         controllersconfig = generate_sdl_game_controller_config(playersControllers)
         with ensure_parents_and_open(CONTROLLERS, "w") as file:
-               file.write(controllersconfig)
+            file.write(controllersconfig)
 
         existing_library_path = os.environ.get("LD_LIBRARY_PATH")
 
-        return Command.Command(array=commandArray, env={
+        return Command.Command(array=command_array, env={
             "SDL_AUDIODRIVER": "alsa",
-            "LD_LIBRARY_PATH": f"{LD_LIB}:{existing_library_path}" if existing_library_path else LD_LIB
+            "LD_LIBRARY_PATH":
+                f"{LD_LIB}:{existing_library_path}" if existing_library_path else LD_LIB
         })
 
     def getInGameRatio(self, config, gameResolution, rom):

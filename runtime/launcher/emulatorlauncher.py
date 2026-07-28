@@ -22,7 +22,7 @@ from typing import TYPE_CHECKING
 import pyudev
 import sdl2
 
-# 1. Absolute path modifications at the very beginning
+# absolute path modifications at the very beginning
 ROOTDIR = Path(__file__).resolve().parents[2]
 CONFIGGEN_DIR = Path(__file__).resolve().parent
 sys.path.append(str(ROOTDIR))

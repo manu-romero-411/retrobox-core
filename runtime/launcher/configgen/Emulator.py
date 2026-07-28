@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, Any
 
 import yaml
 
-from runtime.retrobox_paths import DEFAULTS_DIR, ES_SETTINGS, SHADERS_DIR, configure_emulator
+from runtime.retrobox_paths import DEFAULTS_DIR, ES_SETTINGS_CFG, _SHADERS_DIR, configure_emulator
 
 from .config import Config, SystemConfig
 from .exceptions import MissingEmulator
@@ -171,7 +171,7 @@ class Emulator:
         _logger.info('game settings name: %s', gsname)
 
         # load configuration from batocera.conf
-        settings = UnixSettings(ES_SETTINGS)
+        settings = UnixSettings(ES_SETTINGS_CFG)
 
         global_settings = settings.get_all('global')
         system_settings = settings.get_all(args.system)
@@ -199,7 +199,7 @@ class Emulator:
                 raise MissingEmulator
 
         try:
-            es_config = ET.parse(ES_SETTINGS)
+            es_config = ET.parse(ES_SETTINGS_CFG)
 
             # showFPS
             drawframerate_node = es_config.find('./bool[@name="DrawFramerate"]')
@@ -288,11 +288,11 @@ class Emulator:
         render_data: dict[str, Any] = {}
         if (shader_set := self.config.get('shaderset')) is not self.config.MISSING:
             if shader_set == 'none':
-                rendering_defaults = SHADERS_DIR / 'configs' / 'rendering-defaults.yml'
+                rendering_defaults = _SHADERS_DIR / 'configs' / 'rendering-defaults.yml'
             else:
-                rendering_defaults = SHADERS_DIR / 'configs' / shader_set / 'rendering-defaults.yml'
+                rendering_defaults = _SHADERS_DIR / 'configs' / shader_set / 'rendering-defaults.yml'
                 if not rendering_defaults.exists():
-                    rendering_defaults = SHADERS_DIR / 'configs' / shader_set / 'rendering-defaults.yml'
+                    rendering_defaults = _SHADERS_DIR / 'configs' / shader_set / 'rendering-defaults.yml'
 
             render_data = _load_defaults(
                 args.system, rendering_defaults, rendering_defaults.with_name('rendering-defaults-arch.yml')

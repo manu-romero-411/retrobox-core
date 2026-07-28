@@ -1,6 +1,7 @@
 """
 This submodule regenerates es_systems.cfg based on actual system directories situation
 """
+import logging
 import os
 from pathlib import Path
 import sys
@@ -10,10 +11,22 @@ from xml.dom import minidom
 import yaml
 from yaml.scanner import ScannerError
 from yaml.parser import ParserError
+
 ROOTDIR = Path(__file__).resolve().parents[2]
 sys.path.append(str(ROOTDIR))
 
-from runtime.retrobox_paths import ROMS, USERDATA
+logging.basicConfig(
+    level=logging.INFO,
+    format="[%(levelname)s] %(message)s"
+)
+_logger = logging.getLogger(__name__)
+
+from runtime.retrobox_paths import (
+    _ES_SYSTEMS_DIR,
+    ES_SYSTEMS_CFG,
+    ROMS,
+    USERDATA
+)
 
 PYTHON_COMMAND: Final = Path("/usr/bin/python3")
 EMULAUNCHER_COMMAND: Final = USERDATA / "runtime" / "launcher" / "emulatorlauncher.py"
@@ -61,11 +74,15 @@ def _append_emulator_nodes(parent_elem, emulators_data):
             core_elem = ET.SubElement(emulator_elem, "core", **core_attrs)
             core_elem.text = core_name
 
-def yaml_to_es_systems(base_dir: str, output_cfg_path: str):
+def generate_es_systems(base_path: Path = _ES_SYSTEMS_DIR, output_path: Path = ES_SYSTEMS_CFG):
     """
     Recorre la estructura de directorios YAML generada y reconstruye 
     el archivo es_systems.cfg original.
     """
+    _logger.info("Start generating %s", output_path)
+    base_dir: str = str(base_path)
+    output_cfg_file: str = str(output_path)
+
     root = ET.Element("systemList")
 
     # Forzar la ruta a string para evitar falsos positivos de iteración en linters
@@ -81,7 +98,7 @@ def yaml_to_es_systems(base_dir: str, output_cfg_path: str):
                 with open(yaml_path, 'r', encoding='utf-8') as f:
                     data = yaml.safe_load(f)
             except (ScannerError, ParserError) as e:
-                print(f"Error de sintaxis en YAML al leer {yaml_path}: {e}")
+                _logger.error("Error de sintaxis en YAML al leer %s: %s", yaml_path, e)
                 continue
 
             if not isinstance(data, dict) or not data:
@@ -128,7 +145,7 @@ def yaml_to_es_systems(base_dir: str, output_cfg_path: str):
     final_lines = ['<?xml version="1.0" encoding="UTF-8"?>'] + clean_lines
     final_xml = "\n".join(final_lines)
 
-    with open(output_cfg_path, 'w', encoding='utf-8') as f:
+    with open(output_cfg_file, 'w', encoding='utf-8') as f:
         f.write(final_xml)
 
-    print(f"Archivo es_systems.cfg reconstruido con éxito en: {output_cfg_path}")
+    _logger.info("Successfully regenerated: %s", output_cfg_file)

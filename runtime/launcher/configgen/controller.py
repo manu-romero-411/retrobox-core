@@ -9,7 +9,7 @@ from dataclasses import InitVar, dataclass, field, replace
 from pathlib import Path
 from typing import TYPE_CHECKING, Final, Literal, Self, TypedDict, Unpack, cast
 
-from runtime.retrobox_paths import BATOCERA_ES_DIR, HOME, USER_ES_DIR
+from runtime.retrobox_paths import _FRONTEND_DIR, _USER_HOME, ES_INPUT_CFG
 
 _logger: Final = logging.getLogger(__name__)
 
@@ -423,7 +423,7 @@ class Controller:
         import evdev
 
         # read the sdl2 cache if possible for axis
-        cache_file = Path(HOME / ".sdl2" / f"{self.guid}_{self.name}.cache")
+        cache_file = Path(_USER_HOME / ".sdl2" / f"{self.guid}_{self.name}.cache")
         if not cache_file.exists():
             return {}
 
@@ -460,7 +460,7 @@ class Controller:
     @classmethod
     def load_for_players(cls, max_players: int, args: Namespace, /) -> ControllerList:
         cfg_roots = []
-        for conffile in (USER_ES_DIR / 'es_input.cfg', BATOCERA_ES_DIR / 'es_input.cfg'):
+        for conffile in (ES_INPUT_CFG, _FRONTEND_DIR / 'es_input.cfg'):
             es_input_exists = conffile.exists()
             print(f"[DEBUG] buscando es_input.cfg en: {conffile} → {es_input_exists}")
             if es_input_exists:

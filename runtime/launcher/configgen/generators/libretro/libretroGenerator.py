@@ -25,13 +25,13 @@ from runtime.launcher.configgen.generators.libretro.libretroPaths import (
     RETROARCH_SHARE
 )
 from runtime.retrobox_paths import (
+    _UTILS_DIR,
     BIOS,
     CMDFILES_DIR,
-    HOME,
     OVERLAYS,
     ROMS,
     SAVES,
-    USER_SHADERS,
+    _SHADERS_USER_DIR,
     configure_emulator,
     mkdir_if_not_exists
 )
@@ -116,9 +116,9 @@ class LibretroGenerator(Generator):
 
             shader_filename = f"{game_shader}.{shader_type}p"
             _logger.debug("searching shader %s", shader_filename)
-            if (USER_SHADERS / shader_filename).exists():
-                video_shader_dir = USER_SHADERS
-                _logger.debug("shader %s found in %s", shader_filename, USER_SHADERS)
+            if (_SHADERS_USER_DIR / shader_filename).exists():
+                video_shader_dir = _SHADERS_USER_DIR
+                _logger.debug("shader %s found in %s", shader_filename, _SHADERS_USER_DIR)
             else:
                 video_shader_dir = RETROARCH_SHADERS / f"shaders_{shader_type}"
             video_shader = video_shader_dir / shader_filename
@@ -230,8 +230,8 @@ class LibretroGenerator(Generator):
                         shutil.copy(saveFile, newSaveFile)
                 # Generates a script to copy the saves back on exit
                 # Starts by making sure script paths exist
-                mkdir_if_not_exists(HOME / "scripts" / "gb2savesync")
-                script_file = HOME / "scripts" / "gb2savesync" / "exitsync.sh"
+                mkdir_if_not_exists(_UTILS_DIR / "gb2savesync")
+                script_file = _UTILS_DIR / "gb2savesync" / "exitsync.sh"
                 if script_file.exists():
                     script_file.unlink()
                 GBMultiScript = script_file.open("w")

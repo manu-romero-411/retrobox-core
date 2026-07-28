@@ -24,10 +24,10 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from runtime.retrobox_paths import (
-    _MAPPER_SCRIPT,
-    _PROFILES_DIR,
-    _PROFILES_USER_DIR,
-    ES_INPUT
+    GAMEPADLY_MAPPER,
+    _GAMEPADLY_PROFILES,
+    _GAMEPADLY_USER_PROFILES,
+    ES_INPUT_CFG
 )
 
 if TYPE_CHECKING:
@@ -39,16 +39,16 @@ _logger = logging.getLogger(__name__)
 def _find_profile(rom: Path, system: str, emulator: str, core: str) -> Path | None:
     candidates = [
         (rom.parent / f"{rom.name}.keys") if not rom.is_dir() else (rom / "pad2.keys"),
-        _PROFILES_USER_DIR / f"{system}.{emulator}.{core}.keys",
-        _PROFILES_USER_DIR / f"{system}.{emulator}.keys",
-        _PROFILES_USER_DIR / f"{system}.keys",
-        _PROFILES_USER_DIR / f"{emulator}.keys",
-        _PROFILES_USER_DIR / "any.keys",
-        _PROFILES_DIR / f"{system}.{emulator}.{core}.keys",
-        _PROFILES_DIR / f"{system}.{emulator}.keys",
-        _PROFILES_DIR / f"{system}.keys",
-        _PROFILES_DIR / f"{emulator}.keys",
-        _PROFILES_DIR / "any.keys",
+        _GAMEPADLY_USER_PROFILES / f"{system}.{emulator}.{core}.keys",
+        _GAMEPADLY_USER_PROFILES / f"{system}.{emulator}.keys",
+        _GAMEPADLY_USER_PROFILES / f"{system}.keys",
+        _GAMEPADLY_USER_PROFILES / f"{emulator}.keys",
+        _GAMEPADLY_USER_PROFILES / "any.keys",
+        _GAMEPADLY_PROFILES / f"{system}.{emulator}.{core}.keys",
+        _GAMEPADLY_PROFILES / f"{system}.{emulator}.keys",
+        _GAMEPADLY_PROFILES / f"{system}.keys",
+        _GAMEPADLY_PROFILES / f"{emulator}.keys",
+        _GAMEPADLY_PROFILES / "any.keys",
 
     ]
     for path in candidates:
@@ -87,7 +87,7 @@ class GamepadManager(AbstractContextManager):
         if profile is None:
             return self
 
-        es_input = self.es_input or ES_INPUT
+        es_input = self.es_input or ES_INPUT_CFG
         if not es_input.exists():
             _logger.warning("gamepadly: es_input no encontrado en %s", es_input)
             return self
@@ -119,7 +119,7 @@ class GamepadManager(AbstractContextManager):
 
         cmd = [
             sys.executable,
-            str(_MAPPER_SCRIPT),
+            str(GAMEPADLY_MAPPER),
             "--guid",     guid,
             "--sdl_id",   str(index),
             "--player",   str(player),
