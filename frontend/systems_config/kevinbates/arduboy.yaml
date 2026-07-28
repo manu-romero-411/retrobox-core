@@ -1,0 +1,17 @@
+arduboy:
+  fullname: Arduboy
+  manufacturer: Kevin Bates
+  release: 2015
+  hardware: portable
+  path: /var/penguintb/juegos/roms/arduboy
+  extension:
+  - .hex
+  - .zip
+  - .7z
+  platform:
+  - arduboy
+  theme: arduboy
+  emulators:
+    libretro:
+      arduous:
+        default: true

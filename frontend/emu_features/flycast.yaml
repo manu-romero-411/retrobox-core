@@ -1,0 +1,249 @@
+emulator_name: flycast
+features:
+  - cheevos
+sharedFeatures:
+  - powermode
+  - tdp
+  - videomode
+  - bezel
+  - bezel_stretch
+  - use_wheels
+  - wheel_rotation
+  - wheel_deadzone
+  - wheel_midzone
+systems:
+  - name: dreamcast
+    groups:
+      GENERAL:
+        items:
+          - name: BIOS LANGUAGE
+            value: flycast_language
+            description: Dreamcast BIOS's language setting. Can change the language of some games. Some games default to Japanese.
+            choices:
+              - name: Japanese
+                value: 0
+              - name: English
+                value: 1
+              - name: German
+                value: 2
+              - name: French
+                value: 3
+              - name: Spanish
+                value: 4
+              - name: Italian
+                value: 5
+              - name: Game's default
+                value: 6
+          - name: CONSOLE REGION
+            value: flycast_region
+            description: ""
+            choices:
+              - name: Japan
+                value: 0
+              - name: USA
+                value: 1
+              - name: Europe
+                value: 2
+              - name: Game's default
+                value: 3
+          - name: AUTO LOAD ON GAME LAUNCH
+            value: flycast_loadstate
+            description: ""
+            choices:
+              - name: Off (Default)
+                value: False
+              - name: On
+                value: True
+          - name: AUTO SAVE ON GAME EXIT
+            value: flycast_savestate
+            description: ""
+            choices:
+              - name: Off (Default)
+                value: False
+              - name: On
+                value: True
+          - name: DIGITAL SOUND PROCESSOR
+            value: flycast_DSP
+            description: Enable the Dreamcast DSP for more accurate audio. Only recommended for fast systems.
+            choices:
+              - name: Disabled (Default)
+                value: no
+              - name: Enabled
+                value: yes
+      ADVANCED OPTIONS:
+        items:
+          - name: FORCE WINDOWS CE MODE
+            value: flycast_winCE
+            description: Required for some games.
+            choices:
+              - name: Off
+                value: False
+              - name: On
+                value: True
+          - name: "PER-GAME VMU"
+            value: flycast_per_game_vmu
+            description: "When enabled, each game has its own VMU on port 1 of controller 1."
+            preset: switchauto
+          - name: CONTROLLER 1 FEATURE PACK
+            value: flycast_ctrl1_pack
+            description: Choose second feature pack for the controller.
+            choices:
+              - name: 2nd VMU (Default)
+                value: 1
+              - name: Purupuru Pack/Vibration Pack
+                value: 3
+          - name: CONTROLLER 2 FEATURE PACK
+            value: flycast_ctrl2_pack
+            description: Choose second feature pack for the controller.
+            choices:
+              - name: 2nd VMU (Default)
+                value: 1
+              - name: Purupuru Pack/Vibration Pack
+                value: 3
+          - name: CONTROLLER 3 FEATURE PACK
+            value: flycast_ctrl3_pack
+            description: Choose second feature pack for the controller.
+            choices:
+              - name: 2nd VMU (Default)
+                value: 1
+              - name: Purupuru Pack/Vibration Pack
+                value: 3
+          - name: CONTROLLER 4 FEATURE PACK
+            value: flycast_ctrl4_pack
+            description: Choose second feature pack for the controller.
+            choices:
+              - name: 2nd VMU (Default)
+                value: 1
+              - name: Purupuru Pack/Vibration Pack
+                value: 3
+groups:
+  GENERAL:
+    items:
+      - name: GAME ASPECT RATIO
+        value: flycast_ratio
+        description: Force the game to render in this aspect ratio.
+        choices:
+          - name: 4/3
+            value: False
+          - name: 16/9
+            value: True
+      - name: RENDER RESOLUTION
+        value: flycast_render_resolution
+        description: Enhancement. Increase the rendering resolution. Makes 3D objects clearer.
+        choices:
+          - name: 0.5x (320x240)
+            value: 240
+          - name: 1x (640x480)
+            value: 480
+          - name: 1.5x (960x720)
+            value: 720
+          - name: 2x (1280x960)
+            value: 960
+          - name: 2.5x (1600x1200)
+            value: 1200
+          - name: 3x (1920x1440)
+            value: 1440
+          - name: 4x (2560x1920)
+            value: 1920
+          - name: 4.5x (2880x2160)
+            value: 2160
+      - name: GRAPHICS API
+        value: flycast_renderer
+        description: ""
+        choices:
+          - name: OpenGL (Default)
+            value: 0
+          - name: Vulkan
+            value: 4
+      - name: SCREEN ROTATION
+        value: flycast_rotate
+        description: Rotate the screen with the emulator.
+        choices:
+          - name: 0 degrees
+            value: False
+          - name: 90 degrees
+            value: True
+  ADVANCED OPTIONS:
+    items:
+      - name: ANISOTROPIC FILTERING
+        value: flycast_anisotropic
+        description: "Improves clarity of distant textures when mip-mapping is enabled."
+        choices:
+          - name: Disabled (Default)
+            value: 1
+          - name: 2x
+            value: 2
+          - name: 4x
+            value: 4
+          - name: 8x
+            value: 8
+          - name: 16x
+            value: 16
+      - name: ALPHA SORTING
+        value: flycast_sorting
+        description: "Per pixel is the most accurate, but also the most demanding."
+        choices:
+          - name: Per Strip
+            value: 2
+          - name: Per Triangle (Default)
+            value: 1
+          - name: Per Pixel
+            value: 3
+  LIGHT GUN:
+    items:
+      - name: PLAYER 1 CROSSHAIR COLOR
+        value: flycast_lightgun1_crosshair
+        description: ""
+        choices:
+          - name: Red
+            value: "-1073741571"
+          - name: Blue
+            value: "-1057153792"
+          - name: Green
+            value: "-1073479933"
+          - name: White
+            value: "-1056964609"
+          - name: Disabled
+            value: 0
+      - name: PLAYER 2 CROSSHAIR COLOR
+        value: flycast_lightgun2_crosshair
+        description: ""
+        choices:
+          - name: Red
+            value: "-1073741571"
+          - name: Blue
+            value: "-1057153792"
+          - name: Green
+            value: "-1073479933"
+          - name: White
+            value: "-1056964609"
+          - name: Disabled
+            value: 0
+      - name: PLAYER 3 CROSSHAIR COLOR
+        value: flycast_lightgun3_crosshair
+        description: ""
+        choices:
+          - name: Red
+            value: "-1073741571"
+          - name: Blue
+            value: "-1057153792"
+          - name: Green
+            value: "-1073479933"
+          - name: White
+            value: "-1056964609"
+          - name: Disabled
+            value: 0
+      - name: PLAYER 4 CROSSHAIR COLOR
+        value: flycast_lightgun4_crosshair
+        description: ""
+        choices:
+          - name: Red
+            value: "-1073741571"
+          - name: Blue
+            value: "-1057153792"
+          - name: Green
+            value: "-1073479933"
+          - name: White
+            value: "-1056964609"
+          - name: Disabled
+            value: 0

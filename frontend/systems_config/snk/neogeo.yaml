@@ -1,0 +1,21 @@
+neogeo:
+  fullname: Neo-Geo
+  manufacturer: SNK
+  release: 1990
+  hardware: console
+  path: /var/penguintb/juegos/roms/neogeo
+  extension:
+  - .7z
+  - .zip
+  platform:
+  - neogeo
+  - arcade
+  theme: neogeo
+  emulators:
+    libretro:
+      fbneo:
+        default: true
+      mame: mame
+      mame078plus: mame078plus
+    mame:
+      mame: mame

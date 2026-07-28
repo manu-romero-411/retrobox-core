@@ -1,0 +1,33 @@
+n64:
+  fullname: Nintendo 64
+  manufacturer: Nintendo
+  release: 1996
+  hardware: console
+  path: /var/penguintb/juegos/roms/n64
+  extension:
+  - .z64
+  - .n64
+  - .v64
+  - .zip
+  - .7z
+  platform:
+  - n64
+  theme: n64
+  emulators:
+    libretro:
+      mupen64plus-next: mupen64plus-next
+      parallel_n64: parallel_n64
+    mupen64plus:
+      glide64mk2:
+        default: true
+        incompatible_extensions:
+        - .zip
+        - .7z
+      gliden64:
+        incompatible_extensions:
+        - .zip
+        - .7z
+      rice:
+        incompatible_extensions:
+        - .zip
+        - .7z

@@ -1,0 +1,7 @@
+emulator_name: libretro
+core_name: freeintv
+features:
+  - padtokeyboard
+  - cheevos
+sharedFeatures:
+  - autosave

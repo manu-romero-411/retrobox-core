@@ -1,0 +1,86 @@
+emulator_name: shadps4
+features:
+  - padtokeyboard
+sharedFeatures:
+  - powermode
+  - tdp
+  - videomode
+  - bezel
+  - bezel_stretch
+groups:
+  GENERAL:
+    items:
+      - name: HDR
+        value: shadps4_hdr
+        description: Enable High Dynamic Range if your display supports it.
+        choices:
+          - name: Disabled
+            value: False
+          - name: Enabled
+            value: True
+      - name: CONSOLE LANGUAGE
+        value: shadps4_console_lang
+        description: Choose console language. Not all games may support the language choice.
+        choices:
+          - name: Arabic
+            value: 21
+          - name: Czech
+            value: 23
+          - name: Danish
+            value: 14
+          - name: Dutch
+            value: 6
+          - name: English (United Kingdom)
+            value: 18
+          - name: English (United States)
+            value: 1
+          - name: Finnish
+            value: 12
+          - name: French (Canada)
+            value: 22
+          - name: French (France)
+            value: 2
+          - name: German
+            value: 4
+          - name: Greek
+            value: 25
+          - name: Hungarian
+            value: 24
+          - name: Indonesian
+            value: 29
+          - name: Italian
+            value: 5
+          - name: Japanese
+            value: 0
+          - name: Korean
+            value: 9
+          - name: Norwegian (Bokmaal)
+            value: 15
+          - name: Polish
+            value: 16
+          - name: Portuguese (Brazil)
+            value: 17
+          - name: Portuguese (Portugal)
+            value: 7
+          - name: Romanian
+            value: 26
+          - name: Russian
+            value: 8
+          - name: Simplified Chinese
+            value: 11
+          - name: Spanish (Latin America)
+            value: 20
+          - name: Spanish (Spain)
+            value: 3
+          - name: Swedish
+            value: 13
+          - name: Thai
+            value: 27
+          - name: Traditional Chinese
+            value: 10
+          - name: Turkish
+            value: 19
+          - name: Ukrainian
+            value: 30
+          - name: Vietnamese
+            value: 28

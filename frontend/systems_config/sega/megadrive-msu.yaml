@@ -1,0 +1,21 @@
+megadrive-msu:
+  fullname: MSU-MD
+  manufacturer: Sega
+  release: 2020
+  hardware: console
+  path: /var/penguintb/juegos/roms/megadrive-msu
+  extension:
+  - .md
+  - .zip
+  - .7z
+  - .squashfs
+  platform:
+  - genesis
+  - megadrive
+  theme: megadrive-msu
+  group: megadrive
+  emulators:
+    libretro:
+      genesisplusgx:
+        default: true
+      genesisplusgx-wide: genesisplusgx-wide

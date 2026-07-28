@@ -1,0 +1,19 @@
+gx4000:
+  fullname: GX4000
+  manufacturer: Amstrad
+  release: 1991
+  hardware: console
+  path: /var/penguintb/juegos/roms/gx4000
+  extension:
+  - .dsk
+  - .m3u
+  - .cpr
+  - .zip
+  - .7z
+  platform:
+  - gx4000
+  theme: gx4000
+  emulators:
+    libretro:
+      cap32:
+        default: true

@@ -1,0 +1,20 @@
+snes-msu1:
+  fullname: Super Disc System (MSU1)
+  manufacturer: Nintendo
+  release: 1991
+  hardware: console
+  path: /var/penguintb/juegos/roms/snes-msu1
+  extension:
+  - .smc
+  - .sfc
+  - .squashfs
+  platform:
+  - snes-msu1
+  theme: snes-msu1
+  group: snes
+  emulators:
+    libretro:
+      bsnes: bsnes
+      bsnes_hd: bsnes_hd
+      snes9x:
+        default: true

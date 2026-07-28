@@ -1,0 +1,21 @@
+gamegear:
+  fullname: Game Gear
+  manufacturer: Sega
+  release: 1990
+  hardware: portable
+  path: /var/penguintb/juegos/roms/gamegear
+  extension:
+  - .bin
+  - .gg
+  - .zip
+  - .7z
+  platform:
+  - gamegear
+  theme: gamegear
+  emulators:
+    libretro:
+      gearsystem: gearsystem
+      genesisplusgx:
+        default: true
+      picodrive: picodrive
+      smsplus: smsplus

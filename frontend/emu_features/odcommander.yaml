@@ -1,0 +1,8 @@
+emulator_name: odcommander
+features:
+  - padtokeyboard
+sharedFeatures:
+  - powermode
+  - tdp
+  - videomode
+  - ratio

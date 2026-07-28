@@ -1,0 +1,27 @@
+zxspectrum:
+  fullname: ZX Spectrum
+  manufacturer: Sinclair
+  release: 1982
+  hardware: computer
+  path: /var/penguintb/juegos/roms/zxspectrum
+  extension:
+  - .tzx
+  - .tap
+  - .z80
+  - .rzx
+  - .scl
+  - .trd
+  - .dsk
+  - .zip
+  - .7z
+  platform:
+  - zxspectrum
+  theme: zxspectrum
+  emulators:
+    clk:
+      clk:
+        incompatible_extensions:
+        - .7z
+    libretro:
+      fuse:
+        default: true

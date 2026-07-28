@@ -1,0 +1,112 @@
+emulator_name: scummvm
+features:
+  - padtokeyboard
+sharedFeatures:
+  - powermode
+  - tdp
+  - videomode
+  - bezel
+  - bezel_stretch
+groups:
+  GENERAL:
+    items:
+      - name: SCALE FACTOR
+        value: scumm_scale
+        description: Select scale resolution of the game.
+        choices:
+          - name: 1x (320x200)
+            value: 1
+          - name: 2x (640x400)
+            value: 2
+          - name: 3x (960x600)
+            value: 3
+          - name: 4x (1280x800)
+            value: 4
+          - name: 5x (1600x1000)
+            value: 5
+          - name: 6x (1920x1200)
+            value: 6
+          - name: 7x (2240x1400)
+            value: 7
+          - name: 8x (2560x1600)
+            value: 8
+      - name: SCALER MODE
+        value: scumm_scaler_mode
+        description: Sets the scaler filter mode when rendering.
+        choices:
+          - name: Normal
+            value: normal
+          - name: HQ (bilinear filter)
+            value: hq
+          - name: Edge (sharper filet)
+            value: edge
+          - name: AdvMame
+            value: advmame
+          - name: Scanline Interpolation Filter (SAI)
+            value: sai
+          - name: SuperSAI
+            value: supersai
+          - name: SuperEagle
+            value: supereagle
+          - name: "Pixel-Perfect"
+            value: pm
+          - name: DotMatrix
+            value: dotmatrix
+          - name: TV2x CRT Television Filter
+            value: tv
+      - name: STRETCH MODE
+        value: scumm_stretch
+        description: Stretches the output to fill the display area.
+        choices:
+          - name: Center
+            value: center
+          - name: Pixel Perfect
+            value: "pixel-perfect"
+          - name: Even Pixels
+            value: "even-pixels"
+          - name: Stretch to screen
+            value: stretch
+          - name: Fit resolution scale
+            value: fit
+          - name: "Fit 4:3 Aspect Ratio"
+            value: fit_force_aspect
+      - name: RENDERER
+        value: scumm_renderer
+        description: Choose your preferred renderer.
+        choices:
+          - name: Software
+            value: software
+          - name: OpenGL (Default)
+            value: opengl
+          - name: OpenGL with Shaders
+            value: opengl_shaders
+      - name: LANGUAGE
+        value: scumm_language
+        description: Choose your preferred language.
+        choices:
+          - name: English
+            value: en
+          - name: German
+            value: de
+          - name: French
+            value: fr
+          - name: Italian
+            value: it
+          - name: Portuguese
+            value: pt
+          - name: Spanish
+            value: es
+          - name: Japanese
+            value: jp
+          - name: Chinese (Mandarin)
+            value: zh
+          - name: Korean
+            value: kr
+          - name: Swedish
+            value: se
+          - name: Hebrew
+            value: hb
+          - name: Russian
+            value: ru
+          - name: Czech
+            value: cz

@@ -1,0 +1,18 @@
+atari7800:
+  fullname: Atari 7800
+  manufacturer: Atari
+  release: 1986
+  hardware: console
+  path: /var/penguintb/juegos/roms/atari7800
+  extension:
+  - .a78
+  - .bin
+  - .zip
+  - .7z
+  platform:
+  - atari7800
+  theme: atari7800
+  emulators:
+    libretro:
+      prosystem:
+        default: true

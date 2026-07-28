@@ -1,0 +1,26 @@
+switch:
+  fullname: Nintendo Switch
+  manufacturer: Nintendo
+  release: 2017
+  hardware: console
+  path: /var/penguintb/juegos/roms/switch
+  extension:
+  - .nro
+  - .NRO
+  - .xci
+  - .XCI
+  - .xcz
+  - .XCZ
+  - .nsp
+  - .NSP
+  - .nsz
+  - .NSZ
+  platform:
+  - switch
+  theme: switch
+  emulators:
+    eden-emu:
+      eden-emu:
+        default: true
+    ryujinx-emu:
+      ryujinx-emu: ryujinx-emu

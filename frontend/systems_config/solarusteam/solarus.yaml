@@ -1,0 +1,16 @@
+solarus:
+  fullname: Solarus
+  manufacturer: Solarus Team
+  release: 2011
+  hardware: port
+  path: /var/penguintb/juegos/roms/solarus
+  extension:
+  - .zip
+  - .solarus
+  platform:
+  - solarus
+  theme: solarus
+  emulators:
+    solarus:
+      solarus:
+        default: true

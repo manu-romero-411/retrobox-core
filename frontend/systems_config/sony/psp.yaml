@@ -1,0 +1,20 @@
+psp:
+  fullname: PlayStation Portable
+  manufacturer: Sony
+  release: 2004
+  hardware: portable
+  path: /var/penguintb/juegos/roms/psp
+  extension:
+  - .iso
+  - .cso
+  - .pbp
+  - .chd
+  platform:
+  - psp
+  theme: psp
+  emulators:
+    libretro:
+      ppsspp: ppsspp
+    ppsspp:
+      ppsspp:
+        default: true

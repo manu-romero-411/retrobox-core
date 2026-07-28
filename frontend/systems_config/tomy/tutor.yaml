@@ -1,0 +1,20 @@
+tutor:
+  fullname: Tutor
+  manufacturer: Tomy
+  release: 1983
+  hardware: computer
+  path: /var/penguintb/juegos/roms/tutor
+  extension:
+  - .bin
+  - .wav
+  - .zip
+  - .7z
+  platform:
+  - tutor
+  theme: tutor
+  emulators:
+    libretro:
+      mame: mame
+    mame:
+      mame:
+        default: true

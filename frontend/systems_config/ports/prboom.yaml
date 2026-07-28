@@ -1,0 +1,18 @@
+prboom:
+  fullname: PrBoom
+  manufacturer: Ports
+  release: None
+  hardware: port
+  path: /var/penguintb/juegos/roms/prboom
+  extension:
+  - .wad
+  - .iwad
+  - .pwad
+  platform:
+  - pc
+  theme: prboom
+  group: ports
+  emulators:
+    libretro:
+      prboom:
+        default: true

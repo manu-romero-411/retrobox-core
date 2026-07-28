@@ -1,0 +1,21 @@
+emulator_name: vice
+features:
+  - padtokeyboard
+sharedFeatures:
+  - powermode
+  - tdp
+  - videomode
+  - ratio
+  - bezel
+  - bezel_stretch
+groups:
+  ADVANCED OPTIONS:
+    items:
+      - name: ZOOM (HIDE BORDERS)
+        value: noborder
+        description: Hides borders on many games. Some games used the borders.
+        choices:
+          - name: NO (DEFAULT)
+            value: 0
+          - name: YES
+            value: 1

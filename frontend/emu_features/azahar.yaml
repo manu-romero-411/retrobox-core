@@ -1,0 +1,158 @@
+emulator_name: azahar
+sharedFeatures:
+  - powermode
+  - tdp
+  - videomode
+  - bezel
+  - bezel_stretch
+groups:
+  GENERAL:
+    submenus:
+      GRAPHICS:
+        - name: RENDERING RESOLUTION
+          value: azahar_resolution_factor
+          description: Enhancement. Increase the rendering resolution. Makes 3D objects clearer.
+          choices:
+            - name: 1x (400x240)
+              value: 1
+            - name: 2x (800x480)
+              value: 2
+            - name: 3x (1200x720)
+              value: 3
+            - name: 4x (1600x960)
+              value: 4
+            - name: 5x (2000x1200)
+              value: 5
+            - name: 6x (2400x1440)
+              value: 6
+            - name: 7x (2800x1680)
+              value: 7
+            - name: 8x (3200x1920)
+              value: 8
+            - name: 9x (3600x2160)
+              value: 9
+            - name: 10x (4000x2400)
+              value: 10
+        - name: VSYNC
+          value: azahar_use_vsync_new
+          description: Fix screen tearing. CPU heavy.
+          choices:
+            - name: Off
+              value: 0
+            - name: On
+              value: 1
+        - name: GRAPHICS API
+          value: azahar_graphics_api
+          description: Choose which graphics API library to use.
+          choices:
+            - name: Software
+              value: 0
+            - name: OpenGL (Default)
+              value: 1
+            - name: Vulkan
+              value: 2
+        - name: HARDWARE SHADER
+          value: azahar_use_hw_shader
+          description: Helps improve performance and requires a powerful GPU. May cause some games not launch when enabled.
+          choices:
+            - name: Off (Default)
+              value: 0
+            - name: On
+              value: 1
+        - name: ACCURATE MULTIPLICATION
+          value: azahar_accurate_multiplication
+          description: Some applications requires this to be enabled for the hardware shader to render properly. However this would reduce performance in most applications.
+          choices:
+            - name: Off
+              value: 0
+            - name: On
+              value: 1
+        - name: SHADER JIT
+          value: azahar_use_shader_jit
+          description: Use the JIT engine instead of the interpreter for software shader emulation. Enable this for better performance.
+          choices:
+            - name: Off
+              value: 0
+            - name: On
+              value: 1
+        - name: ENABLE ASYNC SHADER COMPILATION
+          value: azahar_async_shader_compilation
+          description: Compile shaders using background threads to avoid shader compilation stutter. May cause graphical glitches.
+          choices:
+            - name: Off
+              value: 0
+            - name: On
+              value: 1
+        - name: ENABLE ASYNC PRESENTATION
+          value: azahar_async_presentation
+          description: Perform presentation on separate threads. Improves performance when using Vulkan in most applications. Adds ~1 frame of input lag.
+          choices:
+            - name: Off
+              value: 0
+            - name: On
+              value: 1
+        - name: DISK SHADER CACHE
+          value: azahar_use_disk_shader_cache
+          description: Reduce stutter that happens when compiling shaders. Requires hardware shader to be enabled.
+          choices:
+            - name: Off
+              value: 0
+            - name: On
+              value: 1
+        - name: LOAD CUSTOM TEXTURES
+          value: azahar_custom_textures
+          description: Preloading is impossible from ES.
+          choices:
+            - name: Off
+              value: 0
+            - name: On
+              value: "1-normal"
+            - name: Preload
+              value: "1-preload"
+    items:
+      - name: SCREEN LAYOUT
+        value: azahar_screen_layout
+        description: Arrange the dual screen layout. Separate windows can be changed with Hotkey+R2.
+        choices:
+          - name: Top Only
+            value: "1-false"
+          - name: Bottom Only
+            value: "1-true"
+          - name: Large Top
+            value: "2-false"
+          - name: Large Bottom
+            value: "2-true"
+          - name: Left/Right
+            value: "3-false"
+          - name: Right/Left
+            value: "3-true"
+          - name: Separate Windows
+            value: "4-false"
+          - name: Hybrid Screen Top
+            value: "5-false"
+          - name: Hybrid Screen Bottom
+            value: "5-true"
+      - name: SCREEN PROPORTION
+        value: azahar_large_screen_proportion
+        description: Determines the proportion of the larger screen relative to the smaller one.
+        choices:
+          - name: 2
+            value: 2
+          - name: 3
+            value: 3
+          - name: 4 (Default)
+            value: 4
+          - name: 5
+            value: 5
+          - name: 6
+            value: 6
+  ADVANCED OPTIONS:
+    items:
+      - name: NEW 3DS MODE
+        value: azahar_is_new_3ds
+        description: "The New 3DS has a faster processor, ZL/ZR buttons and a C-stick."
+        choices:
+          - name: Off
+            value: 0
+          - name: On
+            value: 1

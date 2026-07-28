@@ -1,0 +1,28 @@
+emulator_name: gzdoom
+features:
+  - padtokeyboard
+sharedFeatures:
+  - powermode
+  - tdp
+  - videomode
+  - bezel
+  - bezel_stretch
+groups:
+  GENERAL:
+    items:
+      - name: GRAPHICS API
+        value: gz_api
+        description: Choose which graphics API library to use.
+        choices:
+          - name: OpenGL (Default)
+            value: 0
+          - name: Vulkan
+            value: 1
+      - name: VSYNC
+        value: gz_vsync
+        description: Fix screen tearing. With Some games you need to turn VSync on in the games options.
+        choices:
+          - name: Disabled
+            value: False
+          - name: Enabled
+            value: True

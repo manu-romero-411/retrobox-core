@@ -1,0 +1,19 @@
+intellivision:
+  fullname: Mattel Intellivision
+  manufacturer: Mattel
+  release: 1979
+  hardware: console
+  path: /var/penguintb/juegos/roms/intellivision
+  extension:
+  - .int
+  - .bin
+  - .rom
+  - .zip
+  - .7z
+  platform:
+  - intellivision
+  theme: intellivision
+  emulators:
+    libretro:
+      freeintv:
+        default: true

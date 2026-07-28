@@ -1,0 +1,38 @@
+atom:
+  fullname: Atom
+  manufacturer: Acorn Computers
+  release: 1979
+  hardware: computer
+  path: /var/penguintb/juegos/roms/atom
+  extension:
+  - .wav
+  - .tap
+  - .csw
+  - .uef
+  - .mfi
+  - .dfi
+  - .hfe
+  - .mfm
+  - .td0
+  - .imd
+  - .d77
+  - .d88
+  - .1dd
+  - .cqm
+  - .cqi
+  - .dsk
+  - .40t
+  - .atm
+  - .bin
+  - .rom
+  - .zip
+  - .7z
+  platform:
+  - atom
+  theme: atom
+  emulators:
+    libretro:
+      mame: mame
+    mame:
+      mame:
+        default: true

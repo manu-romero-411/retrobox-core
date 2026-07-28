@@ -1,0 +1,18 @@
+channelf:
+  fullname: Channel-F
+  manufacturer: Fairchild
+  release: 1976
+  hardware: console
+  path: /var/penguintb/juegos/roms/channelf
+  extension:
+  - .zip
+  - .rom
+  - .bin
+  - .chf
+  platform:
+  - channelf
+  theme: channelf
+  emulators:
+    libretro:
+      freechaf:
+        default: true

@@ -1,0 +1,33 @@
+pc98:
+  fullname: PC-9800
+  manufacturer: NEC
+  release: 1982
+  hardware: computer
+  path: /var/penguintb/juegos/roms/pc98
+  extension:
+  - .d98
+  - .zip
+  - .98d
+  - .fdi
+  - .fdd
+  - .2hd
+  - .tfd
+  - .d88
+  - .88d
+  - .hdm
+  - .xdf
+  - .dup
+  - .cmd
+  - .hdi
+  - .thd
+  - .nhd
+  - .hdd
+  - .hdn
+  - .m3u
+  platform:
+  - pc98
+  theme: pc98
+  emulators:
+    libretro:
+      np2kai:
+        default: true

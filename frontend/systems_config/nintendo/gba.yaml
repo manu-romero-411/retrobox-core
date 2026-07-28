@@ -1,0 +1,18 @@
+gba:
+  fullname: Game Boy Advance
+  manufacturer: Nintendo
+  release: 2001
+  hardware: portable
+  path: /var/penguintb/juegos/roms/gba
+  extension:
+  - .gba
+  - .zip
+  - .7z
+  platform:
+  - gba
+  theme: gba
+  emulators:
+    libretro:
+      mgba:
+        default: true
+      vba-m: vba-m

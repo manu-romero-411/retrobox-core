@@ -1,0 +1,29 @@
+saturn:
+  fullname: Saturn
+  manufacturer: Sega
+  release: 1994
+  hardware: console
+  path: /var/penguintb/juegos/roms/saturn
+  extension:
+  - .cue
+  - .ccd
+  - .m3u
+  - .chd
+  - .iso
+  - .zip
+  - .mds
+  platform:
+  - saturn
+  theme: saturn
+  emulators:
+    libretro:
+      beetle-saturn:
+        default: true
+        incompatible_extensions:
+        - .zip
+      kronos: kronos
+      yabasanshiro:
+        incompatible_extensions:
+        - .m3u
+    ymir:
+      ymir: ymir

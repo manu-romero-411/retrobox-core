@@ -1,0 +1,21 @@
+oricatmos:
+  fullname: Oric Atmos
+  manufacturer: Tangerine Computer Systems
+  release: 1984
+  hardware: computer
+  path: /var/penguintb/juegos/roms/oricatmos
+  extension:
+  - .tap
+  - .dsk
+  - .zip
+  platform:
+  - oricatmos
+  theme: oric
+  emulators:
+    clk:
+      clk:
+        default: true
+    libretro:
+      mame: mame
+    mame:
+      mame: mame

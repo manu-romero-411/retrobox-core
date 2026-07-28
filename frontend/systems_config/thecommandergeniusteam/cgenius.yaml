@@ -1,0 +1,16 @@
+cgenius:
+  fullname: Commander Genius
+  manufacturer: The Commander Genius Team
+  release: 1990
+  hardware: port
+  path: /var/penguintb/juegos/roms/cgenius
+  extension:
+  - .cgenius
+  platform:
+  - pc
+  theme: cgenius
+  group: ports
+  emulators:
+    cgenius:
+      cgenius:
+        default: true

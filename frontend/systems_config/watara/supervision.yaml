@@ -1,0 +1,17 @@
+supervision:
+  fullname: Supervision
+  manufacturer: Watara
+  release: 1992
+  hardware: portable
+  path: /var/penguintb/juegos/roms/supervision
+  extension:
+  - .sv
+  - .zip
+  - .7z
+  platform:
+  - supervision
+  theme: supervision
+  emulators:
+    libretro:
+      potator:
+        default: true

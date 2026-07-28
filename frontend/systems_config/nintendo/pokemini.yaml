@@ -1,0 +1,17 @@
+pokemini:
+  fullname: Pokemon Mini
+  manufacturer: Nintendo
+  release: 2001
+  hardware: portable
+  path: /var/penguintb/juegos/roms/pokemini
+  extension:
+  - .min
+  - .zip
+  - .7z
+  platform:
+  - pokemini
+  theme: pokemini
+  emulators:
+    libretro:
+      pokemini:
+        default: true

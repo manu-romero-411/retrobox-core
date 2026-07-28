@@ -1,0 +1,16 @@
+traider1:
+  fullname: Tomb Raider
+  manufacturer: Ports
+  release: 1996
+  hardware: port
+  path: /var/penguintb/juegos/roms/traider1
+  extension:
+  - .croft
+  platform:
+  - pc
+  theme: traider1
+  group: ports
+  emulators:
+    tr1x:
+      tr1x:
+        default: true

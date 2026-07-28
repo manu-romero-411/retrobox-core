@@ -1,0 +1,16 @@
+cdogs:
+  fullname: C-Dogs SDL
+  manufacturer: Ports
+  release: 1997
+  hardware: port
+  path: /var/penguintb/juegos/roms/cdogs
+  extension:
+  - .game
+  platform:
+  - pc
+  theme: cdogs
+  group: ports
+  emulators:
+    cdogs:
+      cdogs:
+        default: true

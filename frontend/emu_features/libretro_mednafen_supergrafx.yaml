@@ -1,0 +1,19 @@
+emulator_name: libretro
+core_name: mednafen_supergrafx
+features:
+  - netplay
+  - cheevos
+sharedFeatures:
+  - rewind
+  - autosave
+groups:
+  GENERAL:
+    items:
+      - name: REDUCE SPRITE FLICKERING
+        value: sgx_nospritelimit
+        description: Enhancement. Remove the sixteen sprites per line limit.
+        choices:
+          - name: Off
+            value: disabled
+          - name: On
+            value: enabled

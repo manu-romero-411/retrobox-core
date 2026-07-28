@@ -1,0 +1,16 @@
+hurrican:
+  fullname: Hurrican
+  manufacturer: Ports
+  release: 2007
+  hardware: port
+  path: /var/penguintb/juegos/roms/hurrican
+  extension:
+  - .game
+  platform:
+  - pc
+  theme: hurrican
+  group: ports
+  emulators:
+    hurrican:
+      hurrican:
+        default: true

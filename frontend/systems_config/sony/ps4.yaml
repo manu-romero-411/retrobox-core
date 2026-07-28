@@ -1,0 +1,15 @@
+ps4:
+  fullname: PlayStation 4
+  manufacturer: Sony
+  release: 2013
+  hardware: console
+  path: /var/penguintb/juegos/roms/ps4
+  extension:
+  - .ps4
+  platform:
+  - ps4
+  theme: ps4
+  emulators:
+    shadps4:
+      shadps4:
+        default: true

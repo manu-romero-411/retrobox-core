@@ -1,0 +1,21 @@
+emulator_name: dosbox_staging
+features:
+  - padtokeyboard
+sharedFeatures:
+  - powermode
+  - tdp
+  - videomode
+  - ratio
+  - bezel
+  - bezel_stretch
+groups:
+  GENERAL:
+    items:
+      - name: Enable writable overlay for squashfs ROMs
+        value: dosbox_staging_writes_to_rom
+        description: "Writes are saved per-game in saves/dos/game-rom-name"
+        choices:
+          - name: Enabled
+            value: True
+          - name: Disabled
+            value: False

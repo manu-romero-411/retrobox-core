@@ -1,0 +1,16 @@
+traider2:
+  fullname: Tomb Raider 2
+  manufacturer: Ports
+  release: 1997
+  hardware: port
+  path: /var/penguintb/juegos/roms/traider2
+  extension:
+  - .croft
+  platform:
+  - pc
+  theme: traider2
+  group: ports
+  emulators:
+    tr2x:
+      tr2x:
+        default: true

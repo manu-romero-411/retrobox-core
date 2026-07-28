@@ -1,0 +1,25 @@
+xegs:
+  fullname: Atari XE Game System
+  manufacturer: Atari
+  release: 1987
+  hardware: computer
+  path: /var/penguintb/juegos/roms/xegs
+  extension:
+  - .atr
+  - .dsk
+  - .xfd
+  - .bin
+  - .rom
+  - .car
+  - .zip
+  - .7z
+  platform:
+  - xegs
+  theme: xegs
+  group: atari8bit
+  emulators:
+    libretro:
+      mame: mame
+    mame:
+      mame:
+        default: true

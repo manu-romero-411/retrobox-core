@@ -1,0 +1,12 @@
+emuconfig:
+  fullname: emuconfig
+  manufacturer: _Retrobox
+  release: None
+  hardware: system
+  path: ../resources/es_menu
+  extension:
+  - .menu
+  command: ../resources/utils/retrobox-emuconfig %ROM%
+  platform:
+  - emuconfig
+  theme: emuconfig

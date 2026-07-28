@@ -1,0 +1,21 @@
+pcfx:
+  fullname: PC-FX
+  manufacturer: NEC
+  release: 1994
+  hardware: console
+  path: /var/penguintb/juegos/roms/pcfx
+  extension:
+  - .cue
+  - .ccd
+  - .toc
+  - .chd
+  - .zip
+  - .7z
+  - .m3u
+  platform:
+  - pcfx
+  theme: pcfx
+  emulators:
+    libretro:
+      pcfx:
+        default: true

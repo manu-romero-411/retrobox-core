@@ -1,0 +1,17 @@
+wswanc:
+  fullname: WonderSwan Color
+  manufacturer: Bandai
+  release: 2000
+  hardware: portable
+  path: /var/penguintb/juegos/roms/wswanc
+  extension:
+  - .wsc
+  - .zip
+  - .7z
+  platform:
+  - wonderswancolor
+  theme: wonderswancolor
+  emulators:
+    libretro:
+      mednafen_wswan:
+        default: true

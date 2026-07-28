@@ -1,0 +1,181 @@
+emulator_name: cemu
+sharedFeatures:
+  - powermode
+  - tdp
+  - videomode
+  - bezel
+  - bezel_stretch
+  - use_wheels
+  - wheel_rotation
+  - wheel_deadzone
+  - wheel_midzone
+  - discordrpc
+groups:
+  GENERAL:
+    items:
+      - name: GRAPHICS API
+        value: cemu_gfxbackend
+        description: Choose which graphics API library to use.
+        choices:
+          - name: OpenGL
+            value: 0
+          - name: Vulkan (Default)
+            value: 1
+      - name: RUMBLE
+        value: cemu_rumble
+        description: Set the controller rumble strength if supported.
+        choices:
+          - name: Off (Default)
+            value: 0
+          - name: "25%"
+            value: 0.25
+          - name: "50%"
+            value: 0.5
+          - name: "75%"
+            value: 0.75
+          - name: "100%"
+            value: 1
+      - name: CONTROLLER COMBINATION
+        value: cemu_controller_combination
+        description: Pro Controller required for games that require shake motions.
+        choices:
+          - name: GamePad + 4 Pro Controller
+            value: 0
+          - name: GamePad + 4 Sideway Wiimote
+            value: 1
+          - name: 5 Pro Controller
+            value: 2
+          - name: 5 Sideway Wiimote
+            value: 3
+          - name: Wii U Classic Controller
+            value: 4
+      - name: AUDIO CHANNELS
+        value: cemu_audio_channels
+        description: Choose the audio output type.
+        choices:
+          - name: Stereo (Default)
+            value: 1
+          - name: Surround
+            value: 2
+      - name: VSYNC
+        value: cemu_vsync
+        description: Fix screen tearing.
+        choices:
+          - name: Off (Default)
+            value: 0
+          - name: Double buffering
+            value: 1
+          - name: Triple buffering
+            value: 2
+      - name: ASPECT RATIO
+        value: cemu_aspect
+        description: Change the output resolution ratio.
+        choices:
+          - name: Keep Aspect Ration (Default)
+            value: 0
+          - name: Stretch
+            value: 1
+      - name: ENABLE MOUSE
+        value: cemu_touchpad
+        description: Enable mouse input to simulate touchscreen.
+        choices:
+          - name: Disabled (Default)
+            value: 0
+          - name: Enabled
+            value: 1
+      - name: ENABLE GAMEPAD VIEW
+        value: cemu_gamepad
+        description: Enable gamepad view for games that have interaction across two screens. Use Hotkey+R2 to switch screens.
+        choices:
+          - name: Disabled (Default)
+            value: False
+          - name: Enabled
+            value: True
+  ADVANCED OPTIONS:
+    items:
+      - name: ASYNC SHADER COMPILE (VULKAN ONLY)
+        value: cemu_async
+        description: Speed up shader compilation.
+        choices:
+          - name: Off
+            value: False
+          - name: On (Default)
+            value: True
+      - name: CONSOLE LANGUAGE
+        value: cemu_console_language
+        description: Choose console language. Not all games may support the language choice.
+        choices:
+          - name: Current language
+            value: ui
+          - name: Japanese
+            value: ja_JP
+          - name: English
+            value: en_US
+          - name: French
+            value: fr_FR
+          - name: German
+            value: de_DE
+          - name: Italian
+            value: it_IT
+          - name: Spanish
+            value: es_ES
+          - name: Chinese
+            value: zh_CN
+          - name: Korean
+            value: ko_KR
+          - name: Dutch
+            value: nl_NL
+          - name: Portuguese
+            value: pt_PT
+          - name: Russian
+            value: ru_RU
+          - name: Taiwanese
+            value: zh_TW
+      - name: AUDIO OUTPUT
+        value: cemu_audio_config
+        description: Have Batocera set the first audio output device.
+        choices:
+          - name: "Set in Config - choose if no audio output"
+            value: False
+          - name: Batocera sets first audio device (Default)
+            value: True
+      - name: UPSCALE FILTER
+        value: cemu_upscale
+        description: Choose upscaling method.
+        choices:
+          - name: Bilinear
+            value: 0
+          - name: Bicubic
+            value: 1
+          - name: Hermite (Default)
+            value: 2
+          - name: Nearest Neighbour
+            value: 3
+      - name: DOWNSCALE FILTER
+        value: cemu_downscale
+        description: Choose downscaling method.
+        choices:
+          - name: Bilinear (Default)
+            value: 0
+          - name: Bicubic
+            value: 1
+          - name: Hermite
+            value: 2
+          - name: Nearest Neighbour
+            value: 3
+      - name: ENABLE PERFORMANCE OVERLAY
+        value: cemu_overlay
+        description: Enable Cemu's performance overlay.
+        choices:
+          - name: Disabled (Default)
+            value: False
+          - name: Enabled
+            value: True
+      - name: ENABLE NOTIFICATIONS
+        value: cemu_notifications
+        description: "Enable notifications of cache, controller events etc."
+        choices:
+          - name: Disabled (Default)
+            value: False
+          - name: Enabled
+            value: True

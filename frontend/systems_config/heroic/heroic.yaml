@@ -1,0 +1,12 @@
+heroic:
+  fullname: Heroic Games Launcher
+  group: pcgames
+  manufacturer: Heroic
+  release: 2020
+  hardware: None
+  path: ../roms/heroic
+  extension:
+  - .heroic
+  platform:
+  - windows
+  theme: heroic

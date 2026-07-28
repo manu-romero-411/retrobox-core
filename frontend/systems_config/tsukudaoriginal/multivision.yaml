@@ -1,0 +1,18 @@
+multivision:
+  fullname: Othello Multivision
+  manufacturer: Tsukuda Original
+  release: 1983
+  hardware: console
+  path: /var/penguintb/juegos/roms/multivision
+  extension:
+  - .bin
+  - .sg
+  - .zip
+  - .7z
+  platform:
+  - sg-1000
+  theme: multivision
+  emulators:
+    libretro:
+      gearsystem:
+        default: true

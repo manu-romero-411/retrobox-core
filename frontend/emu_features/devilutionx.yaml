@@ -1,0 +1,20 @@
+emulator_name: devilutionx
+features:
+  - padtokeyboard
+sharedFeatures:
+  - powermode
+  - tdp
+  - videomode
+  - bezel
+  - bezel_stretch
+groups:
+  GENERAL:
+    items:
+      - name: STRETCH TO FILL
+        value: devilutionx_stretch
+        description: Fills the screen.
+        choices:
+          - name: Disabled (Default)
+            value: false
+          - name: Enabled
+            value: true

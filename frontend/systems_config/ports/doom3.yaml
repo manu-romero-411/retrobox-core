@@ -1,0 +1,18 @@
+doom3:
+  fullname: Doom 3
+  manufacturer: Ports
+  release: 2004
+  hardware: port
+  path: /var/penguintb/juegos/roms/doom3
+  extension:
+  - .d3
+  platform:
+  - pc
+  theme: doom3
+  group: ports
+  emulators:
+    dhewm3:
+      dhewm3:
+        default: true
+    libretro:
+      boom3: boom3

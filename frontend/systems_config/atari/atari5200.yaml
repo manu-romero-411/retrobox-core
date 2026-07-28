@@ -1,0 +1,27 @@
+atari5200:
+  fullname: Atari 5200
+  manufacturer: Atari
+  release: 1982
+  hardware: console
+  path: /var/penguintb/juegos/roms/atari5200
+  extension:
+  - .rom
+  - .xfd
+  - .atr
+  - .atx
+  - .cdm
+  - .cas
+  - .car
+  - .bin
+  - .a52
+  - .xex
+  - .zip
+  - .7z
+  platform:
+  - atari5200
+  theme: atari5200
+  emulators:
+    libretro:
+      a5200:
+        default: true
+      atari800: atari800

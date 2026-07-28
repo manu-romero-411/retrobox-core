@@ -1,0 +1,16 @@
+superbroswar:
+  fullname: Super Mario War
+  manufacturer: Ports
+  release: 2006
+  hardware: port
+  path: /var/penguintb/juegos/roms/superbroswar
+  extension:
+  - .game
+  platform:
+  - pc
+  theme: superbroswar
+  group: ports
+  emulators:
+    libretro:
+      superbroswar:
+        default: true

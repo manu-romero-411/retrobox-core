@@ -1,0 +1,16 @@
+jknight:
+  fullname: Star Wars - Jedi Academy
+  manufacturer: Ports
+  release: 2003
+  hardware: port
+  path: /var/penguintb/juegos/roms/jknight
+  extension:
+  - .jedi
+  platform:
+  - pc
+  theme: jknight
+  group: ports
+  emulators:
+    openjk:
+      openjk:
+        default: true

@@ -1,0 +1,16 @@
+xrick:
+  fullname: xrick
+  manufacturer: Ports
+  release: None
+  hardware: port
+  path: /var/penguintb/juegos/roms/xrick
+  extension:
+  - .zip
+  platform:
+  - pc
+  theme: xrick
+  group: ports
+  emulators:
+    libretro:
+      xrick:
+        default: true

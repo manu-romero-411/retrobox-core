@@ -1,0 +1,16 @@
+catacomb:
+  fullname: CatacombGL
+  manufacturer: Ports
+  release: 1991
+  hardware: port
+  path: /var/penguintb/juegos/roms/catacomb
+  extension:
+  - .game
+  platform:
+  - pc
+  theme: catacomb
+  group: ports
+  emulators:
+    catacombgl:
+      catacombgl:
+        default: true

@@ -1,0 +1,10 @@
+emulator_name: pygame
+features:
+  - padtokeyboard
+sharedFeatures:
+  - powermode
+  - tdp
+  - videomode
+  - bezel
+  - bezel_stretch
+  - use_guns

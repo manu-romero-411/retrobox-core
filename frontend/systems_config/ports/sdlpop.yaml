@@ -1,0 +1,16 @@
+sdlpop:
+  fullname: SdlPop
+  manufacturer: Ports
+  release: None
+  hardware: port
+  path: /var/penguintb/juegos/roms/sdlpop
+  extension:
+  - .sdlpop
+  platform:
+  - pc
+  theme: sdlpop
+  group: ports
+  emulators:
+    sdlpop:
+      sdlpop:
+        default: true

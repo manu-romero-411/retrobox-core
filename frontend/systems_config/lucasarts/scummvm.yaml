@@ -1,0 +1,18 @@
+scummvm:
+  fullname: ScummVM
+  manufacturer: LucasArts
+  release: 1987
+  hardware: computer
+  path: /var/penguintb/juegos/roms/scummvm
+  extension:
+  - .scummvm
+  - .squashfs
+  platform:
+  - scummvm
+  theme: scummvm
+  emulators:
+    libretro:
+      scummvm: scummvm
+    scummvm:
+      scummvm:
+        default: true

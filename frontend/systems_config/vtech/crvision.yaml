@@ -1,0 +1,20 @@
+crvision:
+  fullname: CreatiVision
+  manufacturer: VTech
+  release: 1982
+  hardware: console
+  path: /var/penguintb/juegos/roms/crvision
+  extension:
+  - .bin
+  - .rom
+  - .zip
+  - .7z
+  platform:
+  - crvision
+  theme: creativision
+  emulators:
+    libretro:
+      mame: mame
+    mame:
+      mame:
+        default: true

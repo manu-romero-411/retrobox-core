@@ -1,0 +1,19 @@
+beena:
+  fullname: Advanced Pico Beena
+  manufacturer: Sega
+  release: 2005
+  hardware: console
+  path: /var/penguintb/juegos/roms/beena
+  extension:
+  - .bin
+  - .zip
+  - .7z
+  platform:
+  - beena
+  theme: beena
+  emulators:
+    libretro:
+      mame:
+        default: true
+    mame:
+      mame: mame

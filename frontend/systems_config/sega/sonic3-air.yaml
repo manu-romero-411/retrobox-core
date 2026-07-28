@@ -1,0 +1,16 @@
+sonic3-air:
+  fullname: Sonic 3 A.I.R.
+  manufacturer: Sega
+  release: 2019
+  hardware: port
+  path: /var/penguintb/juegos/roms/sonic3-air
+  extension:
+  - .s3air
+  platform:
+  - pc
+  theme: sonic3-air
+  group: ports
+  emulators:
+    sonic3-air:
+      sonic3-air:
+        default: true

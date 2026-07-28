@@ -1,0 +1,16 @@
+xbox:
+  fullname: Xbox
+  manufacturer: Microslop
+  release: 2003
+  hardware: console
+  path: /var/penguintb/juegos/roms/xbox
+  extension:
+  - .iso
+  - .squashfs
+  platform:
+  - xbox
+  theme: xbox
+  emulators:
+    xemu:
+      xemu:
+        default: true

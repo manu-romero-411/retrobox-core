@@ -1,0 +1,6 @@
+emulator_name: libretro
+core_name: freechaf
+features:
+  - cheevos
+sharedFeatures:
+  - rewind

@@ -1,0 +1,36 @@
+pc60:
+  fullname: PC-6000
+  manufacturer: NEC
+  release: 1981
+  hardware: computer
+  path: /var/penguintb/juegos/roms/pc60
+  extension:
+  - .bin
+  - .cas
+  - .p6
+  - .d77
+  - .d88
+  - .dsk
+  - .1dd
+  - .mfi
+  - .dfi
+  - .mfm
+  - .td0
+  - .imd
+  - .cqm
+  - .cqi
+  - .xdf
+  - .hdm
+  - .2hd
+  - .fdi
+  - .zip
+  - .7z
+  platform:
+  - pc60
+  theme: pc60
+  emulators:
+    libretro:
+      mame:
+        default: true
+    mame:
+      mame: mame

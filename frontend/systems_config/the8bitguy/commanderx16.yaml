@@ -1,0 +1,17 @@
+commanderx16:
+  fullname: Commander X16
+  manufacturer: The 8-Bit Guy
+  release: 2019
+  hardware: computer
+  path: /var/penguintb/juegos/roms/commanderx16
+  extension:
+  - .bas
+  - .img
+  - .prg
+  platform:
+  - commanderx16
+  theme: commanderx16
+  emulators:
+    x16emu:
+      x16emu:
+        default: true

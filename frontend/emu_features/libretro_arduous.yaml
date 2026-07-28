@@ -1,0 +1,4 @@
+emulator_name: libretro
+core_name: arduous
+features:
+  - cheevos

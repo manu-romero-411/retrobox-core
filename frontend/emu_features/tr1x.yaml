@@ -1,0 +1,20 @@
+emulator_name: tr1x
+features:
+  - padtokeyboard
+sharedFeatures:
+  - powermode
+  - tdp
+  - videomode
+  - bezel
+  - bezel_stretch
+groups:
+  GENERAL:
+    items:
+      - name: EXPANSION PACK
+        value: "tr1x-expansion"
+        description: Run the Unfinished expansion pack.
+        choices:
+          - name: Off (Default)
+            value: 0
+          - name: On
+            value: 1

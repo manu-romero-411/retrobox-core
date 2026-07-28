@@ -1,0 +1,22 @@
+lcdgames:
+  fullname: LCD Games
+  manufacturer: Various
+  release: 1979
+  hardware: portable
+  path: /var/penguintb/juegos/roms/lcdgames
+  extension:
+  - .mgw
+  - .zip
+  - .7z
+  platform:
+  - lcdgames
+  theme: lcdgames
+  group: lcdgames
+  emulators:
+    libretro:
+      mame: mame
+    mame:
+      mame:
+        default: true
+        incompatible_extensions:
+        - .mgw

@@ -1,0 +1,7 @@
+emulator_name: hurrican
+features:
+  - padtokeyboard
+sharedFeatures:
+  - powermode
+  - tdp
+  - videomode

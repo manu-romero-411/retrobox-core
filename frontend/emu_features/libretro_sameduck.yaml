@@ -1,0 +1,9 @@
+emulator_name: libretro
+core_name: sameduck
+features:
+  - netplay
+  - padtokeyboard
+  - cheevos
+sharedFeatures:
+  - rewind
+  - autosave

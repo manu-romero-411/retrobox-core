@@ -1,0 +1,19 @@
+sv8000:
+  fullname: Super Vision 8000
+  manufacturer: Bandai
+  release: 1979
+  hardware: console
+  path: /var/penguintb/juegos/roms/sv8000
+  extension:
+  - .bin
+  - .zip
+  - .7z
+  platform:
+  - sv8000
+  theme: sv8000
+  emulators:
+    libretro:
+      mame:
+        default: true
+    mame:
+      mame: mame

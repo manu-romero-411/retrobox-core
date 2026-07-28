@@ -1,0 +1,12 @@
+steam:
+  fullname: Steam
+  group: pcgames
+  manufacturer: Valve
+  release: 2003
+  hardware: None
+  path: ../roms/steam
+  extension:
+  - .steam
+  platform:
+  - windows
+  theme: steam

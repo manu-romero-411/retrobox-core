@@ -1,0 +1,18 @@
+recordings:
+  fullname: Recordings
+  manufacturer: Misc. System
+  release: None
+  hardware: system
+  path: /var/penguintb/juegos/recordings
+  extension:
+  - .mkv
+  - .mp4
+  - .avi
+  - .webm
+  - .mp3
+  - .wav
+  - .ogg
+  - .flac
+  platform:
+  - imageviewer
+  theme: recordings

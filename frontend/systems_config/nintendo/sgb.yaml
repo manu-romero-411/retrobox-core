@@ -1,0 +1,20 @@
+sgb:
+  fullname: Super Game Boy
+  manufacturer: Nintendo
+  release: 1994
+  hardware: console
+  path: /var/penguintb/juegos/roms/sgb
+  extension:
+  - .gb
+  - .gbc
+  - .zip
+  - .7z
+  platform:
+  - sgb
+  theme: sgb
+  group: snes
+  emulators:
+    libretro:
+      mesen-s:
+        default: true
+      mgba: mgba

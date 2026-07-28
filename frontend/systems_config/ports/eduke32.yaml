@@ -1,0 +1,16 @@
+eduke32:
+  fullname: EDuke32
+  manufacturer: Ports
+  release: None
+  hardware: port
+  path: /var/penguintb/juegos/roms/eduke32
+  extension:
+  - .eduke32
+  platform:
+  - pc
+  theme: eduke32
+  group: ports
+  emulators:
+    eduke32:
+      eduke32:
+        default: true

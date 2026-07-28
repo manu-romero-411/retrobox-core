@@ -1,0 +1,10 @@
+emulator_name: "dosbox-x"
+features:
+  - padtokeyboard
+sharedFeatures:
+  - powermode
+  - tdp
+  - videomode
+  - ratio
+  - bezel
+  - bezel_stretch

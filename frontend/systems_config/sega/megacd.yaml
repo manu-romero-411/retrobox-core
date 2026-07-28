@@ -1,0 +1,19 @@
+megacd:
+  fullname: Mega CD
+  manufacturer: Sega
+  release: 1991
+  hardware: console
+  path: /var/penguintb/juegos/roms/megacd
+  extension:
+  - .cue
+  - .iso
+  - .chd
+  - .m3u
+  platform:
+  - megacd
+  theme: megacd
+  emulators:
+    libretro:
+      genesisplusgx:
+        default: true
+      picodrive: picodrive

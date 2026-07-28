@@ -1,0 +1,20 @@
+jaguarcd:
+  fullname: Jaguar CD
+  manufacturer: Atari
+  release: 1995
+  hardware: console
+  path: /var/penguintb/juegos/roms/jaguarcd
+  extension:
+  - .cue
+  - .cdi
+  - .bigpimg
+  platform:
+  - jaguar
+  theme: atarijaguarcd
+  group: jaguar
+  emulators:
+    bigpemu:
+      bigpemu:
+        default: true
+    libretro:
+      virtualjaguar: virtualjaguar

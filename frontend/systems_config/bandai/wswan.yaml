@@ -1,0 +1,17 @@
+wswan:
+  fullname: WonderSwan
+  manufacturer: Bandai
+  release: 1999
+  hardware: portable
+  path: /var/penguintb/juegos/roms/wswan
+  extension:
+  - .ws
+  - .zip
+  - .7z
+  platform:
+  - wonderswan
+  theme: wonderswan
+  emulators:
+    libretro:
+      mednafen_wswan:
+        default: true

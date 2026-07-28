@@ -1,0 +1,26 @@
+jaguar:
+  fullname: Jaguar
+  manufacturer: Atari
+  release: 1993
+  hardware: console
+  path: /var/penguintb/juegos/roms/jaguar
+  extension:
+  - .j64
+  - .jag
+  - .cof
+  - .abs
+  - .rom
+  - .zip
+  - .7z
+  platform:
+  - jaguar
+  theme: atarijaguar
+  group: jaguar
+  emulators:
+    bigpemu:
+      bigpemu:
+        default: true
+    libretro:
+      virtualjaguar:
+        incompatible_extensions:
+        - .7z

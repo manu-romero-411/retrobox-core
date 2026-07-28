@@ -1,0 +1,26 @@
+x1:
+  fullname: Sharp X1
+  manufacturer: Sharp
+  release: 1982
+  hardware: computer
+  path: /var/penguintb/juegos/roms/x1
+  extension:
+  - .dx1
+  - .zip
+  - .2d
+  - .2hd
+  - .tfd
+  - .d88
+  - .88d
+  - .hdm
+  - .xdf
+  - .dup
+  - .cmd
+  - .7z
+  platform:
+  - x1
+  theme: x1
+  emulators:
+    libretro:
+      x1:
+        default: true

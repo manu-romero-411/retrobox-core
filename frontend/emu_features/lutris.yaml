@@ -1,0 +1,14 @@
+emulator_name: lutris
+features:
+  - padtokeyboard
+groups:
+  GENERAL:
+    items:
+      - name: SDL CONFIG
+        value: sdl_config
+        description: Choose whether to pass SDL Game Controller config to the Windows game. Disabling may help with some games.
+        choices:
+          - name: Off
+            value: 0
+          - name: On (Default)
+            value: 1

@@ -1,0 +1,18 @@
+quake:
+  fullname: Quake
+  manufacturer: Ports
+  release: 1996
+  hardware: port
+  path: /var/penguintb/juegos/roms/quake
+  extension:
+  - .quake
+  platform:
+  - pc
+  theme: quake
+  group: ports
+  emulators:
+    libretro:
+      tyrquake:
+        default: true
+    vkquake:
+      vkquake: vkquake

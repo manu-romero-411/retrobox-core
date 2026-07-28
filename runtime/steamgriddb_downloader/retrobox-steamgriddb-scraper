@@ -1,0 +1,10 @@
+#!/bin/bash
+
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd -P)"
+cd $HERE
+source .env
+python sgdb-artwork.py \
+--roms "$(realpath "$HERE/../../../roms")" \
+--apikey "${SGDB_API_KEY}" \
+--systems steam heroic lutris
+

@@ -1,0 +1,50 @@
+emulator_name: dosbox
+features:
+  - padtokeyboard
+sharedFeatures:
+  - powermode
+  - tdp
+  - videomode
+  - ratio
+  - bezel
+  - bezel_stretch
+groups:
+  GENERAL:
+    submenus:
+      EMULATION:
+        - name: CPU CORE
+          value: dosbox_cpu_core
+          description: CPU Core used in emulation
+          choices:
+            - name: AUTO
+              value: auto
+            - name: Dynamic
+              value: dynamic
+            - name: Normal
+              value: normal
+            - name: Simple
+              value: simple
+        - name: CPU TYPE
+          value: dosbox_cpu_cputype
+          description: CPU Type used in emulation
+          choices:
+            - name: AUTO
+              value: auto
+            - name: 386
+              value: 386
+            - name: 386_slow
+              value: 386_slow
+            - name: 486_slow
+              value: 486_slow
+            - name: pentium_slow
+              value: pentium_slow
+            - name: 386_prefetch
+              value: 386_prefetch
+        - name: CPU CYCLES
+          value: dosbox_cpu_cycles
+          description: Amount of instructions DOSBox tries to emulate
+          choices:
+            - name: AUTO
+              value: auto
+            - name: Max
+              value: max

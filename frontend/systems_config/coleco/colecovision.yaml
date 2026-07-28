@@ -1,0 +1,25 @@
+colecovision:
+  fullname: ColecoVision
+  manufacturer: Coleco
+  release: 1982
+  hardware: console
+  path: /var/penguintb/juegos/roms/colecovision
+  extension:
+  - .bin
+  - .col
+  - .rom
+  - .zip
+  - .7z
+  platform:
+  - colecovision
+  theme: colecovision
+  emulators:
+    clk:
+      clk:
+        incompatible_extensions:
+        - .7z
+    libretro:
+      bluemsx:
+        default: true
+    openmsx:
+      openmsx: openmsx

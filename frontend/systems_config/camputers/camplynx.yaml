@@ -1,0 +1,21 @@
+camplynx:
+  fullname: Camputers Lynx
+  manufacturer: Camputers
+  release: 1983
+  hardware: computer
+  path: /var/penguintb/juegos/roms/camplynx
+  extension:
+  - .wav
+  - .tap
+  - .ldf
+  - .zip
+  - .7z
+  platform:
+  - camplynx
+  theme: camplynx
+  emulators:
+    libretro:
+      mame: mame
+    mame:
+      mame:
+        default: true

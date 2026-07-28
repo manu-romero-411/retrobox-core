@@ -1,0 +1,21 @@
+vis:
+  fullname: Tandy Video Information System
+  manufacturer: Tandy / Memorex
+  release: 1992
+  hardware: computer
+  path: /var/penguintb/juegos/roms/vis
+  extension:
+  - .chd
+  - .cue
+  - .toc
+  - .nrg
+  - .gdi
+  - .iso
+  - .cdr
+  platform:
+  - vis
+  theme: vis
+  emulators:
+    libretro:
+      mame:
+        default: true

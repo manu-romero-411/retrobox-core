@@ -1,0 +1,22 @@
+atomiswave:
+  fullname: Atomiswave
+  manufacturer: Sammy
+  release: 2003
+  hardware: arcade
+  path: /var/penguintb/juegos/roms/atomiswave
+  extension:
+  - .lst
+  - .bin
+  - .dat
+  - .zip
+  - .7z
+  platform:
+  - atomiswave
+  - arcade
+  theme: atomiswave
+  emulators:
+    flycast:
+      flycast: flycast
+    libretro:
+      flycast:
+        default: true

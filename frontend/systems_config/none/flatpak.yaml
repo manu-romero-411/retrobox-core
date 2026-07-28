@@ -1,0 +1,16 @@
+flatpak:
+  fullname: Applications
+  manufacturer: None
+  release: None
+  hardware: None
+  path: /var/penguintb/juegos/roms/flatpak
+  extension:
+  - .flatpak
+  platform:
+  - pc
+  theme: flatpak
+  group: ports
+  emulators:
+    flatpak:
+      flatpak:
+        default: true

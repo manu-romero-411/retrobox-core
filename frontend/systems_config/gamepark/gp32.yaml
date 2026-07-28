@@ -1,0 +1,19 @@
+gp32:
+  fullname: GP32
+  manufacturer: GamePark
+  release: 2001
+  hardware: portable
+  path: /var/penguintb/juegos/roms/gp32
+  extension:
+  - .smc
+  - .zip
+  - .7z
+  platform:
+  - gp32
+  theme: gp32
+  emulators:
+    libretro:
+      mame: mame
+    mame:
+      mame:
+        default: true

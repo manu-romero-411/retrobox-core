@@ -1,0 +1,16 @@
+fallout2-ce:
+  fullname: Fallout 2 Community Edition
+  manufacturer: Ports
+  release: 1998
+  hardware: port
+  path: /var/penguintb/juegos/roms/fallout2-ce
+  extension:
+  - .f2ce
+  platform:
+  - pc
+  theme: fallout2-ce
+  group: ports
+  emulators:
+    fallout2-ce:
+      fallout2-ce:
+        default: true

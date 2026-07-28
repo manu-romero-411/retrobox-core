@@ -1,0 +1,19 @@
+pcengine:
+  fullname: PC Engine
+  manufacturer: NEC
+  release: 1987
+  hardware: console
+  path: /var/penguintb/juegos/roms/pcengine
+  extension:
+  - .pce
+  - .bin
+  - .zip
+  - .7z
+  platform:
+  - pcengine
+  theme: pcengine
+  emulators:
+    libretro:
+      mednafen_pce:
+        default: true
+      mednafen_pce_fast: mednafen_pce_fast

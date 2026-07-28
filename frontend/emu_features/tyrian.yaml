@@ -1,0 +1,7 @@
+emulator_name: tyrian
+features:
+  - padtokeyboard
+sharedFeatures:
+  - powermode
+  - tdp
+  - videomode

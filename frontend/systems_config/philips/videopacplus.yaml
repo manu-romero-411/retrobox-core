@@ -1,0 +1,17 @@
+videopacplus:
+  fullname: Videopac+ G7400
+  manufacturer: Philips
+  release: 1983
+  hardware: console
+  path: /var/penguintb/juegos/roms/videopacplus
+  extension:
+  - .bin
+  - .zip
+  - .7z
+  platform:
+  - videopac
+  theme: videopacplus
+  emulators:
+    libretro:
+      o2em:
+        default: true

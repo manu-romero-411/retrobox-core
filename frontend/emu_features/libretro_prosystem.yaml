@@ -1,0 +1,7 @@
+emulator_name: libretro
+core_name: prosystem
+features:
+  - cheevos
+sharedFeatures:
+  - rewind
+  - autosave

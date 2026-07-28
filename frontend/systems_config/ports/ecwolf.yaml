@@ -1,0 +1,18 @@
+ecwolf:
+  fullname: ECWolf
+  manufacturer: Ports
+  release: 2013
+  hardware: port
+  path: /var/penguintb/juegos/roms/ecwolf
+  extension:
+  - .ecwolf
+  - .pk3
+  - .squashfs
+  platform:
+  - pc
+  theme: ecwolf
+  group: ports
+  emulators:
+    ecwolf:
+      ecwolf:
+        default: true

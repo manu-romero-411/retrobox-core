@@ -1,0 +1,23 @@
+triforce:
+  fullname: Triforce
+  manufacturer: Namco, Sega, Nintendo
+  release: 2003
+  hardware: arcade
+  path: /var/penguintb/juegos/roms/triforce
+  extension:
+  - .gcm
+  - .iso
+  - .gcz
+  - .ciso
+  - .wbfs
+  - .elf
+  - .dol
+  - .m3u
+  platform:
+  - triforce
+  - arcade
+  theme: triforce
+  emulators:
+    dolphin:
+      dolphin:
+        default: true

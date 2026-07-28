@@ -1,0 +1,28 @@
+atari800:
+  fullname: Atari 800
+  manufacturer: Atari
+  release: 1979
+  hardware: computer
+  path: /var/penguintb/juegos/roms/atari800
+  extension:
+  - .rom
+  - .xfd
+  - .atr
+  - .atx
+  - .cdm
+  - .cas
+  - .car
+  - .bin
+  - .a52
+  - .xex
+  - .zip
+  - .7z
+  - .m3u
+  platform:
+  - atari800
+  theme: atari800
+  group: atari8bit
+  emulators:
+    libretro:
+      atari800:
+        default: true

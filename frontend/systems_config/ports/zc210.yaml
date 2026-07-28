@@ -1,0 +1,15 @@
+zc210:
+  fullname: Zelda Classic
+  manufacturer: Ports
+  release: 1999
+  hardware: console
+  path: /var/penguintb/juegos/roms/zc210
+  extension:
+  - .qst
+  platform:
+  - pc
+  theme: zeldac
+  emulators:
+    libretro:
+      zc210:
+        default: true

@@ -1,0 +1,22 @@
+naomi:
+  fullname: Naomi
+  manufacturer: Sega
+  release: 1998
+  hardware: arcade
+  path: /var/penguintb/juegos/roms/naomi
+  extension:
+  - .lst
+  - .bin
+  - .dat
+  - .zip
+  - .7z
+  platform:
+  - naomi
+  - arcade
+  theme: naomi
+  emulators:
+    flycast:
+      flycast: flycast
+    libretro:
+      flycast:
+        default: true

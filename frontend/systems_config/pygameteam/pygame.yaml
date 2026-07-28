@@ -1,0 +1,15 @@
+pygame:
+  fullname: Pygame
+  manufacturer: Pygame Team
+  release: 2000
+  hardware: library
+  path: /var/penguintb/juegos/roms/pygame
+  extension:
+  - .pygame
+  platform:
+  - pygame
+  theme: pygame
+  emulators:
+    pygame:
+      pygame:
+        default: true

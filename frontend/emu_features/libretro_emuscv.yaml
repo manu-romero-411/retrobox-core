@@ -1,0 +1,5 @@
+emulator_name: libretro
+core_name: emuscv
+sharedFeatures:
+  - rewind
+  - autosave

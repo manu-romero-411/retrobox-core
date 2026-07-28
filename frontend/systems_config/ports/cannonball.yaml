@@ -1,0 +1,16 @@
+cannonball:
+  fullname: Cannonball
+  manufacturer: Ports
+  release: None
+  hardware: port
+  path: /var/penguintb/juegos/roms/cannonball
+  extension:
+  - .cannonball
+  platform:
+  - pc
+  theme: cannonball
+  group: ports
+  emulators:
+    cannonball:
+      cannonball:
+        default: true

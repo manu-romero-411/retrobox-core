@@ -1,0 +1,39 @@
+amiga1200:
+  fullname: Amiga AGA
+  manufacturer: Commodore
+  release: 1992
+  hardware: computer
+  path: /var/penguintb/juegos/roms/amiga1200
+  extension:
+  - .adf
+  - .uae
+  - .ipf
+  - .dms
+  - .dmz
+  - .adz
+  - .lha
+  - .hdf
+  - .exe
+  - .m3u
+  - .zip
+  - .raw
+  - .scp
+  platform:
+  - amiga
+  theme: amiga1200
+  group: amiga
+  emulators:
+    amiberry:
+      A1200:
+        incompatible_extensions:
+        - .m3u
+      A4000:
+        incompatible_extensions:
+        - .m3u
+    fsuae:
+      A1200: A1200
+      A4000: A4000
+    libretro:
+      puae:
+        default: true
+      puae2021: puae2021

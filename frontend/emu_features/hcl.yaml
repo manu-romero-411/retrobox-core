@@ -1,0 +1,7 @@
+emulator_name: hcl
+features:
+  - padtokeyboard
+sharedFeatures:
+  - powermode
+  - tdp
+  - videomode

@@ -1,0 +1,17 @@
+flash:
+  fullname: Flash Player
+  manufacturer: Adobe
+  release: 1996
+  hardware: port
+  path: /var/penguintb/juegos/roms/flash
+  extension:
+  - .swf
+  platform:
+  - flash
+  theme: flash
+  emulators:
+    lightspark:
+      lightspark: lightspark
+    ruffle:
+      ruffle:
+        default: true

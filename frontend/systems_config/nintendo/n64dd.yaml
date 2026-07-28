@@ -1,0 +1,24 @@
+n64dd:
+  fullname: Nintendo 64 Disk Drive
+  manufacturer: Nintendo
+  release: 1999
+  hardware: console
+  path: /var/penguintb/juegos/roms/n64dd
+  extension:
+  - .z64
+  - .n64
+  - .ndd
+  - .zip
+  - .7z
+  platform:
+  - n64dd
+  theme: n64dd
+  emulators:
+    libretro:
+      mupen64plus-next: mupen64plus-next
+      parallel_n64: parallel_n64
+    mupen64plus:
+      glide64mk2:
+        default: true
+      gliden64: gliden64
+      rice: rice

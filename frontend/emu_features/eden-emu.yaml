@@ -1,0 +1,495 @@
+emulator_name: "eden-emu"
+features:
+  - padtokeyboard
+sharedFeatures:
+  - videomode
+  - hud
+  - hud_corner
+  - discordrpc
+  - powermode
+  - tdp
+groups:
+  SWITCH OPTIONS:
+    submenus:
+      CONTROLLERS:
+        - name: AUTO CONTROLLER CONFIG
+          value: yuzu_auto_controller_config
+          description: "Auto Controller Configuration Auto=On "
+          choices:
+            - name: Off
+              value: 0
+            - name: On
+              value: 1
+        - name: RUMBLE
+          value: yuzu_rumble
+          description: "Controller Rumble Auto=On "
+          choices:
+            - name: Off
+              value: false
+            - name: On
+              value: true
+        - name: "INVERSE BUTTON A/X - X/Y"
+          value: yuzu_inverse_button
+          description: Inverse Button A/X and X/Y For Xbox 
+          choices:
+            - name: Off
+              value: false
+            - name: On
+              value: true
+        - name: CONTROLLER 1 TYPE
+          value: p1_pad
+          description: "Choose Player 1 Pad Type Auto=Pro Controller"
+          choices:
+            - name: Pro Controller
+              value: 0
+            - name: Two Joycons
+              value: 1
+            - name: Left joycon
+              value: 2
+            - name: Right Joycon
+              value: 3
+            - name: Portable Mode
+              value: 4
+            - name: Gamecube Pad
+              value: 5
+        - name: CONTROLLER 2 TYPE
+          value: p2_pad
+          description: "Choose Player 2 Pad Type Auto=Pro Controller"
+          choices:
+            - name: Pro Controller
+              value: 0
+            - name: Two Joycons
+              value: 1
+            - name: Left joycon
+              value: 2
+            - name: Right Joycon
+              value: 3
+            - name: Portable Mode
+              value: 4
+            - name: Gamecube Pad
+              value: 5
+        - name: CONTROLLER 3 TYPE
+          value: p3_pad
+          description: "Choose Player 3 Pad Type Auto=Pro Controller"
+          choices:
+            - name: Pro Controller
+              value: 0
+            - name: Two Joycons
+              value: 1
+            - name: Left joycon
+              value: 2
+            - name: Right Joycon
+              value: 3
+            - name: Portable Mode
+              value: 4
+            - name: Gamecube Pad
+              value: 5
+        - name: CONTROLLER 4 TYPE
+          value: p4_pad
+          description: "Choose Player 4 Pad Type Auto=Pro Controller"
+          choices:
+            - name: Pro Controller
+              value: 0
+            - name: Two Joycons
+              value: 1
+            - name: Left joycon
+              value: 2
+            - name: Right Joycon
+              value: 3
+            - name: Portable Mode
+              value: 4
+            - name: Gamecube Pad
+              value: 5
+        - name: CONTROLLER 5 TYPE
+          value: p5_pad
+          description: "Choose Player 5 Pad Type Auto=Pro Controller"
+          choices:
+            - name: Pro Controller
+              value: 0
+            - name: Two Joycons
+              value: 1
+            - name: Left joycon
+              value: 2
+            - name: Right Joycon
+              value: 3
+            - name: Portable Mode
+              value: 4
+            - name: Gamecube Pad
+              value: 5
+        - name: CONTROLLER 6 TYPE
+          value: p6_pad
+          description: "Choose Player 6 Pad Type Auto=Pro Controller"
+          choices:
+            - name: Pro Controller
+              value: 0
+            - name: Two Joycons
+              value: 1
+            - name: Left joycon
+              value: 2
+            - name: Right Joycon
+              value: 3
+            - name: Portable Mode
+              value: 4
+            - name: Gamecube Pad
+              value: 5
+        - name: CONTROLLER 7 TYPE
+          value: p7_pad
+          description: "Choose Player 7 Pad Type Auto=Pro Controller"
+          choices:
+            - name: Pro Controller
+              value: 0
+            - name: Two Joycons
+              value: 1
+            - name: Left joycon
+              value: 2
+            - name: Right Joycon
+              value: 3
+            - name: Portable Mode
+              value: 4
+            - name: Gamecube Pad
+              value: 5
+        - name: CONTROLLER 8 TYPE
+          value: p8_pad
+          description: "Choose Player 8 Pad Type Auto=Pro Controller"
+          choices:
+            - name: Pro Controller
+              value: 0
+            - name: Two Joycons
+              value: 1
+            - name: Left joycon
+              value: 2
+            - name: Right Joycon
+              value: 3
+            - name: Portable Mode
+              value: 4
+            - name: Gamecube Pad
+              value: 5
+      DISPLAY:
+        - name: ASPECT RATIO
+          value: yuzu_ratio
+          description: "Yuzu Aspect Ratio Auto=16/9"
+          choices:
+            - name: 16/9
+              value: 0
+            - name: Force 4/3
+              value: 1
+            - name: Force 21/9
+              value: 2
+            - name: Force 16/10
+              value: 3
+            - name: Stretch To Window
+              value: 4
+        - name: FULLSCREEN MODE
+          value: fullscreen_mode
+          description: Choose fullscreen/borderless
+          choices:
+            - name: Borderless Windowed
+              value: 0
+            - name: Exclusive Fullscreen
+              value: 1
+        - name: SINGLE WINDOW MODE
+          value: single_window
+          description: "Single Window Mode setting Auto=On"
+          choices:
+            - name: On
+              value: true
+            - name: Off
+              value: false
+        - name: VSYNC
+          value: vsync
+          description: "Fix the heavy screen tearing in games Auto=Mailbox (Recommended)"
+          choices:
+            - name: Mailbox (Recommended)
+              value: 1
+            - name: Off (Immediate)
+              value: 0
+            - name: On (Fifo)
+              value: 2
+            - name: Fifo relaxed
+              value: 3
+      SYSTEM:
+        - name: AUDIO FORMAT
+          value: audio_mode
+          description: Audio Output Mode
+          choices:
+            - name: Mono
+              value: 0
+            - name: Stereo (default)
+              value: 1
+            - name: Surround
+              value: 2
+        - name: MULTICORE CPU
+          value: multicore
+          description: "Multicore CPU Auto=enable"
+          choices:
+            - name: Off
+              value: false
+            - name: On
+              value: true
+        - name: MEMORY LAYOUT
+          value: yuzu_memory_layout
+          description: "Increases amount of emulated RAM from 4G to 8/6 useful for HDtextures Auto=4G(Recommended)"
+          choices:
+            - name: 4GB DRAM (Recommended)
+              value: 0
+            - name: 6GB DRAM (Unsafe)
+              value: 1
+            - name: 8GB DRAM
+              value: 2
+            - name: 10GB DRAM (Unsafe)
+              value: 3
+            - name: 12GB DRAM (Unsafe)
+              value: 4
+        - name: LANGUAGE
+          value: language
+          description: "System language select Auto=American English"
+          choices:
+            - name: Japanese
+              value: 0
+            - name: American English
+              value: 1
+            - name: Francais
+              value: 2
+            - name: German
+              value: 3
+            - name: Italian
+              value: 4
+            - name: Spanish
+              value: 5
+            - name: Chinese
+              value: 6
+            - name: Korean
+              value: 7
+            - name: Dutch
+              value: 8
+            - name: Portuguese
+              value: 9
+            - name: Russian
+              value: 10
+            - name: Taiwanese
+              value: 11
+            - name: British English
+              value: 12
+            - name: Canadian French
+              value: 13
+            - name: Latin American Spanish
+              value: 14
+            - name: Simplified Chinese
+              value: 15
+            - name: Traditional Chinese
+              value: 16
+            - name: Brazilian Portugese
+              value: 17
+            - name: Serbian
+              value: 18
+        - name: REGION
+          value: region
+          description: "System region select Auto=USA"
+          choices:
+            - name: Japan
+              value: 0
+            - name: Usa
+              value: 1
+            - name: Europe
+              value: 2
+            - name: Australia
+              value: 3
+            - name: China
+              value: 4
+            - name: Korea
+              value: 5
+            - name: Taiwan
+              value: 6
+        - name: SWITCH DOCK MODE
+          value: dock_mode
+          description: "Undocked reduce resolution/detail for slow PC Auto=Docked"
+          choices:
+            - name: Docked
+              value: 1
+            - name: Undocked
+              value: 0
+        - name: USERS PROFILES
+          value: user_profile
+          description: Ask For User Profile on boot (useful if you have created several profiles in yuzu) 
+          choices:
+            - name: Off (default)
+              value: false
+            - name: On
+              value: true
+      RENDERING:
+        - name: GRAPHICS API
+          value: gfxbackend
+          description: Choose which graphics API library to use
+          choices:
+            - name: Opengl
+              value: 0
+            - name: Vulkan
+              value: 1
+        - name: SHADER MODE
+          value: shaderbackend
+          description: "Faster shaders compil (OpenGL backend only) Auto=GLSL"
+          choices:
+            - name: Glsl (default)
+              value: 0
+            - name: Glasm (nvidia only)
+              value: 1
+            - name: "Spir-v (mesa only)"
+              value: 2
+        - name: ENABLE ASYNC SHADER COMPILATION
+          value: async_shaders
+          description: Speedup shader compilation
+          choices:
+            - name: Off
+              value: false
+            - name: On
+              value: true
+        - name: RENDERING RESOLUTION
+          value: resolution_scale
+          description: "Improve the fidelity of 3D models Auto=1X (720p/1080p)"
+          choices:
+            - name: "0.25x (180p/270p)[experimental]"
+              value: 0
+            - name: "0.50x (360p/540p)[experimental]"
+              value: 1
+            - name: "0.75x (540p/810p)[experimental]"
+              value: 2
+            - name: 1x (720p/1080p)
+              value: 3
+            - name: 1.25x (900p/1350p)
+              value: 4
+            - name: "1.5x (1080/1620p)[experimental]"
+              value: 5
+            - name: 2x (1440p/2160p)
+              value: 6
+            - name: 3x (2160p/3240p)
+              value: 7
+            - name: 4x (2880p/4320p)
+              value: 8
+            - name: 5x (3600p/5400p)
+              value: 9
+            - name: 6x (4320p/6480p)
+              value: 10
+            - name: 7x (5040p/7560p)
+              value: 11
+            - name: 8x (5760p/8640p)
+              value: 12
+        - name: ASTC DECODING METHOD
+          value: accelerate_astc
+          description: "Uses a background thread to decode ASTC textures Default:GPU"
+          choices:
+            - name: GPU
+              value: 1
+            - name: CPU
+              value: 0
+            - name: CPU Async
+              value: 2
+        - name: ASTC TEXTURE RECOMPRESSION
+          value: astc_recompression
+          description: "Decreases VRAM requirements Auto=Uncompressed"
+          choices:
+            - name: Uncompressed (Best Quality)
+              value: 0
+            - name: BC3 (Medium Quality)
+              value: 2
+            - name: BC1 (Low Quality)
+              value: 1
+        - name: TEXTURE FILTERING
+          value: scale_filter
+          description: "Smooths out textures on 3D objetcs Auto=Bilinear"
+          choices:
+            - name: "Nearest-Neighbor"
+              value: 0
+            - name: Bilinear
+              value: 1
+            - name: Bicubic
+              value: 2
+            - name: Gaussian
+              value: 3
+            - name: Lanczos
+              value: 4
+            - name: ScaleForce
+              value: 5
+            - name: "AMD's FidelityFX Super Resolution [Vulkan Only]"
+              value: 6
+            - name: Area
+              value: 7
+            - name: "Zero-Tangent"
+              value: 8
+            - name: "B-Spline"
+              value: 9
+            - name: Mitchell
+              value: 10
+            - name: "Spline-1"
+              value: 11
+            - name: MMPX
+              value: 12
+        - name: FXAA/SMAA
+          value: aliasing_method
+          description: Anti aliasing FXAA/SMAA
+          choices:
+            - name: Off
+              value: 0
+            - name: Fxaa
+              value: 1
+            - name: Smaa
+              value: 2
+        - name: ASYNC GPU EMULATION
+          value: async_gpu
+          description: Asynchronous gpu emulation
+          choices:
+            - name: Off
+              value: false
+            - name: On
+              value: true
+        - name: GPU CACHE GC
+          value: gpu_cache_gc
+          description: Enables garbage collection for gpu cache
+          choices:
+            - name: Off
+              value: false
+            - name: On
+              value: true
+        - name: GPU ACCURACY
+          value: gpuaccuracy
+          description: Gpu accuracy level
+          choices:
+            - name: Normal
+              value: 0
+            - name: High
+              value: 1
+            - name: Extreme
+              value: 2
+        - name: CPU ACCURACY
+          value: cpuaccuracy
+          description: Cpu accuracy level
+          choices:
+            - name: Accurate
+              value: 1
+            - name: Unsafe
+              value: 2
+        - name: NVDEC EMULATION
+          value: nvdec_emu
+          description: "Cutscenes video decoder Auto=Via Gpu"
+          choices:
+            - name: Off
+              value: 0
+            - name: Cpu
+              value: 1
+            - name: Gpu
+              value: 2
+        - name: ANISOTROPIC FILTERING
+          value: anisotropy
+          description: Enhance the quality with on perspective textures (experimental)
+          choices:
+            - name: Automatic
+              value: 0
+            - name: Default
+              value: 1
+            - name: 2x
+              value: 2
+            - name: 4x
+              value: 3
+            - name: 8x
+              value: 4
+            - name: 16x
+              value: 5

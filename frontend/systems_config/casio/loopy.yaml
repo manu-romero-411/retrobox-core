@@ -1,0 +1,20 @@
+loopy:
+  fullname: Casio Loopy
+  manufacturer: Casio
+  release: 1995
+  hardware: console
+  path: /var/penguintb/juegos/roms/loopy
+  extension:
+  - .bin
+  - .ic1
+  - .zip
+  - .7z
+  platform:
+  - loopy
+  theme: loopy
+  emulators:
+    libretro:
+      mame:
+        default: true
+    mame:
+      mame: mame

@@ -1,0 +1,29 @@
+cdi:
+  fullname: CD-i
+  manufacturer: Philips
+  release: 1990
+  hardware: console
+  path: /var/penguintb/juegos/roms/cdi
+  extension:
+  - .chd
+  - .cue
+  - .toc
+  - .nrg
+  - .gdi
+  - .iso
+  - .cdr
+  platform:
+  - cdi
+  theme: cdi
+  emulators:
+    libretro:
+      same_cdi:
+        incompatible_extensions:
+        - .cue
+        - .toc
+        - .nrg
+        - .gdi
+        - .cdr
+    mame:
+      mame:
+        default: true

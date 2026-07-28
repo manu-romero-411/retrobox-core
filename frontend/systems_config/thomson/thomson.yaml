@@ -1,0 +1,21 @@
+thomson:
+  fullname: Thomson - MO/TO (Theodore)
+  manufacturer: Thomson
+  release: 1984
+  hardware: computer
+  path: /var/penguintb/juegos/roms/thomson
+  extension:
+  - .fd
+  - .sap
+  - .k7
+  - .m7
+  - .m5
+  - .rom
+  - .zip
+  platform:
+  - thomson
+  theme: thomson
+  emulators:
+    libretro:
+      theodore:
+        default: true

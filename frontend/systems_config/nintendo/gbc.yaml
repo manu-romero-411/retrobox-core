@@ -1,0 +1,20 @@
+gbc:
+  fullname: Game Boy Color
+  manufacturer: Nintendo
+  release: 1998
+  hardware: portable
+  path: /var/penguintb/juegos/roms/gbc
+  extension:
+  - .gbc
+  - .zip
+  - .7z
+  platform:
+  - gbc
+  theme: gbc
+  emulators:
+    libretro:
+      gambatte:
+        default: true
+      mesen-s: mesen-s
+      mgba: mgba
+      vba-m: vba-m

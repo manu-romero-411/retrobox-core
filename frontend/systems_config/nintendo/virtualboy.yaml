@@ -1,0 +1,17 @@
+virtualboy:
+  fullname: Virtual Boy
+  manufacturer: Nintendo
+  release: 1995
+  hardware: console
+  path: /var/penguintb/juegos/roms/virtualboy
+  extension:
+  - .vb
+  - .zip
+  - .7z
+  platform:
+  - virtualboy
+  theme: virtualboy
+  emulators:
+    libretro:
+      mednafen_vb:
+        default: true

@@ -1,0 +1,112 @@
+emulator_name: redream
+sharedFeatures:
+  - powermode
+  - tdp
+  - videomode
+  - bezel
+  - bezel_stretch
+groups:
+  GENERAL:
+    items:
+      - name: RENDERING RESOLUTION
+        value: redreamResolution
+        description: Choose your render resolution (Requires personal redream.key file).
+        choices:
+          - name: 1x (640x480)
+            value: 1
+          - name: 2x (1280x960) (Default)
+            value: 2
+          - name: 3x (1920x1440)
+            value: 3
+          - name: 4x (2560x1920)
+            value: 4
+          - name: 5x (3200x2400)
+            value: 5
+          - name: 6x (3840x2880)
+            value: 6
+      - name: ASPECT RATIO
+        value: redreamRatio
+        description: Choose your preferred aspect ratio.
+        choices:
+          - name: "4:3 (Default)"
+            value: "4:3"
+          - name: "16:9"
+            value: "16:9"
+          - name: Stretch
+            value: stretch
+      - name: FRAMESKIP
+        value: redreamFrameSkip
+        description: "Enable auto frameskipping for performance on lower-end systems."
+        choices:
+          - name: Off (Default)
+            value: 0
+          - name: On
+            value: 1
+      - name: VSYNC
+        value: redreamVsync
+        description: Enable vertical sync to avoid tearing in some cases.
+        choices:
+          - name: Off (Default)
+            value: 0
+          - name: On
+            value: 1
+      - name: REGION
+        value: redreamRegion
+        description: Choose the Dreamcast console region.
+        choices:
+          - name: USA (Default)
+            value: usa
+          - name: Europe
+            value: europe
+          - name: Japan
+            value: japan
+      - name: CONSOLE LANGUAGE
+        value: redreamLanguage
+        description: Choose console language. Not all games may support the language choice.
+        choices:
+          - name: English (Default)
+            value: english
+          - name: German
+            value: german
+          - name: French
+            value: french
+          - name: Spanish
+            value: spanish
+          - name: Italian
+            value: italian
+          - name: Japanese
+            value: japanese
+      - name: BROADCAST
+        value: redreamBroadcast
+        description: Choose broadcast standard (for older TV's).
+        choices:
+          - name: NTSC (Default)
+            value: ntsc
+          - name: PAL
+            value: pal
+          - name: PAL_M
+            value: pal_m
+          - name: PAL_N
+            value: pal_n
+      - name: CABLE
+        value: redreamCable
+        description: Choose cable type for the TV.
+        choices:
+          - name: VGA (Default)
+            value: vga
+          - name: RGB
+            value: rgb
+          - name: Composite
+            value: composite
+  ADVANCED OPTIONS:
+    items:
+      - name: RENDER MODE
+        value: redreamRender
+        description: ""
+        choices:
+          - name: "HLE (per-strip)"
+            value: hle_perstrip
+          - name: "HLE (per-pixel)"
+            value: hle_perpixel
+          - name: LLE
+            value: lle

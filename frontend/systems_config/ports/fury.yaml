@@ -1,0 +1,16 @@
+fury:
+  fullname: Ion Fury
+  manufacturer: Ports
+  release: 2019
+  hardware: port
+  path: /var/penguintb/juegos/roms/fury
+  extension:
+  - .grp
+  platform:
+  - pc
+  theme: fury
+  group: ports
+  emulators:
+    eduke32:
+      fury:
+        default: true

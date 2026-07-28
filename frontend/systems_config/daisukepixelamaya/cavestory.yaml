@@ -1,0 +1,16 @@
+cavestory:
+  fullname: Cave Story
+  manufacturer: Daisuke "Pixel" Amaya
+  release: 2004
+  hardware: port
+  path: /var/penguintb/juegos/roms/cavestory
+  extension:
+  - .exe
+  platform:
+  - pc
+  theme: cavestory
+  group: ports
+  emulators:
+    libretro:
+      nxengine:
+        default: true

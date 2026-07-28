@@ -1,0 +1,16 @@
+lindbergh:
+  fullname: Sega Lindbergh
+  manufacturer: Sega
+  release: 2005
+  hardware: arcade
+  path: /var/penguintb/juegos/roms/lindbergh
+  extension:
+  - .game
+  platform:
+  - lindbergh
+  - arcade
+  theme: lindbergh
+  emulators:
+    lindbergh-loader:
+      lindbergh-loader:
+        default: true

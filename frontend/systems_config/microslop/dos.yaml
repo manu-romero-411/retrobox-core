@@ -1,0 +1,34 @@
+dos:
+  fullname: Dos (x86)
+  manufacturer: Microslop
+  release: 1981
+  hardware: computer
+  path: /var/penguintb/juegos/roms/dos
+  extension:
+  - .pc
+  - .dos
+  - .zip
+  - .squashfs
+  - .dosz
+  - .m3u
+  - .iso
+  - .cue
+  platform:
+  - pc
+  theme: dos
+  emulators:
+    dosbox:
+      dosbox:
+        incompatible_extensions:
+        - .zip
+    dosbox_staging:
+      dosbox_staging:
+        incompatible_extensions:
+        - .zip
+    dosboxx:
+      dosbox-x:
+        incompatible_extensions:
+        - .zip
+    libretro:
+      dosbox_pure:
+        default: true

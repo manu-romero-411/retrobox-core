@@ -1,0 +1,18 @@
+emulator_name: eduke32
+sharedFeatures:
+  - powermode
+  - tdp
+  - videomode
+  - bezel
+  - bezel_stretch
+groups:
+  GENERAL:
+    items:
+      - name: SKIP INTRO VIDEOS
+        value: nologo
+        description: ""
+        choices:
+          - name: Skip
+            value: 1
+          - name: Show (Default)
+            value: 0

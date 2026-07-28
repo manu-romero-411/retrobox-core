@@ -1,0 +1,7 @@
+emulator_name: flatpak
+features:
+  - padtokeyboard
+sharedFeatures:
+  - powermode
+  - tdp
+  - videomode

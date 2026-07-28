@@ -1,0 +1,9 @@
+emulator_name: ecwolf
+features:
+  - padtokeyboard
+sharedFeatures:
+  - powermode
+  - tdp
+  - videomode
+  - bezel
+  - bezel_stretch

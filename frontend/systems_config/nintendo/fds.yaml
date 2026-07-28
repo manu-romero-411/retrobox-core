@@ -1,0 +1,20 @@
+fds:
+  fullname: Family Computer Disk System
+  manufacturer: Nintendo
+  release: 1986
+  hardware: console
+  path: /var/penguintb/juegos/roms/fds
+  extension:
+  - .fds
+  - .zip
+  - .7z
+  platform:
+  - fds
+  theme: fds
+  group: nes
+  emulators:
+    libretro:
+      fceumm:
+        default: true
+      mesen: mesen
+      nestopia: nestopia

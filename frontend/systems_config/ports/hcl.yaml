@@ -1,0 +1,16 @@
+hcl:
+  fullname: Hydra Castle Labyrinth
+  manufacturer: Ports
+  release: 2011
+  hardware: port
+  path: /var/penguintb/juegos/roms/hcl
+  extension:
+  - .game
+  platform:
+  - pc
+  theme: hcl
+  group: ports
+  emulators:
+    hcl:
+      hcl:
+        default: true

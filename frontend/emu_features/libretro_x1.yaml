@@ -1,0 +1,7 @@
+emulator_name: libretro
+core_name: x1
+features:
+  - padtokeyboard
+sharedFeatures:
+  - rewind
+  - autosave

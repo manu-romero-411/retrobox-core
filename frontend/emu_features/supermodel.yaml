@@ -1,0 +1,126 @@
+emulator_name: supermodel
+features:
+  - padtokeyboard
+sharedFeatures:
+  - powermode
+  - tdp
+  - videomode
+  - bezel
+  - bezel_stretch
+  - use_wheels
+  - wheel_rotation
+  - wheel_deadzone
+  - wheel_midzone
+groups:
+  ADVANCED OPTIONS:
+    items:
+      - name: 3D ENGINE
+        value: engine3D
+        description: Enable the legacy or the new 3D engine (choose legacy for older GPUs).
+        choices:
+          - name: Legacy3D
+            value: legacy3d
+          - name: New3D
+            value: new3d
+      - name: QUAD RENDERING
+        value: quadRendering
+        description: Enable proper quad rendering (for higher end systems).
+        choices:
+          - name: Off
+            value: 0
+          - name: On
+            value: 1
+      - name: CRT COLOUR
+        value: crt_colour
+        description: "CRT-like colour adaption. Requires New 3D engine."
+        choices:
+          - name: None (Default)
+            value: 0
+          - name: ARI/D93 (recommended for all JP developed games)
+            value: 1
+          - name: PVM_20M2U/D93
+            value: 2
+          - name: BT601_525/D93
+            value: 3
+          - name: BT601_525/D65 (recommended for all US developed games)
+            value: 4
+          - name: BT601_625/D65 (recommended for all EUR/AUS developed games)
+            value: 5
+      - name: ADJUST POWERPC FREQUENCY
+        value: ppcFreq
+        description: Change the speed of the emulated PowerPC chip (fixes some issues).
+        choices:
+          - name: 10
+            value: 10
+          - name: 20
+            value: 20
+          - name: 50
+            value: 30
+          - name: 40
+            value: 40
+          - name: 50 (Default)
+            value: 50
+          - name: 60
+            value: 60
+          - name: 70
+            value: 70
+          - name: 80
+            value: 80
+          - name: 90
+            value: 90
+          - name: 100
+            value: 100
+          - name: 110
+            value: 110
+          - name: 120
+            value: 120
+          - name: 130
+            value: 130
+          - name: 140
+            value: 140
+          - name: 150
+            value: 150
+  GENERAL:
+    items:
+      - name: WIDESCREEN HACK (GLITCHY)
+        value: m3_wideScreen
+        description: Enhancement. Only works with a 16/9 ratio and bezels disabled.
+        choices:
+          - name: Off
+            value: 0
+          - name: On
+            value: 1
+      - name: UPSCALE MODE
+        value: upscale_mode
+        description: Upscale filter used for the 2D layers. Requires New 3D engine.
+        choices:
+          - name: None/Sharp Pixels
+            value: 0
+          - name: Biquintic
+            value: 1
+          - name: Bilinear (Default)
+            value: 2
+          - name: Bicubic
+            value: 3
+      - name: RUMBLE
+        value: forceFeedback
+        description: Only some games feature rumble. Not compatible with all controllers.
+        choices:
+          - name: Off
+            value: 0
+          - name: On
+            value: 1
+  LIGHT GUN:
+    items:
+      - name: SHOW LIGHT GUN CROSSHAIRS
+        value: crosshairs
+        description: Enable crosshairs in shooting games for the selected players.
+        choices:
+          - name: None
+            value: 0
+          - name: P1 only
+            value: 1
+          - name: P2 only
+            value: 2
+          - name: "P1 & P2"
+            value: 3

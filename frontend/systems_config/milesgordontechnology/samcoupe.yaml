@@ -1,0 +1,26 @@
+samcoupe:
+  fullname: SAM Coupé
+  manufacturer: Miles Gordon Technology
+  release: 1989
+  hardware: computer
+  path: /var/penguintb/juegos/roms/samcoupe
+  extension:
+  - .cpm
+  - .dsk
+  - .sad
+  - .mgt
+  - .sdf
+  - .td0
+  - .sbt
+  - .zip
+  platform:
+  - samcoupe
+  theme: samcoupe
+  emulators:
+    libretro:
+      mame: mame
+    mame:
+      mame: mame
+    samcoupe:
+      samcoupe:
+        default: true

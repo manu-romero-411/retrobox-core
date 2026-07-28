@@ -1,0 +1,17 @@
+dxx-rebirth:
+  fullname: DXX Rebirth
+  manufacturer: Ports
+  release: 1998
+  hardware: port
+  path: /var/penguintb/juegos/roms/dxx-rebirth
+  extension:
+  - .d1x
+  - .d2x
+  platform:
+  - pc
+  theme: dxx-rebirth
+  group: ports
+  emulators:
+    dxx-rebirth:
+      dxx-rebirth:
+        default: true

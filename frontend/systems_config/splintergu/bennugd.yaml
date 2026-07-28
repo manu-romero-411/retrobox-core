@@ -1,0 +1,16 @@
+bennugd:
+  fullname: Bennu Game Development
+  manufacturer: SplinterGU
+  release: 2008
+  hardware: computer
+  path: /var/penguintb/juegos/roms/bennugd
+  extension:
+  - .dcb
+  - .dat
+  platform:
+  - pc
+  theme: bennugd
+  emulators:
+    libretro:
+      bennugd:
+        default: true

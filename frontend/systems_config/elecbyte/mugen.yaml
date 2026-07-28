@@ -1,0 +1,15 @@
+mugen:
+  fullname: MUGEN
+  manufacturer: Elecbyte
+  release: 1999
+  hardware: port
+  path: /var/penguintb/juegos/roms/mugen
+  extension:
+  - .pc
+  platform:
+  - mugen
+  theme: mugen
+  emulators:
+    mugen:
+      wine-tkg:
+        default: true

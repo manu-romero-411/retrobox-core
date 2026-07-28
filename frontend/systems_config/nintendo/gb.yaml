@@ -1,0 +1,20 @@
+gb:
+  fullname: Game Boy
+  manufacturer: Nintendo
+  release: 1989
+  hardware: portable
+  path: /var/penguintb/juegos/roms/gb
+  extension:
+  - .gb
+  - .zip
+  - .7z
+  platform:
+  - gb
+  theme: gb
+  emulators:
+    libretro:
+      gambatte:
+        default: true
+      mesen-s: mesen-s
+      mgba: mgba
+      vba-m: vba-m

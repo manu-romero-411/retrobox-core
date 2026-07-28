@@ -1,0 +1,36 @@
+msx2:
+  fullname: MSX2
+  manufacturer: Microslop
+  release: 1985
+  hardware: computer
+  path: /var/penguintb/juegos/roms/msx2
+  extension:
+  - .dsk
+  - .mx2
+  - .rom
+  - .zip
+  - .7z
+  - .cas
+  - .m3u
+  - .ogv
+  - .openmsx
+  platform:
+  - msx2
+  theme: msx2
+  emulators:
+    clk:
+      clk:
+        incompatible_extensions:
+        - .7z
+    libretro:
+      bluemsx:
+        default: true
+        incompatible_extensions:
+        - .openmsx
+      fmsx:
+        incompatible_extensions:
+        - .openmsx
+    openmsx:
+      openmsx:
+        incompatible_extensions:
+        - .m3u

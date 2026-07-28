@@ -1,0 +1,20 @@
+tvc:
+  fullname: Videoton TVC
+  manufacturer: Videoton
+  release: 1986
+  hardware: computer
+  path: /var/penguintb/juegos/roms/tvc
+  extension:
+  - .cas
+  - .tap
+  - .dsk
+  - .img
+  - .zip
+  platform:
+  - tvc
+  theme: tvc
+  emulators:
+    libretro:
+      mame: mame
+    mame:
+      mame: mame

@@ -1,0 +1,9 @@
+emulator_name: vkquake
+features:
+  - padtokeyboard
+sharedFeatures:
+  - powermode
+  - tdp
+  - videomode
+  - bezel
+  - bezel_stretch

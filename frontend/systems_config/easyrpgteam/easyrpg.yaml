@@ -1,0 +1,19 @@
+easyrpg:
+  fullname: EasyRPG
+  manufacturer: EasyRPG Team
+  release: 2000
+  hardware: port
+  path: /var/penguintb/juegos/roms/easyrpg
+  extension:
+  - .easyrpg
+  - .squashfs
+  - .zip
+  platform:
+  - easyrpg
+  theme: easyrpg
+  emulators:
+    easyrpg:
+      easyrpg:
+        default: true
+    libretro:
+      easyrpg: easyrpg

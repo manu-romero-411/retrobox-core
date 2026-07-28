@@ -1,0 +1,16 @@
+halflife:
+  fullname: Half-Life 1
+  manufacturer: Ports
+  release: 1998
+  hardware: port
+  path: /var/penguintb/juegos/roms/halflife
+  extension:
+  - .game
+  platform:
+  - pc
+  theme: halflife
+  group: ports
+  emulators:
+    xash3d_fwgs:
+      xash3d_fwgs:
+        default: true

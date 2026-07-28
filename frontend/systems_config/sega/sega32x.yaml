@@ -1,0 +1,22 @@
+sega32x:
+  fullname: 32x
+  manufacturer: Sega
+  release: 1994
+  hardware: console
+  path: /var/penguintb/juegos/roms/sega32x
+  extension:
+  - .32x
+  - .chd
+  - .smd
+  - .bin
+  - .md
+  - .zip
+  - .7z
+  platform:
+  - sega32x
+  theme: sega32x
+  group: megadrive
+  emulators:
+    libretro:
+      picodrive:
+        default: true

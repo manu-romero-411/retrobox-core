@@ -1,0 +1,70 @@
+emulator_name: vita3k
+sharedFeatures:
+  - powermode
+  - tdp
+  - videomode
+groups:
+  GENERAL:
+    items:
+      - name: GRAPHICS API
+        value: vita3k_gfxbackend
+        description: Choose which graphics API library to use.
+        choices:
+          - name: OpenGL
+            value: OpenGL
+          - name: Vulkan
+            value: Vulkan
+      - name: RENDERING RESOLUTION
+        value: vita3k_resolution
+        description: Enhancement. Increase the rendering resolution. Makes 3D objects clearer.
+        choices:
+          - name: 1x (960x544)
+            value: 1
+          - name: 2x (1920x1088)
+            value: 2
+          - name: 3x (2880x1632)
+            value: 3
+          - name: 4x (3840x2176)
+            value: 4
+          - name: 5x (4800x2720)
+            value: 5
+          - name: 6x (5760x3264)
+            value: 6
+          - name: 7x (6720x3808)
+            value: 7
+          - name: 8x (7680x4352)
+            value: 8
+      - name: DISABLE SURFACE SYNC
+        value: vita3k_surface
+        description: "Speed hack, enable to disable surface syncing between CPU and GPU. Surface syncing is needed by a few games."
+        preset: switchauto
+      - name: LINEAR FILTERING
+        value: vita3k_linear
+        description: The image will be softer which could help with aliasing.
+        preset: switchauto
+      - name: FXAA
+        value: vita3k_fxaa
+        description: "Anti-aliasing is a technique for smoothing out jagged edges."
+        preset: switchauto
+      - name: VSYNC
+        value: vita3k_vsync
+        description: Fix screen tearing.
+        preset: switchauto
+      - name: ANISOTROPIC FILTERING
+        value: vita3k_anisotropic
+        description: Improves clarity of distant textures.
+        choices:
+          - name: 1x
+            value: 1
+          - name: 2x
+            value: 2
+          - name: 4x
+            value: 4
+          - name: 8x
+            value: 8
+          - name: 16x
+            value: 16
+      - name: SHOW POINTER
+        value: vita3k_show_pointer
+        description: You can hide the pointer on touchscreen devices.
+        preset: switchauto

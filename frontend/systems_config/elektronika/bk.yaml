@@ -1,0 +1,21 @@
+bk:
+  fullname: Elektronika BK
+  manufacturer: Elektronika
+  release: 1985
+  hardware: computer
+  path: /var/penguintb/juegos/roms/bk
+  extension:
+  - .bin
+  - .img
+  - .dsk
+  - .bkd
+  - .zip
+  - .7z
+  platform:
+  - bk
+  theme: bk
+  emulators:
+    libretro:
+      mame: mame
+    mame:
+      mame: mame

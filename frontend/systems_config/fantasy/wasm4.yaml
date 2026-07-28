@@ -1,0 +1,15 @@
+wasm4:
+  fullname: wasm4
+  manufacturer: Fantasy
+  release: 2021
+  hardware: console
+  path: /var/penguintb/juegos/roms/wasm4
+  extension:
+  - .wasm
+  platform:
+  - wasm4
+  theme: wasm4
+  emulators:
+    libretro:
+      wasm4:
+        default: true

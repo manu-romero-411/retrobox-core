@@ -1,0 +1,17 @@
+ports:
+  fullname: Ports
+  manufacturer: Ports
+  release: None
+  hardware: port
+  path: /var/penguintb/juegos/roms/ports
+  extension:
+  - .sh
+  - .squashfs
+  platform:
+  - pc
+  theme: ports
+  group: ports
+  emulators:
+    sh:
+      sh:
+        default: true

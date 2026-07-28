@@ -1,0 +1,17 @@
+ngp:
+  fullname: Neo-Geo Pocket
+  manufacturer: SNK
+  release: 1998
+  hardware: portable
+  path: /var/penguintb/juegos/roms/ngp
+  extension:
+  - .ngp
+  - .zip
+  - .7z
+  platform:
+  - ngp
+  theme: ngp
+  emulators:
+    libretro:
+      mednafen_ngp:
+        default: true

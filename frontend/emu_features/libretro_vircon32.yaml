@@ -1,0 +1,8 @@
+emulator_name: libretro
+core_name: vircon32
+features:
+  - netplay
+  - padtokeyboard
+sharedFeatures:
+  - rewind
+  - autosave

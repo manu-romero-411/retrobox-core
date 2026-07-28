@@ -1,0 +1,30 @@
+enterprise:
+  fullname: Enterprise
+  manufacturer: Enterprise Computers
+  release: 1985
+  hardware: computer
+  path: /var/penguintb/juegos/roms/enterprise
+  extension:
+  - .bas
+  - .com
+  - .zip
+  - .img
+  - .dsk
+  - .tap
+  - .dtf
+  - .trn
+  - '.128'
+  - .cas
+  - .cdt
+  - .tzx
+  platform:
+  - enterprise
+  theme: enterprise
+  emulators:
+    clk:
+      clk:
+        default: true
+    libretro:
+      mame: mame
+    mame:
+      mame: mame

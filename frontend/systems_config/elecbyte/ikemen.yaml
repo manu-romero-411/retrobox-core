@@ -1,0 +1,16 @@
+ikemen:
+  fullname: IKEMEN
+  manufacturer: Elecbyte
+  release: 2021
+  hardware: port
+  path: /var/penguintb/juegos/roms/ikemen
+  extension:
+  - .ikemen
+  - .pc
+  platform:
+  - ikemen
+  theme: ikemen
+  emulators:
+    ikemen:
+      ikemen:
+        default: true

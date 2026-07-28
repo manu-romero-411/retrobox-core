@@ -1,0 +1,27 @@
+x68000:
+  fullname: Sharp X68000
+  manufacturer: Sharp
+  release: 1987
+  hardware: computer
+  path: /var/penguintb/juegos/roms/x68000
+  extension:
+  - .dim
+  - .img
+  - .d88
+  - .88d
+  - .hdm
+  - .dup
+  - .2hd
+  - .xdf
+  - .hdf
+  - .cmd
+  - .m3u
+  - .zip
+  - .7z
+  platform:
+  - x68000
+  theme: x68000
+  emulators:
+    libretro:
+      px68k:
+        default: true
