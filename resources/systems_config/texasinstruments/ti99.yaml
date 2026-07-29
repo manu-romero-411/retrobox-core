@@ -1,0 +1,23 @@
+ti99:
+  fullname: TI-99
+  manufacturer: Texas Instruments
+  release: 1981
+  hardware: computer
+  path: /var/penguintb/juegos/roms/ti99
+  extension:
+  - .rpk
+  - .wav
+  - .zip
+  - .7z
+  platform:
+  - ti99
+  theme: ti99
+  emulators:
+    libretro:
+      cores:
+        mame: {}
+    mame:
+      cores:
+        mame:
+          default: true
+  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

@@ -1,0 +1,23 @@
+jaguarcd:
+  fullname: Jaguar CD
+  manufacturer: Atari
+  release: 1995
+  hardware: console
+  path: /var/penguintb/juegos/roms/jaguarcd
+  extension:
+  - .cue
+  - .cdi
+  - .bigpimg
+  platform:
+  - jaguar
+  theme: atarijaguarcd
+  group: jaguar
+  emulators:
+    bigpemu:
+      cores:
+        bigpemu:
+          default: true
+    libretro:
+      cores:
+        virtualjaguar: {}
+  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

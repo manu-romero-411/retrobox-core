@@ -1,6 +1,0 @@
-#!/bin/bash
-
-for i in steam lutris heroic; do
-    mkdir -p ${USERDATA}/roms/_scrap_backups/"$i"
-    cp ${USERDATA}/roms/"$i"/images/*thumb.png  ${USERDATA}/roms/_scrap_backups/"$i"
-done

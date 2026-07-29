@@ -1,0 +1,18 @@
+jkdf2:
+  fullname: Jedi Knight - Dark Forces 2
+  manufacturer: Ports
+  release: 1993
+  hardware: port
+  path: /var/penguintb/juegos/roms/jkdf2
+  extension:
+  - .jedi
+  platform:
+  - pc
+  theme: jkdf2
+  group: ports
+  emulators:
+    openjkdf2:
+      cores:
+        openjkdf2:
+          default: true
+  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

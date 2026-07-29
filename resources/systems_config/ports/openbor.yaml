@@ -1,0 +1,20 @@
+openbor:
+  fullname: OpenBOR
+  manufacturer: Ports
+  release: None
+  hardware: port
+  path: /var/penguintb/juegos/roms/openbor
+  extension:
+  - .pak
+  platform:
+  - openbor
+  theme: openbor
+  emulators:
+    openbor:
+      cores:
+        openbor4432: {}
+        openbor6412:
+          default: true
+        openbor7142: {}
+        openbor7530: {}
+  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

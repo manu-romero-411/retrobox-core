@@ -1,0 +1,24 @@
+pdp1:
+  fullname: PDP-1
+  manufacturer: Digital Equipment Corporation
+  release: 1961
+  hardware: computer
+  path: /var/penguintb/juegos/roms/pdp1
+  extension:
+  - .zip
+  - .7z
+  - .tap
+  - .rim
+  - .drm
+  platform:
+  - pdp1
+  theme: pdp1
+  emulators:
+    libretro:
+      cores:
+        mame: {}
+    mame:
+      cores:
+        mame:
+          default: true
+  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

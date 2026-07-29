@@ -1,0 +1,24 @@
+camplynx:
+  fullname: Camputers Lynx
+  manufacturer: Camputers
+  release: 1983
+  hardware: computer
+  path: /var/penguintb/juegos/roms/camplynx
+  extension:
+  - .wav
+  - .tap
+  - .ldf
+  - .zip
+  - .7z
+  platform:
+  - camplynx
+  theme: camplynx
+  emulators:
+    libretro:
+      cores:
+        mame: {}
+    mame:
+      cores:
+        mame:
+          default: true
+  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

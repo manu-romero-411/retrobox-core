@@ -1,0 +1,23 @@
+gamegear:
+  fullname: Game Gear
+  manufacturer: Sega
+  release: 1990
+  hardware: portable
+  path: /var/penguintb/juegos/roms/gamegear
+  extension:
+  - .bin
+  - .gg
+  - .zip
+  - .7z
+  platform:
+  - gamegear
+  theme: gamegear
+  emulators:
+    libretro:
+      cores:
+        gearsystem: {}
+        genesisplusgx:
+          default: true
+        picodrive: {}
+        smsplus: {}
+  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

@@ -1,0 +1,23 @@
+pv2000:
+  fullname: PV-2000
+  manufacturer: Casio
+  release: 1983
+  hardware: console
+  path: /var/penguintb/juegos/roms/pv2000
+  extension:
+  - .bin
+  - .cas
+  - .zip
+  - .7z
+  platform:
+  - pv2000
+  theme: pv2000
+  emulators:
+    libretro:
+      cores:
+        mame:
+          default: true
+    mame:
+      cores:
+        mame: {}
+  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

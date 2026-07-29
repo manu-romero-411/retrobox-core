@@ -1,0 +1,18 @@
+odcommander:
+  fullname: OD-Commander
+  manufacturer: Ports
+  release: 2022
+  hardware: port
+  path: /var/penguintb/juegos/roms/odcommander
+  extension:
+  - .odc
+  platform:
+  - odcommander
+  theme: odcommander
+  group: ports
+  emulators:
+    odcommander:
+      cores:
+        odcommander:
+          default: true
+  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

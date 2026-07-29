@@ -1,0 +1,18 @@
+lutris:
+  fullname: Lutris
+  group: pcgames
+  manufacturer: Lutris
+  release: 2013
+  hardware: None
+  path: ../roms/lutris
+  extension:
+  - .lynx
+  platform:
+  - windows
+  theme: lutris
+  emulators:
+    lutris:
+      cores:
+        lutris:
+          default: true
+  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

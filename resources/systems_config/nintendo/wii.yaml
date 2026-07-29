@@ -1,0 +1,30 @@
+wii:
+  fullname: Wii
+  manufacturer: Nintendo
+  release: 2006
+  hardware: console
+  path: /var/penguintb/juegos/roms/wii
+  extension:
+  - .gcm
+  - .iso
+  - .gcz
+  - .ciso
+  - .wbfs
+  - .wad
+  - .rvz
+  - .elf
+  - .dol
+  - .m3u
+  - .json
+  platform:
+  - wii
+  theme: wii
+  emulators:
+    dolphin:
+      cores:
+        dolphin:
+          default: true
+    libretro:
+      cores:
+        dolphin: {}
+  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

@@ -1,0 +1,25 @@
+triforce:
+  fullname: Triforce
+  manufacturer: Namco, Sega, Nintendo
+  release: 2003
+  hardware: arcade
+  path: /var/penguintb/juegos/roms/triforce
+  extension:
+  - .gcm
+  - .iso
+  - .gcz
+  - .ciso
+  - .wbfs
+  - .elf
+  - .dol
+  - .m3u
+  platform:
+  - triforce
+  - arcade
+  theme: triforce
+  emulators:
+    dolphin:
+      cores:
+        dolphin:
+          default: true
+  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

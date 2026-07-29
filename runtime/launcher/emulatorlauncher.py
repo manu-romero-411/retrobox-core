@@ -327,7 +327,7 @@ def getHudBezel(system: Emulator, generator: Generator, rom: Path, gameResolutio
     else:
         _logger.debug("hud enabled. trying to apply the bezel %s", bezel)
 
-        bz_infos = bezelsUtil.getBezelInfos(rom, bezel, system.name, system.config.emulator)
+        bz_infos = bezelsUtil.get_bezel_infos(rom, bezel, system.name, system.config.emulator)
         if bz_infos is None:
             _logger.debug("no bezel info file found")
             return None
@@ -654,8 +654,6 @@ def run_command(command: Command) -> int:
             exitcode = proc.returncode
 
             if err is not None:
-                with open("/tmp/retrobox_launcher_stderr.log", "wb") as f:
-                    f.write(err)
                 _logger.error(err.decode(errors='backslashreplace'))
 
             if out is not None:

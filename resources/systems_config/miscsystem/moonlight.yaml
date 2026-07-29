@@ -1,0 +1,17 @@
+moonlight:
+  fullname: Moonlight
+  manufacturer: Misc. System
+  release: None
+  hardware: system
+  path: /var/penguintb/juegos/roms/moonlight
+  extension:
+  - .moonlight
+  platform:
+  - moonlight
+  theme: moonlight
+  emulators:
+    moonlight:
+      cores:
+        moonlight:
+          default: true
+  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

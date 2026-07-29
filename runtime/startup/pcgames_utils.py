@@ -1,6 +1,5 @@
 import json
 import logging
-import os
 import re
 import sqlite3
 from pathlib import Path
@@ -36,7 +35,7 @@ def _load_json(path: Path):
     try:
         return json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
-        _logger.debug("No se pudo leer %s: %s", path, exc)
+        _logger.debug("Couldn't read %s: %s", path, exc)
         return None
 
 def _vdf_get(texto: str, clave: str) -> str:
@@ -44,20 +43,23 @@ def _vdf_get(texto: str, clave: str) -> str:
     return match.group(1) if match else ""
 
 def _clear_pcgame_links(system_dir: Path, ext: str) -> None:
+    _logger.info("Deleting %s links for clean import: %s", ext, system_dir)
+
     if not system_dir.is_dir():
-        return None
+        return
     for f in system_dir.glob(f"*.{ext}"):
         f.unlink(missing_ok=True)
+    return
 
 def lutris_es_sync(target: Path):
     """Escanea los juegos instalados en Lutris (vía su base SQLite) y genera
     un .lynx por cada uno en `destino`."""
     lutris_db = next((c for c in _LUTRIS_DB_CANDIDATES if c.is_file()), None)
     if lutris_db is None:
-        _logger.debug("No se encontró la base de datos de Lutris en: %s", _LUTRIS_DB_CANDIDATES)
+        _logger.debug("lutris database not found at: %s", _LUTRIS_DB_CANDIDATES)
         return 0
 
-    _logger.debug("Base de datos encontrada: %s", lutris_db)
+    _logger.debug("Database found: %s", lutris_db)
 
     target.mkdir(parents=True, exist_ok=True)
     _clear_pcgame_links(target, "lynx")
@@ -81,17 +83,17 @@ def lutris_es_sync(target: Path):
         _logger.debug("[%s] %s.lynx -> %s", runner or "sin runner", name_clean, link)
         total += 1
 
-    _logger.info("%d archivo(s) .lynx generados en %s", total, target)
+    _logger.info("%d lutris launchers generated at %s", total, target)
 
 def steam_es_sync(target: Path) -> int:
     """Escanea los juegos instalados en Steam (todas las bibliotecas) y genera
     un .steam por cada uno en `destino`. Devuelve el número de ficheros generados."""
     steam_root = next((r for r in _STEAM_ROOTS if (r / "steamapps").is_dir()), None)
     if steam_root is None:
-        _logger.debug("No se encontró ninguna instalación de Steam en: %s", _STEAM_ROOTS)
+        _logger.debug("Steam installation not found at: %s", _STEAM_ROOTS)
         return 0
 
-    _logger.debug("Steam encontrado en: %s", steam_root)
+    _logger.debug("Steam found at: %s", steam_root)
     _clear_pcgame_links(target, "steam")
 
     library_vdf = next(
@@ -99,10 +101,10 @@ def steam_es_sync(target: Path) -> int:
         None,
     )
     if library_vdf is None:
-        _logger.debug("No se encontró el archivo de bibliotecas (libraryfolders.vdf / libraryfolder.vdf)")
+        _logger.debug("Couldn't find steam library files (libraryfolders.vdf / libraryfolder.vdf)")
         return 0
 
-    _logger.debug("Bibliotecas leídas desde: %s", library_vdf)
+    _logger.debug("steam library read from: %s", library_vdf)
 
     library_paths = [
         Path(p)
@@ -145,7 +147,7 @@ def steam_es_sync(target: Path) -> int:
                 continue
 
             if _SKIP_NAME_RE.search(name):
-                _logger.debug("Saltando herramienta: %s (appid: %s)", name, appid)
+                _logger.debug("Skipping: %s (appid: %s)", name, appid)
                 continue
 
             clean_name = _clear_name(name)
@@ -159,10 +161,10 @@ def steam_es_sync(target: Path) -> int:
             total += 1
 
         if games_in_lib == 0:
-            _logger.info("No se encontraron juegos instalados en esta biblioteca: %s", steamapps_dir)
+            _logger.info("No steam games found in: %s", steamapps_dir)
 
     _logger.info(
-        "%d archivo(s) .steam generados en %s (%d biblioteca(s) escaneada(s))",
+        "%d steam launchers generated at %s (%d scanned libraries)",
         total, target, found_libs,
     )
     return total
@@ -187,7 +189,7 @@ def heroic_es_sync(target: Path) -> int:
             _write_heroic_link(target, titulo, app_name, "legendary")
             total += 1
     else:
-        _logger.info("No se encontró: %s", _EPIC_JSON)
+        _logger.info("Not found: %s", _EPIC_JSON)
  
     # GOG
     data = _load_json(_GOG_JSON)
@@ -201,7 +203,7 @@ def heroic_es_sync(target: Path) -> int:
             _write_heroic_link(target, titulo, app_name, "gog")
             total += 1
     else:
-        _logger.info("No se encontró: %s", _GOG_JSON)
+        _logger.info("Not found: %s", _GOG_JSON)
  
     # Sideload / apps externas
     data = _load_json(_HEROIC_SIDELOAD_JSON)
@@ -214,8 +216,8 @@ def heroic_es_sync(target: Path) -> int:
             _write_heroic_link(target, titulo, app_name, "sideload")
             total += 1
     else:
-        _logger.info("No se encontró: %s", _HEROIC_SIDELOAD_JSON)
+        _logger.info("Not found: %s", _HEROIC_SIDELOAD_JSON)
  
-    _logger.info("%d archivo(s) .heroic generados en %s", total, target)
+    _logger.info("%d Heroic launchers generated at %s", total, target)
     return total
  

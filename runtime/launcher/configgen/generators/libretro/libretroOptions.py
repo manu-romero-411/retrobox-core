@@ -152,7 +152,7 @@ def _mednafen_wswan_options(
     if (rotate_display := system.config.get('wswan_rotate_display')) is not system.config.MISSING:
         wswanOrientation = rotate_display
     else:
-        wswanGameRotation = videoMode.getAltDecoration(system.name, rom, 'retroarch')
+        wswanGameRotation = videoMode.get_alt_decoration(system.name, rom, 'retroarch')
         wswanOrientation = "portrait" if wswanGameRotation == "90" else "manual"
 
     _set(coreSettings, 'wswan_rotate_display', wswanOrientation)

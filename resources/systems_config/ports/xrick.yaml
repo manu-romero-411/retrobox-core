@@ -1,0 +1,18 @@
+xrick:
+  fullname: xrick
+  manufacturer: Ports
+  release: None
+  hardware: port
+  path: /var/penguintb/juegos/roms/xrick
+  extension:
+  - .zip
+  platform:
+  - pc
+  theme: xrick
+  group: ports
+  emulators:
+    libretro:
+      cores:
+        xrick:
+          default: true
+  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

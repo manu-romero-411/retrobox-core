@@ -1,0 +1,23 @@
+vgmplay:
+  fullname: Video Game Music Player
+  manufacturer: Various
+  release: 1980
+  hardware: computer
+  path: /var/penguintb/juegos/roms/vgmplay
+  extension:
+  - .vgm
+  - .vgz
+  - .zip
+  - .7z
+  platform:
+  - vgmplay
+  theme: vgmplay
+  emulators:
+    libretro:
+      cores:
+        mame: {}
+    mame:
+      cores:
+        mame:
+          default: true
+  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

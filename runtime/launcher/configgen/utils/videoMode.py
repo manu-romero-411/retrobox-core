@@ -222,7 +222,7 @@ def getGLVendor() -> str:
     except Exception:
         return "unknown"
 
-def getAltDecoration(systemName: str, rom: str | Path, emulator: str) -> str:
+def get_alt_decoration(systemName: str, rom: str | Path, emulator: str) -> str:
     # Returns an ID for games that need rotated bezels/shaders or have special art
     # Vectrex will actually return an abbreviated game name for overlays, all others will return 0, 90, or 270 for rotation angle
     # 0 will be ignored.

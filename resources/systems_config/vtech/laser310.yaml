@@ -1,0 +1,24 @@
+laser310:
+  fullname: Laser 310
+  manufacturer: VTech
+  release: 1984
+  hardware: computer
+  path: /var/penguintb/juegos/roms/laser310
+  extension:
+  - .vz
+  - .wav
+  - .cas
+  - .zip
+  - .7z
+  platform:
+  - laser310
+  theme: laser310
+  emulators:
+    libretro:
+      cores:
+        mame: {}
+    mame:
+      cores:
+        mame:
+          default: true
+  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

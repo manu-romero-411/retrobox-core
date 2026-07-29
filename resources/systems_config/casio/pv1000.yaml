@@ -1,0 +1,22 @@
+pv1000:
+  fullname: PV-1000
+  manufacturer: Casio
+  release: 1983
+  hardware: console
+  path: /var/penguintb/juegos/roms/pv1000
+  extension:
+  - .bin
+  - .zip
+  - .7z
+  platform:
+  - pv1000
+  theme: pv1000
+  emulators:
+    libretro:
+      cores:
+        mame: {}
+    mame:
+      cores:
+        mame:
+          default: true
+  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

@@ -72,18 +72,18 @@ class Pcsx2Generator(Generator):
         return 4/3
 
     @staticmethod
-    def isPlayingWithWheel(system: Emulator, wheels: DeviceInfoMapping):
+    def is_playing_with_wheel(system: Emulator, wheels: DeviceInfoMapping):
         return bool(system.config.use_wheels and wheels)
 
     @staticmethod
-    def useEmulatorWheels(playingWithWheel: bool, wheel_type: str):
+    def use_emulator_wheels(playingWithWheel: bool, wheel_type: str):
         if playingWithWheel is False:
             return False
         # the virtual type is the virtual wheel that use a physical wheel to manipulate the pad
         return wheel_type != "Virtual"
 
     @staticmethod
-    def getWheelType(metadata: Mapping[str, str], playingWithWheel: bool, config: SystemConfig):
+    def get_wheel_type(metadata: Mapping[str, str], playingWithWheel: bool, config: SystemConfig):
         wheel_type = "Virtual"
         if playingWithWheel is False:
             return wheel_type
@@ -96,7 +96,7 @@ class Pcsx2Generator(Generator):
         return wheel_type
 
     def generate(self, system, rom, playersControllers, metadata, guns, wheels, gameResolution):
-        pcsx2Patches = _PCSX2_BIOS / "patches.zip"
+        pcsx2_patches = _PCSX2_BIOS / "patches.zip"
 
         # Remove older config files if present
         inisDir = _PCSX2_CFGDIR / "inis"
@@ -106,11 +106,21 @@ class Pcsx2Generator(Generator):
             if file_path.exists():
                 file_path.unlink()
 
-        playingWithWheel = Pcsx2Generator.isPlayingWithWheel(system, wheels)
+        playing_with_wheel = Pcsx2Generator.is_playing_with_wheel(system, wheels)
 
         # Config files
         #configureReg(_PCSX2_CONFIG)
-        configureINI(_PCSX2_CFGDIR, _PCSX2_BIOS, system, rom, playersControllers, metadata, guns, wheels, playingWithWheel)
+        configureINI(
+            _PCSX2_CFGDIR,
+            _PCSX2_BIOS,
+            system,
+            rom,
+            playersControllers,
+            metadata,
+            guns,
+            wheels,
+            playing_with_wheel
+        )
         #configureAudio(_PCSX2_CONFIG)
 
         # write our own game_controller_db.txt file before launching the game
@@ -121,10 +131,10 @@ class Pcsx2Generator(Generator):
         args = []
         if not configure_emulator(rom):
             args = ["-nogui", "-batch", "-fullscreen", str(rom)]
-        
-        with Path("/proc/cpuinfo").open() as cpuinfo:
+
+        with Path("/proc/cpuinfo").open(encoding="utf8") as cpuinfo:
             if not re.search(r'^flags\s*:.*\ssse4_1\W', cpuinfo.read(), re.MULTILINE):
-                _logger.warning("CPU does not support SSE4.1 which is required by pcsx2.  The emulator will likely crash with SIGILL (illegal instruction).")
+                raise RetroboxException("CPU does not support SSE4.1, which is required by pcsx2.")
 
         envcmd: dict[str, str | Path] = {
             "XDG_CONFIG_HOME": _PCSX2_XDG
@@ -132,17 +142,17 @@ class Pcsx2Generator(Generator):
 
         # wheels won't work correctly when SDL_GAMECONTROLLERCONFIG is set. excluding wheels from SDL_GAMECONTROLLERCONFIG doesn't fix too.
         # wheel metadata
-        if not Pcsx2Generator.useEmulatorWheels(playingWithWheel, Pcsx2Generator.getWheelType(metadata, playingWithWheel, system.config)):
-            envcmd["SDL_GAMECONTROLLERCONFIG"] = generate_sdl_game_controller_config(playersControllers)
+        if not Pcsx2Generator.use_emulator_wheels(
+            playing_with_wheel,
+            Pcsx2Generator.get_wheel_type(metadata, playing_with_wheel, system.config)
+        ):
+            envcmd["SDL_GAMECONTROLLERCONFIG"] = \
+                generate_sdl_game_controller_config(playersControllers)
 
         # ensure we have the patches.zip file to avoid message.
-        mkdir_if_not_exists(pcsx2Patches.parent)
-        if not pcsx2Patches.exists():
-            patch_src = DATAINIT_DIR / "bios" / "ps2" / "patches.zip"
-            if patch_src.exists():
-                shutil.copy(patch_src, pcsx2Patches)
-            else:
-                _logger.debug("patches.zip not found in datainit, skipping")
+        mkdir_if_not_exists(pcsx2_patches.parent)
+        if not pcsx2_patches.exists():
+            _logger.debug("patches.zip not found in %s, skipping", pcsx2_patches)
 
         # state_slot option
         if state_filename := system.config.get('state_filename'):
@@ -153,7 +163,7 @@ class Pcsx2Generator(Generator):
         #_logger.warning("DEBUG pcsx2 command: %s env: %s", commandArray, envcmd)
 
         command_wrapper = [generate_bash_wrapper(system.config.emulator, PCSX2_BIN, args)]
-        
+
         comm = Command.Command(
             array=command_wrapper,
             env=envcmd
@@ -570,9 +580,9 @@ def configureINI(config_directory: Path, bios_directory: Path, system: Emulator,
                 target_file_path.unlink()
 
     # wheels
-    wtype = Pcsx2Generator.getWheelType(metadata, playingWithWheel, system.config)
+    wtype = Pcsx2Generator.get_wheel_type(metadata, playingWithWheel, system.config)
     _logger.info("PS2 wheel type is %s", wtype)
-    if Pcsx2Generator.useEmulatorWheels(playingWithWheel, wtype) and wheels:
+    if Pcsx2Generator.use_emulator_wheels(playingWithWheel, wtype) and wheels:
         wheelMapping = {
             "DrivingForcePro": {
                 "up":       "Pad_DPadUp",
@@ -619,7 +629,7 @@ def configureINI(config_directory: Path, bios_directory: Path, system: Emulator,
                     pcsx2INIConfig.add_section(f"USB{usbx}")
                 pcsx2INIConfig.set(f"USB{usbx}", "Type", "Pad")
 
-                wheel_type = Pcsx2Generator.getWheelType(metadata, playingWithWheel, system.config)
+                wheel_type = Pcsx2Generator.get_wheel_type(metadata, playingWithWheel, system.config)
                 pcsx2INIConfig.set(f"USB{usbx}", "Pad_subtype", Pcsx2Generator.wheelTypeMapping[wheel_type])
 
                 if pad.physical_device_path is not None: # ffb on the real wheel

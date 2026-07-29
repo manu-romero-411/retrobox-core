@@ -52,23 +52,6 @@
 		<region>wr</region>
 	</game>
 	<game>
-		<path>./crunchyroll.webapp</path>
-		<name>Crunchyroll</name>
-		<desc>Plataforma especializada en anime, manga y dorama con el mayor catálogo de animación japonesa en streaming del mundo.</desc>
-		<genre>Streaming</genre>
-		<image>./app-icons/crunchyroll.png</image>
-		<marquee>./app-icons/crunchyroll.png</marquee>
-		<rating>0</rating>
-		<releasedate>20060514T000000</releasedate>
-		<developer>Sony Pictures Entertainment</developer>
-		<publisher>Sony Pictures Entertainment</publisher>
-		<playcount />
-		<lastplayed />
-		<gametime />
-		<lang>es</lang>
-		<region>wr</region>
-	</game>
-	<game>
 		<path>./kodi.kodi</path>
 		<name>Kodi</name>
 		<desc>Centro multimedia de código abierto para reproducir vídeo, música, imágenes y podcasts desde cualquier fuente local o en red.</desc>
@@ -137,23 +120,6 @@
 		<region>wr</region>
 	</game>
 	<game>
-		<path>./rtve_play.webapp</path>
-		<name>RTVE Play</name>
-		<desc>Servicio de streaming gratuito de Radio Televisión Española con acceso a series, películas, noticias y contenido en directo.</desc>
-		<genre>Streaming</genre>
-		<image>./app-icons/rtve_play.png</image>
-		<marquee>./app-icons/rtve_play.png</marquee>
-		<rating>0</rating>
-		<releasedate>20110101T000000</releasedate>
-		<developer>RTVE</developer>
-		<publisher>RTVE</publisher>
-		<playcount>1</playcount>
-		<lastplayed>20260619T195451</lastplayed>
-		<gametime>54</gametime>
-		<lang>es</lang>
-		<region>wr</region>
-	</game>
-	<game>
 		<path>./twitch.webapp</path>
 		<name>Twitch</name>
 		<desc>Plataforma líder de streaming en directo, centrada en videojuegos, esports y contenido creativo.</desc>
@@ -184,6 +150,40 @@
 		<playcount>6</playcount>
 		<lastplayed>20260723T210509</lastplayed>
 		<gametime>3141</gametime>
+		<lang>es</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./crunchyroll.webapp</path>
+		<name>Crunchyroll</name>
+		<desc>Plataforma especializada en anime, manga y dorama con el mayor catálogo de animación japonesa en streaming del mundo.</desc>
+		<genre>Streaming</genre>
+		<image>./app-icons/crunchyroll.png</image>
+		<marquee>./app-icons/crunchyroll.png</marquee>
+		<rating>0</rating>
+		<releasedate>20060514T000000</releasedate>
+		<developer>Sony Pictures Entertainment</developer>
+		<publisher>Sony Pictures Entertainment</publisher>
+		<playcount>1</playcount>
+		<lastplayed>20260729T145334</lastplayed>
+		<gametime>38</gametime>
+		<lang>es</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./rtve_play.webapp</path>
+		<name>RTVE Play</name>
+		<desc>Servicio de streaming gratuito de Radio Televisión Española con acceso a series, películas, noticias y contenido en directo.</desc>
+		<genre>Streaming</genre>
+		<image>./app-icons/rtve_play.png</image>
+		<marquee>./app-icons/rtve_play.png</marquee>
+		<rating>0</rating>
+		<releasedate>20110101T000000</releasedate>
+		<developer>RTVE</developer>
+		<publisher>RTVE</publisher>
+		<playcount>2</playcount>
+		<lastplayed>20260729T150132</lastplayed>
+		<gametime>202</gametime>
 		<lang>es</lang>
 		<region>wr</region>
 	</game>

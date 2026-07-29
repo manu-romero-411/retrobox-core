@@ -1,0 +1,21 @@
+gb2players:
+  fullname: Game Boy (2 players)
+  manufacturer: Nintendo
+  release: 1989
+  hardware: portable
+  path: /var/penguintb/juegos/roms/gb2players
+  extension:
+  - .gb
+  - .gb2
+  - .gbc2
+  - .zip
+  - .7z
+  platform:
+  - gb
+  theme: gb2players
+  emulators:
+    libretro:
+      cores:
+        tgbdual:
+          default: true
+  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

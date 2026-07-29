@@ -1,0 +1,18 @@
+theforceengine:
+  fullname: The Force Engine
+  manufacturer: Ports
+  release: 1995
+  hardware: port
+  path: /var/penguintb/juegos/roms/theforceengine
+  extension:
+  - .tfe
+  platform:
+  - pc
+  theme: theforceengine
+  group: ports
+  emulators:
+    theforceengine:
+      cores:
+        theforceengine:
+          default: true
+  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

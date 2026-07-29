@@ -22,8 +22,9 @@ logging.basicConfig(
 _logger = logging.getLogger(__name__)
 
 from runtime.retrobox_paths import (
-    _ES_SYSTEMS_DIR,
+    _SYSTEMS_CONF_DIR,
     ES_SYSTEMS_CFG,
+    ES_SYSTEMS_TMP,
     ROMS,
     USERDATA
 )
@@ -59,7 +60,8 @@ def _build_core_attributes(core_props):
     return core_attrs
 
 def _append_emulator_nodes(parent_elem, emulators_data):
-    """Procesa y añade los nodos de emuladores y sus respectivos cores."""
+    """Procesa y añade los nodos de emuladores y sus 
+    respectivos cores ignorando las opciones internas."""
     if not isinstance(emulators_data, dict):
         return
 
@@ -69,17 +71,38 @@ def _append_emulator_nodes(parent_elem, emulators_data):
         if not isinstance(emu_data, dict):
             continue
 
-        for core_name, core_props in emu_data.items():
+        # Buscamos la sección de cores de forma segura
+        cores_data = emu_data.get("cores", {})
+        if not isinstance(cores_data, dict):
+            continue
+
+        for core_name, core_props in cores_data.items():
+            # core_props puede contener 'default', 'incompatible_extensions' y 'options'
             core_attrs = _build_core_attributes(core_props)
             core_elem = ET.SubElement(emulator_elem, "core", **core_attrs)
             core_elem.text = core_name
 
-def generate_es_systems(base_path: Path = _ES_SYSTEMS_DIR, output_path: Path = ES_SYSTEMS_CFG):
+def generate_es_systems(base_path: Path = _SYSTEMS_CONF_DIR, output_path: Path = ES_SYSTEMS_TMP):
     """
     Recorre la estructura de directorios YAML generada y reconstruye 
     el archivo es_systems.cfg original.
     """
-    _logger.info("Start generating %s", output_path)
+    if not os.path.exists(base_path):
+        raise FileNotFoundError(f"Systems dir not found: {base_path}")
+
+    if not os.path.isdir(base_path):
+        raise NotADirectoryError(f"Systems dir isn't a directory: {base_path}")
+
+
+    _logger.info("Begin generating %s", output_path)
+
+    if output_path.exists():
+        output_path.unlink()
+
+    if output_path != ES_SYSTEMS_CFG and \
+    (ES_SYSTEMS_CFG.exists() or ES_SYSTEMS_CFG.is_symlink()):
+        ES_SYSTEMS_CFG.unlink()
+
     base_dir: str = str(base_path)
     output_cfg_file: str = str(output_path)
 
@@ -90,7 +113,7 @@ def generate_es_systems(base_path: Path = _ES_SYSTEMS_DIR, output_path: Path = E
 
     for root_dir, _, files in os.walk(safe_base_dir):
         for file in files:
-            if not file.endswith(".yaml"):
+            if not file.endswith(".yaml") or file == "defaults.yml":
                 continue
 
             yaml_path = os.path.join(root_dir, file)
@@ -147,5 +170,17 @@ def generate_es_systems(base_path: Path = _ES_SYSTEMS_DIR, output_path: Path = E
 
     with open(output_cfg_file, 'w', encoding='utf-8') as f:
         f.write(final_xml)
+    _logger.info("Successfully generated: %s", output_cfg_file)
 
-    _logger.info("Successfully regenerated: %s", output_cfg_file)
+    if output_path != ES_SYSTEMS_CFG:
+        try:
+            ES_SYSTEMS_CFG.symlink_to(output_path)
+            _logger.info("Successfully linked: %s", ES_SYSTEMS_CFG)
+        except FileNotFoundError as e:
+            _logger.error(
+                "Can't create symlink in %s: %s",
+                ES_SYSTEMS_CFG.parent, e
+            )
+            raise
+
+    _logger.info("=========")

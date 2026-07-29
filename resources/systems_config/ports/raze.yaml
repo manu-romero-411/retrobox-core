@@ -1,0 +1,18 @@
+raze:
+  fullname: Raze
+  manufacturer: Ports
+  release: None
+  hardware: port
+  path: /var/penguintb/juegos/roms/raze
+  extension:
+  - .raze
+  platform:
+  - pc
+  theme: raze
+  group: ports
+  emulators:
+    raze:
+      cores:
+        raze:
+          default: true
+  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

@@ -1,0 +1,21 @@
+doom3:
+  fullname: Doom 3
+  manufacturer: Ports
+  release: 2004
+  hardware: port
+  path: /var/penguintb/juegos/roms/doom3
+  extension:
+  - .d3
+  platform:
+  - pc
+  theme: doom3
+  group: ports
+  emulators:
+    dhewm3:
+      cores:
+        dhewm3:
+          default: true
+    libretro:
+      cores:
+        boom3: {}
+  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

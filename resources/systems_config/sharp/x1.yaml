@@ -1,0 +1,28 @@
+x1:
+  fullname: Sharp X1
+  manufacturer: Sharp
+  release: 1982
+  hardware: computer
+  path: /var/penguintb/juegos/roms/x1
+  extension:
+  - .dx1
+  - .zip
+  - .2d
+  - .2hd
+  - .tfd
+  - .d88
+  - .88d
+  - .hdm
+  - .xdf
+  - .dup
+  - .cmd
+  - .7z
+  platform:
+  - x1
+  theme: x1
+  emulators:
+    libretro:
+      cores:
+        x1:
+          default: true
+  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

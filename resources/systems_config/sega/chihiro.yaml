@@ -1,0 +1,17 @@
+chihiro:
+  fullname: Sega Chihiro
+  manufacturer: Sega
+  release: 2002
+  hardware: arcade
+  path: /var/penguintb/juegos/roms/chihiro
+  extension:
+  - .iso
+  platform:
+  - chihiro
+  theme: chihiro
+  emulators:
+    xemu:
+      cores:
+        xemu:
+          default: true
+  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

@@ -12,10 +12,10 @@ from typing import TYPE_CHECKING, Any
 
 import yaml
 
-from runtime.retrobox_paths import DEFAULTS_DIR, ES_SETTINGS_CFG, _SHADERS_DIR, configure_emulator
+from runtime.retrobox_paths import _SYSTEMS_CONF_DIR, DEFAULTS_DIR, ES_SETTINGS_CFG, _SHADERS_DIR, configure_emulator
 
 from .config import Config, SystemConfig
-from .exceptions import MissingEmulator
+from .exceptions import MissingEmulator, RetroboxException
 from .settings.unixSettings import UnixSettings
 
 if TYPE_CHECKING:
@@ -72,21 +72,99 @@ def _load_defaults(system_name: str, default_yml: Path, default_arch_yml: Path, 
     return config
 
 def _load_system_config(system_name: str, /) -> dict[str, Any]:
-    defaults = _load_defaults(
-        system_name,
-        DEFAULTS_DIR / 'configgen-defaults.yml',
-        DEFAULTS_DIR / 'configgen-defaults-arch.yml'
-    )
-
-    # In the yaml files, the "options" structure is not flat, so we have to flatten it here
-    # because the options are flat in batocera.conf to make it easier for end users to edit
     data: dict[str, Any] = {
-        'emulator': defaults.get('emulator'),
-        'core':     defaults.get('core'),
+        'emulator': None,
+        'core': None,
     }
-    
-    if 'options' in defaults:
-        _dict_merge(data, defaults['options'])
+
+    # 1. Cargar las opciones globales desde defaults.yml si existe en _ES_SYSTEMS_DIR
+    defaults_path = _SYSTEMS_CONF_DIR / "defaults.yml"
+    if defaults_path.exists():
+        try:
+            with open(defaults_path, 'r', encoding='utf-8') as f:
+                defaults_content = yaml.safe_load(f)
+                if isinstance(defaults_content, dict) and 'default' in defaults_content:
+                    default_block = defaults_content['default']
+                    # Extraer emulator y core globales si los hubiera
+                    if 'emulator' in default_block:
+                        data['emulator'] = default_block['emulator']
+                    if 'core' in default_block:
+                        data['core'] = default_block['core']
+                    # Aplanar el bloque 'options' global si existe
+                    if 'options' in default_block and isinstance(default_block['options'], dict):
+                        _dict_merge(data, default_block['options'])
+        except Exception as e:
+            _logger.error("Error reading defaults.yml: %s", e)
+            raise RetroboxException("Error reading default configs file") from e
+
+    # 2. Buscar el archivo YAML del sistema específico dentro de la estructura de _ES_SYSTEMS_DIR
+    sys_yaml_path = None
+    if _SYSTEMS_CONF_DIR.exists():
+        for path in _SYSTEMS_CONF_DIR.glob(f"**/{system_name}.yaml"):
+            sys_yaml_path = path
+            break
+
+    if not sys_yaml_path or not sys_yaml_path.exists():
+        _logger.error("YAML not found for system %s", system_name)
+        raise RetroboxException(f"YAML not found for {system_name}")
+
+    try:
+        with open(sys_yaml_path, 'r', encoding='utf-8') as f:
+            yaml_content = yaml.safe_load(f)
+    except Exception as e:
+        _logger.error("Error reading system YAML %s: %s", system_name, e)
+        raise RetroboxException(f"Error reading YAML for {system_name}") from e
+
+    if not isinstance(yaml_content, dict) or system_name not in yaml_content:
+        return data
+
+    sys_info = yaml_content[system_name]
+    emulators_data = sys_info.get('emulators', {})
+
+    # 3. Buscar cuál es el emulador y core por defecto (marcado con default: true)
+    selected_emulator = None
+    selected_core = None
+    core_options = {}
+
+    for emu_name, emu_content in emulators_data.items():
+        if not isinstance(emu_content, dict):
+            continue
+
+        cores_data = emu_content.get('cores', {})
+        if not isinstance(cores_data, dict):
+            continue
+
+        for core_name, core_props in cores_data.items():
+            if isinstance(core_props, dict) and core_props.get('default') is True:
+                selected_emulator = emu_name
+                selected_core = core_name
+                if 'options' in core_props and isinstance(core_props['options'], dict):
+                    core_options = core_props['options']
+                break
+        if selected_emulator:
+            break
+
+    # Si ningún core está marcado explícitamente como default, cogemos el primero por defecto
+    if not selected_emulator and emulators_data:
+        for emu_name, emu_content in emulators_data.items():
+            if isinstance(emu_content, dict):
+                cores_data = emu_content.get('cores', {})
+                if cores_data:
+                    selected_emulator = emu_name
+                    selected_core = list(cores_data.keys())[0]
+                    first_props = cores_data[selected_core]
+                    if isinstance(first_props, dict) and 'options' in first_props:
+                        core_options = first_props['options']
+                    break
+
+    if selected_emulator:
+        data['emulator'] = selected_emulator
+    if selected_core:
+        data['core'] = selected_core
+
+    # 4. Aplanar las opciones específicas del core para que sobrescriban a los valores de defaults.yml
+    if core_options:
+        _dict_merge(data, core_options)
 
     return data
 

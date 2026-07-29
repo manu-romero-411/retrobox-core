@@ -1,0 +1,18 @@
+tyrian:
+  fullname: Tyrian
+  manufacturer: Ports
+  release: 1995
+  hardware: port
+  path: /var/penguintb/juegos/roms/tyrian
+  extension:
+  - .game
+  platform:
+  - pc
+  theme: tyrian
+  group: ports
+  emulators:
+    tyrian:
+      cores:
+        tyrian:
+          default: true
+  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

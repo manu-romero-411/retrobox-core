@@ -52,6 +52,7 @@ Formato del perfil JSON:
 """
 
 from __future__ import annotations
+from pathlib import Path
 import sys
 
 import argparse
@@ -63,6 +64,9 @@ import time
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from typing import Callable
+
+ROOTDIR = Path(__file__).resolve().parents[2]
+sys.path.append(str(ROOTDIR))
 from runtime.launcher.configgen.exceptions import RetroboxException
 
 os.environ.setdefault("SDL_VIDEODRIVER", "dummy")

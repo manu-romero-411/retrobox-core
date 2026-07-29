@@ -1,0 +1,22 @@
+advision:
+  fullname: Adventure Vision
+  manufacturer: Entex
+  release: 1982
+  hardware: console
+  path: /var/penguintb/juegos/roms/advision
+  extension:
+  - .bin
+  - .zip
+  - .7z
+  platform:
+  - advision
+  theme: advision
+  emulators:
+    libretro:
+      cores:
+        mame: {}
+    mame:
+      cores:
+        mame:
+          default: true
+  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

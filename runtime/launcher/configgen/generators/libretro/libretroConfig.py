@@ -489,7 +489,7 @@ def createLibretroConfig(
         if (rotate_display := system.config.get('wswan_rotate_display')) is not system.config.MISSING:
             wswanOrientation = rotate_display
         else:
-            wswanGameRotation = videoMode.getAltDecoration(system.name, rom, 'retroarch')
+            wswanGameRotation = videoMode.get_alt_decoration(system.name, rom, 'retroarch')
             wswanOrientation = "portrait" if wswanGameRotation == "90" else "manual"
 
         retroarch_config['wswan_rotate_display'] = wswanOrientation
@@ -1138,7 +1138,7 @@ def writeBezelConfig(
     else:
         if bezel is None:
             return
-        bz_infos = bezelsUtil.getBezelInfos(rom, bezel, system.name, 'retroarch')
+        bz_infos = bezelsUtil.get_bezel_infos(rom, bezel, system.name, 'retroarch')
     if bz_infos is None:
         _logger.debug("getBezelInfos devolvió None para bezel=%s system=%s rom=%s", bezel, system.name, rom)
         return

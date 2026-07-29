@@ -1,0 +1,23 @@
+megaduck:
+  fullname: Mega Duck / Cougar Boy
+  manufacturer: Welback Holdings
+  release: 1993
+  hardware: portable
+  path: /var/penguintb/juegos/roms/megaduck
+  extension:
+  - .bin
+  - .zip
+  - .7z
+  platform:
+  - megaduck
+  theme: megaduck
+  emulators:
+    libretro:
+      cores:
+        mame: {}
+        sameduck: {}
+    mame:
+      cores:
+        mame:
+          default: true
+  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

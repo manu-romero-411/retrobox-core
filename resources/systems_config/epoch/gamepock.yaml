@@ -1,0 +1,22 @@
+gamepock:
+  fullname: Game Pocket Computer
+  manufacturer: Epoch
+  release: 1984
+  hardware: portable
+  path: /var/penguintb/juegos/roms/gamepock
+  extension:
+  - .bin
+  - .zip
+  - .7z
+  platform:
+  - gamepock
+  theme: gamepock
+  emulators:
+    libretro:
+      cores:
+        mame: {}
+    mame:
+      cores:
+        mame:
+          default: true
+  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

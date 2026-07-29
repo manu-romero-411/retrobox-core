@@ -2,6 +2,9 @@
   "version": "0.2.0",
   "configurations": [
 
+
+
+
   
 
 
@@ -196,7 +199,7 @@
         "-system",
         "lutris",
         "-rom",
-        "${workspaceFolder}/roms/lutris/Rayman Legends.lynx",
+        "${workspaceFolder}/roms/lutris/Minecraft.lynx",
         "-gameinfoxml",
         "/tmp/game.xml",
         "-systemname",
@@ -292,6 +295,31 @@
         "-p2nbaxes",
         "6",
         "-wheel",
+        "-system",
+        "gamecube",
+        "-rom",
+        "/var/penguintb/juegos/roms/gamecube/Mario Kart - Double Dash!! (Europe) (En,Fr,De,Es,It).rvz",
+        "-gameinfoxml",
+        "/tmp/game.xml",
+        "-systemname",
+        "GameCube"
+      ],
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}",
+        "PATH": "${workspaceFolder}:/home/manuel/.local/bin:/usr/local/bin:/usr/bin:/bin"
+      },
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+        {
+      "name": "configgen: GameCube (Mario Kart Double Dash) - sin mandos",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "emulatorlauncher",
+      "cwd": "${workspaceFolder}/runtime/launcher",
+      "envFile": "${workspaceFolder}/.env",
+      "args": [
+      
         "-system",
         "gamecube",
         "-rom",
@@ -596,7 +624,7 @@
         "-system",
         "megadrive",
         "-rom",
-        "/media/manuel/penguinTB/juegos/roms/megadrive/Sonic The Hedgehog 2 (World) (Rev B).zip",
+        "/var/penguintb/juegos/roms/megadrive/Sonic The Hedgehog 2 (World) (Rev B).zip",
         "-gameinfoxml",
         "/tmp/game.xml",
         "-systemname",

@@ -33,25 +33,22 @@ ENV_FILE = RETROBOX_ROOTDIR / ".env"
 
 RESOURCES_DIR:  Final = RETROBOX_ROOTDIR / 'resources'
 DATAINIT_DIR: Final = RESOURCES_DIR / 'datainit'
-#BATOCERA_ES_DIR: Final = Path('/home/manuel/proyectos/batocera-emulationstation/appimage/es')
 _FRONTEND_DIR: Final = RETROBOX_ROOTDIR / 'frontend'
 DEFAULTS_DIR: Final = RESOURCES_DIR / 'configgen'
 
 HOME_INIT:  Final = DATAINIT_DIR / 'system'
 CONF_INIT:  Final = HOME_INIT / 'configs'
 EMULATORS:  Final = USERDATA / 'emulators'
+ROMS:     Final = USERDATA / 'roms'
 
-# ---------------------------------------------------------------------------
-# "userdata" → $HOME
-# ---------------------------------------------------------------------------
-ROMS:     Final = USERDATA / 'roms'          # ajusta si los tienes en otro sitio
-
-# ---------------------------------------------------------------------------
-# "system" de batocera → ~/.local/share/batocera  (estado interno del port)
 CACHE: Final = _XDG_CACHE / 'retrobox'
 LOGS:  Final = USERDATA / 'logs'
 
 HOOKS = USERDATA / "resources" / "hooks" / "retrohook"
+
+# config defaults and generators
+_EMU_FEATURES_DIR:   Final = RESOURCES_DIR / 'emu_features'
+_SYSTEMS_CONF_DIR:   Final = RESOURCES_DIR / 'systems_config'
 
 # directories for emulator things
 SAVES:       Final = USERDATA / 'saves'
@@ -71,13 +68,14 @@ _USER_ES_DIR: Final = _FRONTEND_DIR / '.emulationstation'
 ES_SETTINGS_CFG: Final = _USER_ES_DIR / 'es_settings.cfg'
 ES_FEATURES_CFG: Final = _USER_ES_DIR  / "es_features.cfg"
 ES_SYSTEMS_CFG: Final = _USER_ES_DIR  / "es_systems.cfg"
+ES_FEATURES_TMP: Final = Path("/tmp/retrobox_es_features.cfg")
+ES_SYSTEMS_TMP: Final = Path("/tmp/retrobox_es_systems.cfg")
 ES_INPUT_CFG: Final = _USER_ES_DIR  / "es_input.cfg"
-ES_INI: Final = _USER_ES_DIR / "emulationstation.ini"
+ES_INI_TMP: Final = Path("/tmp/retrobox-emulationstation.ini")
+ES_INI_CFG: Final = _USER_ES_DIR / "emulationstation.ini"
 
 # Recursos de ES y configgen (sistema)
 _ES_RESOURCES_DIR:   Final = _FRONTEND_DIR / 'resources'
-_ES_FEATURES_DIR:   Final = _FRONTEND_DIR / 'emu_features'
-_ES_SYSTEMS_DIR:   Final = _FRONTEND_DIR / 'systems_config'
 ES_GUNS_METADATA:    Final = _ES_RESOURCES_DIR / 'gungames.xml'
 ES_WHEELS_METADATA:  Final = _ES_RESOURCES_DIR / 'wheelgames.xml'
 ES_GAMES_METADATA:   Final = _ES_RESOURCES_DIR / 'gamesdb.xml'

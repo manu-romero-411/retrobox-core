@@ -1,0 +1,34 @@
+enterprise:
+  fullname: Enterprise
+  manufacturer: Enterprise Computers
+  release: 1985
+  hardware: computer
+  path: /var/penguintb/juegos/roms/enterprise
+  extension:
+  - .bas
+  - .com
+  - .zip
+  - .img
+  - .dsk
+  - .tap
+  - .dtf
+  - .trn
+  - '.128'
+  - .cas
+  - .cdt
+  - .tzx
+  platform:
+  - enterprise
+  theme: enterprise
+  emulators:
+    clk:
+      cores:
+        clk:
+          default: true
+    libretro:
+      cores:
+        mame: {}
+    mame:
+      cores:
+        mame: {}
+  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

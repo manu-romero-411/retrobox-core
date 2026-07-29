@@ -1,0 +1,40 @@
+library:
+  fullname: Library
+  manufacturer: Misc. System
+  release: None
+  hardware: system
+  path: /var/penguintb/juegos/library
+  extension:
+  - .jpg
+  - .jpeg
+  - .png
+  - .bmp
+  - .psd
+  - .tga
+  - .gif
+  - .hdr
+  - .pic
+  - .ppm
+  - .pgm
+  - .mkv
+  - .pdf
+  - .mp4
+  - .avi
+  - .webm
+  - .cbz
+  - .mp3
+  - .wav
+  - .ogg
+  - .flac
+  - .mod
+  - .xm
+  - .stm
+  - .s3m
+  - .far
+  - .it
+  - '.669'
+  - .mtm
+  platform:
+  - imageviewer
+  theme: library
+  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

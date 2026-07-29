@@ -1,0 +1,25 @@
+nds:
+  fullname: Nintendo DS
+  manufacturer: Nintendo
+  release: 2004
+  hardware: portable
+  path: /var/penguintb/juegos/roms/nds
+  extension:
+  - .nds
+  - .bin
+  - .zip
+  - .7z
+  platform:
+  - nds
+  theme: nds
+  emulators:
+    libretro:
+      cores:
+        desmume: {}
+        melonds:
+          default: true
+        melondsds: {}
+    melonds:
+      cores:
+        melonds: {}
+  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

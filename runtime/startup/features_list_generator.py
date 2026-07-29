@@ -2,6 +2,7 @@
 This submodule regenerates es_features.cfg based on YAML configuration files.
 """
 import logging
+import os
 from pathlib import Path
 import sys
 import xml.etree.ElementTree as ET
@@ -17,7 +18,11 @@ logging.basicConfig(
 
 _logger = logging.getLogger(__name__)
 
-from runtime.retrobox_paths import _ES_FEATURES_DIR, ES_FEATURES_CFG
+from runtime.retrobox_paths import (
+    _EMU_FEATURES_DIR,
+    ES_FEATURES_CFG,
+    ES_FEATURES_TMP
+)
 
 ROOTDIR = Path(__file__).resolve().parents[2]
 sys.path.append(str(ROOTDIR))
@@ -90,11 +95,24 @@ def build_system_elements(parent_elem, systems_list):
                 sys_elem.set(str(k), str(v))
         build_features_elements(sys_elem, sys_data)
 
-def generate_es_features(yaml_dir: Path = _ES_FEATURES_DIR, output_cfg: Path = ES_FEATURES_CFG):
+def generate_es_features(yaml_dir: Path = _EMU_FEATURES_DIR, output_cfg: Path = ES_FEATURES_TMP):
     """
     entrypoint to the es_features.cfg generator
     """
-    _logger.info("Start generating: %s", output_cfg)
+    if not os.path.exists(yaml_dir):
+        raise FileNotFoundError(f"Features dir not found: {yaml_dir}")
+
+    if not os.path.isdir(yaml_dir):
+        raise NotADirectoryError(f"Features dir isn't a directory: {yaml_dir}")
+
+    if output_cfg.exists():
+        output_cfg.unlink()
+
+    if output_cfg != ES_FEATURES_CFG and \
+    (ES_FEATURES_CFG.exists() or ES_FEATURES_CFG.is_symlink()):
+        ES_FEATURES_CFG.unlink()
+
+    _logger.info("Begin generating: %s", output_cfg)
     root = ET.Element('features')
 
     yaml_files = sorted(list(yaml_dir.glob('*.yaml')))
@@ -204,5 +222,16 @@ def generate_es_features(yaml_dir: Path = _ES_FEATURES_DIR, output_cfg: Path = E
     output_cfg.parent.mkdir(parents=True, exist_ok=True)
     with open(output_cfg, 'w', encoding='utf-8') as f:
         f.write(final_xml + "\n")
+    _logger.info("Successfully generated: %s", output_cfg)
 
-    _logger.info("Successfully regenerated: %s", output_cfg)
+    if output_cfg != ES_FEATURES_CFG:
+        try:
+            ES_FEATURES_CFG.symlink_to(output_cfg)
+            _logger.info("Successfully linked: %s", ES_FEATURES_CFG)
+        except FileNotFoundError as e:
+            _logger.error(
+                "Can't create symlink in %s: %s",
+                ES_FEATURES_CFG.parent, e
+            )
+            raise
+    _logger.info("=========")

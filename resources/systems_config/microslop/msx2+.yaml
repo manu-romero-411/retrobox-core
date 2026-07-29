@@ -1,0 +1,34 @@
+msx2+:
+  fullname: MSX2+
+  manufacturer: Microslop
+  release: 1988
+  hardware: computer
+  path: /var/penguintb/juegos/roms/msx2+
+  extension:
+  - .dsk
+  - .mx2
+  - .rom
+  - .zip
+  - .7z
+  - .cas
+  - .m3u
+  - .openmsx
+  platform:
+  - msx2+
+  theme: msx2+
+  emulators:
+    libretro:
+      cores:
+        bluemsx:
+          default: true
+          incompatible_extensions:
+          - .openmsx
+        fmsx:
+          incompatible_extensions:
+          - .openmsx
+    openmsx:
+      cores:
+        openmsx:
+          incompatible_extensions:
+          - .m3u
+  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

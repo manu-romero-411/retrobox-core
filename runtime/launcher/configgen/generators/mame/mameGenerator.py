@@ -666,7 +666,7 @@ class MameGenerator(Generator):
             else:
                 return
         else:
-            bz_infos = bezelsUtil.getBezelInfos(rom, bezelSet, system.name, 'mame')
+            bz_infos = bezelsUtil.get_bezel_infos(rom, bezelSet, system.name, 'mame')
             if bz_infos is None and gunsBordersSize is None:
                 return
 

@@ -1,0 +1,18 @@
+fallout2-ce:
+  fullname: Fallout 2 Community Edition
+  manufacturer: Ports
+  release: 1998
+  hardware: port
+  path: /var/penguintb/juegos/roms/fallout2-ce
+  extension:
+  - .f2ce
+  platform:
+  - pc
+  theme: fallout2-ce
+  group: ports
+  emulators:
+    fallout2-ce:
+      cores:
+        fallout2-ce:
+          default: true
+  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

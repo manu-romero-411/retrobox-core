@@ -1,0 +1,20 @@
+prboom:
+  fullname: PrBoom
+  manufacturer: Ports
+  release: None
+  hardware: port
+  path: /var/penguintb/juegos/roms/prboom
+  extension:
+  - .wad
+  - .iwad
+  - .pwad
+  platform:
+  - pc
+  theme: prboom
+  group: ports
+  emulators:
+    libretro:
+      cores:
+        prboom:
+          default: true
+  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

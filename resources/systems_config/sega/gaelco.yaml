@@ -1,0 +1,25 @@
+gaelco:
+  fullname: Gaelco
+  manufacturer: Sega
+  release: 1999
+  hardware: arcade
+  path: /var/penguintb/juegos/roms/gaelco
+  extension:
+  - .zip
+  - .7z
+  platform:
+  - gaelco
+  - arcade
+  theme: gaelco
+  emulators:
+    demul:
+      cores:
+        demul: {}
+    libretro:
+      cores:
+        mame:
+          default: true
+    mame:
+      cores:
+        mame: {}
+  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

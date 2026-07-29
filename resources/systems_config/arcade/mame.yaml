@@ -1,0 +1,22 @@
+mame:
+  fullname: Mame
+  manufacturer: Arcade
+  release: 1997
+  hardware: arcade
+  path: /var/penguintb/juegos/roms/mame
+  extension:
+  - .zip
+  - .7z
+  platform:
+  - arcade
+  theme: mame
+  emulators:
+    libretro:
+      cores:
+        mame: {}
+        mame078plus:
+          default: true
+    mame:
+      cores:
+        mame: {}
+  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

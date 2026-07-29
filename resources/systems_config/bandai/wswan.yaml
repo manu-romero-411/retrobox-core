@@ -1,0 +1,19 @@
+wswan:
+  fullname: WonderSwan
+  manufacturer: Bandai
+  release: 1999
+  hardware: portable
+  path: /var/penguintb/juegos/roms/wswan
+  extension:
+  - .ws
+  - .zip
+  - .7z
+  platform:
+  - wonderswan
+  theme: wonderswan
+  emulators:
+    libretro:
+      cores:
+        mednafen_wswan:
+          default: true
+  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

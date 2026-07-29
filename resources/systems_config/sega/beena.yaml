@@ -1,0 +1,22 @@
+beena:
+  fullname: Advanced Pico Beena
+  manufacturer: Sega
+  release: 2005
+  hardware: console
+  path: /var/penguintb/juegos/roms/beena
+  extension:
+  - .bin
+  - .zip
+  - .7z
+  platform:
+  - beena
+  theme: beena
+  emulators:
+    libretro:
+      cores:
+        mame:
+          default: true
+    mame:
+      cores:
+        mame: {}
+  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

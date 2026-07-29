@@ -80,20 +80,17 @@ for system in root.findall('system'):
                         if is_default:
                             core_props['default'] = True
                         if incompatible:
-                            # Convertir incompatible_extensions en una lista
                             if ',' in incompatible:
                                 core_props['incompatible_extensions'] = [i.strip() for i in incompatible.split(',')]
                             else:
                                 core_props['incompatible_extensions'] = [i.strip() for i in incompatible.split()]
 
-                        if core_props:
-                            if core_name not in cores_dict:
-                                cores_dict[core_name] = {}
-                            cores_dict[core_name].update(core_props)
-                        else:
-                            cores_dict[core_name] = core_name
+                        # Inicializamos un diccionario de opciones vacío por defecto para cada core
+                        if core_name not in cores_dict:
+                            cores_dict[core_name] = core_props
                 
-                emulators_dict[emu_name] = cores_dict
+                # Agrupamos los cores bajo la clave explícita 'cores'
+                emulators_dict[emu_name] = {'cores': cores_dict}
             sys_data['emulators'] = emulators_dict
         else:
             sys_data[tag] = text

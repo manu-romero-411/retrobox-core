@@ -1,0 +1,29 @@
+megadrive:
+  fullname: Mega Drive
+  manufacturer: Sega
+  release: 1988
+  hardware: console
+  path: /var/penguintb/juegos/roms/megadrive
+  extension:
+  - .bin
+  - .gen
+  - .md
+  - .sg
+  - .smd
+  - .zip
+  - .7z
+  platform:
+  - genesis
+  - megadrive
+  theme: megadrive
+  group: megadrive
+  emulators:
+    libretro:
+      cores:
+        blastem: {}
+        genesisplusgx:
+          default: true
+        genesisplusgx-expanded: {}
+        genesisplusgx-wide: {}
+        picodrive: {}
+  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

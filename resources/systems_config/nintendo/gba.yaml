@@ -1,0 +1,20 @@
+gba:
+  fullname: Game Boy Advance
+  manufacturer: Nintendo
+  release: 2001
+  hardware: portable
+  path: /var/penguintb/juegos/roms/gba
+  extension:
+  - .gba
+  - .zip
+  - .7z
+  platform:
+  - gba
+  theme: gba
+  emulators:
+    libretro:
+      cores:
+        mgba:
+          default: true
+        vba-m: {}
+  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

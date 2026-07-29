@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 import re
 
-from runtime.retrobox_paths import _USER_HOME, _XDG_DATA
+from runtime.retrobox_paths import _USER_HOME, _XDG_CONFIG, _XDG_DATA
 
 def _env_paths(var_name: str) -> tuple[Path, ...]:
     """Lee una variable de entorno con rutas separadas por `os.pathsep`
@@ -15,8 +15,8 @@ def _env_paths(var_name: str) -> tuple[Path, ...]:
     return tuple(Path(p).expanduser() for p in raw.split(os.pathsep) if p.strip())
 
 _LUTRIS_DB_CANDIDATES = (
-    Path.home() / ".local" / "share" / "lutris" / "pga.db",
-    Path.home() / ".var" / "app" / "net.lutris.Lutris" / ".local" / "share" / "lutris" / "pga.db",  # Flatpak
+    _XDG_DATA / "lutris" / "pga.db",
+    _USER_HOME / ".var" / "app" / "net.lutris.Lutris" / ".local" / "share" / "lutris" / "pga.db",  # Flatpak
 )
 
 _INVALID_FILENAME_CHARS = str.maketrans({c: "-" for c in '/\\:*?"<>|'})
@@ -32,9 +32,7 @@ _SKIP_NAME_RE = re.compile(
     re.IGNORECASE,
 )
 
-_INVALID_FILENAME_CHARS = str.maketrans({c: "-" for c in '/\\:*?"<>|'})
-
-_HEROIC_CONFIG = Path.home() / ".config" / "heroic"
+_HEROIC_CONFIG = _XDG_CONFIG / "heroic"
 _EPIC_JSON = _HEROIC_CONFIG / "legendaryConfig" / "legendary" / "installed.json"
 _GOG_JSON = _HEROIC_CONFIG / "gog_store" / "installed.json"
 _HEROIC_SIDELOAD_JSON = _HEROIC_CONFIG / "sideload_apps" / "library.json"

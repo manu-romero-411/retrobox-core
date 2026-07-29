@@ -1,0 +1,31 @@
+psx:
+  fullname: PlayStation
+  manufacturer: Sony
+  release: 1994
+  hardware: console
+  path: /var/penguintb/juegos/roms/psx
+  extension:
+  - .cue
+  - .img
+  - .mdf
+  - .pbp
+  - .toc
+  - .cbn
+  - .m3u
+  - .ccd
+  - .chd
+  - .iso
+  platform:
+  - psx
+  theme: psx
+  emulators:
+    duckstation:
+      cores:
+        duckstation: {}
+    libretro:
+      cores:
+        mednafen_psx: {}
+        pcsx_rearmed:
+          default: true
+        swanstation: {}
+  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

@@ -1,0 +1,18 @@
+jknight:
+  fullname: Star Wars - Jedi Academy
+  manufacturer: Ports
+  release: 2003
+  hardware: port
+  path: /var/penguintb/juegos/roms/jknight
+  extension:
+  - .jedi
+  platform:
+  - pc
+  theme: jknight
+  group: ports
+  emulators:
+    openjk:
+      cores:
+        openjk:
+          default: true
+  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

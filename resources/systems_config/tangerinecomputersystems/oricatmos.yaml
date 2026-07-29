@@ -1,0 +1,25 @@
+oricatmos:
+  fullname: Oric Atmos
+  manufacturer: Tangerine Computer Systems
+  release: 1984
+  hardware: computer
+  path: /var/penguintb/juegos/roms/oricatmos
+  extension:
+  - .tap
+  - .dsk
+  - .zip
+  platform:
+  - oricatmos
+  theme: oric
+  emulators:
+    clk:
+      cores:
+        clk:
+          default: true
+    libretro:
+      cores:
+        mame: {}
+    mame:
+      cores:
+        mame: {}
+  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

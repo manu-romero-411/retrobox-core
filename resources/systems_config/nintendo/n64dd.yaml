@@ -1,0 +1,27 @@
+n64dd:
+  fullname: Nintendo 64 Disk Drive
+  manufacturer: Nintendo
+  release: 1999
+  hardware: console
+  path: /var/penguintb/juegos/roms/n64dd
+  extension:
+  - .z64
+  - .n64
+  - .ndd
+  - .zip
+  - .7z
+  platform:
+  - n64dd
+  theme: n64dd
+  emulators:
+    libretro:
+      cores:
+        mupen64plus-next: {}
+        parallel_n64: {}
+    mupen64plus:
+      cores:
+        glide64mk2:
+          default: true
+        gliden64: {}
+        rice: {}
+  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

@@ -1,0 +1,30 @@
+apps:
+  fullname: Apps
+  manufacturer: _Retrobox
+  release: None
+  hardware: system
+  path: ../resources/apps
+  extension:
+  - .webapp
+  - .kodi
+  platform:
+  - apps
+  theme: apps
+  emulators:
+    chrome:
+      cores:
+        chrome:
+          default: true
+          incompatible_extensions:
+          - .kodi
+    firefox:
+      cores:
+        firefox:
+          incompatible_extensions:
+          - .kodi
+    kodi:
+      cores:
+        kodi:
+          incompatible_extensions:
+          - .webapp
+  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

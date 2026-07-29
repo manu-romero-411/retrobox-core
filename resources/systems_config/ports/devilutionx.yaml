@@ -1,0 +1,18 @@
+devilutionx:
+  fullname: Diablo
+  manufacturer: Ports
+  release: 1996
+  hardware: port
+  path: /var/penguintb/juegos/roms/devilutionx
+  extension:
+  - .mpq
+  platform:
+  - pc
+  theme: devilutionx
+  group: ports
+  emulators:
+    devilutionx:
+      cores:
+        devilutionx:
+          default: true
+  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

@@ -1,0 +1,33 @@
+pcw:
+  fullname: Amstrad PCW
+  manufacturer: Amstrad
+  release: 1985
+  hardware: computer
+  path: /var/penguintb/juegos/roms/pcw
+  extension:
+  - .mfi
+  - .dfi
+  - .mfm
+  - .td0
+  - .imd
+  - .86f
+  - .d77
+  - .d88
+  - .1dd
+  - .cqm
+  - .cqi
+  - .dsk
+  - .zip
+  - .7z
+  platform:
+  - pcw
+  theme: pcw
+  emulators:
+    libretro:
+      cores:
+        mame:
+          default: true
+    mame:
+      cores:
+        mame: {}
+  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

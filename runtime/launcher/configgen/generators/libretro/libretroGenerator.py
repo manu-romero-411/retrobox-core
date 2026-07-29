@@ -94,7 +94,7 @@ class LibretroGenerator(Generator):
 
         # Get the shader before writing the config, we may need to disable bezels based on the shader.
         render_config = system.renderconfig
-        alt_decoration = videoMode.getAltDecoration(system.name, rom, 'retroarch')
+        alt_decoration = videoMode.get_alt_decoration(system.name, rom, 'retroarch')
         game_shader = None
         shader_bezel = False
         video_shader: Path | None = None
