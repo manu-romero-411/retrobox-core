@@ -147,7 +147,7 @@ class HatariGenerator(Generator):
         # Screen
         if not config.has_section("Screen"):
             config.add_section("Screen")
-        config.set("Screen", "bShowStatusbar", str(system.config.show_fps).upper())
+        config.set("Screen", "bShowStatusbar", str(system.config.display_fps).upper())
 
         with HATARI_CFG.open('w') as configfile:
             config.write(configfile)

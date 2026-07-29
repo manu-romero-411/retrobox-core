@@ -134,7 +134,7 @@ def createPPSSPPConfig(iniConfig: CaseSensitiveConfigParser, system: Emulator):
     iniConfig.set("Graphics", "Smart2DTexFiltering", str(system.config.get_bool("smart_2d", False)))
 
     # Display FPS
-    iniConfig.set("Graphics", "ShowFPSCounter", "3" if system.config.show_fps else "0") # 1 for Speed%, 2 for FPS, 3 for both
+    iniConfig.set("Graphics", "ShowFPSCounter", "3" if system.config.get_bool("show_fps", False) else "0") # 1 for Speed%, 2 for FPS, 3 for both
 
     # Set other defaults
     iniConfig.set("Graphics", "DisplayIntegerScale", "False")

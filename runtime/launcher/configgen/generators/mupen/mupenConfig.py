@@ -192,12 +192,12 @@ def setMupenConfig(iniConfig: CaseSensitiveConfigParser, system: Emulator, contr
     iniConfig.set("64DD", "Disk", "")
 
     # Display FPS
-    if system.config.show_fps:
+    if system.config.get_bool("show_fps", False):
         iniConfig.set("Video-Rice",       "ShowFPS",  "True")
-        iniConfig.set("Video-Glide64mk2", "show_fps", "4")
+        iniConfig.set("Video-Glide64mk2", "display_fps", "4")
     else:
         iniConfig.set("Video-Rice",       "ShowFPS",  "False")
-        iniConfig.set("Video-Glide64mk2", "show_fps", "8") # 1=FPS counter, 2=VI/s counter, 4=% speed, 8=FPS transparent
+        iniConfig.set("Video-Glide64mk2", "display_fps", "8") # 1=FPS counter, 2=VI/s counter, 4=% speed, 8=FPS transparent
 
         # Custom : allow the user to configure directly mupen64plus.cfg via batocera.conf via lines like : n64.mupen64plus.section.option=value
         for section_option, user_config_value in system.config.items(starts_with='mupen64plus.'):

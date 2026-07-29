@@ -250,7 +250,7 @@ class DolphinGenerator(Generator):
         dolphinGFXSettings.set("Settings", "AspectRatio", system.config.get("dolphin_aspect_ratio", "0"))  # set to zero, which is 'Auto' in Dolphin & Batocera
 
         # Show fps
-        dolphinGFXSettings.set("Settings", "ShowFPS", str(system.config.show_fps))
+        dolphinGFXSettings.set("Settings", "ShowFPS", str(system.config.get_bool("display_fps", False)))
 
         # HiResTextures
         hires_textures = str(system.config.get_bool('hires_textures'))

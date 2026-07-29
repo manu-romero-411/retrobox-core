@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, NotRequired, TypedDict, cast
 import qrcode
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 
+from configgen.utils.language import _detect_language
 from runtime.retrobox_paths import RESOURCES_DIR, ES_GUNS_ART_METADATA, _DECORATIONS_DIR, _DECORATIONS_DIR
 from ..exceptions import RetroboxException
 from . import metadata
@@ -46,9 +47,10 @@ def get_bezel_infos(
     #1. rom name inside games/<systemName>/          -> specific to this game
     #2. rom name inside games/                        -> specific to this game
     #3. systemName + alt decoration inside systems/    -> only if altDecoration != "0"
-    #4. systemName inside systems/
-    #5. "default" + alt decoration                     -> only if altDecoration != "0"
-    #6. "default"
+    #4. systemName inside systems/ (localized)
+    #5. systemName inside systems/
+    #6. "default" + alt decoration                     -> only if altDecoration != "0"
+    #7. "default"
     The first one to be found wins.
     If none of the above exist, return None.
     mamezip files are for MAME-specific advanced artwork
@@ -57,9 +59,9 @@ def get_bezel_infos(
     alt_decoration = get_alt_decoration(system_name, rom, emulator)
     rom_base = Path(rom).stem  # filename without extension
 
-    def build(directory: Path, basename: str, bezel_game: bool) -> BezelInfos:
+    def build(directory: Path, basename: str, bezel_game: bool, locale: str = "") -> BezelInfos:
         return {
-            "png": directory / f"{basename}.png",
+            "png": directory / f"{basename}{locale}.png",
             "info": directory / f"{basename}.info",
             "layout": directory / f"{basename}.lay",
             "mamezip": directory / f"{basename}.zip",
@@ -76,6 +78,7 @@ def get_bezel_infos(
     ]
     if alt_decoration != "0":
         candidates.append(build(bez_systems_dir, f"{system_name}-{alt_decoration!s}", False))
+    candidates.append(build(bez_systems_dir, system_name, False, f"_{_detect_language()}" ))
     candidates.append(build(bez_systems_dir, system_name, False))
     if alt_decoration != "0":
         candidates.append(build(bez_root_dir, f"default-{alt_decoration!s}", True))

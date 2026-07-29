@@ -747,9 +747,7 @@ def createLibretroConfig(
             retroarch_config['netplay_use_mitm_server'] = "false"
 
     # Display FPS
-    retroarch_config['fps_show'] = 'true' \
-        if system.config.get_bool("display_fps", True, return_values=('true', 'false')) \
-        else 'false'
+    retroarch_config['fps_show'] = 'true' if system.config.get_bool("display_fps", False) else 'false'
     retroarch_config['fps_update_interval'] = '40'
 
     # rumble (to reduce force feedback on devices like RG552)

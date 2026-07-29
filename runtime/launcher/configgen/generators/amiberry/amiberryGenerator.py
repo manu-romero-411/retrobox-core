@@ -129,7 +129,7 @@ class AmiberryGenerator(Generator):
                     commandArray.append(f"joyport0_friendlyname={padfilename}")
 
             # fps
-            if system.config.show_fps:
+            if system.config.get("display_fps"):
                 commandArray.append("-s")
                 commandArray.append("show_leds=true")
 

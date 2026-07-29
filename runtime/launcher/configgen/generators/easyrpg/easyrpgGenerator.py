@@ -26,7 +26,7 @@ class EasyRPGGenerator(Generator):
         commandArray: list[str | Path] = ["easyrpg-player"]
 
         # FPS
-        if system.config.show_fps:
+        if system.config.display_fps:
             commandArray.append("--show-fps")
 
         # Test Play (Debug Mode)

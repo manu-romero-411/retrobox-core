@@ -234,7 +234,8 @@ frontend/.emulationstation/music/*
 frontend/.emulationstation/es_log.*
 frontend/.emulationstation/es_settings.*
 frontend/.emulationstation/es_*input*
-
+frontend/.emulationstation/es_systems*.*
+frontend/.emulationstation/es_features*.*
 bios/
 bios/*
 cheats/

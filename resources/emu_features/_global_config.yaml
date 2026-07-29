@@ -383,7 +383,9 @@ groups:
             value: normal
           - name: hidden
             value: hidden
+
 sharedFeatures:
+  - display_fps
   - discordrpc
   - powermode
   - batterymode
