@@ -160,7 +160,7 @@ class LibretroGenerator(Generator):
             #shutil.copyfile(RETROARCH_CUSTOM, remapconfigDir / "common.rmp")
         # Batocera usa nombres alias; los ficheros upstream de RetroArch usan nombres distintos
 
-        libretro_core = libretro_core = RETROARCH_CORES / f"{self._core_filename(system.config.core)}_libretro.so"
+        libretro_core = RETROARCH_CORES / f"{self._core_filename(system.config.core)}_libretro.so"
         info_file = RETROARCH_SHARE / f"{self._core_filename(system.config.core)}_libretro.info"
         # Retroarch core on the filesystem
         #_logger.warning("DEBUG core seleccionado: %r", system.config.core)
@@ -169,6 +169,7 @@ class LibretroGenerator(Generator):
         # to do a global check : cd /usr/lib/libretro && for i in *.so; do INF=$(echo $i | sed -e s+/usr/lib/libretro+/usr/share/libretro/info+ -e s+\.so+.info+); test -e "$INF" || echo $i; done
         _logger.debug("Looking for core info: %s", info_file)   # ← añade esto
         if not info_file.exists() and not configure_emulator(rom):
+            _logger.error("Core not found: %s", system.config.core)
             raise MissingCore
 
         # The command to run

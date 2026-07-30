@@ -9,7 +9,7 @@ import xml.etree.ElementTree as ET
 from collections.abc import Mapping
 from dataclasses import InitVar, dataclass, field
 from typing import TYPE_CHECKING, Any
-
+from pathlib import Path
 import yaml
 
 from runtime.retrobox_paths import _SYSTEMS_CONF_DIR, DEFAULTS_DIR, ES_SETTINGS_CFG, _SHADERS_DIR, configure_emulator
@@ -110,16 +110,24 @@ def _load_system_config(system_name: str, /) -> dict[str, Any]:
 
     try:
         with open(sys_yaml_path, 'r', encoding='utf-8') as f:
-            yaml_content = yaml.safe_load(f)
+            yaml_content = yaml.safe_load(f)            
     except Exception as e:
         _logger.error("Error reading system YAML %s: %s", system_name, e)
         raise RetroboxException(f"Error reading YAML for {system_name}") from e
 
+    file_stem = Path(sys_yaml_path).stem
+    if not yaml_content \
+    or next(iter(yaml_content)) != file_stem \
+    or next(iter(yaml_content)) != system_name \
+    or file_stem != system_name:
+        raise RetroboxException(
+            f"YML for '{system_name}'|'{file_stem}' not well formed. Check first key")
+    
     if not isinstance(yaml_content, dict) or system_name not in yaml_content:
         return data
 
-    sys_info = yaml_content[system_name]
-    emulators_data = sys_info.get('emulators', {})
+    emulators_data = yaml_content[system_name] \
+        .get('emulators', {})
 
     # 3. Buscar cuál es el emulador y core por defecto (marcado con default: true)
     selected_emulator = None

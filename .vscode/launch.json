@@ -3,107 +3,6 @@
   "configurations": [
 
 
-
-
-  
-
-
-
-
-    {
-      "name": "sgdb-artwork: todos los sistemas",
-      "type": "debugpy",
-      "request": "launch",
-      "program": "${workspaceFolder}/resources/utils/steamgriddb_downloader/sgdb-artwork.py",
-      "envFile": "${workspaceFolder}/.env",
-      "args": [
-        "--roms",
-        "${workspaceFolder}/roms",
-        "--apikey",
-        "a8974d29e7f2a1db3ff3317fdd1396e5",
-        "--systems",
-        "steam",
-        "heroic",
-        "lutris"
-      ],
-      "console": "integratedTerminal"
-    },
-    {
-      "name": "sgdb-artwork: solo heroic",
-      "type": "debugpy",
-      "request": "launch",
-      "program": "${workspaceFolder}/resources/utils/steamgriddb_downloader/sgdb-artwork.py",
-      "envFile": "${workspaceFolder}/.env",
-      "args": [
-        "--roms",
-        "${workspaceFolder}/roms",
-        "--apikey",
-        "a8974d29e7f2a1db3ff3317fdd1396e5",
-        "--systems",
-        "heroic"
-      ],
-      "console": "integratedTerminal"
-    },
-    {
-      "name": "sgdb-artwork: solo steam",
-      "type": "debugpy",
-      "request": "launch",
-      "program": "${workspaceFolder}/resources/utils/steamgriddb_downloader/sgdb-artwork.py",
-      "envFile": "${workspaceFolder}/.env",
-      "args": [
-        "--roms",
-        "${workspaceFolder}/roms",
-        "--apikey",
-        "a8974d29e7f2a1db3ff3317fdd1396e5",
-        "--systems",
-        "steam"
-      ],
-      "console": "integratedTerminal"
-    },
-    {
-      "name": "sgdb-artwork: --force (sobreescribe todo)",
-      "type": "debugpy",
-      "request": "launch",
-      "program": "${workspaceFolder}/resources/utils/steamgriddb_downloader/sgdb-artwork.py",
-      "envFile": "${workspaceFolder}/.env",
-      "args": [
-        "--roms",
-        "${workspaceFolder}/roms",
-        "--apikey",
-        "a8974d29e7f2a1db3ff3317fdd1396e5",
-        "--systems",
-        "steam",
-        "heroic",
-        "lutris",
-        "--force"
-      ],
-      "console": "integratedTerminal"
-    },
-    {
-      "name": "configgen: gamepadly",
-      "type": "debugpy",
-      "request": "launch",
-      "module": "mapper",
-      "cwd": "${workspaceFolder}/runtime/gamepadly",
-      "envFile": "${workspaceFolder}/.env",
-      "args": [
-        "--guid",
-        "0600b7926f0e0000a802000000010000",
-        "--sdl_id",
-        "1",
-        "--player",
-        "1",
-        "--es-input",
-        "${workspaceFolder}/frontend/.emulationstation/es_input.cfg",
-        "--profile",
-        "${workspaceFolder}/resources/apps/youtube.webapp.keys"
-      ],
-      "env": {
-        "PYTHONPATH": "${workspaceFolder}"
-      },
-      "console": "integratedTerminal",
-      "justMyCode": false
-    },
     {
       "name": "configgen: youtube",
       "type": "debugpy",
@@ -613,6 +512,7 @@
       "console": "integratedTerminal",
       "justMyCode": false
     },
+    
     {
       "name": "configgen: Mega Drive (Sonic 2 sin mando)",
       "type": "debugpy",
@@ -629,6 +529,25 @@
         "/tmp/game.xml",
         "-systemname",
         "Mega Drive"
+      ],
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}"
+      },
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      "name": "configgen: mame2010 (namco museum ncv2)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "emulatorlauncher",
+      "cwd": "${workspaceFolder}/runtime/launcher",
+      "envFile": "${workspaceFolder}/.env",
+      "args": [
+        "-system", "mame",
+        "-rom", "/var/penguintb/juegos/roms/mame/ncv2.zip",
+        "-systemname", "Mame",
+        "-gameinfoxml", "/tmp/game.xml",
       ],
       "env": {
         "PYTHONPATH": "${workspaceFolder}"

@@ -399,15 +399,15 @@ def generateMAMEConfigs(playersControllers: Controllers, system: Emulator, rom: 
                                 autoRunCmd = row[1] + "\\n"
                                 autoRunDelay = 3
 
-            inipath = SAVES / 'mame' / 'mame' / 'ini'
+            inipath = BIOS / 'mame' / 'mame' / 'ini'
             command_line += [ '-inipath', f'"{inipath}"' ]
             if autoRunCmd != "":
                 if autoRunCmd.startswith("'"):
                     autoRunCmd.replace("'", "")
-                iniFile = (SAVES / 'mame' / 'mame' / 'ini' / 'batocera.ini').open("w")
-                iniFile.write('autoboot_command          ' + autoRunCmd + "\n")
-                iniFile.write('autoboot_delay            ' + str(autoRunDelay))
-                iniFile.close()
+                ini_file = (BIOS / 'mame' / 'mame' / 'ini' / 'retrobox.ini').open("w")
+                ini_file.write('autoboot_command          ' + autoRunCmd + "\n")
+                ini_file.write('autoboot_delay            ' + str(autoRunDelay))
+                ini_file.close()
             # Create & add a blank disk if needed, insert into drive 2
             # or drive 1 if drive 2 is selected manually.
             if system.config.get_bool('addblankdisk'):
@@ -445,8 +445,8 @@ def generateMAMEConfigs(playersControllers: Controllers, system: Emulator, rom: 
 
     # Share plugins with standalone MAME (except TI99)
     if system.name != "ti99":
-        command_line += [ "-pluginspath", f"/usr/bin/mame/plugins/;{SAVES / 'mame' / 'plugins'}" ]
-        command_line += [ "-homepath" , SAVES / 'mame' / 'plugins' ]
+        command_line += [ "-pluginspath", f"{BIOS / 'mame' / 'plugins'}" ]
+        command_line += [ "-homepath" , BIOS / 'mame' / 'plugins' ]
     # Share samples with standalone MAME (except gamecom and TI99)
     if system.name not in ['gamecom', 'ti99']:
         command_line += [ "-samplepath", BIOS / "mame" / "samples" ]

@@ -289,19 +289,6 @@
 		<region>wr</region>
 	</game>
 	<game>
-		<path>./capriceforever.menu</path>
-		<name>Caprice Forever (Amstrad CPC)</name>
-		<desc>Run Caprice Forever (Amstrad CPC).</desc>
-		<genre>Emulator</genre>
-		<image>./media/capriceforever-logo.png</image>
-		<marquee>./media/capriceforever-logo.png</marquee>
-		<rating>0</rating>
-		<developer>Frederic Coste (Fredouille)</developer>
-		<publisher>CPC-Power</publisher>
-		<lang>fr</lang>
-		<region>wr</region>
-	</game>
-	<game>
 		<path>./m2emulator.menu</path>
 		<name>M2Emulator (Model 2)</name>
 		<desc>Run M2Emulator (Model 2).</desc>
@@ -1113,6 +1100,19 @@
 		<playcount>3</playcount>
 		<lastplayed>20260724T234653</lastplayed>
 		<gametime>211</gametime>
+		<lang>en</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./capriceforever.menu</path>
+		<name>Caprice Forever (Amstrad CPC)</name>
+		<desc>Run Caprice Forever (Amstrad CPC).</desc>
+		<genre>Emulator</genre>
+		<image>./media/capriceforever-logo.png</image>
+		<marquee>./media/capriceforever-logo.png</marquee>
+		<rating>0</rating>
+		<developer>Frederic Coste (Fredouille)</developer>
+		<publisher>CPC-Power</publisher>
 		<lang>en</lang>
 		<region>wr</region>
 	</game>

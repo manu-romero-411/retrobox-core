@@ -16,7 +16,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 logging.basicConfig(
     level=logging.INFO,
     format="[%(levelname)s] %(message)s"
@@ -91,6 +90,15 @@ def setup_emulationstation_config() -> None:
 
 
 def run_emulationstation(argv: list[str]) -> int:
+    setup_emulationstation_config()
+
+    call_retrohook(
+        "_frontend",
+        "emulationstation",
+        "on-frontend-start",
+        argv
+    )
+
     es_binary = _FRONTEND_DIR / "emulationstation"
     if not es_binary.is_file():
         _logger.error("EmulationStation binary not found at %s", es_binary)
@@ -101,6 +109,12 @@ def run_emulationstation(argv: list[str]) -> int:
         cwd=str(_FRONTEND_DIR),
         check=False,
     )
+    call_retrohook(
+        "_frontend",
+        "emulationstation",
+        "on-frontend-stop",
+        argv
+    )
     return result.returncode
 
 # executed after emulationstation exits normally
@@ -109,12 +123,6 @@ def teardown() -> None:
     if TEARDOWN_DONE:
         return
     TEARDOWN_DONE = True
-    call_retrohook(
-        "_frontend",
-        "emulationstation",
-        "on-frontend-stop",
-        []
-    )
 
     for i in [
         ES_SYSTEMS_CFG,
@@ -140,7 +148,12 @@ def teardown() -> None:
 def _handle_sigterm(signum, frame) -> None:
     raise SystemExit(128 + signum)
 
-def parse_args(argv: list[str]) -> tuple[argparse.Namespace, list[str]]:
+# NOTE: EmulationStation's own flags (--resolution, --gamelist-only, --debug, etc.)
+# are declared here as regular argparse arguments (not merely "known"), so that
+# parse_args() rejects anything that isn't one of Retrobox's own flags or a real
+# EmulationStation flag. Any other argument now triggers an argparse error instead
+# of being silently forwarded.
+def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         prog="startup.py",
         description="Arranque de RetroBox",
@@ -159,14 +172,119 @@ def parse_args(argv: list[str]) -> tuple[argparse.Namespace, list[str]]:
         help="No arranca EmulationStation: solo scrapea portadas de PC games vía "
              "SteamGridDB. Sin valor, usa STEAMGRIDDB_API_KEY del .env.",
     )
-    return parser.parse_known_args(argv)
+
+    # EmulationStation's own arguments. These are only validated and reconstructed
+    # here; they are forwarded as-is to the "emulationstation" binary by
+    # build_es_argv() / run_emulationstation().
+    es_group = parser.add_argument_group("EmulationStation arguments")
+    es_group.add_argument(
+        "--resolution", nargs=2, metavar=("WIDTH", "HEIGHT"),
+        help="Try and force a particular resolution.",
+    )
+    es_group.add_argument(
+        "--gamelist-only", action="store_true",
+        help="Skip automatic game search, only read from gamelist.xml.",
+    )
+    es_group.add_argument(
+        "--ignore-gamelist", action="store_true",
+        help="Ignore the gamelist (useful for troubleshooting).",
+    )
+    es_group.add_argument(
+        "--draw-framerate", action="store_true",
+        help="Display the framerate.",
+    )
+    es_group.add_argument(
+        "--no-exit", action="store_true",
+        help="Don't show the exit option in the menu.",
+    )
+    es_group.add_argument(
+        "--no-splash", action="store_true",
+        help="Don't show the splash screen.",
+    )
+    es_group.add_argument(
+        "--debug", action="store_true",
+        help="More logging.",
+    )
+    es_group.add_argument(
+        "--windowed", action="store_true",
+        help="Not fullscreen, should be used with --resolution.",
+    )
+    es_group.add_argument(
+        "--vsync", metavar="1/on|0/off",
+        help="Turn vsync on or off (default is on).",
+    )
+    es_group.add_argument(
+        "--max-vram", metavar="SIZE",
+        help="Max VRAM to use in Mb before swapping. 0 for unlimited.",
+    )
+    es_group.add_argument(
+        "--force-kid", action="store_true",
+        help="Force the UI mode to be Kid.",
+    )
+    es_group.add_argument(
+        "--force-kiosk", action="store_true",
+        help="Force the UI mode to be Kiosk.",
+    )
+    es_group.add_argument(
+        "--force-disable-filters", action="store_true",
+        help="Force the UI to ignore applied filters in gamelist.",
+    )
+    es_group.add_argument(
+        "--monitor", metavar="INDEX",
+        help="Monitor index.",
+    )
+    # --home is intentionally NOT exposed: startup.py always forces it to
+    # _FRONTEND_DIR itself when launching EmulationStation (see
+    # run_emulationstation()), so accepting it here would just cause a
+    # conflicting duplicate --home in the final command line.
+
+    return parser.parse_args(argv)
+
+
+# Rebuilds the argv that gets forwarded to the "emulationstation" binary from
+# the parsed namespace, translating parsed values back into their original
+# flag form and dropping anything that wasn't actually provided by the user.
+def build_es_argv(args: argparse.Namespace) -> list[str]:
+    es_argv: list[str] = []
+
+    if args.resolution:
+        es_argv += ["--resolution", *args.resolution]
+    if args.gamelist_only:
+        es_argv.append("--gamelist-only")
+    if args.ignore_gamelist:
+        es_argv.append("--ignore-gamelist")
+    if args.draw_framerate:
+        es_argv.append("--draw-framerate")
+    if args.no_exit:
+        es_argv.append("--no-exit")
+    if args.no_splash:
+        es_argv.append("--no-splash")
+    if args.debug:
+        es_argv.append("--debug")
+    if args.windowed:
+        es_argv.append("--windowed")
+    if args.vsync is not None:
+        es_argv += ["--vsync", args.vsync]
+    if args.max_vram is not None:
+        es_argv += ["--max-vram", args.max_vram]
+    if args.force_kid:
+        es_argv.append("--force-kid")
+    if args.force_kiosk:
+        es_argv.append("--force-kiosk")
+    if args.force_disable_filters:
+        es_argv.append("--force-disable-filters")
+    if args.monitor is not None:
+        es_argv += ["--monitor", args.monitor]
+
+    return es_argv
+
 
 def main() -> int:
     signal.signal(signal.SIGTERM, _handle_sigterm)
 
     apply_env_defaults()
 
-    args, extra_argv = parse_args(sys.argv[1:])
+    args = parse_args(sys.argv[1:])
 
     if args.disable_internal_display:
         os.environ["RETROBOX_DISABLE_INTERNAL_DISPLAY"] = "1"
@@ -182,21 +300,17 @@ def main() -> int:
             )
         ))
 
-    #forward_argv = list(extra_argv)
-    #if args.disable_internal_display:
-    #    forward_argv.append("-i")
+    # Only real EmulationStation flags reach the ES binary; -i and --scrap-pc
+    # are consumed by Retrobox itself and are never forwarded.
+    es_argv = build_es_argv(args)
 
     try:
-        setup_emulationstation_config()
-
         steam_es_sync(Path(f"{ROMS}/steam"))
         lutris_es_sync(Path(f"{ROMS}/lutris"))
         heroic_es_sync(Path(f"{ROMS}/heroic"))
         _logger.info("=========")
 
-        call_retrohook("_frontend", "emulationstation", "on-frontend-start", sys.argv[1:])
-
-        return run_emulationstation(sys.argv[1:])
+        return run_emulationstation(es_argv)
     finally:
         teardown()
 
