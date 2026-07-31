@@ -3,7 +3,6 @@ ps2:
   manufacturer: Sony
   release: 2000
   hardware: console
-  path: /var/penguintb/juegos/roms/ps2
   extension:
   - .iso
   - .mdf
@@ -39,4 +38,3 @@ ps2:
         play:
           incompatible_extensions:
           - .m3u
-  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

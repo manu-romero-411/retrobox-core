@@ -3,7 +3,6 @@ mz80k:
   manufacturer: Sharp
   release: 1978
   hardware: computer
-  path: /var/penguintb/juegos/roms/mz80k
   extension:
   - .mzf
   - .mzt
@@ -22,4 +21,3 @@ mz80k:
     mame:
       cores:
         mame: {}
-  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

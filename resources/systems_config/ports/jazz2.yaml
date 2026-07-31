@@ -3,7 +3,6 @@ jazz2:
   manufacturer: Ports
   release: 1998
   hardware: port
-  path: /var/penguintb/juegos/roms/jazz2
   extension:
   - .game
   platform:
@@ -15,4 +14,3 @@ jazz2:
       cores:
         jazz2-native:
           default: true
-  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

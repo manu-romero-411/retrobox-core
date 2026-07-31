@@ -3,7 +3,6 @@ ps3:
   manufacturer: Sony
   release: 2006
   hardware: console
-  path: /var/penguintb/juegos/roms/ps3
   extension:
   - .ps3
   - .psn
@@ -17,4 +16,3 @@ ps3:
       cores:
         rpcs3:
           default: true
-  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

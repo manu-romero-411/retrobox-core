@@ -3,7 +3,6 @@ apple2:
   manufacturer: Apple
   release: 1977
   hardware: computer
-  path: /var/penguintb/juegos/roms/apple2
   extension:
   - .nib
   - .do
@@ -46,4 +45,3 @@ apple2:
     mame:
       cores:
         mame: {}
-  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

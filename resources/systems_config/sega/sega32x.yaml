@@ -3,7 +3,6 @@ sega32x:
   manufacturer: Sega
   release: 1994
   hardware: console
-  path: /var/penguintb/juegos/roms/sega32x
   extension:
   - .32x
   - .chd
@@ -21,4 +20,3 @@ sega32x:
       cores:
         picodrive:
           default: true
-  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

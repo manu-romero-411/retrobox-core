@@ -3,7 +3,6 @@ neogeocd:
   manufacturer: SNK
   release: 1994
   hardware: console
-  path: /var/penguintb/juegos/roms/neogeocd
   extension:
   - .cue
   - .iso
@@ -16,4 +15,3 @@ neogeocd:
       cores:
         neocd:
           default: true
-  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

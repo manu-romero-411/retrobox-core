@@ -3,7 +3,6 @@ sg1000:
   manufacturer: Sega
   release: 1983
   hardware: console
-  path: /var/penguintb/juegos/roms/sg1000
   extension:
   - .bin
   - .sg
@@ -18,4 +17,3 @@ sg1000:
         gearsystem: {}
         genesisplusgx:
           default: true
-  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

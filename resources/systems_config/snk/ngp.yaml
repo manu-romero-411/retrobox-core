@@ -3,7 +3,6 @@ ngp:
   manufacturer: SNK
   release: 1998
   hardware: portable
-  path: /var/penguintb/juegos/roms/ngp
   extension:
   - .ngp
   - .zip
@@ -16,4 +15,3 @@ ngp:
       cores:
         mednafen_ngp:
           default: true
-  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

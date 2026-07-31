@@ -3,7 +3,6 @@ systemsp:
   manufacturer: Sega
   release: 2004
   hardware: arcade
-  path: /var/penguintb/juegos/roms/systemsp
   extension:
   - .lst
   - .bin
@@ -22,4 +21,3 @@ systemsp:
       cores:
         flycast:
           default: true
-  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

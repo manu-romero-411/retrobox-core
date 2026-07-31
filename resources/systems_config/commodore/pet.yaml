@@ -3,7 +3,6 @@ pet:
   manufacturer: Commodore
   release: 1977
   hardware: computer
-  path: /var/penguintb/juegos/roms/pet
   extension:
   - .a0
   - .b0
@@ -30,4 +29,3 @@ pet:
           incompatible_extensions:
           - .m3u
           - .7z
-  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

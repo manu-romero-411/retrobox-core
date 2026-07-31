@@ -4,11 +4,9 @@ mame2003:
   manufacturer: Arcade
   release: 2003
   hardware: arcade
-  path: /var/penguintb/juegos/roms/mame2003
   extension:
   - .zip
   - .7z
-  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%
   platform:
   - arcade
   theme: mame

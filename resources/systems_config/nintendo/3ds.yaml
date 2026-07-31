@@ -3,7 +3,6 @@
   manufacturer: Nintendo
   release: 2011
   hardware: portable
-  path: /var/penguintb/juegos/roms/3ds
   extension:
   - .3ds
   - .cci
@@ -24,4 +23,3 @@
       cores:
         azahar:
           default: true
-  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

@@ -3,7 +3,6 @@ supervision:
   manufacturer: Watara
   release: 1992
   hardware: portable
-  path: /var/penguintb/juegos/roms/supervision
   extension:
   - .sv
   - .zip
@@ -16,4 +15,3 @@ supervision:
       cores:
         potator:
           default: true
-  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

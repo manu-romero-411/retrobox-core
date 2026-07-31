@@ -3,7 +3,6 @@ videopacplus:
   manufacturer: Philips
   release: 1983
   hardware: console
-  path: /var/penguintb/juegos/roms/videopacplus
   extension:
   - .bin
   - .zip
@@ -16,4 +15,3 @@ videopacplus:
       cores:
         o2em:
           default: true
-  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

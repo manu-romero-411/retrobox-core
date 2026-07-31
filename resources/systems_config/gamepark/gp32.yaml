@@ -3,7 +3,6 @@ gp32:
   manufacturer: GamePark
   release: 2001
   hardware: portable
-  path: /var/penguintb/juegos/roms/gp32
   extension:
   - .smc
   - .zip
@@ -19,4 +18,3 @@ gp32:
       cores:
         mame:
           default: true
-  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

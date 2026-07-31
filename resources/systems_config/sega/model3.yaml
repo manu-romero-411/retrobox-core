@@ -3,7 +3,6 @@ model3:
   manufacturer: Sega
   release: 1996
   hardware: arcade
-  path: /var/penguintb/juegos/roms/model3
   extension:
   - .zip
   platform:
@@ -21,4 +20,3 @@ model3:
       cores:
         supermodel:
           default: true
-  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

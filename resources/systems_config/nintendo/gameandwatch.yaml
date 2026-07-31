@@ -3,7 +3,6 @@ gameandwatch:
   manufacturer: Nintendo
   release: 1980
   hardware: portable
-  path: /var/penguintb/juegos/roms/gameandwatch
   extension:
   - .mgw
   - .zip
@@ -23,4 +22,3 @@ gameandwatch:
         mame:
           incompatible_extensions:
           - .mgw
-  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

@@ -39,7 +39,7 @@ DEFAULTS_DIR: Final = RESOURCES_DIR / 'configgen'
 HOME_INIT:  Final = DATAINIT_DIR / 'system'
 CONF_INIT:  Final = HOME_INIT / 'configs'
 EMULATORS:  Final = USERDATA / 'emulators'
-ROMS:     Final = USERDATA / 'roms'
+ROMS: Final = os.environ.get('ROMS_DIR', USERDATA / 'roms')
 
 CACHE: Final = _XDG_CACHE / 'retrobox'
 LOGS:  Final = USERDATA / 'logs'
@@ -51,17 +51,15 @@ _EMU_FEATURES_DIR:   Final = RESOURCES_DIR / 'emu_features'
 _SYSTEMS_CONF_DIR:   Final = RESOURCES_DIR / 'systems_config'
 
 # directories for emulator things
-SAVES:       Final = USERDATA / 'saves'
-SCREENSHOTS: Final = USERDATA / 'screenshots'
-RECORDINGS:  Final = USERDATA / 'recordings'
-BIOS:        Final = USERDATA / 'bios'
-OVERLAYS:    Final = USERDATA / 'overlay'
-CHEATS:      Final = USERDATA / 'cheats'
+SAVES:       Final = os.environ.get('SAVES_DIR', USERDATA / 'saves')
+SCREENSHOTS: Final = os.environ.get('SCREENSHOTS_DIR', USERDATA / 'screenshots')
+RECORDINGS:  Final = os.environ.get('RECORDINGS_DIR', USERDATA / 'recordings')
+BIOS:        Final = os.environ.get('BIOS_DIR', USERDATA / 'bios')
+OVERLAYS:    Final = os.environ.get('OVERLAYS_DIR', USERDATA / 'overlay')
+CHEATS:      Final = os.environ.get('CHEATS_DIR', USERDATA / 'cheats')
 
-_SHADERS_DIR:    Final = USERDATA / 'shaders'
-_SHADERS_USER_DIR: Final = _SHADERS_DIR
-_DECORATIONS_DIR:  Final = USERDATA / 'decorations'
-_DECORATIONS_USER_DIR: Final = _DECORATIONS_DIR
+_SHADERS_DIR:    Final = os.environ.get('SHADERS_DIR', USERDATA / 'shaders')
+_DECORATIONS_DIR:  Final = os.environ.get('BEZELS_DIR', USERDATA / 'decorations')
 
 # EmulationStation
 _USER_ES_DIR: Final = _FRONTEND_DIR / '.emulationstation'
@@ -73,6 +71,7 @@ ES_SYSTEMS_TMP: Final = Path("/tmp/retrobox_es_systems.cfg")
 ES_INPUT_CFG: Final = _USER_ES_DIR  / "es_input.cfg"
 ES_INI_TMP: Final = Path("/tmp/retrobox-emulationstation.ini")
 ES_INI_CFG: Final = _USER_ES_DIR / "emulationstation.ini"
+ES_EXECUTABLE = _FRONTEND_DIR / "emulationstation"
 
 # Recursos de ES y configgen (sistema)
 _ES_RESOURCES_DIR:   Final = _FRONTEND_DIR / 'resources'

@@ -3,7 +3,6 @@ thomson:
   manufacturer: Thomson
   release: 1984
   hardware: computer
-  path: /var/penguintb/juegos/roms/thomson
   extension:
   - .fd
   - .sap
@@ -20,4 +19,3 @@ thomson:
       cores:
         theodore:
           default: true
-  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

@@ -3,7 +3,6 @@ gamecom:
   manufacturer: Tiger Electronics
   release: 1997
   hardware: portable
-  path: /var/penguintb/juegos/roms/gamecom
   extension:
   - .bin
   - .tgc
@@ -20,4 +19,3 @@ gamecom:
       cores:
         mame:
           default: true
-  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

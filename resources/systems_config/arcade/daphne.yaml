@@ -3,7 +3,6 @@ daphne:
   manufacturer: Arcade
   release: 1983
   hardware: arcade
-  path: /var/penguintb/juegos/roms/daphne
   extension:
   - .daphne
   - .squashfs
@@ -17,4 +16,3 @@ daphne:
       cores:
         hypseus-singe:
           default: true
-  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

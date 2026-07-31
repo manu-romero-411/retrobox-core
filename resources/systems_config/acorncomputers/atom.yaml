@@ -3,7 +3,6 @@ atom:
   manufacturer: Acorn Computers
   release: 1979
   hardware: computer
-  path: /var/penguintb/juegos/roms/atom
   extension:
   - .wav
   - .tap
@@ -38,4 +37,3 @@ atom:
       cores:
         mame:
           default: true
-  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

@@ -3,7 +3,6 @@ amiga500:
   manufacturer: Commodore
   release: 1987
   hardware: computer
-  path: /var/penguintb/juegos/roms/amiga500
   extension:
   - .adf
   - .uae
@@ -43,4 +42,3 @@ amiga500:
         puae:
           default: true
         puae2021: {}
-  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

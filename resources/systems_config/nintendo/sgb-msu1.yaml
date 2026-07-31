@@ -3,7 +3,6 @@ sgb-msu1:
   manufacturer: Nintendo
   release: 1994
   hardware: console
-  path: /var/penguintb/juegos/roms/sgb-msu1
   extension:
   - .gb
   - .gbc
@@ -20,4 +19,3 @@ sgb-msu1:
         bsnes:
           default: true
         bsnes_hd: {}
-  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

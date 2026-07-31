@@ -3,7 +3,6 @@ mohaa:
   manufacturer: Ports
   release: 2002
   hardware: port
-  path: /var/penguintb/juegos/roms/mohaa
   extension:
   - .mohaa
   platform:
@@ -15,4 +14,3 @@ mohaa:
       cores:
         openmohaa:
           default: true
-  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

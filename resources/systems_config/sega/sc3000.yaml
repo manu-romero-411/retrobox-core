@@ -3,7 +3,6 @@ sc3000:
   manufacturer: Sega
   release: 1983
   hardware: computer
-  path: /var/penguintb/juegos/roms/sc3000
   extension:
   - .bin
   - .sg
@@ -23,4 +22,3 @@ sc3000:
     mame:
       cores:
         mame: {}
-  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

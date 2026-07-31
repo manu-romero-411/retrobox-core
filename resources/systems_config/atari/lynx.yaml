@@ -3,7 +3,6 @@ lynx:
   manufacturer: Atari
   release: 1989
   hardware: portable
-  path: /var/penguintb/juegos/roms/lynx
   extension:
   - .bll
   - .lnx
@@ -21,4 +20,3 @@ lynx:
         holani: {}
         mednafen_lynx:
           default: true
-  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

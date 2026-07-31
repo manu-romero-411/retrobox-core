@@ -3,7 +3,6 @@ sgb:
   manufacturer: Nintendo
   release: 1994
   hardware: console
-  path: /var/penguintb/juegos/roms/sgb
   extension:
   - .gb
   - .gbc
@@ -19,4 +18,3 @@ sgb:
         mesen-s:
           default: true
         mgba: {}
-  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

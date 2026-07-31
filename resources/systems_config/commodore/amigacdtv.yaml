@@ -3,7 +3,6 @@ amigacdtv:
   manufacturer: Commodore
   release: 1991
   hardware: console
-  path: /var/penguintb/juegos/roms/amigacdtv
   extension:
   - .bin
   - .cue
@@ -25,4 +24,3 @@ amigacdtv:
         puae:
           default: true
         puae2021: {}
-  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

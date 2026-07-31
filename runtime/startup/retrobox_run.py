@@ -7,9 +7,9 @@ y arranca el frontend (EmulationStation)
 
 from __future__ import annotations
 
+import argparse
 import logging
 import os
-import argparse
 import shutil
 import signal
 import subprocess
@@ -20,64 +20,75 @@ logging.basicConfig(
     level=logging.INFO,
     format="[%(levelname)s] %(message)s"
 )
-
 _logger = logging.getLogger(__name__)
+
+TEARDOWN_DONE = False
 
 RETROBOX_ROOTDIR = os.environ.get("RETROBOX_ROOTDIR", Path(__file__).resolve().parents[2])
 sys.path.insert(0, str(f"{RETROBOX_ROOTDIR}/"))
 sys.path.insert(0, str(f"{RETROBOX_ROOTDIR}/runtime"))
 sys.path.insert(0, str(f"{RETROBOX_ROOTDIR}/runtime/launcher"))
 
-from runtime.startup.es_ini_generator import generate_emulationstation_ini
-from runtime.startup.features_list_generator import generate_es_features
-from runtime.startup.system_list_generator import generate_es_systems
-from runtime.startup.pcgames_utils import heroic_es_sync, lutris_es_sync, steam_es_sync
-from runtime.launcher.emulatorlauncher import call_retrohook
-from runtime.steamgriddb_scraper.steamgriddb_scraper import run_steamgriddb_scraper
-from configgen.generators.libretro.libretroPaths import _RETROARCH_AUDIO_FILTERS, _RETROARCH_VIDEO_FILTERS
+# pylint: disable=wrong-import-position
+# Bootstrap: hay que aplicar los overrides del .env ANTES de importar
+# retrobox_paths (o cualquier módulo que lo importe transitivamente), porque
+# sus constantes son Final y se congelan en el momento del import.
+from runtime.startup.env_handling import apply_env_defaults
+
+apply_env_defaults(RETROBOX_ROOTDIR)
+
 from runtime.retrobox_paths import (
     _FRONTEND_DIR,
-    _GAMEPADLY_PROFILES,
-    _GAMEPADLY_USER_PROFILES,
-    _DECORATIONS_DIR,
-    ENV_FILE,
     ES_FEATURES_CFG,
     ES_FEATURES_TMP,
     ES_INI_CFG,
     ES_INI_TMP,
     ES_SYSTEMS_CFG,
     ES_SYSTEMS_TMP,
-    LOGS,
+    ES_EXECUTABLE,
     ROMS,
     RUNTIME_DIR,
-    SAVES,
-    SCREENSHOTS,
-    _SHADERS_DIR,
     _USER_ES_DIR,
     USERDATA,
     mkdir_if_not_exists,
-) 
+)
+from runtime.startup.es_ini_generator import generate_emulationstation_ini
+from runtime.startup.features_list_generator import generate_es_features
+from runtime.startup.system_list_generator import generate_es_systems
+from runtime.startup.pcgames_utils import heroic_es_sync, lutris_es_sync, steam_es_sync
+from runtime.launcher.emulatorlauncher import call_retrohook
+from runtime.steamgriddb_scraper.steamgriddb_scraper import run_steamgriddb_scraper
+# pylint: enable=wrong-import-position
 
-TEARDOWN_DONE = False
+def is_emulationstation_running(ES_BINARY: Path) -> bool:
+    """
+    Comprueba si ya hay un proceso EmulationStation vivo (de cualquier
+    instancia de Retrobox), inspeccionando /proc directamente en vez de
+    fiarnos de un pidfile que podría quedar obsoleto (p. ej. tras un SIGKILL
+    que se salte el teardown()).
+    """
+    current_pid = os.getpid()
+    try:
+        proc_entries = list(Path("/proc").iterdir())
+    except FileNotFoundError:
+        return False
 
-def load_env(env_path: Path) -> dict[str, str]:
-    env: dict[str, str] = {}
-    if not env_path.is_file():
-        return env
-    for raw_line in env_path.read_text().splitlines():
-        line = raw_line.strip()
-        if not line or line.startswith("#") or "=" not in line:
+    for entry in proc_entries:
+        if not entry.name.isdigit():
             continue
-        key, _, value = line.partition("=")
-        key = key.strip()
-        value = value.strip().strip('"').strip("'")
-        if key:
-            env[key] = value
-    return env
-
-def apply_env_defaults() -> None:
-    for key, value in load_env(ENV_FILE).items():
-        os.environ.setdefault(key, value)
+        pid = int(entry.name)
+        if pid == current_pid:
+            continue
+        try:
+            cmdline = (entry / "cmdline").read_bytes()
+        except (FileNotFoundError, PermissionError, ProcessLookupError):
+            continue
+        if not cmdline:
+            continue
+        argv0 = cmdline.split(b"\0", 1)[0]
+        if Path(argv0.decode(errors="replace")).name == ES_BINARY.name:
+            return True
+    return False
 
 # EmulationStation config
 def setup_emulationstation_config() -> None:
@@ -99,13 +110,12 @@ def run_emulationstation(argv: list[str]) -> int:
         argv
     )
 
-    es_binary = _FRONTEND_DIR / "emulationstation"
-    if not es_binary.is_file():
-        _logger.error("EmulationStation binary not found at %s", es_binary)
+    if not ES_EXECUTABLE.is_file():
+        _logger.error("EmulationStation binary not found at %s", ES_EXECUTABLE)
         return 1
     _logger.info("=========")
     result = subprocess.run(
-        [str(es_binary), "--home", str(_FRONTEND_DIR), *argv],
+        [str(ES_EXECUTABLE), "--home", str(_FRONTEND_DIR), *argv],
         cwd=str(_FRONTEND_DIR),
         check=False,
     )
@@ -278,11 +288,8 @@ def build_es_argv(args: argparse.Namespace) -> list[str]:
 
     return es_argv
 
-
 def main() -> int:
     signal.signal(signal.SIGTERM, _handle_sigterm)
-
-    apply_env_defaults()
 
     args = parse_args(sys.argv[1:])
 
@@ -295,13 +302,15 @@ def main() -> int:
 
     if args.scrap_pc is not None:
         return run_steamgriddb_scraper(
-            apikey=str(
-                os.getenv("STEAMGRIDDB_API_KEY", str(args.scrap_pc)
-            )
-        ))
+            apikey=str(os.getenv("STEAMGRIDDB_API_KEY", str(args.scrap_pc)))
+        )
 
-    # Only real EmulationStation flags reach the ES binary; -i and --scrap-pc
-    # are consumed by Retrobox itself and are never forwarded.
+    if is_emulationstation_running(ES_EXECUTABLE):
+        _logger.error(
+            "Retrobox (emulationstation) is already running"
+        )
+        return 1
+
     es_argv = build_es_argv(args)
 
     try:
@@ -315,4 +324,5 @@ def main() -> int:
         teardown()
 
 if __name__ == "__main__":
+    
     raise SystemExit(main())

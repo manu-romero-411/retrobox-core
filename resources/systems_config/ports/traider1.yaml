@@ -3,7 +3,6 @@ traider1:
   manufacturer: Ports
   release: 1996
   hardware: port
-  path: /var/penguintb/juegos/roms/traider1
   extension:
   - .croft
   platform:
@@ -15,4 +14,3 @@ traider1:
       cores:
         tr1x:
           default: true
-  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

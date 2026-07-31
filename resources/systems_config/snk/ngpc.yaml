@@ -3,7 +3,6 @@ ngpc:
   manufacturer: SNK
   release: 1999
   hardware: portable
-  path: /var/penguintb/juegos/roms/ngpc
   extension:
   - .ngc
   - .zip
@@ -16,4 +15,3 @@ ngpc:
       cores:
         mednafen_ngp:
           default: true
-  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

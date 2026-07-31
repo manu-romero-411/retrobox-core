@@ -3,7 +3,6 @@ supergrafx:
   manufacturer: NEC
   release: 1989
   hardware: console
-  path: /var/penguintb/juegos/roms/supergrafx
   extension:
   - .pce
   - .sgx
@@ -20,4 +19,3 @@ supergrafx:
       cores:
         mednafen_supergrafx:
           default: true
-  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

@@ -3,7 +3,6 @@ cave3rd:
   manufacturer: Sega
   release: 2004
   hardware: arcade
-  path: /var/penguintb/juegos/roms/cave3rd
   extension:
   - .zip
   - .7z
@@ -22,4 +21,3 @@ cave3rd:
     mame:
       cores:
         mame: {}
-  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

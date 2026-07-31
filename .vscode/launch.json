@@ -4,6 +4,26 @@
 
 
     {
+      "name": "boot",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "retrobox_run",
+      "cwd": "${workspaceFolder}/runtime/startup",
+      "envFile": "${workspaceFolder}/.env",
+      "args": [
+       
+      ],
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}",
+        //"ROMS_DIR": "/var/penguintb/juegos/roms"
+
+      },
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+
+
+    {
       "name": "configgen: youtube",
       "type": "debugpy",
       "request": "launch",
@@ -110,6 +130,7 @@
       "console": "integratedTerminal",
       "justMyCode": false
     },
+    
     {
       "name": "configgen: Switch eden-emu (ROM genérica)",
       "type": "debugpy",

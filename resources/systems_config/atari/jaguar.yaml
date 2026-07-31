@@ -3,7 +3,6 @@ jaguar:
   manufacturer: Atari
   release: 1993
   hardware: console
-  path: /var/penguintb/juegos/roms/jaguar
   extension:
   - .j64
   - .jag
@@ -26,4 +25,3 @@ jaguar:
         virtualjaguar:
           incompatible_extensions:
           - .7z
-  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

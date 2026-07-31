@@ -4,16 +4,12 @@ This submodule regenerates es_systems.cfg based on actual system directories sit
 import logging
 import os
 from pathlib import Path
-import sys
 from typing import Final
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 import yaml
 from yaml.scanner import ScannerError
 from yaml.parser import ParserError
-
-ROOTDIR = Path(__file__).resolve().parents[2]
-sys.path.append(str(ROOTDIR))
 
 logging.basicConfig(
     level=logging.INFO,
@@ -110,7 +106,7 @@ def generate_es_systems(base_path: Path = _SYSTEMS_CONF_DIR, output_path: Path =
 
     # Forzar la ruta a string para evitar falsos positivos de iteración en linters
     safe_base_dir = os.fspath(base_dir)
-
+    print(os.environ)
     for root_dir, _, files in os.walk(safe_base_dir):
         for file in files:
             if not file.endswith(".yaml") or file == "defaults.yml":
@@ -132,7 +128,7 @@ def generate_es_systems(base_path: Path = _SYSTEMS_CONF_DIR, output_path: Path =
             system_elem = ET.SubElement(root, "system")
             name_elem = ET.SubElement(system_elem, "name")
             name_elem.text = sys_name
-
+            print(f"================ {ROMS}/{sys_name}")
             if "path" not in sys_content:
                 sys_content["path"] = str(Path(f"{ROMS}/{sys_name}"))
 

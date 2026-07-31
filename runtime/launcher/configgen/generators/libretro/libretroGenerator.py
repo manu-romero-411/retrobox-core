@@ -31,7 +31,7 @@ from runtime.retrobox_paths import (
     OVERLAYS,
     ROMS,
     SAVES,
-    _SHADERS_USER_DIR,
+    _SHADERS_DIR,
     configure_emulator,
     mkdir_if_not_exists
 )
@@ -116,9 +116,9 @@ class LibretroGenerator(Generator):
 
             shader_filename = f"{game_shader}.{shader_type}p"
             _logger.debug("searching shader %s", shader_filename)
-            if (_SHADERS_USER_DIR / shader_filename).exists():
-                video_shader_dir = _SHADERS_USER_DIR
-                _logger.debug("shader %s found in %s", shader_filename, _SHADERS_USER_DIR)
+            if (_SHADERS_DIR / shader_filename).exists():
+                video_shader_dir = _SHADERS_DIR
+                _logger.debug("shader %s found in %s", shader_filename, _SHADERS_DIR)
             else:
                 video_shader_dir = RETROARCH_SHADERS / f"shaders_{shader_type}"
             video_shader = video_shader_dir / shader_filename

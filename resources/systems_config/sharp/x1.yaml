@@ -3,7 +3,6 @@ x1:
   manufacturer: Sharp
   release: 1982
   hardware: computer
-  path: /var/penguintb/juegos/roms/x1
   extension:
   - .dx1
   - .zip
@@ -25,4 +24,3 @@ x1:
       cores:
         x1:
           default: true
-  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

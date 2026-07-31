@@ -3,7 +3,6 @@ namco2x6:
   manufacturer: Sony / Namco
   release: 2000
   hardware: arcade
-  path: /var/penguintb/juegos/roms/namco2x6
   extension:
   - .zip
   platform:
@@ -16,4 +15,3 @@ namco2x6:
       cores:
         play:
           default: true
-  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

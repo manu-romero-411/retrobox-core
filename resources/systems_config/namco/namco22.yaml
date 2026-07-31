@@ -3,7 +3,6 @@ namco22:
   manufacturer: Namco
   release: 1992
   hardware: arcade
-  path: /var/penguintb/juegos/roms/namco22
   extension:
   - .zip
   - .7z
@@ -19,4 +18,3 @@ namco22:
     mame:
       cores:
         mame: {}
-  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

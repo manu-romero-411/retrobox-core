@@ -3,7 +3,6 @@ quake3:
   manufacturer: Ports
   release: 1999
   hardware: port
-  path: /var/penguintb/juegos/roms/quake3
   extension:
   - .quake3
   platform:
@@ -15,4 +14,3 @@ quake3:
       cores:
         vkquake3:
           default: true
-  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

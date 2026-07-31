@@ -3,7 +3,6 @@ megaduck:
   manufacturer: Welback Holdings
   release: 1993
   hardware: portable
-  path: /var/penguintb/juegos/roms/megaduck
   extension:
   - .bin
   - .zip
@@ -20,4 +19,3 @@ megaduck:
       cores:
         mame:
           default: true
-  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

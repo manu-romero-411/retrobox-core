@@ -3,7 +3,6 @@ dice:
   manufacturer: Arcade
   release: 1972
   hardware: arcade
-  path: /var/penguintb/juegos/roms/dice
   extension:
   - .zip
   - .dmy
@@ -16,4 +15,3 @@ dice:
       cores:
         dice:
           default: true
-  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

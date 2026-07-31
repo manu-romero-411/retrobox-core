@@ -3,7 +3,6 @@ dxx-rebirth:
   manufacturer: Ports
   release: 1998
   hardware: port
-  path: /var/penguintb/juegos/roms/dxx-rebirth
   extension:
   - .d1x
   - .d2x
@@ -16,4 +15,3 @@ dxx-rebirth:
       cores:
         dxx-rebirth:
           default: true
-  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%

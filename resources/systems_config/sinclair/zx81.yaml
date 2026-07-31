@@ -3,7 +3,6 @@ zx81:
   manufacturer: Sinclair
   release: 1981
   hardware: computer
-  path: /var/penguintb/juegos/roms/zx81
   extension:
   - .tzx
   - .p
@@ -17,4 +16,3 @@ zx81:
       cores:
         '81':
           default: true
-  command: /usr/bin/python3 /var/penguin/juegos/retrobox/runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%
