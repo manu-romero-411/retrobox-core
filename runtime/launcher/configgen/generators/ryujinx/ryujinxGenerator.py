@@ -451,7 +451,7 @@ class RyujinxGenerator(Generator):
         data['docked_mode'] = system.config.get_bool('ryu_docked_mode', True, return_values=(True, False))
 
         # V-Sync
-        data['enable_vsync'] = system.config.get_bool('ryu_vsync', False, return_values=(True, False))
+        data['enable_vsync'] = system.config.get_bool("use_vsync", False))
 
         # graphics backend
         if system.isOptSet('ryu_backend'):

@@ -20,7 +20,7 @@ groups:
             - name: Enhanced OpenGL
               value: rend2
         - name: VSYNC
-          value: iortcw_vsync
+          value: use_vsync
           description: Fix screen tearing.
           choices:
             - name: Disabled (Default)

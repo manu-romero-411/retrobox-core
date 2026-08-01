@@ -1,4 +1,4 @@
-fbneo:
+fbalpha:
   fullname: Final Burn Alpha
   manufacturer: Arcade
   release: 2007
@@ -8,7 +8,7 @@ fbneo:
   - .7z
   platform:
   - arcade
-  theme: fbneo
+  theme: fbalpha
   emulators:
     libretro:
       cores:

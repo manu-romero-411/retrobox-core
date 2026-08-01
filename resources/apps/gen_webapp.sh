@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
-# =============================================================================
 # gen_webapps.sh
 # Genera archivos .webapp/.kodi y gamelist.xml para servicios de streaming
 # Ejecutar desde el directorio donde quieras los archivos de salida
-# =============================================================================
 
 set -uo pipefail
 
@@ -13,10 +11,8 @@ ICONS_DIR="${DESTINO}/app-icons"
 mkdir -p "$DESTINO"
 mkdir -p "$ICONS_DIR"
 
-# =============================================================================
 # Definición de servicios
 # Formato: "id|nombre|url|desarrollador|descripción|fecha(YYYYMMDD)|extensión"
-# =============================================================================
 
 declare -a SERVICIOS=(
     "youtube|YouTube|https://www.youtube.com|Google LLC|Plataforma de vídeo online con millones de vídeos subidos por usuarios y creadores de todo el mundo.|20050214|webapp"
@@ -32,9 +28,7 @@ declare -a SERVICIOS=(
     "netflix|Netflix|https://www.netflix.com|Netflix Inc.|El mayor servicio de streaming del mundo, con series, películas y documentales originales disponibles en más de 190 países.|20070116|webapp"
 )
 
-# =============================================================================
 # Generar archivos .webapp / .kodi
-# =============================================================================
 
 echo "Generando archivos de rom..."
 
@@ -46,9 +40,7 @@ for entrada in "${SERVICIOS[@]}"; do
     echo "  ✔ ${id}.${ext}"
 done
 
-# =============================================================================
 # Generar gamelist.xml
-# =============================================================================
 
 echo ""
 echo "Generando gamelist.xml..."
@@ -94,9 +86,7 @@ cat >> "$GAMELIST" << 'XMLFOOTER'
 </gameList>
 XMLFOOTER
 
-# =============================================================================
 # Resumen
-# =============================================================================
 
 echo ""
 echo "══════════════════════════════════════════════"

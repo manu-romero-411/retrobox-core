@@ -76,6 +76,9 @@ def generate_emulationstation_ini(target: Path = ES_INI_TMP):
 
     _logger.info("Begin generating %s", target)
 
+    if target.exists():
+        target.unlink()
+
     try:
         target.write_text(INI_CONTENT, encoding="utf-8")
         _logger.info("Successfully generated: %s", target)

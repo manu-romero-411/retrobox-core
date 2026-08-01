@@ -68,9 +68,9 @@ def get_bezel_infos(
             "specific_to_game": bezel_game,
         }
 
-    bez_games_dir = _DECORATIONS_DIR / bezel / "games"
-    bez_systems_dir = _DECORATIONS_DIR / bezel / "systems"
-    bez_root_dir = _DECORATIONS_DIR / bezel
+    bez_games_dir = Path(f"{_DECORATIONS_DIR}/{bezel}/games")
+    bez_systems_dir = Path(f"{_DECORATIONS_DIR}/{bezel}/systems")
+    bez_root_dir = Path(f"{_DECORATIONS_DIR}/{bezel}")
 
     candidates: list[BezelInfos] = [
         build(bez_games_dir / system_name, rom_base, True),

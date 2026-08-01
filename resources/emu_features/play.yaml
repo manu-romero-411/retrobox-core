@@ -55,7 +55,7 @@ groups:
           - name: Enabled
             value: true
       - name: VSYNC
-        value: play_vsync
+        value: use_vsync
         description: Fix screen tearing.
         choices:
           - name: Disabled

@@ -23,7 +23,7 @@ def configureOptions(vpinballSettings: CaseSensitiveConfigParser, system: Emulat
     vpinballSettings.set("Player", "MaxFramerate", system.config.get("vpinball_maxframerate", ""))
 
     # vsync
-    vpinballSettings.set("Player", "SyncMode", system.config.get("vpinball_vsync", "2"))
+    vpinballSettings.set("Player", "SyncMode", system.config.get("use_vsync", "2"))
 
     # avoid default keys like q while it differs depending on the keyboard mapping (making hotkeys fail)
     # 62 = F4 : https://github.com/vpinball/vpinball/tree/standalone/standalone#keyboard

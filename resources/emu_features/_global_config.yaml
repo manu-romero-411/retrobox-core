@@ -153,6 +153,10 @@ groups:
               value: 1
             - name: Off
               value: 0
+        - name: VSYNC
+          value: use_vsync
+          description: Can cause conflict with KDE Plasma's Wayland compositor, but mitigates tearing on X11.
+          preset: switchauto
     items:
       - name: DISCORD RPC
         value: discordrpc
@@ -384,7 +388,9 @@ groups:
           - name: hidden
             value: hidden
 
+
 sharedFeatures:
+  - use_vsync
   - display_fps
   - discordrpc
   - powermode

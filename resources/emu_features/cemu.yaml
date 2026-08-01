@@ -58,7 +58,7 @@ groups:
           - name: Surround
             value: 2
       - name: VSYNC
-        value: cemu_vsync
+        value: use_vsync
         description: Fix screen tearing.
         choices:
           - name: Off (Default)

@@ -63,7 +63,7 @@ groups:
           - name: Native Vulkan
             value: Vulkan
       - name: VSYNC
-        value: xenia_vsync
+        value: use_vsync
         description: Fix screen tearing. With Some games you need to turn VSync on in the games options.
         choices:
           - name: Disabled
@@ -71,7 +71,7 @@ groups:
           - name: Enabled
             value: True
       - name: VSYNC FPS
-        value: xenia_vsync_fps
+        value: use_vsync
         description: Manually set VSYNC frames per second. Ideally this should match your monitor refresh rate.
         choices:
           - name: 50fps

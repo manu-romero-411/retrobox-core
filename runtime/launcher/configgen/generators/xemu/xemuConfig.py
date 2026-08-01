@@ -125,7 +125,8 @@ def createXemuConfig(iniConfig: CaseSensitiveConfigParser, system: Emulator, rom
     iniConfig.set("display.window", "startup_size", f'"{window_res}"')
 
     # Vsync
-    iniConfig.set("display.window", "vsync", system.config.get("xemu_vsync", "true"))
+    iniConfig.set("display.window", "vsync",
+                system.config.get_bool("use_vsync", True, return_values=("true", "false")))
 
     # don't show the menubar
     iniConfig.set("display.ui", "show_menubar", "false")

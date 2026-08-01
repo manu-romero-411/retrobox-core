@@ -164,7 +164,7 @@ groups:
             - name: 5120x2880
               value: 300
         - name: VSYNC
-          value: rpcs3_vsync
+          value: use_vsync
           description: Can fix screen tearing on unorthodox displays (most LCDs don't need this).
           choices:
             - name: Off (Default)

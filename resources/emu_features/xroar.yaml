@@ -74,7 +74,7 @@ groups:
           - name: Disabled
             value: False
       - name: VSYNC
-        value: xroar_vsync
+        value: use_vsync
         description: ""
         choices:
           - name: Enabled

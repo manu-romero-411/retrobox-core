@@ -34,7 +34,7 @@ groups:
             - name: 10x (4000x2400)
               value: 10
         - name: VSYNC
-          value: azahar_use_vsync_new
+          value: use_vsync
           description: Fix screen tearing. CPU heavy.
           choices:
             - name: Off

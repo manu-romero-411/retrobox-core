@@ -169,7 +169,7 @@ class CemuGenerator(Generator):
         # Async VULKAN Shader compilation
         CemuGenerator.setSectionConfig(config, graphic_root, "AsyncCompile", system.config.get_bool("cemu_async", True, return_values=("true", "false")))
         # Vsync
-        CemuGenerator.setSectionConfig(config, graphic_root, "VSync", system.config.get("cemu_vsync", "0"))  # 0 = Off
+        CemuGenerator.setSectionConfig(config, graphic_root, "VSync", system.config.get("use_vsync", "0"))  # 0 = Off
         # Upscale Filter
         CemuGenerator.setSectionConfig(config, graphic_root, "UpscaleFilter", system.config.get("cemu_upscale", "2"))  # 2 = Hermite
         # Downscale Filter

@@ -439,25 +439,28 @@ class LibretroGenerator(Generator):
             # retroarch need the file be named with .entry at the end to load the state
             # a link would work, but on fat32, we need to copy
             args_array.extend(["-e", state_slot])
-
+        args_array.extend(["--verbose"])
         # force X11/Xwayland if we are using MangoHud with OpenGL backend (causes crashes in my PC)
         use_hud = bool(
             (hud_value := system.config.get('hud')) and hud_value.lower() != 'none'
         )
-        force_x11 = False
-        if use_hud and self.usesOpenGLDirectPreload: 
-            force_x11 = True
+        
+        forced_x11 = \
+            system.config.get_bool("force_x11", False, return_values=(True, False))
+        
+        if use_hud and self.usesOpenGLDirectPreload:
+            forced_x11 = True
 
         # generate bash wrapper
         command_wrapper = [generate_bash_wrapper(
             system.config.emulator, _RETROARCH_BIN, args_array,
-            force_x11=False
+            force_x11=forced_x11
         )]
 
         return Command.Command(array=command_wrapper, env={
             "XDG_CONFIG_HOME": _RETROARCH_XDG,
             "SDL_GAMECONTROLLERCONFIG": generate_sdl_game_controller_config(playersControllers),
-            "KWIN_DRM_NO_AMS": "1",
+            #"KWIN_DRM_NO_AMS": "1",
             #"PULSE_LATENCY_MSEC": "60"
         })
 
@@ -477,23 +480,24 @@ def gfx_backend_get(system: Emulator) -> str:
     backend = system.config.get("gfxbackend")
 
     if backend:
-        setManually = True
+        set_manually = True
         backend = _gfx_backend_check(backend)
     else:
-        setManually = False
+        set_manually = False
         backend = _gfx_backend_check("glcore")
-    
+
     # Retroarch has flipped between using opengl or gl, correct the setting here if needed.
     if backend == "opengl":
         backend = "gl"
 
     # No tocar si el usuario lo eligió manualmente
-    if not setManually:
+    if not set_manually:
         core = system.config.core
 
         # Overrides específicos por core
         if backend in ["gl", "glcore"]:
-            if backend == "gl" and core in ['kronos', 'mupen64plus-next', 'melonds', 'beetle-psx-hw']:
+            if backend == "gl" \
+            and core in ['kronos', 'mupen64plus-next', 'melonds', 'beetle-psx-hw']:
                 backend = "glcore"
             if backend == "glcore" and core in ['parallel_n64', 'yabasanshiro', 'boom3']:
                 backend = "gl"

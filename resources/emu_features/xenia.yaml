@@ -15,7 +15,7 @@ groups:
           - name: Native Vulkan
             value: Vulkan
       - name: VSYNC
-        value: xenia_vsync
+        value: use_vsync
         description: Fix screen tearing.
         choices:
           - name: Disabled

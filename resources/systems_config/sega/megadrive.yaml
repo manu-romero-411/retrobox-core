@@ -22,6 +22,5 @@ megadrive:
         blastem: {}
         genesisplusgx:
           default: true
-        genesisplusgx-expanded: {}
         genesisplusgx-wide: {}
         picodrive: {}

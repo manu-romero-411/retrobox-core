@@ -385,7 +385,11 @@ def configureINI(config_directory: Path, bios_directory: Path, system: Emulator,
     pcsx2INIConfig.set("EmuCore/GS", "AspectRatio", system.config.get("pcsx2_ratio", "Auto 4:3/3:2"))
 
     # Vsync
-    pcsx2INIConfig.set("EmuCore/GS","VsyncEnable", system.config.get("pcsx2_vsync", "0"))
+    pcsx2INIConfig.set(
+        "EmuCore/GS",
+        "VsyncEnable",
+        system.config.get_bool("use_vsync", False, return_values=("0", "1"))
+    )
 
     # Resolution
     pcsx2INIConfig.set("EmuCore/GS", "upscale_multiplier", system.config.get("pcsx2_resolution", "1"))

@@ -404,7 +404,7 @@ groups:
               value: 1
       DISPLAY:
         - name: VSYNC
-          value: ryu_vsync
+          value: use_vsync
           description: Fix the heavy screen tearing in games
           choices:
             - name: Off

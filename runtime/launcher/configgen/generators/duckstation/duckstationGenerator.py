@@ -191,7 +191,7 @@ class DuckstationGenerator(Generator):
         if aspect_ratio is not system.config.MISSING and  aspect_ratio != "4:3":
             system.config['bezel'] = "none"
         # Vsync
-        settings.set("Display", "VSync", system.config.get("duckstation_vsync", "false"))
+        settings.set("Display", "VSync", system.config.get("use_vsync", "false"))
         # CropMode
         settings.set("Display", "CropMode", system.config.get("duckstation_CropMode", "Overscan"))
         # Enable Frameskipping = option missing

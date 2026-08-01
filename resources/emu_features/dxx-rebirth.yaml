@@ -11,7 +11,7 @@ groups:
   GENERAL:
     items:
       - name: VSYNC
-        value: rebirth_vsync
+        value: use_vsync
         description: Fix screen tearing.
         choices:
           - name: Disabled (Default)

@@ -4,7 +4,7 @@ groups:
   GENERAL:
     items:
       - name: VSYNC
-        value: openbor_vsync
+        value: use_vsync
         description: Fix screen tearing.
         choices:
           - name: Disabled

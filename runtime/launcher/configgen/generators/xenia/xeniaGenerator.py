@@ -190,7 +190,7 @@ class XeniaGenerator(Generator):
         config['GPU']['gpu'] = system.config.get('xenia_api', 'D3D12').lower()
 
         # vsync
-        config['GPU']['vsync'] = system.config.get_bool('xenia_vsync', True)
+        config['GPU']['vsync'] = system.config.get_bool("use_vsync", True, return_values=("true", "false"))
         config['GPU']['framerate_limit'] = system.config.get_int('xenia_vsync_fps', 0)
         # page state
         config['GPU']['clear_memory_page_state'] = system.config.get_bool('xenia_page_state')

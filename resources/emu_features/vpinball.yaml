@@ -71,7 +71,7 @@ groups:
           - name: 144
             value: 144
       - name: VSYNC
-        value: vpinball_vsync
+        value: use_vsync
         description: "Fix screen tearing. Adaptive Sync (Default) synchronizes on video sync, except for late frames (below target FPS) which are displayed immediately."
         choices:
           - name: None

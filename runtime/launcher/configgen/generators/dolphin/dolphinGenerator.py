@@ -320,7 +320,7 @@ class DolphinGenerator(Generator):
         dolphinGFXSettings.set("Settings", "InternalResolution", system.config.get("internal_resolution", "1"))
 
         # VSync
-        dolphinGFXSettings.set("Hardware", "VSync", str(system.config.get_bool('vsync', True)))
+        dolphinGFXSettings.set("Hardware", "VSync", system.config.get_bool('vsync', True, return_values=("True", "False")))
 
         # Anisotropic filtering
         dolphinGFXSettings.set("Enhancements", "MaxAnisotropy", system.config.get("anisotropic_filtering", "0"))

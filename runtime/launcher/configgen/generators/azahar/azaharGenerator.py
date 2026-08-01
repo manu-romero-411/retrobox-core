@@ -181,7 +181,7 @@ class AzaharGenerator(Generator):
             else:
                 _logger.debug("Discrete GPU is not available on the system. Using default.")
         # Use VSYNC
-        azaharConfig.set("Renderer", "use_vsync_new", system.config.get_bool("azahar_use_vsync_new", True, return_values=("true", "false")))
+        azaharConfig.set("Renderer", "use_vsync_new", system.config.get_bool("use_vsync", True, return_values=("true", "false")))
         azaharConfig.set("Renderer", r"use_vsync_new\default", "false")
         # Resolution Factor
         azaharConfig.set("Renderer", "resolution_factor", system.config.get("azahar_resolution_factor", "1"))

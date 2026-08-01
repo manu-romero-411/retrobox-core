@@ -251,7 +251,7 @@ class BigPEmuGenerator(Generator):
         config["BigPEmuConfig"]["Video"]["DisplayFrequency"] = round(float(videoMode.getRefreshRate()))
 
         # User selections
-        config["BigPEmuConfig"]["Video"]["VSync"] = system.config.get("bigpemu_vsync", 1)
+        config["BigPEmuConfig"]["Video"]["VSync"] = system.config.get_bool("use_vsync", True, return_values=(1,0))
         config["BigPEmuConfig"]["Video"]["ScreenAspect"] = system.config.get_int("bigpemu_ratio", 2)
         config["BigPEmuConfig"]["Video"]["LockAspect"] = 1
 

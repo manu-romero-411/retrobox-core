@@ -11,9 +11,18 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
     from io import BufferedRandom, BufferedWriter, TextIOWrapper
 
-# ---------------------------------------------------------------------------
+def check_env_dirs(variable: str, default_dir: Path) -> Path:
+    """
+    Function to safely assign directory values and env overrides
+    """
+    override = Path(os.environ.get(variable, str(default_dir)))
+    if override.exists() \
+    and override.is_dir() \
+    and os.access(override, os.R_OK):
+        return override
+    return default_dir
+
 # Helpers XDG
-# ---------------------------------------------------------------------------
 _USER_HOME:   Final = Path.home()
 _XDG_DATA:   Final = Path.home() / '.local' / 'share'
 _XDG_CACHE:  Final = Path.home() / '.cache'
@@ -24,9 +33,8 @@ _SYSTEM_LOCAL_SHARE: Final = Path('/usr/local/share')
 # ---------------------------------------------------------------------------
 # Paths de instalación del sistema (igual que en batocera)
 # ---------------------------------------------------------------------------
-RETROBOX_ROOTDIR: Final = Path(
-    os.environ.get('RETROBOX_ROOTDIR', Path(__file__).resolve().parents[1])
-)
+RETROBOX_ROOTDIR: Final = check_env_dirs('RETROBOX_ROOTDIR', Path(__file__).resolve().parents[1])
+
 USERDATA: Final = RETROBOX_ROOTDIR
 
 ENV_FILE = RETROBOX_ROOTDIR / ".env"
@@ -39,7 +47,7 @@ DEFAULTS_DIR: Final = RESOURCES_DIR / 'configgen'
 HOME_INIT:  Final = DATAINIT_DIR / 'system'
 CONF_INIT:  Final = HOME_INIT / 'configs'
 EMULATORS:  Final = USERDATA / 'emulators'
-ROMS: Final = os.environ.get('ROMS_DIR', USERDATA / 'roms')
+ROMS: Final = check_env_dirs('ROMS_DIR', USERDATA / 'roms')
 
 CACHE: Final = _XDG_CACHE / 'retrobox'
 LOGS:  Final = USERDATA / 'logs'
@@ -51,15 +59,15 @@ _EMU_FEATURES_DIR:   Final = RESOURCES_DIR / 'emu_features'
 _SYSTEMS_CONF_DIR:   Final = RESOURCES_DIR / 'systems_config'
 
 # directories for emulator things
-SAVES:       Final = os.environ.get('SAVES_DIR', USERDATA / 'saves')
-SCREENSHOTS: Final = os.environ.get('SCREENSHOTS_DIR', USERDATA / 'screenshots')
-RECORDINGS:  Final = os.environ.get('RECORDINGS_DIR', USERDATA / 'recordings')
-BIOS:        Final = os.environ.get('BIOS_DIR', USERDATA / 'bios')
-OVERLAYS:    Final = os.environ.get('OVERLAYS_DIR', USERDATA / 'overlay')
-CHEATS:      Final = os.environ.get('CHEATS_DIR', USERDATA / 'cheats')
+SAVES:       Final = check_env_dirs('SAVES_DIR', USERDATA / 'saves')
+SCREENSHOTS: Final = check_env_dirs('SCREENSHOTS_DIR', USERDATA / 'screenshots')
+RECORDINGS:  Final = check_env_dirs('RECORDINGS_DIR', USERDATA / 'recordings')
+BIOS:        Final = check_env_dirs('BIOS_DIR', USERDATA / 'bios')
+OVERLAYS:    Final = check_env_dirs('OVERLAYS_DIR', USERDATA / 'overlay')
+CHEATS:      Final = check_env_dirs('CHEATS_DIR', USERDATA / 'cheats')
 
-_SHADERS_DIR:    Final = os.environ.get('SHADERS_DIR', USERDATA / 'shaders')
-_DECORATIONS_DIR:  Final = os.environ.get('BEZELS_DIR', USERDATA / 'decorations')
+_SHADERS_DIR:    Final = check_env_dirs('SHADERS_DIR', USERDATA / 'shaders')
+_DECORATIONS_DIR:  Final = check_env_dirs('BEZELS_DIR', USERDATA / 'decorations')
 
 # EmulationStation
 _USER_ES_DIR: Final = _FRONTEND_DIR / '.emulationstation'

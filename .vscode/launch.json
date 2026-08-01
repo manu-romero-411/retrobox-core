@@ -3,6 +3,8 @@
   "configurations": [
 
 
+
+
     {
       "name": "boot",
       "type": "debugpy",
@@ -425,6 +427,30 @@
         "n64",
         "-rom",
         "/penguintb/juegos/roms/n64/Banjo-Kazooie (USA) (Rev 1).z64",
+        "-gameinfoxml",
+        "/tmp/game.xml",
+        "-systemname",
+        "Nintendo 64"
+      ],
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}",
+        "PATH": "${workspaceFolder}:/home/manuel/.local/bin:/usr/local/bin:/usr/bin:/bin"
+      },
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      "name": "configgen: N64 (jet force gemini)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "emulatorlauncher",
+      "cwd": "${workspaceFolder}/runtime/launcher",
+      "envFile": "${workspaceFolder}/.env",
+      "args": [
+        "-system",
+        "n64",
+        "-rom",
+        "/penguintb/juegos/roms/n64/Jet Force Gemini (Europe) (En,Fr,De,Es).z64",
         "-gameinfoxml",
         "/tmp/game.xml",
         "-systemname",

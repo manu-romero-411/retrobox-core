@@ -143,7 +143,7 @@ groups:
           - name: OpenGL (Compute shader)
             value: 2
       - name: VSYNC
-        value: melonds_vsync
+        value: use_vsync
         description: Fix screen tearing. CPU heavy.
         choices:
           - name: Off

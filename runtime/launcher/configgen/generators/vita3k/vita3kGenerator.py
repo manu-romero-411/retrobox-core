@@ -69,7 +69,7 @@ class Vita3kGenerator(Generator):
         vita3kymlconfig["enable-fxaa"] = system.config.get_bool("vita3k_fxaa", return_values=("true", "false"))
 
         # Set VSync
-        vita3kymlconfig["v-sync"] = system.config.get_bool("vita3k_vsync", True, return_values=("true", "false"))
+        vita3kymlconfig["v-sync"] = system.config.get_bool("use_vsync", "false")
 
         # Set the anisotropic filtering
         vita3kymlconfig["anisotropic-filtering"] = system.config.get_int("vita3k_anisotropic", 1)

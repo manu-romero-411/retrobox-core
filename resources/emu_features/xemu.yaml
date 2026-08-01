@@ -61,7 +61,7 @@ groups:
           - name: 10x (6400x4800)
             value: 10
       - name: VSYNC
-        value: xemu_vsync
+        value: use_vsync
         description: Fix screen tearing.
         choices:
           - name: Off

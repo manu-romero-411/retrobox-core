@@ -177,6 +177,7 @@ def createLibretroConfig(
     # Set the correct value to match ES confirm /cancel inputs
     retroarch_config['menu_swap_ok_cancel_buttons'] = swap_buttons
     
+    retroarch_config['video_vsync'] = system.config.get_bool("use_vsync", True, return_values=("true", "false"))
     retroarch_config["video_viewport_bias_x"] = "0.500000"
     retroarch_config["video_viewport_bias_y"] = "0.500000"
     retroarch_config['video_driver'] = f'"{gfxBackend}"'  # needed for the ozone menu
@@ -200,6 +201,7 @@ def createLibretroConfig(
     # audio latency in 64 = best balance with audio perf
     retroarch_config['audio_latency'] = system.config.get("audio_latency", '64')
     retroarch_config['audio_volume'] = system.config.get("audio_volume", '0')
+    retroarch_config['audio_out_rate'] = system.config.get("audio_out_rate", '48000')
 
     display_rotate = system.config.get_str("display.rotate")
 
@@ -244,11 +246,12 @@ def createLibretroConfig(
     retroarch_config['libretro_info_path'] = RETROARCH_CORES
 
     retroarch_config['video_fullscreen'] = 'true'
+    retroarch_config['video_windowed_fullscreen'] = 'false'
 
     retroarch_config['sort_savefiles_enable'] = 'false'     # ensure we don't save system.name + core
     retroarch_config['sort_savestates_enable'] = 'false'    # ensure we don't save system.name + core
-    retroarch_config['savestate_directory'] = SAVES / system.name
-    retroarch_config['savefile_directory'] = SAVES / system.name
+    retroarch_config['savestate_directory'] = Path(f"{SAVES}/{system.name}")
+    retroarch_config['savefile_directory'] = Path(f"{SAVES}/{system.name}")
 
     # Forced values (so that if the config is not correct, fix it)
     if system.config.core == 'tgbdual':

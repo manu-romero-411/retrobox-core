@@ -37,6 +37,14 @@ groups:
             value: vulkan
   ADVANCED OPTIONS:
     items:
+      - name: FORCE X11
+        value: force_x11
+        description: Force to run RetroArch in X11 (Xwayland) mode. May alter performance for better or worse.
+        preset: switchauto
+      - name: VSYNC
+        value: use_vsync
+        description: Can cause conflict with KDE Plasma's Wayland compositor, but mitigates tearing on X11.
+        preset: switchauto
       - name: AUDIO DRIVER
         value: audio_driver
         description: "Changing driver can improve audio performance and reduce distortion. Alsathread is recommended for low-end systems."

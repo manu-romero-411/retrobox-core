@@ -197,7 +197,7 @@ groups:
           preset: sliderauto
           preset-parameters: 0 360 10
         - name: VSYNC
-          value: jkdf2_vsync
+          value: use_vsync
           description: Fix screen tearing.
           choices:
             - name: Disabled

@@ -19,7 +19,7 @@ groups:
           - name: Vulkan
             value: 1
       - name: VSYNC
-        value: gz_vsync
+        value: use_vsync
         description: Fix screen tearing. With Some games you need to turn VSync on in the games options.
         choices:
           - name: Disabled

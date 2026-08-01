@@ -60,7 +60,7 @@ class OpenborGenerator(Generator):
         # options
         config.save("stretch", system.config.get("openbor_ratio", "0"))
         config.save("swfilter", system.config.get("openbor_filter", "0"))
-        config.save("vsync", system.config.get("openbor_vsync", "1"))
+        config.save("vsync", system.config.get("use_vsync", "1"))
         config.save("fpslimit", system.config.get("openbor_limit", "0"))
 
         # controllers

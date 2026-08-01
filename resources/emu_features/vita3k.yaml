@@ -47,7 +47,7 @@ groups:
         description: "Anti-aliasing is a technique for smoothing out jagged edges."
         preset: switchauto
       - name: VSYNC
-        value: vita3k_vsync
+        value: use_vsync
         description: Fix screen tearing.
         preset: switchauto
       - name: ANISOTROPIC FILTERING

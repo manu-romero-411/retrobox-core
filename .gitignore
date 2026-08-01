@@ -220,6 +220,7 @@ __marimo__/
 .streamlit/secrets.toml
 
 # otros directorios y archivos
+frontend/emulationstation*
 frontend/.emulationstation/music/
 frontend/.emulationstation/music/*
 frontend/.emulationstation/themes/
