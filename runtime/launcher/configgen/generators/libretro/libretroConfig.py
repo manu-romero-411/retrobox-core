@@ -246,7 +246,7 @@ def createLibretroConfig(
     retroarch_config['libretro_info_path'] = RETROARCH_CORES
 
     retroarch_config['video_fullscreen'] = 'true'
-    retroarch_config['video_windowed_fullscreen'] = 'false'
+    retroarch_config['video_windowed_fullscreen'] = 'true'
 
     retroarch_config['sort_savefiles_enable'] = 'false'     # ensure we don't save system.name + core
     retroarch_config['sort_savestates_enable'] = 'false'    # ensure we don't save system.name + core

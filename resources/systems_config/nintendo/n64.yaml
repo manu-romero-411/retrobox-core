@@ -15,12 +15,12 @@ n64:
   emulators:
     libretro:
       cores:
-        mupen64plus-next: {}
+        mupen64plus-next:
+          default: true
         parallel_n64: {}
     mupen64plus:
       cores:
         glide64mk2:
-          default: true
           incompatible_extensions:
           - .zip
           - .7z
