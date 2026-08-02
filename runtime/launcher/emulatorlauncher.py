@@ -12,6 +12,7 @@ import json
 import logging
 import os
 from pathlib import Path
+import shutil
 import signal
 import subprocess
 import sys
@@ -173,6 +174,9 @@ def start_rom(args: argparse.Namespace, maxnbplayers: int, rom: Path, original_r
                      effective_core]
                 )
 
+                power_prof = system.config.get("power_profile", "balanced")
+                previous_power_profile = apply_power_profile(power_prof)      
+       
                 # run the emulator
                 with (
                     GamepadManager(
@@ -298,7 +302,7 @@ def start_rom(args: argparse.Namespace, maxnbplayers: int, rom: Path, original_r
                 )
 
             finally:
-                pass
+                restore_power_profile(previous_power_profile)
     # exit
     return exit_code
 
@@ -532,6 +536,60 @@ def getHudConfig(system: Emulator, systemName: str, emulator: str, core: str, ro
     configstr = configstr.replace("%EMULATORCORE%", hudConfig_protectStr(emulatorstr))
     return configstr.replace("%THUMBNAIL%", hudConfig_protectStr(game_thumbnail))
 
+_POWER_PROFILES_BIN = "powerprofilesctl"
+_VALID_POWER_PROFILES = {"power-saver", "balanced", "performance"}
+
+def apply_power_profile(desired_profile: str) -> str | None:
+    """
+    Aplica el power-profile pedido. Devuelve el perfil que estaba activo antes
+    (o None si no se pudo leer / powerprofilesctl no está disponible).
+    """
+    if shutil.which(_POWER_PROFILES_BIN) is None:
+        _logger.debug("%s not found, skipping power profile management", _POWER_PROFILES_BIN)
+        return None
+
+    desired_profile = (desired_profile or "balanced").strip().lower()
+    if desired_profile not in _VALID_POWER_PROFILES:
+        _logger.warning("unknown power_profile '%s', falling back to 'balanced'", desired_profile)
+        desired_profile = "balanced"
+
+    previous_profile = None
+    try:
+        result = subprocess.run(
+            [_POWER_PROFILES_BIN, "get"],
+            check=True, capture_output=True, text=True
+        )
+        previous_profile = result.stdout.strip()
+        _logger.debug("current power profile before launch: %s", previous_profile)
+    except Exception as e:
+        _logger.warning("could not read current power profile: %s", e)
+
+    if previous_profile != desired_profile:
+        try:
+            subprocess.run(
+                [_POWER_PROFILES_BIN, "set", desired_profile],
+                check=True, capture_output=True, text=True
+            )
+            _logger.info("power profile set to '%s'", desired_profile)
+        except Exception as e:
+            _logger.warning("failed to set power profile to '%s': %s", desired_profile, e)
+    else:
+        _logger.debug("power profile already '%s', nothing to do", desired_profile)
+
+    return previous_profile
+
+
+def restore_power_profile(previous_profile: str | None) -> None:
+    if not previous_profile or previous_profile not in _VALID_POWER_PROFILES:
+        return
+    try:
+        subprocess.run(
+            [_POWER_PROFILES_BIN, "set", previous_profile],
+            check=True, capture_output=True, text=True
+        )
+        _logger.info("power profile restored to '%s'", previous_profile)
+    except Exception as e:
+        _logger.warning("failed to restore power profile to '%s': %s", previous_profile, e)
 
 def _controller_monitor_thread():
     """

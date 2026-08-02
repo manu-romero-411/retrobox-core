@@ -2,7 +2,7 @@ emulator_name: vkquake3
 features:
   - padtokeyboard
 sharedFeatures:
-  - powermode
+  - power_profile
   - tdp
   - videomode
   - bezel

@@ -3,7 +3,7 @@ core_name: pcsx2
 features:
   - cheevos
 sharedFeatures:
-  - powermode
+  - power_profile
   - tdp
   - videomode
   - bezel

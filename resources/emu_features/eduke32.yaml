@@ -1,6 +1,6 @@
 emulator_name: eduke32
 sharedFeatures:
-  - powermode
+  - power_profile
   - tdp
   - videomode
   - bezel

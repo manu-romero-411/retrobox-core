@@ -2,7 +2,7 @@ emulator_name: supermodel
 features:
   - padtokeyboard
 sharedFeatures:
-  - powermode
+  - power_profile
   - tdp
   - videomode
   - bezel

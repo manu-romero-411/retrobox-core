@@ -1,6 +1,6 @@
 emulator_name: cannonball
 sharedFeatures:
-  - powermode
+  - power_profile
   - tdp
   - videomode
 groups:

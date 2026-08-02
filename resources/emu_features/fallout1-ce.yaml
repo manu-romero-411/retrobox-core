@@ -2,7 +2,7 @@ emulator_name: "fallout1-ce"
 features:
   - padtokeyboard
 sharedFeatures:
-  - powermode
+  - power_profile
   - tdp
   - videomode
   - bezel

@@ -2,7 +2,7 @@ emulator_name: etlegacy
 features:
   - padtokeyboard
 sharedFeatures:
-  - powermode
+  - power_profile
   - tdp
   - videomode
   - bezel

@@ -1,6 +1,6 @@
 emulator_name: vita3k
 sharedFeatures:
-  - powermode
+  - power_profile
   - tdp
   - videomode
 groups:

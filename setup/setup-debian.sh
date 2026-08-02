@@ -25,7 +25,8 @@ sudo apt-get install -y \
     python3-qrcode \
     python3-pil \
     python3-evdev \
-    python3-pygame
+    python3-pygame \
+    power-profiles-daemon
 
 sudo cp ../resources/udev/*.rules /etc/udev/rules.d/
 sudo usermod -aG input $(whoami)

@@ -1,6 +1,6 @@
 emulator_name: rpcs3
 sharedFeatures:
-  - powermode
+  - power_profile
   - tdp
   - videomode
   - bezel

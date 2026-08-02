@@ -1,6 +1,6 @@
 emulator_name: "xenia-canary"
 sharedFeatures:
-  - powermode
+  - power_profile
   - tdp
   - videomode
 groups:

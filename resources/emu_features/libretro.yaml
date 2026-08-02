@@ -1,6 +1,6 @@
 emulator_name: libretro
 sharedFeatures:
-  - powermode
+  - power_profile
   - tdp
   - videomode
   - ratio

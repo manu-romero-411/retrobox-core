@@ -6,7 +6,7 @@ sharedFeatures:
   - hud
   - hud_corner
   - discordrpc
-  - powermode
+  - power_profile
   - tdp
 groups:
   SWITCH OPTIONS:

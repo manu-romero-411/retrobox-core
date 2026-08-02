@@ -1,6 +1,6 @@
 emulator_name: ppsspp
 sharedFeatures:
-  - powermode
+  - power_profile
   - tdp
   - videomode
   - rewind

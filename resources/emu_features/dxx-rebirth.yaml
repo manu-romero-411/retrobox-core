@@ -2,7 +2,7 @@ emulator_name: "dxx-rebirth"
 features:
   - padtokeyboard
 sharedFeatures:
-  - powermode
+  - power_profile
   - tdp
   - videomode
   - bezel

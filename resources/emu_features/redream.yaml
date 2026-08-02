@@ -1,6 +1,6 @@
 emulator_name: redream
 sharedFeatures:
-  - powermode
+  - power_profile
   - tdp
   - videomode
   - bezel

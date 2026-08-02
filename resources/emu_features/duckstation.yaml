@@ -2,7 +2,7 @@ emulator_name: duckstation
 features:
   - cheevos
 sharedFeatures:
-  - powermode
+  - power_profile
   - tdp
   - videomode
   - bezel

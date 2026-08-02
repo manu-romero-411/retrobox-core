@@ -5,6 +5,7 @@
 
 
 
+
     {
       "name": "boot",
       "type": "debugpy",
@@ -390,7 +391,7 @@
         "-system",
         "gamecube",
         "-rom",
-        "/penguintb/juegos/roms/gamecube/Mario Kart - Double Dash!! (Europe) (En,Fr,De,Es,It).rvz",
+        "/var/penguintb/juegos/roms/gamecube/Mario Kart - Double Dash!! (Europe) (En,Fr,De,Es,It).rvz",
         "-gameinfoxml",
         "/tmp/game.xml",
         "-systemname",
@@ -426,7 +427,7 @@
         "-system",
         "n64",
         "-rom",
-        "/penguintb/juegos/roms/n64/Banjo-Kazooie (USA) (Rev 1).z64",
+        "/var/penguintb/juegos/roms/n64/Banjo-Kazooie (USA) (Rev 1).z64",
         "-gameinfoxml",
         "/tmp/game.xml",
         "-systemname",
@@ -450,7 +451,7 @@
         "-system",
         "n64",
         "-rom",
-        "/penguintb/juegos/roms/n64/Jet Force Gemini (Europe) (En,Fr,De,Es).z64",
+        "/var/penguintb/juegos/roms/n64/Jet Force Gemini (Europe) (En,Fr,De,Es).z64",
         "-gameinfoxml",
         "/tmp/game.xml",
         "-systemname",
@@ -708,7 +709,7 @@
         "-system",
         "gb",
         "-rom",
-        "/penguintb/juegos/roms/gb/A-mazing Tater (USA).zip",
+        "/var/penguintb/juegos/roms/gb/A-mazing Tater (USA).zip",
         "-gameinfoxml",
         "/tmp/game.xml",
         "-systemname",

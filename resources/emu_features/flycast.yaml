@@ -2,7 +2,7 @@ emulator_name: flycast
 features:
   - cheevos
 sharedFeatures:
-  - powermode
+  - power_profile
   - tdp
   - videomode
   - bezel

@@ -2,7 +2,7 @@ emulator_name: iortcw
 features:
   - padtokeyboard
 sharedFeatures:
-  - powermode
+  - power_profile
   - tdp
   - videomode
   - bezel

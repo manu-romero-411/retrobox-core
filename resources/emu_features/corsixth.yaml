@@ -2,7 +2,7 @@ emulator_name: corsixth
 features:
   - padtokeyboard
 sharedFeatures:
-  - powermode
+  - power_profile
   - tdp
   - videomode
 groups:

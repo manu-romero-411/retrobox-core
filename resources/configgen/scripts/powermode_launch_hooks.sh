@@ -29,7 +29,7 @@ is_power_connected() {
 handle_game_stop() {
     # Check if power connected
     if is_power_connected; then
-        POWER_MODE="$(/usr/bin/batocera-settings-get-master global.powermode)"
+        POWER_MODE="$(/usr/bin/batocera-settings-get-master global.power_profile)"
     else
         POWER_MODE="$(/usr/bin/batocera-settings-get-master global.batterymode)"
     fi
@@ -47,20 +47,20 @@ handle_game_start() {
 
     # Check for user set game-specific setting
     if [ -n "${GAME_NAME}" ]; then
-        POWER_MODE_SETTING="${SYSTEM_NAME}[\"${GAME_NAME}\"].powermode"
+        POWER_MODE_SETTING="${SYSTEM_NAME}[\"${GAME_NAME}\"].power_profile"
         POWER_MODE="$(/usr/bin/batocera-settings-get-master "${POWER_MODE_SETTING}")"
     fi
 
     # If no user set game-specific setting, check for system-specific setting
     if [ -z "${POWER_MODE}" ] && [ -n "${SYSTEM_NAME}" ]; then
-        POWER_MODE_SETTING="${SYSTEM_NAME}.powermode"
+        POWER_MODE_SETTING="${SYSTEM_NAME}.power_profile"
         POWER_MODE="$(/usr/bin/batocera-settings-get-master "${POWER_MODE_SETTING}")"
     fi
 
     # If no system-specific setting, check for global setting
     if [ -z "${POWER_MODE}" ]; then
         if is_power_connected; then
-            POWER_MODE="$(/usr/bin/batocera-settings-get-master global.powermode)"
+            POWER_MODE="$(/usr/bin/batocera-settings-get-master global.power_profile)"
         else
             POWER_MODE="$(/usr/bin/batocera-settings-get-master global.batterymode)"
         fi

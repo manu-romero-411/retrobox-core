@@ -1,6 +1,6 @@
 emulator_name: easyrpg
 sharedFeatures:
-  - powermode
+  - power_profile
   - tdp
   - videomode
   - bezel

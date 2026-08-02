@@ -1,1 +1,3 @@
 emulator_name: pcsx2
+sharedFeatures:
+  - power_profile

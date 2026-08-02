@@ -2,7 +2,7 @@ emulator_name: mugen
 features:
   - padtokeyboard
 sharedFeatures:
-  - powermode
+  - power_profile
   - tdp
   - videomode
 groups:

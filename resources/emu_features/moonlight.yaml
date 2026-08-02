@@ -1,6 +1,6 @@
 emulator_name: moonlight
 sharedFeatures:
-  - powermode
+  - power_profile
   - tdp
   - videomode
   - ratio

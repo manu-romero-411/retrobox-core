@@ -1,5 +1,5 @@
 emulator_name: steam
 sharedFeatures:
-  - powermode
+  - power_profile
   - tdp
   - videomode

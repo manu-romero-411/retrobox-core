@@ -282,6 +282,17 @@ groups:
             value: 10.0
           - name: +12
             value: 12.0
+      - name: POWER PROFILE
+        value: power_profile
+        description: Scalates performance as needed. May not work properly on battery.
+        choices:
+          - name: balanced
+            value: balanced
+          - name: power-saver
+            value: power-saver
+          - name: performance
+            value: performance
+
   CONTROLS:
     submenus:
       LIGHT GUNS:
@@ -393,7 +404,7 @@ sharedFeatures:
   - use_vsync
   - display_fps
   - discordrpc
-  - powermode
+  - power_profile
   - batterymode
   - tdp
   - videomode
@@ -415,4 +426,5 @@ sharedFeatures:
   - vrr_runloop_enable
   - video_threaded
   - rumble_gain
+  - power_profile
 emulator_name: _global_config

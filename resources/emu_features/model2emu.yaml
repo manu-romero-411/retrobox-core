@@ -2,7 +2,7 @@ emulator_name: model2emu
 features:
   - padtokeyboard
 sharedFeatures:
-  - powermode
+  - power_profile
   - tdp
   - videomode
 groups:
