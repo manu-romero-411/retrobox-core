@@ -6,7 +6,7 @@ emuconfig:
   path: ../resources/es_menu
   extension:
   - .menu
-  command: ../resources/utils/retrobox-emuconfig %ROM%
+  command: python3 ../runtime/launcher/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -gameinfoxml %GAMEINFOXML% -systemname %SYSTEMNAME%
   platform:
   - emuconfig
   theme: emuconfig

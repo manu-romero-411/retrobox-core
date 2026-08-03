@@ -3,6 +3,8 @@ from __future__ import annotations
 from abc import ABCMeta, abstractmethod
 from typing import TYPE_CHECKING
 
+from configgen.exceptions import RetroboxException
+
 if TYPE_CHECKING:
     from collections.abc import Mapping
     from pathlib import Path
@@ -27,6 +29,11 @@ class Generator(metaclass=ABCMeta):
         gameResolution: Resolution,
     ) -> Command:
         ...
+
+    def check_if_exists(self, what: Path, emuname: str) -> None:
+        if not what.exists():
+            raise RetroboxException(f"Path for {emuname} does not exist: {what}")
+        return
 
     def getResolutionMode(self, config: SystemConfig) -> str:
         return config['videomode']

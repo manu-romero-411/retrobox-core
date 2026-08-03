@@ -2,12 +2,15 @@ from __future__ import annotations
 
 import logging
 import os
+from pathlib import Path
 import sys
 import glob
 from typing import TYPE_CHECKING
 
-from runtime.launcher.configgen import Command
-from runtime.launcher.configgen.utils.configparser import CaseSensitiveRawConfigParser
+from ..Generator import Generator
+
+from ... import Command
+from ...utils.configparser import CaseSensitiveRawConfigParser
 from runtime.retrobox_paths import DEFAULTS_DIR, SAVES, configure_emulator
 from ...input import Input
 import datetime
@@ -23,7 +26,7 @@ from ctypes import create_string_buffer
 _logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from runtime.launcher.configgen.batoceraTypes import HotkeysContext
+    from ...batoceraTypes import HotkeysContext
 
 class DictToObject:
     def __init__(self, dictionary):
@@ -230,7 +233,7 @@ def eden_list_sdl_gamepads(sdlversion):
 
 def read_file_lower(path):
     try:
-        return pathlib.Path(path).read_text().strip().lower()
+        return Path(path).read_text().strip().lower()
     except FileNotFoundError:
         return ""
 
@@ -240,8 +243,7 @@ def is_steamdeck():
         return True
     return False
 
-class EdenGenerator(runtime.launcher.configgen.generators.Generator.Generator):
-
+class EdenGenerator(Generator):
     def getHotkeysContext(self) -> HotkeysContext:
         return {
             "name": "switch-emu",

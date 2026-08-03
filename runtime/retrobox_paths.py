@@ -112,7 +112,7 @@ GAMEPADLY_MAPPER: Final = _GAMEPADLY_DIR / "gamepadly_mapper.py"
 
 # Utilidades
 def configure_emulator(rom: Path, /) -> bool:
-    return str(rom) == 'config'
+    return str(rom) == 'config' or rom.suffix == ".menu"
 
 def mkdir_if_not_exists(dir):
     try:

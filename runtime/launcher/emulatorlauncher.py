@@ -105,7 +105,7 @@ def start_rom(args: argparse.Namespace, maxnbplayers: int, rom: Path, original_r
     system_name: str = args.system
     _logger.debug("Running system: %s", system_name)
     system = Emulator(args, original_rom)
-
+    
     _logger.debug("Settings: %s", {
         key: '***' if 'password' in key else value for key, value in system.config.items()
     })

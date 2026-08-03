@@ -7,7 +7,7 @@ from runtime.launcher.configgen import Command
 from runtime.retrobox_paths import SCREENSHOTS, configure_emulator, mkdir_if_not_exists
 from ..Generator import Generator
 from .ares_config import _ares_resolve_shader, write_ares_config
-from .ares_paths import _ARES_LIBDIR, _ARES_SHADERS_DIR, ARES_BIN, _ARES_CFGDIR, _ARES_SAVES, _ARES_XDG
+from .ares_paths import _ARES_LIBDIR, _ARES_SHADERS_DIR, _ARES_SHARE, ARES_BIN, _ARES_CFGDIR, _ARES_SAVES, _ARES_XDG
 
 _logger = logging.getLogger(__name__)
 
@@ -17,6 +17,9 @@ class AresGenerator(Generator):
         return True
 
     def generate(self, system, rom, playersControllers, metadata, guns, wheels, gameResolution):
+        self.check_if_exists(ARES_BIN, system.config.emulator)
+        self.check_if_exists(_ARES_SHARE, system.config.emulator)
+
         # Asegurar que la estructura de directorios de configuración y guardado existe
         mkdir_if_not_exists(_ARES_CFGDIR)
         mkdir_if_not_exists(_ARES_SAVES / system.name)
@@ -25,8 +28,6 @@ class AresGenerator(Generator):
         # Generar o actualizar el fichero settings.bml antes de arrancar
         write_ares_config(system, playersControllers)
 
-        if not ARES_BIN.exists():
-            raise RetroboxException(f"{system.config.emulator} executable not found at: {ARES_BIN}")
 
         command_array = [str(ARES_BIN)]
         args_array = []
@@ -47,8 +48,7 @@ class AresGenerator(Generator):
 
         if not configure_emulator(rom):
             args_array.append(str(rom))
-
-        command_array.extend(args_array)
+            command_array.extend(args_array)
 
         env = {
             "XDG_DATA_HOME": str(_ARES_XDG),

@@ -6,6 +6,8 @@
 
 
 
+
+
     {
       "name": "boot",
       "type": "debugpy",
@@ -728,7 +730,7 @@
       "module": "emulatorlauncher",
       "cwd": "${workspaceFolder}/runtime/launcher",
       "envFile": "${workspaceFolder}/.env",
-      "args": ["-system", "config", "-emulator", "libretro", "-rom", "config"],
+      "args": ["-system", "config", "-rom", "/var/penguin/juegos/retrobox/resources/es_menu/libretro.menu"],
       "env": {
         "PYTHONPATH": "${workspaceFolder}"
       },

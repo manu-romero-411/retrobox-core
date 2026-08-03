@@ -85,6 +85,9 @@ class LibretroGenerator(Generator):
     # Main entry of the module
     # Configure retroarch and return a command
     def generate(self, system, rom, playersControllers, metadata, guns, wheels, gameResolution):
+        self.check_if_exists(_RETROARCH_BIN, system.config.emulator)
+        self.check_if_exists(RETROARCH_CORES, system.config.emulator)
+
         # Fix for the removed MESS/MAMEVirtual cores
         if system.config.core in [ 'mess', 'mamevirtual' ]:
             system.config['core'] = 'mame'
@@ -162,6 +165,7 @@ class LibretroGenerator(Generator):
 
         libretro_core = RETROARCH_CORES / f"{self._core_filename(system.config.core)}_libretro.so"
         info_file = RETROARCH_SHARE / f"{self._core_filename(system.config.core)}_libretro.info"
+
         # Retroarch core on the filesystem
         #_logger.warning("DEBUG core seleccionado: %r", system.config.core)
 

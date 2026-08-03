@@ -129,22 +129,6 @@
 		<region>wr</region>
 	</game>
 	<game>
-		<path>./cemu.menu</path>
-		<name>Cemu (Wii U)</name>
-		<desc>Run Cemu Emulator (Wii U).</desc>
-		<genre>Emulator</genre>
-		<image>./media/cemu-logo.png</image>
-		<marquee>./media/cemu-logo.png</marquee>
-		<rating>0</rating>
-		<developer>Cemu Team</developer>
-		<publisher>Cemu Team</publisher>
-		<playcount />
-		<lastplayed />
-		<gametime />
-		<lang>en</lang>
-		<region>wr</region>
-	</game>
-	<game>
 		<path>./tsugaru.menu</path>
 		<name>Tsugaru (FM Towns)</name>
 		<desc>Run Tsugaru (FM Towns).</desc>
@@ -463,19 +447,6 @@
 		<region>wr</region>
 	</game>
 	<game>
-		<path>./ares.menu</path>
-		<name>Ares (Multi Cores Emulator)</name>
-		<desc>Run Ares (Multi Cores Emulator).</desc>
-		<genre>Emulator</genre>
-		<image>./media/ares-logo.png</image>
-		<marquee>./media/ares-logo.png</marquee>
-		<rating>0</rating>
-		<developer>Luke Usher</developer>
-		<publisher>Ares Team</publisher>
-		<lang>en</lang>
-		<region>wr</region>
-	</game>
-	<game>
 		<path>./3dsen.menu</path>
 		<name>3DSen (NES 3D)</name>
 		<desc>Run 3DSen (nes 3D). This software is not provided by RetroBat. You can purshase it here: https://geod.itch.io/3dsenpc/</desc>
@@ -606,7 +577,7 @@
 	<game>
 		<path>./teknoparrot.menu</path>
 		<name>TeknoParrot (Arcade)</name>
-		<desc>Run TeknoParrot (Arcade). This software is not provided by RetroBat. You can download it here: https://teknoparrot.com/Home/Download</desc>
+		<desc>Run TeknoParrot (Arcade). This software is not provided by . You can download it here: https://teknoparrot.com/Home/Download</desc>
 		<genre>Emulator</genre>
 		<image>./media/teknoparrot-logo.png</image>
 		<marquee>./media/teknoparrot-logo.png</marquee>
@@ -1072,23 +1043,7 @@
 		<region>wr</region>
 	</game>
 	<game>
-		<path>./pcsx2.menu</path>
-		<name>PCSX2 (PlayStation 2)</name>
-		<desc>Run PCSX2 Emulator (PlayStation 2).</desc>
-		<genre>Emulator</genre>
-		<image>./media/pcsx2-logo.png</image>
-		<marquee>./media/pcsx2-logo.png</marquee>
-		<rating>0</rating>
-		<developer>PCSX2 Team</developer>
-		<publisher>PCSX2 Team</publisher>
-		<playcount>1</playcount>
-		<lastplayed>20260723T105246</lastplayed>
-		<gametime>28</gametime>
-		<lang>en</lang>
-		<region>wr</region>
-	</game>
-	<game>
-		<path>./retroarch.menu</path>
+		<path>./libretro.menu</path>
 		<name>RetroArch (Multi Cores Emulator)</name>
 		<desc>Run RetroArch (Multi Cores Emulator).</desc>
 		<genre>Emulator</genre>
@@ -1113,6 +1068,54 @@
 		<rating>0</rating>
 		<developer>Frederic Coste (Fredouille)</developer>
 		<publisher>CPC-Power</publisher>
+		<lang>en</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./pcsx2.menu</path>
+		<name>PCSX2 (PlayStation 2)</name>
+		<desc>Run PCSX2 Emulator (PlayStation 2).</desc>
+		<genre>Emulator</genre>
+		<image>./media/pcsx2-logo.png</image>
+		<marquee>./media/pcsx2-logo.png</marquee>
+		<rating>0</rating>
+		<developer>PCSX2 Team</developer>
+		<publisher>PCSX2 Team</publisher>
+		<playcount>2</playcount>
+		<lastplayed>20260804T005745</lastplayed>
+		<gametime>50</gametime>
+		<lang>en</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./ares.menu</path>
+		<name>Ares (Multi Cores Emulator)</name>
+		<desc>Run Ares (Multi Cores Emulator).</desc>
+		<genre>Emulator</genre>
+		<image>./media/ares-logo.png</image>
+		<marquee>./media/ares-logo.png</marquee>
+		<rating>0</rating>
+		<developer>Luke Usher</developer>
+		<publisher>Ares Team</publisher>
+		<playcount>4</playcount>
+		<lastplayed>20260804T011213</lastplayed>
+		<gametime>17</gametime>
+		<lang>en</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./cemu.menu</path>
+		<name>Cemu (Wii U)</name>
+		<desc>Run Cemu Emulator (Wii U).</desc>
+		<genre>Emulator</genre>
+		<image>./media/cemu-logo.png</image>
+		<marquee>./media/cemu-logo.png</marquee>
+		<rating>0</rating>
+		<developer>Cemu Team</developer>
+		<publisher>Cemu Team</publisher>
+		<playcount>1</playcount>
+		<lastplayed>20260804T005717</lastplayed>
+		<gametime>14</gametime>
 		<lang>en</lang>
 		<region>wr</region>
 	</game>

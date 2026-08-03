@@ -41,6 +41,8 @@ class DolphinGenerator(Generator):
         return config.get("gfxbackend") == "OGL"
 
     def generate(self, system, rom, playersControllers, metadata, guns, wheels, gameResolution):
+        self.check_if_exists(DOLPHIN_BIN, system.config.emulator)
+
         mkdir_if_not_exists(DOLPHIN_INI.parent)
 
         # Dir required for saves

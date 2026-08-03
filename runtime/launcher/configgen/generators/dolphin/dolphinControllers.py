@@ -59,7 +59,9 @@ def generateControllerConfig(system: Emulator, playersControllers: Controllers, 
             used_wheels = wheels
         generateControllerConfig_triforce(system, playersControllers, used_wheels, rom)
     else:
-        raise RetroboxException(f"Invalid system name: '{system.name}'")
+        if system.name != "emuconfig" \
+        and system.name != "config":
+            raise RetroboxException(f"Invalid system name: '{system.name}'")
 
 # https://docs.libretro.com/library/dolphin/
 

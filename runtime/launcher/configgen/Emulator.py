@@ -71,11 +71,21 @@ def _load_defaults(system_name: str, default_yml: Path, default_arch_yml: Path, 
 
     return config
 
-def _load_system_config(system_name: str, /) -> dict[str, Any]:
+def _load_system_config(system_name: str, rom: Path) -> dict[str, Any]:
     data: dict[str, Any] = {
         'emulator': None,
         'core': None,
     }
+
+    if rom.suffix == ".menu":
+        rom_name = rom.stem
+
+        if "_" in rom.stem:
+            data['emulator'], data['core'] = rom_name.split("_", 1)
+        else:
+            data['emulator'] = rom_name
+            data['core'] = ""
+        return data
 
     # 1. Cargar las opciones globales desde defaults.yml si existe en _ES_SYSTEMS_DIR
     defaults_path = _SYSTEMS_CONF_DIR / "defaults.yml"
@@ -249,7 +259,7 @@ class Emulator:
         self.game_info_xml = args.gameinfoxml
 
         # read the configuration from the system name
-        system_data = _load_system_config(args.system)
+        system_data = _load_system_config(args.system, rom)
 
         # sanitize rule by EmulationStation
         # see FileData::getConfigurationName() on batocera-emulationstation

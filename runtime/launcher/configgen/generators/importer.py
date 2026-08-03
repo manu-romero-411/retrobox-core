@@ -29,6 +29,7 @@ _GENERATOR_MAP: Final[dict[str, tuple[str, str]]] = {
     'corsixth': ('corsixth.corsixthGenerator', 'CorsixTHGenerator'),
     'devilutionx': ('devilutionx.devilutionxGenerator', 'DevilutionXGenerator'),
     'dhewm3': ('dhewm3.dhewm3Generator', 'Dhewm3Generator'),
+    'dolphin-emu': ('dolphin.dolphinGenerator', 'DolphinGenerator'),
     'dosbox': ('dosbox.dosboxGenerator', 'DosBoxGenerator'),
     'dosbox_staging': ('dosboxstaging.dosboxstagingGenerator', 'DosBoxStagingGenerator'),
     'dosboxx': ('dosboxx.dosboxxGenerator', 'DosBoxxGenerator'),
