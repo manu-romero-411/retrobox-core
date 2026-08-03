@@ -57,8 +57,10 @@ groups:
             value: tinyalsa
           - name: SDL2
             value: sdl2
-          - name: Pulse (Default)
+          - name: PulseAudio (default)
             value: pulse
+          - name: PipeWire
+            value: pipewire
       - name: AUDIO LATENCY
         value: audio_latency
         description: In milliseconds. Can reduce crackling/cutting out.

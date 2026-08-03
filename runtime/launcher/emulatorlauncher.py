@@ -688,8 +688,8 @@ def run_command(command: Command) -> int:
     envvars.update(command.env)
     command.env = envvars
 
-    _logger.debug("command: %s", command)
-    _logger.debug("command: %s", command.array)
+    #_logger.debug("command: %s", command)
+    _logger.info("command: %s", command.array)
     _logger.debug("env: %s", command.env)
 
     if not command.array:

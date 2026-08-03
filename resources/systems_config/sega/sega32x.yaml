@@ -20,3 +20,6 @@ sega32x:
       cores:
         picodrive:
           default: true
+    ares:
+      cores:
+        megadrive: {}

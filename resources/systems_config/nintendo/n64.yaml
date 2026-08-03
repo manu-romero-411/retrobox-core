@@ -15,8 +15,7 @@ n64:
   emulators:
     libretro:
       cores:
-        mupen64plus-next:
-          default: true
+        mupen64plus-next: {}
         parallel_n64: {}
     mupen64plus:
       cores:
@@ -32,3 +31,7 @@ n64:
           incompatible_extensions:
           - .zip
           - .7z
+    ares:
+      cores:
+        n64:
+          default: true

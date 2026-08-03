@@ -439,7 +439,7 @@ class LibretroGenerator(Generator):
             # retroarch need the file be named with .entry at the end to load the state
             # a link would work, but on fat32, we need to copy
             args_array.extend(["-e", state_slot])
-        args_array.extend(["--verbose"])
+
         # force X11/Xwayland if we are using MangoHud with OpenGL backend (causes crashes in my PC)
         use_hud = bool(
             (hud_value := system.config.get('hud')) and hud_value.lower() != 'none'

@@ -1,0 +1,13 @@
+emulator_name: ares
+core_name: snes
+groups:
+  ADVANCED OPTIONS:
+    items:
+      - name: SUPER FAMICOM DEEP BLACK BOOST
+        value: ares_sfc_deep_black_boost
+        description: Boost dark levels for Super Famicom / SNES.
+        choices:
+          - name: Disabled
+            value: false
+          - name: Enabled
+            value: true

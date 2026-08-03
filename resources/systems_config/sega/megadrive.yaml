@@ -24,3 +24,6 @@ megadrive:
           default: true
         genesisplusgx-wide: {}
         picodrive: {}
+    ares:
+      cores:
+        megadrive: {}

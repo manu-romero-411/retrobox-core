@@ -1,0 +1,93 @@
+emulator_name: ares
+sharedFeatures:
+  - power_profile
+  - tdp
+  - videomode
+  - bezel
+  - bezel_stretch
+  - shaderset
+groups:
+  GENERAL:
+    items:
+      - name: VSYNC
+        value: use_vsync
+        description: Fix screen tearing. May bring latency
+        choices:
+          - name: Disabled
+            value: 0
+          - name: Enabled
+            value: 1
+      - name: ASPECT RATIO
+        value: ares_ratio
+        description: Change the output resolution ratio.
+        choices:
+          - name: "Standard (Default)"
+            value: Standard
+          - name: "Center"
+            value: Center
+          - name: "Scale"
+            value: Scale
+      - name: FAST BOOT
+        value: ares_fast_boot
+        description: Skip system boot animation and intro sequences.
+        choices:
+          - name: Disabled
+            value: false
+          - name: Enabled
+            value: true
+  VIDEO OPTIONS:
+    items:
+      - name: THREADED RENDERER
+        value: ares_threaded_renderer
+        description: Enable multi-threaded rendering for improved performance.
+        choices:
+          - name: Disabled
+            value: false
+          - name: Enabled
+            value: true
+      - name: COLOR EMULATION
+        value: ares_color_emulation
+        description: Accurately emulate original hardware color profiles.
+        choices:
+          - name: Disabled
+            value: false
+          - name: Enabled
+            value: true
+      - name: INTERFRAME BLENDING
+        value: ares_interframe_blending
+        description: Blend frames to simulate CRT motion blur.
+        choices:
+          - name: Disabled
+            value: false
+          - name: Enabled
+            value: true
+  AUDIO OPTIONS:
+    items:
+      - name: AUDIO LATENCY
+        value: ares_audio_latency
+        description: Adjust audio buffer latency in milliseconds.
+        choices:
+          - name: "20 ms"
+            value: 20
+          - name: "40 ms (Default)"
+            value: 40
+          - name: "80 ms"
+            value: 80
+  ADVANCED OPTIONS:
+    items:
+      - name: REWIND
+        value: ares_rewind
+        description: Enable gameplay rewind functionality.
+        choices:
+          - name: Disabled
+            value: false
+          - name: Enabled
+            value: true
+      - name: RUN AHEAD
+        value: ares_run_ahead
+        description: Reduce input latency by running frames ahead.
+        choices:
+          - name: Disabled
+            value: false
+          - name: Enabled
+            value: true

@@ -56,6 +56,3 @@ class Generator(metaclass=ABCMeta):
     def usesOpenGLDirectPreload(self, config) -> bool:
         return False
 
-    @abstractmethod
-    def getHotkeysContext(self) -> HotkeysContext:
-        ...

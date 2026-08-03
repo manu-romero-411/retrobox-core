@@ -19,6 +19,7 @@ _LEGACY_GENERATOR_MAP: Final[dict[str, dict[str, tuple[str, str]]]] = {
 
 _GENERATOR_MAP: Final[dict[str, tuple[str, str]]] = {
     'libretro': ('libretro.libretroGenerator', 'LibretroGenerator'),
+    'ares': ('ares.ares_generator', 'AresGenerator'),
     'applewin': ('applewin.applewinGenerator', 'AppleWinGenerator'),
     'bigpemu': ('bigpemu.bigpemuGenerator', 'BigPEmuGenerator'),
     'bstone': ('bstone.bstoneGenerator', 'BstoneGenerator'),
@@ -54,12 +55,7 @@ _GENERATOR_MAP: Final[dict[str, tuple[str, str]]] = {
     'openmohaa': ('openmohaa.openmohaaGenerator', 'OpenMOHAAGenerator'),
     'ppsspp': ('ppsspp.ppssppGenerator', 'PPSSPPGenerator'),
     'scummvm': ('scummvm.scummvmGenerator', 'ScummVMGenerator'),
-    'sdlpop': ('sdlpop.sdlpopGenerator', 'SdlPopGenerator'),
     'shadps4': ('shadps4.shadps4Generator', 'shadPS4Generator'),
-    'sonic-mania': ('sonic_mania.sonic_maniaGenerator', 'SonicManiaGenerator'),
-    'sonic2013': ('sonicretro.sonicretroGenerator', 'SonicRetroGenerator'),
-    'sonic3-air': ('sonic3_air.sonic3_airGenerator', 'Sonic3AIRGenerator'),
-    'soniccd': ('sonicretro.sonicretroGenerator', 'SonicRetroGenerator'),
     'theforceengine': ('theforceengine.theforceengineGenerator', 'TheForceEngineGenerator'),
     'thextech': ('thextech.thextechGenerator', 'TheXTechGenerator'),
     'tr1x': ('tr1x.tr1xGenerator', 'TR1XGenerator'),

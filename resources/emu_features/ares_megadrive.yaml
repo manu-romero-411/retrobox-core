@@ -1,0 +1,13 @@
+emulator_name: ares
+core_name: megadrive
+groups:
+  ADVANCED OPTIONS:
+    items:
+      - name: MEGADRIVE TMSS
+        value: ares_md_tmss
+        description: Enable Trademark Security System enforcement for Mega Drive.
+        choices:
+          - name: Disabled
+            value: false
+          - name: Enabled
+            value: true

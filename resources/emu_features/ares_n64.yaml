@@ -1,0 +1,13 @@
+emulator_name: ares
+core_name: n64
+groups:
+  ADVANCED OPTIONS:
+    items:
+      - name: NINTENDO 64 EXPANSION PAK
+        value: ares_n64_expansion_pak
+        description: Enable the 4MB Expansion Pak for Nintendo 64.
+        choices:
+          - name: Disabled
+            value: false
+          - name: Enabled
+            value: true
