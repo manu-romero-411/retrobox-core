@@ -26,7 +26,8 @@ sudo apt-get install -y \
     python3-pil \
     python3-evdev \
     python3-pygame \
-    power-profiles-daemon
+    power-profiles-daemon \
+    python3-ruamel.yaml
 
 sudo cp ../resources/udev/*.rules /etc/udev/rules.d/
 sudo usermod -aG input $(whoami)

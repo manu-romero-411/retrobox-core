@@ -241,7 +241,7 @@ class Rpcs3Generator(Generator):
         # copy icon files to config
         icon_target = _RPCS3_CFGDIR / 'Icons'
         mkdir_if_not_exists(icon_target)
-        shutil.copytree('/usr/share/rpcs3/Icons/', icon_target, dirs_exist_ok=True, copy_function=shutil.copy2)
+        #shutil.copytree('/usr/share/rpcs3/Icons/', icon_target, dirs_exist_ok=True, copy_function=shutil.copy2)
 
         # determine the rom name
 

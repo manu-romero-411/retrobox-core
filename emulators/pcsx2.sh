@@ -24,15 +24,12 @@ function desinstalar() {
 
 function appimage_install(){
   # 3. Comprobar curl
-  if ! command -v curl &> /dev/null; then
-    dnf install curl
-  fi
+  for i in curl jq; do
+    if ! command -v $i &> /dev/null; then
+      sudo dnf install -y $i || sudo apt-get install -y $i
+    fi
+  done 
 
-  # Instalar jq si no existe
-  if ! command -v jq &> /dev/null; then
-    dnf install -y jq
-  fi
-  
   releases=$(curl -sL "${API_URL}?per_page=10")
   
   # 6. Extraer URL del AppImage del primer elemento del array (la última release)

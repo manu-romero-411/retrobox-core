@@ -154,22 +154,6 @@
 		<region>wr</region>
 	</game>
 	<game>
-		<path>./ppsspp.menu</path>
-		<name>PPSSPP (PSP, Homebrews)</name>
-		<desc>Run PPSSPP Emulator (PSP, Homebrews).</desc>
-		<genre>Emulator</genre>
-		<image>./media/ppsspp-logo.png</image>
-		<marquee>./media/ppsspp-logo.png</marquee>
-		<rating>0</rating>
-		<developer>PPSSPP Team</developer>
-		<publisher>PPSSPP Team</publisher>
-		<playcount />
-		<lastplayed />
-		<gametime />
-		<lang>en</lang>
-		<region>wr</region>
-	</game>
-	<game>
 		<path>./scummvm_libretro.menu</path>
 		<name>ScummVM Libretro</name>
 		<desc>Run ScummVM Libretro.</desc>
@@ -626,19 +610,6 @@
 		<region>wr</region>
 	</game>
 	<game>
-		<path>./rpcs3.menu</path>
-		<name>RPCS3 (PlayStation 3)</name>
-		<desc>Run RPCS3 (PlayStation 3).</desc>
-		<genre>Emulator</genre>
-		<image>./media/rpcs3-logo.png</image>
-		<marquee>./media/rpcs3-logo.png</marquee>
-		<rating>0</rating>
-		<developer>RPCS3 Team</developer>
-		<publisher>RPCS3 Team</publisher>
-		<lang>en</lang>
-		<region>wr</region>
-	</game>
-	<game>
 		<path>./mesen.menu</path>
 		<name>Mesen (FDS, NES)</name>
 		<desc>Run Mesen (FDS, NES).</desc>
@@ -660,22 +631,6 @@
 		<rating>0</rating>
 		<developer>TuxFamily</developer>
 		<publisher>TuxFamily</publisher>
-		<lang>en</lang>
-		<region>wr</region>
-	</game>
-	<game>
-		<path>./ryujinx.menu</path>
-		<name>Ryujinx (Switch)</name>
-		<desc>Run Ryujinx (Switch). This software is not provided by RetroBat. You can download it here: https://ryujinx.org/download</desc>
-		<genre>Emulator</genre>
-		<image>./media/ryujinx-logo.png</image>
-		<marquee>./media/ryujinx-logo.png</marquee>
-		<rating>0</rating>
-		<developer>Ryujinx Team</developer>
-		<publisher>Ryujinx Team</publisher>
-		<playcount />
-		<lastplayed />
-		<gametime />
 		<lang>en</lang>
 		<region>wr</region>
 	</game>
@@ -796,22 +751,6 @@
 		<region>wr</region>
 	</game>
 	<game>
-		<path>./dolphin-emu.menu</path>
-		<name>Dolphin (GameCube,Wii,WAD)</name>
-		<desc>Run Dolphin Emulator (GameCube, Wii, WAD).</desc>
-		<genre>Emulator</genre>
-		<image>./media/dolphin-logo.png</image>
-		<marquee>./media/dolphin-logo.png</marquee>
-		<rating>0</rating>
-		<developer>Dolphin Team</developer>
-		<publisher>Dolphin Team</publisher>
-		<playcount />
-		<lastplayed />
-		<gametime />
-		<lang>en</lang>
-		<region>wr</region>
-	</game>
-	<game>
 		<path>./groovymame.menu</path>
 		<name>GroovyMame (Arcade CRT)</name>
 		<desc>Run GroovyMame.</desc>
@@ -820,19 +759,6 @@
 		<marquee>./media/groovymame-logo.png</marquee>
 		<rating>0</rating>
 		<developer>antonioginer</developer>
-		<lang>en</lang>
-		<region>wr</region>
-	</game>
-	<game>
-		<path>./redream.menu</path>
-		<name>Redream (Dreamcast)</name>
-		<desc>Run Redream Emulator (Dreamcast).</desc>
-		<genre>Emulator</genre>
-		<image>./media/redream-logo.png</image>
-		<marquee>./media/redream-logo.png</marquee>
-		<rating>0</rating>
-		<developer>Redream</developer>
-		<publisher>Redream</publisher>
 		<lang>en</lang>
 		<region>wr</region>
 	</game>
@@ -846,21 +772,6 @@
 		<rating>0</rating>
 		<developer>Ciaran Anscomb</developer>
 		<publisher>xroar@6809.org.uk</publisher>
-		<lang>en</lang>
-		<region>wr</region>
-	</game>
-	<game>
-		<path>./eden.menu</path>
-		<name>Eden (Switch)</name>
-		<desc>Run Eden (Switch). This software is not provided by RetroBat.</desc>
-		<genre>Emulator</genre>
-		<image>./media/eden-logo.png</image>
-		<marquee>./media/eden-logo.png</marquee>
-		<rating>0</rating>
-		<developer>The Eden Team</developer>
-		<playcount />
-		<lastplayed />
-		<gametime />
 		<lang>en</lang>
 		<region>wr</region>
 	</game>
@@ -1088,22 +999,6 @@
 		<region>wr</region>
 	</game>
 	<game>
-		<path>./ares.menu</path>
-		<name>Ares (Multi Cores Emulator)</name>
-		<desc>Run Ares (Multi Cores Emulator).</desc>
-		<genre>Emulator</genre>
-		<image>./media/ares-logo.png</image>
-		<marquee>./media/ares-logo.png</marquee>
-		<rating>0</rating>
-		<developer>Luke Usher</developer>
-		<publisher>Ares Team</publisher>
-		<playcount>4</playcount>
-		<lastplayed>20260804T011213</lastplayed>
-		<gametime>17</gametime>
-		<lang>en</lang>
-		<region>wr</region>
-	</game>
-	<game>
 		<path>./cemu.menu</path>
 		<name>Cemu (Wii U)</name>
 		<desc>Run Cemu Emulator (Wii U).</desc>
@@ -1116,6 +1011,117 @@
 		<playcount>1</playcount>
 		<lastplayed>20260804T005717</lastplayed>
 		<gametime>14</gametime>
+		<lang>en</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./eden.menu</path>
+		<name>Eden (Switch)</name>
+		<desc>Run Eden (Switch). This software is not provided by RetroBat.</desc>
+		<genre>Emulator</genre>
+		<image>./media/eden-logo.png</image>
+		<marquee>./media/eden-logo.png</marquee>
+		<rating>0</rating>
+		<developer>The Eden Team</developer>
+		<playcount>6</playcount>
+		<lastplayed>20260804T012446</lastplayed>
+		<gametime>77</gametime>
+		<lang>en</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./ppsspp.menu</path>
+		<name>PPSSPP (PSP, Homebrews)</name>
+		<desc>Run PPSSPP Emulator (PSP, Homebrews).</desc>
+		<genre>Emulator</genre>
+		<image>./media/ppsspp-logo.png</image>
+		<marquee>./media/ppsspp-logo.png</marquee>
+		<rating>0</rating>
+		<developer>PPSSPP Team</developer>
+		<publisher>PPSSPP Team</publisher>
+		<playcount>1</playcount>
+		<lastplayed>20260804T012527</lastplayed>
+		<gametime>17</gametime>
+		<lang>en</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./ares.menu</path>
+		<name>Ares (Multi Cores Emulator)</name>
+		<desc>Run Ares (Multi Cores Emulator).</desc>
+		<genre>Emulator</genre>
+		<image>./media/ares-logo.png</image>
+		<marquee>./media/ares-logo.png</marquee>
+		<rating>0</rating>
+		<developer>Luke Usher</developer>
+		<publisher>Ares Team</publisher>
+		<playcount>5</playcount>
+		<lastplayed>20260804T011257</lastplayed>
+		<gametime>39</gametime>
+		<lang>en</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./dolphin-emu.menu</path>
+		<name>Dolphin (GameCube,Wii,WAD)</name>
+		<desc>Run Dolphin Emulator (GameCube, Wii, WAD).</desc>
+		<genre>Emulator</genre>
+		<image>./media/dolphin-logo.png</image>
+		<marquee>./media/dolphin-logo.png</marquee>
+		<rating>0</rating>
+		<developer>Dolphin Team</developer>
+		<publisher>Dolphin Team</publisher>
+		<playcount>9</playcount>
+		<lastplayed>20260804T123841</lastplayed>
+		<gametime>2403</gametime>
+		<lang>en</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./rpcs3.menu</path>
+		<name>RPCS3 (PlayStation 3)</name>
+		<desc>Run RPCS3 (PlayStation 3).</desc>
+		<genre>Emulator</genre>
+		<image>./media/rpcs3-logo.png</image>
+		<marquee>./media/rpcs3-logo.png</marquee>
+		<rating>0</rating>
+		<developer>RPCS3 Team</developer>
+		<publisher>RPCS3 Team</publisher>
+		<playcount>6</playcount>
+		<lastplayed>20260804T100333</lastplayed>
+		<gametime>1132</gametime>
+		<lang>en</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./redream.menu</path>
+		<name>Redream (Dreamcast)</name>
+		<desc>Run Redream Emulator (Dreamcast).</desc>
+		<genre>Emulator</genre>
+		<image>./media/redream-logo.png</image>
+		<marquee>./media/redream-logo.png</marquee>
+		<rating>0</rating>
+		<developer>Redream</developer>
+		<publisher>Redream</publisher>
+		<playcount>1</playcount>
+		<lastplayed>20260804T083027</lastplayed>
+		<gametime>11</gametime>
+		<lang>en</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./ryujinx.menu</path>
+		<name>Ryujinx (Switch)</name>
+		<desc>Run Ryujinx (Switch). This software is not provided by RetroBat. You can download it here: https://ryujinx.org/download</desc>
+		<genre>Emulator</genre>
+		<image>./media/ryujinx-logo.png</image>
+		<marquee>./media/ryujinx-logo.png</marquee>
+		<rating>0</rating>
+		<developer>Ryujinx Team</developer>
+		<publisher>Ryujinx Team</publisher>
+		<playcount>2</playcount>
+		<lastplayed>20260804T081950</lastplayed>
+		<gametime>152</gametime>
 		<lang>en</lang>
 		<region>wr</region>
 	</game>

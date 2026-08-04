@@ -13,4 +13,4 @@ RPCS3_CONFIG: Final = _RPCS3_CFGDIR / 'config.yml'
 RPCS3_CURRENT_CONFIG: Final = _RPCS3_CFGDIR / 'GuiConfigs' / 'CurrentSettings.ini'
 RPCS3_CONFIG_INPUT: Final = _RPCS3_CFGDIR / 'config_input.yml'
 RPCS3_CONFIG_EVDEV: Final = _RPCS3_CFGDIR / 'InputConfigs' / 'Evdev' / 'Default Profile.yml'
-RPCS3_BIN: Final = Path('/usr/bin/rpcs3')
+RPCS3_BIN: Final = _RPCS3_DIR / "app" / "AppRun"

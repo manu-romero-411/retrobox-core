@@ -13,14 +13,22 @@ from runtime.launcher.configgen.Emulator import generate_bash_wrapper
 
 from . import dolphinControllers
 from ... import Command
-from runtime.retrobox_paths import HUD_CONFIG_FILE, ROMS, SAVES, USERDATA, configure_emulator, mkdir_if_not_exists
+from runtime.retrobox_paths import BIOS, HUD_CONFIG_FILE, ROMS, SAVES, USERDATA, configure_emulator, mkdir_if_not_exists
 from ...utils import vulkan
 from ...utils.configparser import CaseSensitiveConfigParser
 from ..Generator import Generator
 from . import dolphinSYSCONF
 from .dolphinPaths import (
-    _DOLPHIN_DIR,
+    _DOLPHIN_GC_CARD_A,
+    _DOLPHIN_GC_CARD_B,
+    _DOLPHIN_LOCALE,
+    _DOLPHIN_WII_NAND,
+    _DOLPHIN_WII_RESPACKS,
+    _DOLPHIN_WII_SDCARD_DIR,
+    _DOLPHIN_WII_SDCARD_SYNC,
+    _DOLPHIN_WII_WFSDIR,
     DOLPHIN_BIN,
+    DOLPHIN_BIN_NOGUI,
     DOLPHIN_BIOS,
     _DOLPHIN_CFGDIR,
     DOLPHIN_GFX_INI,
@@ -100,6 +108,28 @@ class DolphinGenerator(Generator):
 
         discord_presence   = system.config.get_bool('discordrpc', False, return_values=('True', 'False'))
         dolphinSettings.set("General", "UseDiscordPresence", discord_presence)
+
+        # SAVE PATH RESOLUTION
+        mkdir_if_not_exists(_DOLPHIN_WII_NAND)
+        mkdir_if_not_exists(_DOLPHIN_WII_RESPACKS)
+        mkdir_if_not_exists(_DOLPHIN_WII_WFSDIR)
+        mkdir_if_not_exists(_DOLPHIN_WII_SDCARD_DIR)
+        mkdir_if_not_exists(_DOLPHIN_WII_SDCARD_SYNC)
+        mkdir_if_not_exists(_DOLPHIN_GC_CARD_A)
+        mkdir_if_not_exists(_DOLPHIN_GC_CARD_B)
+
+        dolphinSettings.set("General", "DumpPath", str(_DOLPHIN_CFGDIR / "Dump/"))
+        dolphinSettings.set("General", "LoadPath", str(_DOLPHIN_CFGDIR / "Load/"))
+        dolphinSettings.set("General", "NANDRootPath", str(_DOLPHIN_WII_NAND))
+        dolphinSettings.set("General", "ResourcePackPath", str(_DOLPHIN_WII_RESPACKS))
+
+        dolphinSettings.set("General", "WFSPath", str(_DOLPHIN_WII_WFSDIR))
+        dolphinSettings.set("General", "WiiSDCardPath", str(_DOLPHIN_WII_SDCARD_DIR / "WiiSD.raw"))
+        dolphinSettings.set("General", "WiiSDCardSyncFolder", str(_DOLPHIN_WII_SDCARD_SYNC))
+
+        # MemcardAPath/MemcardBPath if I want to use raw memcard files
+        dolphinSettings.set("Core", "GCIFolderAPath", str(_DOLPHIN_GC_CARD_A))
+        dolphinSettings.set("Core", "GCIFolderBPath", str(_DOLPHIN_GC_CARD_B))
 
 
         # Don't ask about statistics
@@ -215,6 +245,11 @@ class DolphinGenerator(Generator):
             dolphinSettings.set("Core", "DPL2Decoder", "False")
             dolphinSettings.set("Core", "DSPHLE", "True")
             dolphinSettings.set("DSP", "EnableJIT", "False")
+        
+        dolphinSettings.set("GBA", "BIOS", str(BIOS / "gba_bios.bin"))
+        dolphinSettings.set("GBA", "SavesPath", str(SAVES / "gba" / "dolphin_emu"))
+
+        mkdir_if_not_exists(SAVES / "gba" / "dolphin_emu")
 
         # Save dolphin.ini
         with DOLPHIN_INI.open('w') as configfile:
@@ -436,27 +471,32 @@ class DolphinGenerator(Generator):
         except Exception:
             pass # don't fail in case of SYSCONF update
 
-        command_array = []
         dolphin_exec_env = {
-            "APPDIR": f"{_DOLPHIN_DIR}/AppDir",
+            #"APPDIR": f"{_DOLPHIN_DIR}/AppDir",
             "XDG_CONFIG_HOME": _DOLPHIN_XDG,
-            "XDG_DATA_HOME": SAVES,
+            "XDG_DATA_HOME": _DOLPHIN_XDG,
+            "LOCPATH": str(_DOLPHIN_LOCALE),
             "SDL_JOYSTICK_HIDAPI": "1",
             "SDL_JOYSTICK_HIDAPI_SWITCH": "1",
             "SDL_JOYSTICK_HIDAPI_PRO": "1",
             "SDL_JOYSTICK_ALLOW_BACKGROUND_EVENTS": "1",
         }
 
+        selected_bin = ""
         if configure_emulator(rom):
+            selected_bin = DOLPHIN_BIN
             dolphin_args = []  # modo config, sin -b -e
         else:
-            dolphin_args = ["-b", "-e", str(rom)]
+            selected_bin = DOLPHIN_BIN_NOGUI
+            dolphin_args = [
+                "-C", "Dolphin.Display.Fullscreen=True",
+                "-e", str(rom)]
 
         # state_slot option
         if state_filename := system.config.get('state_filename'):
             dolphin_args.extend(["--save_state", state_filename])
 
-        command_wrapper = [generate_bash_wrapper(system.config.emulator, DOLPHIN_BIN, dolphin_args)]
+        command_wrapper = [generate_bash_wrapper(system.config.emulator, selected_bin, dolphin_args)]
 
         return Command.Command(
             array=command_wrapper,

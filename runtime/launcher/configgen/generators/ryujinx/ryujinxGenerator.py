@@ -445,13 +445,13 @@ class RyujinxGenerator(Generator):
             data['system_region'] = 'USA'
 
         # discord integration
-        data['enable_discord_integration'] = system.config.get_bool('discordrpc', False, return_values=(True, False))
+        data['enable_discord_integration'] = system.config.get_bool('discordrpc', True, return_values=(True, False))
         
         # docked mode
         data['docked_mode'] = system.config.get_bool('ryu_docked_mode', True, return_values=(True, False))
 
         # V-Sync
-        data['enable_vsync'] = system.config.get_bool("use_vsync", False))
+        data['enable_vsync'] = system.config.get_bool("use_vsync", True, return_values=(True, False))
 
         # graphics backend
         if system.isOptSet('ryu_backend'):

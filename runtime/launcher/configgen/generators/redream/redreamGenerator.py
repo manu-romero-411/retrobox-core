@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from runtime.launcher.configgen import Command
-from runtime.launcher.configgen.controller import generate_sdl_game_controller_config
-from runtime.launcher.configgen.generators.Generator import Generator
-from runtime.launcher.configgen.generators.redream.redream_paths import _REDREAM_ROMS, REDREAM_BIN, REDREAM_CFG, REDREAM_DIR
+from ... import Command
+from ...controller import generate_sdl_game_controller_config
+from ..Generator import Generator
+from .redream_paths import _REDREAM_ROMS, REDREAM_BIN, REDREAM_CFG, REDREAM_DIR
 from runtime.retrobox_paths import mkdir_if_not_exists
 
 if TYPE_CHECKING:

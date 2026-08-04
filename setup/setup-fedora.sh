@@ -23,8 +23,8 @@ sudo dnf install -y \
     python3-evdev \
     python3-pygame \
     python-ruamel-yaml \
-    python3-tomlkit
-
+    python3-tomlkit \
+    python3-ruamel-yaml
 
 sudo cp ../resources/udev/*.rules /etc/udev/rules.d/
 sudo usermod -aG input $(whoami)
