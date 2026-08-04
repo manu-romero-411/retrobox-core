@@ -1,5 +1,5 @@
 emulator_name: libretro
-core_name: "beetle-saturn"
+core_name: "mednafen_saturn"
 features:
   - netplay
   - cheevos

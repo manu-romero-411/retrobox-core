@@ -17,7 +17,7 @@ saturn:
   emulators:
     libretro:
       cores:
-        beetle-saturn:
+        mednafen_saturn:
           default: true
           incompatible_extensions:
           - .zip

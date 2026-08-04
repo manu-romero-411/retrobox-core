@@ -1062,22 +1062,6 @@
 		<region>wr</region>
 	</game>
 	<game>
-		<path>./dolphin-emu.menu</path>
-		<name>Dolphin (GameCube,Wii,WAD)</name>
-		<desc>Run Dolphin Emulator (GameCube, Wii, WAD).</desc>
-		<genre>Emulator</genre>
-		<image>./media/dolphin-logo.png</image>
-		<marquee>./media/dolphin-logo.png</marquee>
-		<rating>0</rating>
-		<developer>Dolphin Team</developer>
-		<publisher>Dolphin Team</publisher>
-		<playcount>9</playcount>
-		<lastplayed>20260804T123841</lastplayed>
-		<gametime>2403</gametime>
-		<lang>en</lang>
-		<region>wr</region>
-	</game>
-	<game>
 		<path>./rpcs3.menu</path>
 		<name>RPCS3 (PlayStation 3)</name>
 		<desc>Run RPCS3 (PlayStation 3).</desc>
@@ -1122,6 +1106,22 @@
 		<playcount>2</playcount>
 		<lastplayed>20260804T081950</lastplayed>
 		<gametime>152</gametime>
+		<lang>en</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./dolphin-emu.menu</path>
+		<name>Dolphin (GameCube,Wii,WAD)</name>
+		<desc>Run Dolphin Emulator (GameCube, Wii, WAD).</desc>
+		<genre>Emulator</genre>
+		<image>./media/dolphin-logo.png</image>
+		<marquee>./media/dolphin-logo.png</marquee>
+		<rating>0</rating>
+		<developer>Dolphin Team</developer>
+		<publisher>Dolphin Team</publisher>
+		<playcount>10</playcount>
+		<lastplayed>20260804T125103</lastplayed>
+		<gametime>2559</gametime>
 		<lang>en</lang>
 		<region>wr</region>
 	</game>

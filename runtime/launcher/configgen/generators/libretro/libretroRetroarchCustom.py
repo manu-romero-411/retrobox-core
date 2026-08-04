@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from runtime.retrobox_paths import BIOS, CHEATS, RECORDINGS, RESOURCES_DIR, SAVES, SCREENSHOTS, mkdir_if_not_exists, USERDATA
 from ...settings.unixSettings import UnixSettings
-from .libretroPaths import _RETROARCH_CONFIG, _RETROARCH_ROOT, RETROARCH_ASSETS, RETROARCH_CUSTOM, RETROARCH_SHADERS
+from .libretroPaths import _RETROARCH_CONFIG, _RETROARCH_SHARE, RETROARCH_ASSETS, RETROARCH_CUSTOM, RETROARCH_SHADERS
 
 def generate_retroarch_custom() -> None:
     # retroarchcustom.cfg
@@ -90,12 +90,12 @@ def generate_rarch_custom_paths(retroarch_settings: UnixSettings) -> None:
     retroarch_settings.save('recording_output_directory',    f'"{RECORDINGS}/"')
     retroarch_settings.save('savestate_directory',           f'"{SAVES}/"')
     retroarch_settings.save('savefile_directory',            f'"{SAVES}/"')
-    retroarch_settings.save('extraction_directory',          f'"{_RETROARCH_ROOT}/extractions/"')
+    retroarch_settings.save('extraction_directory',          f'"{_RETROARCH_SHARE}/extractions/"')
     retroarch_settings.save('cheat_database_path',           f'"{CHEATS}/cht/"')
     retroarch_settings.save('cheat_settings_path',           f'"{CHEATS}/saves/"')
     retroarch_settings.save('system_directory',              f'"{BIOS}/"')
     retroarch_settings.save('joypad_autoconfig_dir',         f'"{_RETROARCH_CONFIG}/autoconfig/"')
     retroarch_settings.save('video_shader_dir',              f'"{RETROARCH_SHADERS}/"')
     retroarch_settings.save('video_font_path',               '"/usr/share/fonts/liberation-mono-fonts/LiberationMono-Regular.ttf"')
-    retroarch_settings.save('video_filter_dir',              f'"{_RETROARCH_ROOT}/filters/video"')
-    retroarch_settings.save('audio_filter_dir',              f'"{_RETROARCH_ROOT}/filters/audio"')
+    retroarch_settings.save('video_filter_dir',              f'"{_RETROARCH_SHARE}/filters/video"')
+    retroarch_settings.save('audio_filter_dir',              f'"{_RETROARCH_SHARE}/filters/audio"')

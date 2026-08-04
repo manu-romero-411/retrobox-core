@@ -123,7 +123,9 @@ class LibretroGenerator(Generator):
                 video_shader_dir = _SHADERS_DIR
                 _logger.debug("shader %s found in %s", shader_filename, _SHADERS_DIR)
             else:
-                video_shader_dir = RETROARCH_SHADERS / f"shaders_{shader_type}"
+                #video_shader_dir = RETROARCH_SHADERS / f"shaders_{shader_type}"
+                video_shader_dir = RETROARCH_SHADERS
+                _logger.debug("shader %s: falling back to %s", shader_filename, video_shader_dir)
             video_shader = video_shader_dir / shader_filename
 
             # If the shader filename contains noBezel, activate Shader Bezel mode.
@@ -451,9 +453,6 @@ class LibretroGenerator(Generator):
         
         forced_x11 = \
             system.config.get_bool("force_x11", False, return_values=(True, False))
-        
-        if use_hud and self.usesOpenGLDirectPreload:
-            forced_x11 = True
 
         # generate bash wrapper
         command_wrapper = [generate_bash_wrapper(
@@ -464,8 +463,9 @@ class LibretroGenerator(Generator):
         return Command.Command(array=command_wrapper, env={
             "XDG_CONFIG_HOME": _RETROARCH_XDG,
             "SDL_GAMECONTROLLERCONFIG": generate_sdl_game_controller_config(playersControllers),
-            #"KWIN_DRM_NO_AMS": "1",
-            #"PULSE_LATENCY_MSEC": "60"
+            #"KWIN_DRM_NO_AMS": "1",              # <-- CLAVE: Desactiva Atomic Mode Setting
+            #"KWIN_DRM_DIRECT_SCANOUT": "0",      # Desactiva Direct Scanout
+            #"KWIN_DRM_USE_CURSOR_PLANES": "0",   # Evita problemas con el cursor hardware
         })
 
 def _gfx_backend_check(backend: str):

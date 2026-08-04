@@ -196,12 +196,12 @@ def createLibretroConfig(
         else:
             _logger.debug("Discrete GPU is not available on the system. Using default.")
 
-    retroarch_config['audio_driver'] = system.config.get("audio_driver", '"pulse"')
+    retroarch_config['audio_driver'] = system.config.get("audio_driver", '"pipewire"')
 
     # audio latency in 64 = best balance with audio perf
     retroarch_config['audio_latency'] = system.config.get("audio_latency", '64')
     retroarch_config['audio_volume'] = system.config.get("audio_volume", '0')
-    retroarch_config['audio_out_rate'] = system.config.get("audio_out_rate", '48000')
+    retroarch_config['audio_out_rate'] = system.config.get("audio_out_rate", '44100')
 
     display_rotate = system.config.get_str("display.rotate")
 
@@ -247,6 +247,10 @@ def createLibretroConfig(
 
     retroarch_config['video_fullscreen'] = 'true'
     retroarch_config['video_windowed_fullscreen'] = 'true'
+    #retroarch_config['video_hard_sync'] = 'false'
+    retroarch_config['video_max_swapchain_images'] = '3'
+    retroarch_config['video_frame_delay'] = '0'
+    retroarch_config['video_black_frame_insertion'] = '0'
 
     retroarch_config['sort_savefiles_enable'] = 'false'     # ensure we don't save system.name + core
     retroarch_config['sort_savestates_enable'] = 'false'    # ensure we don't save system.name + core

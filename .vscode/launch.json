@@ -1,6 +1,7 @@
 {
   "version": "0.2.0",
   "configurations": [
+  
 
 
 
@@ -454,6 +455,30 @@
         "n64",
         "-rom",
         "/var/penguintb/juegos/roms/n64/Jet Force Gemini (Europe) (En,Fr,De,Es).z64",
+        "-gameinfoxml",
+        "/tmp/game.xml",
+        "-systemname",
+        "Nintendo 64"
+      ],
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}",
+        "PATH": "${workspaceFolder}:/home/manuel/.local/bin:/usr/local/bin:/usr/bin:/bin"
+      },
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      "name": "configgen: N64 (goldeneye 007)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "emulatorlauncher",
+      "cwd": "${workspaceFolder}/runtime/launcher",
+      "envFile": "${workspaceFolder}/.env",
+      "args": [
+        "-system",
+        "n64",
+        "-rom",
+        "/var/penguintb/juegos/roms/n64/GoldenEye 007 (USA).z64",
         "-gameinfoxml",
         "/tmp/game.xml",
         "-systemname",
