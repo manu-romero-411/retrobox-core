@@ -26,13 +26,29 @@ _GAMEPAD_MAPPING: list[tuple[str, str, str | None]] = [
     ("R-Down", "joystick2up", "/Hi"),
     ("R-Left", "joystick2left", "/Lo"),
     ("R-Right", "joystick2left", "/Hi"),
+    ("Rumble", "b", None),
 ]
 
+def _compute_guid_indices(playersControllers) -> dict[int, int]:
+    """
+    Calcula, para cada controller, su posición dentro del grupo de
+    mandos que comparten el mismo GUID — usando el índice SDL real
+    que EmulationStation asignó a cada jugador (controller.index),
+    no la posición P1..P5. Mismo problema (y misma solución) que en
+    libretroControllers.py / edenGenerator.py / ryujinxGenerator.py.
+    """
+    guid_indices: dict[int, int] = {}
+    seen: dict[str, int] = {}
+    for controller in sorted(playersControllers, key=lambda c: c.index):
+        idx = seen.get(controller.guid, 0)
+        guid_indices[id(controller)] = idx
+        seen[controller.guid] = idx + 1
+    return guid_indices
 
-def _ares_get_ctrler_entry(name, guid, inputs, target_dir=None) -> str:
+def _ares_get_ctrler_entry(name, guid, guid_index, inputs, target_dir=None) -> str:
     """
     Traduce un input lógico (ej. 'up', 'l2') al formato de entrada de
-    ares para VirtualPad (guid/puerto/tipo/id[+dirección]).
+    ares para VirtualPad (guid/índice-dentro-del-guid/tipo/id[+dirección]).
     Devuelve "" si el control no está mapeado en este pad.
     """
     if name not in inputs:
@@ -44,22 +60,22 @@ def _ares_get_ctrler_entry(name, guid, inputs, target_dir=None) -> str:
     ival = str(getattr(i, 'value', '1'))
 
     if itype == 'button':
-        return f"{guid}/0/3/{iid}"
+        return f"{guid}/{guid_index}/3/{iid}"
     if itype == 'hat':
         hat_id = '1' if name in ('up', 'down') else '0'
         direction = "/Lo" if name in ('up', 'left') else "/Hi"
-        return f"{guid}/0/1/{hat_id}{direction}"
+        return f"{guid}/{guid_index}/1/{hat_id}{direction}"
     if itype == 'axis':
         direction = target_dir or ("/Hi" if ival.startswith('-') or int(float(ival)) > 0 else "/Lo")
-        return f"{guid}/0/0/{iid}{direction}"
+        return f"{guid}/{guid_index}/0/{iid}{direction}"
     return ""
 
 
-def _ares_gen_gamepad_conf(pad_num: int, guid: str, inputs) -> str:
+def _ares_gen_gamepad_conf(pad_num: int, guid: str, guid_index: int, inputs) -> str:
     """Genera el bloque VirtualPadN completo para un controller."""
     lines = [f"VirtualPad{pad_num}"]
     for label, name, target_dir in _GAMEPAD_MAPPING:
-        entry = _ares_get_ctrler_entry(name, guid, inputs, target_dir)
+        entry = _ares_get_ctrler_entry(name, guid, guid_index, inputs, target_dir)
         lines.append(f"  {label}: {entry};;")
     lines.append("  Rumble: ;;")
     return "\n".join(lines) + "\n"
@@ -67,10 +83,13 @@ def _ares_gen_gamepad_conf(pad_num: int, guid: str, inputs) -> str:
 
 def _ares_create_pads_config(playersControllers) -> str:
     """Genera el mapeo de hasta 5 controles para el settings.bml de ares."""
+    guid_indices = _compute_guid_indices(playersControllers)
+
     pads_config = ""
     for index, controller in enumerate(playersControllers):
         if index >= 5:
             break
         pad_num = index + 1
-        pads_config += _ares_gen_gamepad_conf(pad_num, controller.guid, controller.inputs)
+        guid_index = guid_indices[id(controller)]
+        pads_config += _ares_gen_gamepad_conf(pad_num, controller.guid, guid_index, controller.inputs)
     return pads_config
