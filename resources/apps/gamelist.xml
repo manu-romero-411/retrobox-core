@@ -108,20 +108,6 @@
 		<region>wr</region>
 	</game>
 	<game>
-		<path>./amazon_prime_video.webapp</path>
-		<name>Amazon Prime Video</name>
-		<desc>Servicio de streaming de Amazon con películas, series originales y eventos deportivos en directo incluido con Prime.</desc>
-		<genre>Streaming</genre>
-		<image>./app-icons/amazon_prime_video.png</image>
-		<marquee>./app-icons/amazon_prime_video.png</marquee>
-		<rating>0</rating>
-		<releasedate>20060907T000000</releasedate>
-		<developer>Amazon.com Inc.</developer>
-		<publisher>Amazon.com Inc.</publisher>
-		<lang>en</lang>
-		<region>wr</region>
-	</game>
-	<game>
 		<path>./kodi.kodi</path>
 		<name>Kodi</name>
 		<desc>Centro multimedia de código abierto para reproducir vídeo, música, imágenes y podcasts desde cualquier fuente local o en red.</desc>
@@ -163,6 +149,23 @@
 		<playcount>6</playcount>
 		<lastplayed>20260723T210509</lastplayed>
 		<gametime>3141</gametime>
+		<lang>en</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./amazon_prime_video.webapp</path>
+		<name>Amazon Prime Video</name>
+		<desc>Servicio de streaming de Amazon con películas, series originales y eventos deportivos en directo incluido con Prime.</desc>
+		<genre>Streaming</genre>
+		<image>./app-icons/amazon_prime_video.png</image>
+		<marquee>./app-icons/amazon_prime_video.png</marquee>
+		<rating>0</rating>
+		<releasedate>20060907T000000</releasedate>
+		<developer>Amazon.com Inc.</developer>
+		<publisher>Amazon.com Inc.</publisher>
+		<playcount>3</playcount>
+		<lastplayed>20260809T200916</lastplayed>
+		<gametime>142</gametime>
 		<lang>en</lang>
 		<region>wr</region>
 	</game>

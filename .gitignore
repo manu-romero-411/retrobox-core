@@ -303,3 +303,6 @@ resources/hooks/retrohook.d/**
 !resources/hooks/retrohook.d/_frontend/emulationstation/on-frontend-start/
 !resources/hooks/retrohook.d/_frontend/emulationstation/on-frontend-start/00_setup.sh
 .aider*
+
+# Allow the decorations submodule
+!resources/decorations/

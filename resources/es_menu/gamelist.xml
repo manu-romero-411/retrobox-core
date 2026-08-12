@@ -954,22 +954,6 @@
 		<region>wr</region>
 	</game>
 	<game>
-		<path>./libretro.menu</path>
-		<name>RetroArch (Multi Cores Emulator)</name>
-		<desc>Run RetroArch (Multi Cores Emulator).</desc>
-		<genre>Emulator</genre>
-		<image>./media/retroarch-logo.png</image>
-		<marquee>./media/retroarch-logo.png</marquee>
-		<rating>0</rating>
-		<developer>Libretro Team</developer>
-		<publisher>Libretro Team</publisher>
-		<playcount>3</playcount>
-		<lastplayed>20260724T234653</lastplayed>
-		<gametime>211</gametime>
-		<lang>en</lang>
-		<region>wr</region>
-	</game>
-	<game>
 		<path>./capriceforever.menu</path>
 		<name>Caprice Forever (Amstrad CPC)</name>
 		<desc>Run Caprice Forever (Amstrad CPC).</desc>
@@ -995,22 +979,6 @@
 		<playcount>2</playcount>
 		<lastplayed>20260804T005745</lastplayed>
 		<gametime>50</gametime>
-		<lang>en</lang>
-		<region>wr</region>
-	</game>
-	<game>
-		<path>./cemu.menu</path>
-		<name>Cemu (Wii U)</name>
-		<desc>Run Cemu Emulator (Wii U).</desc>
-		<genre>Emulator</genre>
-		<image>./media/cemu-logo.png</image>
-		<marquee>./media/cemu-logo.png</marquee>
-		<rating>0</rating>
-		<developer>Cemu Team</developer>
-		<publisher>Cemu Team</publisher>
-		<playcount>1</playcount>
-		<lastplayed>20260804T005717</lastplayed>
-		<gametime>14</gametime>
 		<lang>en</lang>
 		<region>wr</region>
 	</game>
@@ -1042,22 +1010,6 @@
 		<playcount>1</playcount>
 		<lastplayed>20260804T012527</lastplayed>
 		<gametime>17</gametime>
-		<lang>en</lang>
-		<region>wr</region>
-	</game>
-	<game>
-		<path>./ares.menu</path>
-		<name>Ares (Multi Cores Emulator)</name>
-		<desc>Run Ares (Multi Cores Emulator).</desc>
-		<genre>Emulator</genre>
-		<image>./media/ares-logo.png</image>
-		<marquee>./media/ares-logo.png</marquee>
-		<rating>0</rating>
-		<developer>Luke Usher</developer>
-		<publisher>Ares Team</publisher>
-		<playcount>5</playcount>
-		<lastplayed>20260804T011257</lastplayed>
-		<gametime>39</gametime>
 		<lang>en</lang>
 		<region>wr</region>
 	</game>
@@ -1110,6 +1062,22 @@
 		<region>wr</region>
 	</game>
 	<game>
+		<path>./cemu.menu</path>
+		<name>Cemu (Wii U)</name>
+		<desc>Run Cemu Emulator (Wii U).</desc>
+		<genre>Emulator</genre>
+		<image>./media/cemu-logo.png</image>
+		<marquee>./media/cemu-logo.png</marquee>
+		<rating>0</rating>
+		<developer>Cemu Team</developer>
+		<publisher>Cemu Team</publisher>
+		<playcount>4</playcount>
+		<lastplayed>20260807T002506</lastplayed>
+		<gametime>1058</gametime>
+		<lang>en</lang>
+		<region>wr</region>
+	</game>
+	<game>
 		<path>./dolphin-emu.menu</path>
 		<name>Dolphin (GameCube,Wii,WAD)</name>
 		<desc>Run Dolphin Emulator (GameCube, Wii, WAD).</desc>
@@ -1119,9 +1087,41 @@
 		<rating>0</rating>
 		<developer>Dolphin Team</developer>
 		<publisher>Dolphin Team</publisher>
-		<playcount>10</playcount>
-		<lastplayed>20260804T125103</lastplayed>
-		<gametime>2559</gametime>
+		<playcount>11</playcount>
+		<lastplayed>20260807T114142</lastplayed>
+		<gametime>2573</gametime>
+		<lang>en</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./ares.menu</path>
+		<name>Ares (Multi Cores Emulator)</name>
+		<desc>Run Ares (Multi Cores Emulator).</desc>
+		<genre>Emulator</genre>
+		<image>./media/ares-logo.png</image>
+		<marquee>./media/ares-logo.png</marquee>
+		<rating>0</rating>
+		<developer>Luke Usher</developer>
+		<publisher>Ares Team</publisher>
+		<playcount>9</playcount>
+		<lastplayed>20260809T015355</lastplayed>
+		<gametime>1499</gametime>
+		<lang>en</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./libretro.menu</path>
+		<name>RetroArch (Multi Cores Emulator)</name>
+		<desc>Run RetroArch (Multi Cores Emulator).</desc>
+		<genre>Emulator</genre>
+		<image>./media/retroarch-logo.png</image>
+		<marquee>./media/retroarch-logo.png</marquee>
+		<rating>0</rating>
+		<developer>Libretro Team</developer>
+		<publisher>Libretro Team</publisher>
+		<playcount>5</playcount>
+		<lastplayed>20260811T165020</lastplayed>
+		<gametime>227</gametime>
 		<lang>en</lang>
 		<region>wr</region>
 	</game>

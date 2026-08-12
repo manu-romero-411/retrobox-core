@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 # Instalación de dependencias de Retrobox para Debian, Ubuntu y Linux Mint.
-# Probado en Debian 12+, Ubuntu 22.04+, Linux Mint 21+.
+# Probado en Debian 13 y Linux Mint 22
 set -euo pipefail
+RETROBOX_ROOTDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. >/dev/null 2>&1 && pwd -P)"
 
 echo "[retrobox] Installing system dependencies (apt)..."
 sudo apt-get update
 sudo apt-get install -y \
+    git \
     libfreeimage3 \
     libsdl2-2.0-0 \
     libsdl2-mixer-2.0-0 \
@@ -29,12 +31,14 @@ sudo apt-get install -y \
     power-profiles-daemon \
     python3-ruamel.yaml
 
-sudo cp ../resources/udev/*.rules /etc/udev/rules.d/
+sudo cp ${RETROBOX_ROOTDIR}/resources/udev/*.rules /etc/udev/rules.d/
 sudo usermod -aG input $(whoami)
 sudo udevadm control --reload-rules
 sudo udevadm trigger
 cat << EOF | sudo tee /etc/udev/rules.d/99-input.rules
 KERNEL=="uinput", MODE="0660", GROUP="input", OPTIONS+="static_node=uinput"
 EOF
+
+git clone https://github.com/RetroBat-Official/retrobat-bezels ${RETROBOX_ROOTDIR}/resources/decorations
 
 echo "[retrobox] System dependencies sucessfully installed."

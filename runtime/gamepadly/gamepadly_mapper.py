@@ -1124,7 +1124,7 @@ ejemplos:
     if not hotkeys and not axis_mouse and not axis_scroll:
         _logger.error("No se resolvió ninguna acción.")
         pygame.quit()
-        sys.exit(1)
+        return
 
     # ── Bucle de reconexión ─────────────────────────────────────────
     # No termina si el mando se desconecta: espera y reanuda.

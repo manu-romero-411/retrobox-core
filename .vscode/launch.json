@@ -1,6 +1,9 @@
 {
   "version": "0.2.0",
   "configurations": [
+
+
+
   
 
 
@@ -40,7 +43,7 @@
         "-p1index",
         "1",
         "-p1guid",
-        "0600b7926f0e0000a802000000010000",
+        "03004e526f0e0000a802000023020000",
         "-p1name",
         "PDP Xbox One Arctic White",
         "-p1nbbuttons",
@@ -52,7 +55,7 @@
         "-p2index",
         "0",
         "-p2guid",
-        "0500d71f7e0500000920000000006803",
+        "0500d71f7e0500000920000001800000",
         "-p2name",
         "Nintendo Switch Pro Controller",
         "-p2nbbuttons",
@@ -146,9 +149,9 @@
       "envFile": "${workspaceFolder}/.env",
       "args": [
         "-p1index",
-        "1",
+        "0",
         "-p1guid",
-        "0600b7926f0e0000a802000000010000",
+        "03004e526f0e0000a802000023020000",
         "-p1name",
         "PDP Xbox One Arctic White",
         "-p1nbbuttons",
@@ -158,17 +161,17 @@
         "-p1nbaxes",
         "6",
         "-p2index",
-        "0",
+        "1",
         "-p2guid",
         "0500d71f7e0500000920000000006803",
         "-p2name",
-        "Nintendo Switch Pro Controller",
+        "Pro Controller",
         "-p2nbbuttons",
-        "16",
+        "14",
         "-p2nbhats",
         "1",
         "-p2nbaxes",
-        "6",
+        "4",
         "-system",
         "switch",
         "-rom",

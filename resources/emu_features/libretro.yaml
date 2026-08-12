@@ -41,6 +41,10 @@ groups:
         value: force_x11
         description: Force to run RetroArch in X11 (Xwayland) mode. May alter performance for better or worse.
         preset: switchauto
+      - name: USE GAMESCOPE
+        value: force_gamescope
+        description: Gamescope is an alternative Wayland compositor designed for gaming.
+        preset: switchauto
       - name: VSYNC
         value: use_vsync
         description: Can cause conflict with KDE Plasma's Wayland compositor, but mitigates tearing on X11.
@@ -59,8 +63,6 @@ groups:
             value: sdl2
           - name: PulseAudio (default)
             value: pulse
-          - name: PipeWire
-            value: pipewire
       - name: AUDIO LATENCY
         value: audio_latency
         description: In milliseconds. Can reduce crackling/cutting out.

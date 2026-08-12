@@ -67,7 +67,10 @@ OVERLAYS:    Final = check_env_dirs('OVERLAYS_DIR', USERDATA / 'overlay')
 CHEATS:      Final = check_env_dirs('CHEATS_DIR', USERDATA / 'cheats')
 
 _SHADERS_DIR:    Final = check_env_dirs('SHADERS_DIR', USERDATA / 'shaders')
+_SHADERS_DEF_DIR:  Final = check_env_dirs('SHADERS_DEFAULT_DIR', RESOURCES_DIR / 'shaders')
+
 _DECORATIONS_DIR:  Final = check_env_dirs('BEZELS_DIR', USERDATA / 'decorations')
+_DECORATIONS_DEF_DIR:  Final = check_env_dirs('BEZELS_DEFAULT_DIR', RESOURCES_DIR / 'decorations')
 
 # EmulationStation
 _USER_ES_DIR: Final = _FRONTEND_DIR / '.emulationstation'

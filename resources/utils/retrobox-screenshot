@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -x
+RETROBOX_ROOT=$( cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." &> /dev/null && pwd )
+ES_METADATA_FILE="/tmp/game.xml"
+if [ ! -f "$ES_METADATA_FILE" ]; then
+	NAME=retrobox
+else
+	GAME_PATH=$(xmllint --xpath 'string(//game/path)' /tmp/game.xml)
+	NAME=$(basename "${GAME_PATH}")
+	NAME="${NAME%.*}"
+fi
+
+mkdir -p "$RETROBOX_ROOT/screenshots"
+exec grim "$RETROBOX_ROOT/screenshots/${NAME}_$(date +%Y%m%d-%H%M%S).png"
+

@@ -13,7 +13,7 @@ groups:
     submenus:
       CONTROLLERS:
         - name: AUTO CONTROLLER CONFIG
-          value: yuzu_auto_controller_config
+          value: eden_auto_controller_config
           description: "Auto Controller Configuration Auto=On "
           choices:
             - name: Off
@@ -21,7 +21,7 @@ groups:
             - name: On
               value: 1
         - name: RUMBLE
-          value: yuzu_rumble
+          value: eden_rumble
           description: "Controller Rumble Auto=On "
           choices:
             - name: Off
@@ -29,7 +29,7 @@ groups:
             - name: On
               value: true
         - name: "INVERSE BUTTON A/X - X/Y"
-          value: yuzu_inverse_button
+          value: eden_inverse_button
           description: Inverse Button A/X and X/Y For Xbox 
           choices:
             - name: Off
@@ -166,7 +166,7 @@ groups:
               value: 5
       DISPLAY:
         - name: ASPECT RATIO
-          value: yuzu_ratio
+          value: eden_ratio
           description: "Yuzu Aspect Ratio Auto=16/9"
           choices:
             - name: 16/9
@@ -227,7 +227,7 @@ groups:
             - name: On
               value: true
         - name: MEMORY LAYOUT
-          value: yuzu_memory_layout
+          value: eden_memory_layout
           description: "Increases amount of emulated RAM from 4G to 8/6 useful for HDtextures Auto=4G(Recommended)"
           choices:
             - name: 4GB DRAM (Recommended)
@@ -310,7 +310,7 @@ groups:
               value: 0
         - name: USERS PROFILES
           value: user_profile
-          description: Ask For User Profile on boot (useful if you have created several profiles in yuzu) 
+          description: Ask For User Profile on boot (useful if you have created several profiles in eden) 
           choices:
             - name: Off (default)
               value: false
