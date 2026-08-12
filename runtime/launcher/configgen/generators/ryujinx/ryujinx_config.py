@@ -1,8 +1,6 @@
-from collections import defaultdict
 import json
 import logging
 import os
-import re
 
 from ...controller import generate_sdl_game_controller_config
 from ..eden.edenPaths import SWITCH_ROMS
