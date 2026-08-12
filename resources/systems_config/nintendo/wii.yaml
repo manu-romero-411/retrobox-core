@@ -23,6 +23,10 @@ wii:
       cores:
         dolphin:
           default: true
+          options:
+            force_no_bezel: true
     libretro:
       cores:
-        dolphin: {}
+        dolphin:
+          options:
+            force_no_bezel: true

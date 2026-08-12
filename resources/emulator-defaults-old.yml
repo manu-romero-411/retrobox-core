@@ -10,7 +10,7 @@ default:
     shaderset:          sharp-bilinear-simple
     rewind:             false
     bezel:              consoles
-    forceNoBezel:       false
+    force_no_bezel:       false
     gamemode_enable:    false
     video_frame_delay_auto: true
 
@@ -266,7 +266,7 @@ gameandwatch:
   emulator: libretro
   core:     gw
   options:
-    forceNoBezel: true
+    force_no_bezel: true
 gamecom:
   emulator: libretro
   core:     mame
@@ -362,7 +362,7 @@ lcdgames:
   emulator: libretro
   core:     mame
   options:
-    forceNoBezel: true
+    force_no_bezel: true
 lindbergh:
   emulator: lindbergh-loader
   core:     lindbergh-loader
@@ -738,7 +738,7 @@ switch:
   emulator: eden-emu
   core:     eden-emu
   options:
-    forceNoBezel: true
+    force_no_bezel: true
     hud_support: false
 systemsp:
   emulator: libretro

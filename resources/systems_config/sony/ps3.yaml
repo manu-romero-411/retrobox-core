@@ -16,3 +16,5 @@ ps3:
       cores:
         rpcs3:
           default: true
+          options:
+            force_no_bezel: true

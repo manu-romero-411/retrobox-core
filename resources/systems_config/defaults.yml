@@ -10,6 +10,6 @@ default:
     shaderset:          sharp-bilinear-simple
     rewind:             false
     bezel:              consoles
-    forceNoBezel:       false
+    force_no_bezel:       false
     gamemode_enable:    false
     video_frame_delay_auto: true

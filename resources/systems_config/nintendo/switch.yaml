@@ -22,6 +22,11 @@ switch:
       cores:
         eden-emu:
           default: true
+          options:
+            force_no_bezel: true
+
     ryujinx-emu:
       cores:
-        ryujinx-emu: {}
+        ryujinx-emu:
+          options:
+            force_no_bezel: true

@@ -32,7 +32,7 @@ ps2:
           incompatible_extensions:
           - .m3u
           options:
-            hud_support: false
+            hud_support: true
     play:
       cores:
         play:

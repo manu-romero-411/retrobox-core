@@ -13,3 +13,5 @@ ps4:
       cores:
         shadps4:
           default: true
+          options:
+            force_no_bezel: true

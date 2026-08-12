@@ -17,7 +17,11 @@ xbox360:
         xenia:
           incompatible_extensions:
           - .zar
+          options:
+            force_no_bezel: true
     xenia-canary:
       cores:
         xenia-canary:
           default: true
+          options:
+            force_no_bezel: true

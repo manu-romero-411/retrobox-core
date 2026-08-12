@@ -15,3 +15,5 @@ lutris:
       cores:
         lutris:
           default: true
+          options:
+            force_no_bezel: true

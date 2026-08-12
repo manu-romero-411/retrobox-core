@@ -19,3 +19,5 @@ wiiu:
       cores:
         cemu:
           default: true
+          options:
+            force_no_bezel: true

@@ -15,3 +15,5 @@ heroic:
       cores:
         heroic:
           default: true
+          options:
+            force_no_bezel: true
