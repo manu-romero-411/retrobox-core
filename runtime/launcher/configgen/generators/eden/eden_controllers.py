@@ -99,7 +99,7 @@ def apply_rare_dpad_fix(inputs: dict, guid: str) -> None:
         'right': sdl2.SDL_CONTROLLER_BUTTON_DPAD_RIGHT,
     }
     for direction, btn_idx in dpad_sdl_buttons.items():
-        inputs[direction] = Input(name=direction, type="button", id=str(btn_idx), value=1, code=0)
+        inputs[direction] = Input(name=direction, type="button", id=str(btn_idx), value="1", code="0")
         _logger.debug("dpad fix: %s → %d", direction, btn_idx)
 
 def sdlmapping_to_controller(mapping, guid):
@@ -120,22 +120,22 @@ def sdlmapping_to_controller(mapping, guid):
             if physical_mapping.startswith('b'):
                 input_type = "button"
                 clean_value = physical_mapping[1:]
-                input_obj = Input(name=logical_name, type=input_type, id=clean_value, value=1, code=0)
+                input_obj = Input(name=logical_name, type=input_type, id=clean_value, value="1", code="0")
             elif physical_mapping.startswith('a'):
                 input_type = "axis"
                 clean_value = physical_mapping[1:]
-                input_obj = Input(name=logical_name, type=input_type, id=clean_value, value=1, code=0)
+                input_obj = Input(name=logical_name, type=input_type, id=clean_value, value="1", code="0")
             elif physical_mapping.startswith('h'):
                 input_type = "hat"
                 clean_value = physical_mapping[1:]
                 clean_value_mask, clean_value_dir = clean_value.split('.')
-                input_obj = Input(name=logical_name, type=input_type, id=clean_value_mask, value=clean_value_dir, code=0)
+                input_obj = Input(name=logical_name, type=input_type, id=clean_value_mask, value=clean_value_dir, code="0")
             else:
                 continue
 
             if logical_name in _DEFAULT_SDL_MAPPING:
                 logical_name = _DEFAULT_SDL_MAPPING[logical_name]
-                input_obj = Input(name=logical_name, type=input_obj.type, id=input_obj.id, value=input_obj.value, code=0)
+                input_obj = Input(name=logical_name, type=input_obj.type, id=input_obj.id, value=input_obj.value, code="0")
 
             current_controller["inputs"][logical_name] = input_obj
 

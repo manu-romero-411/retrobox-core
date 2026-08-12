@@ -25,7 +25,6 @@ def _eden_write_config(edenConfigFile, edenConfigTemplateFile, system, playersCo
 
     # ini file
     eden_config = CaseSensitiveRawConfigParser()
-    eden_config.optionxform=str
 
     if os.path.exists(edenConfigFile):
         eden_config.read(edenConfigFile)

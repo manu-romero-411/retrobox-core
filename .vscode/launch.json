@@ -1,17 +1,6 @@
 {
   "version": "0.2.0",
   "configurations": [
-
-
-
-  
-
-
-
-
-
-
-
     {
       "name": "boot",
       "type": "debugpy",
@@ -19,18 +8,14 @@
       "module": "retrobox_run",
       "cwd": "${workspaceFolder}/runtime/startup",
       "envFile": "${workspaceFolder}/.env",
-      "args": [
-       
-      ],
+      "args": [],
       "env": {
-        "PYTHONPATH": "${workspaceFolder}",
+        "PYTHONPATH": "${workspaceFolder}"
         //"ROMS_DIR": "/var/penguintb/juegos/roms"
-
       },
       "console": "integratedTerminal",
       "justMyCode": false
     },
-
 
     {
       "name": "configgen: youtube",
@@ -139,7 +124,7 @@
       "console": "integratedTerminal",
       "justMyCode": false
     },
-    
+
     {
       "name": "configgen: Switch eden-emu (ROM genérica)",
       "type": "debugpy",
@@ -240,7 +225,7 @@
       "console": "integratedTerminal",
       "justMyCode": false
     },
-        {
+    {
       "name": "configgen: GameCube (Mario Kart Double Dash) - sin mandos",
       "type": "debugpy",
       "request": "launch",
@@ -248,7 +233,6 @@
       "cwd": "${workspaceFolder}/runtime/launcher",
       "envFile": "${workspaceFolder}/.env",
       "args": [
-      
         "-system",
         "gamecube",
         "-rom",
@@ -337,7 +321,7 @@
       "console": "integratedTerminal",
       "justMyCode": false
     },
-        {
+    {
       "name": "configgen: NDS (Zuma)",
       "type": "debugpy",
       "request": "launch",
@@ -505,11 +489,11 @@
         "-p1index",
         "0",
         "-p1guid",
-        "0500d71f7e0500000920000000006803",
+        "03004e526f0e0000a802000023020000",
         "-p1name",
-        "Nintendo Switch Pro Controller",
+        "PDP Xbox One Arctic White",
         "-p1nbbuttons",
-        "16",
+        "11",
         "-p1nbhats",
         "1",
         "-p1nbaxes",
@@ -517,15 +501,15 @@
         "-p2index",
         "1",
         "-p2guid",
-        "03004e526f0e0000a802000023020000",
+        "0500d71f7e0500000920000000006803",
         "-p2name",
-        "PDP Xbox One Arctic White",
+        "Pro Controller",
         "-p2nbbuttons",
-        "11",
+        "14",
         "-p2nbhats",
         "1",
         "-p2nbaxes",
-        "6",
+        "4",
         "-system",
         "ps2",
         "-rom",
@@ -590,7 +574,7 @@
       "console": "integratedTerminal",
       "justMyCode": false
     },
-    
+
     {
       "name": "configgen: Mega Drive (Sonic 2 sin mando)",
       "type": "debugpy",
@@ -622,10 +606,14 @@
       "cwd": "${workspaceFolder}/runtime/launcher",
       "envFile": "${workspaceFolder}/.env",
       "args": [
-        "-system", "mame",
-        "-rom", "/var/penguintb/juegos/roms/mame/ncv2.zip",
-        "-systemname", "Mame",
-        "-gameinfoxml", "/tmp/game.xml",
+        "-system",
+        "mame",
+        "-rom",
+        "/var/penguintb/juegos/roms/mame/ncv2.zip",
+        "-systemname",
+        "Mame",
+        "-gameinfoxml",
+        "/tmp/game.xml"
       ],
       "env": {
         "PYTHONPATH": "${workspaceFolder}"
@@ -758,7 +746,12 @@
       "module": "emulatorlauncher",
       "cwd": "${workspaceFolder}/runtime/launcher",
       "envFile": "${workspaceFolder}/.env",
-      "args": ["-system", "config", "-rom", "/var/penguin/juegos/retrobox/resources/es_menu/libretro.menu"],
+      "args": [
+        "-system",
+        "config",
+        "-rom",
+        "/var/penguin/juegos/retrobox/resources/es_menu/libretro.menu"
+      ],
       "env": {
         "PYTHONPATH": "${workspaceFolder}"
       },

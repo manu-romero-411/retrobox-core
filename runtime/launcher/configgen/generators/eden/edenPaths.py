@@ -2,7 +2,7 @@
 import os
 from pathlib import Path
 from typing import Final
-from runtime.retrobox_paths import _SYSTEM_LOCAL_BIN, BIOS, EMULATORS, ROMS, SAVES, _XDG_DATA, ensure_symlink, mkdir_if_not_exists
+from runtime.retrobox_paths import BIOS, EMULATORS, ROMS, SAVES, ensure_symlink, mkdir_if_not_exists
 
 # --- Base ---
 SWITCH_BIOS: Final = BIOS / "switch"

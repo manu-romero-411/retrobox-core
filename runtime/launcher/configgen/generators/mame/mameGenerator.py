@@ -607,7 +607,7 @@ class MameGenerator(Generator):
 
         # bezels
         bezelSet = system.config.get_str('bezel') or None
-        if system.config.get_bool('forceNoBezel'):
+        if system.config.get_bool('force_no_bezel'):
             bezelSet = None
 
         try:
