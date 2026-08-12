@@ -116,6 +116,10 @@ def start_rom(args: argparse.Namespace, maxnbplayers: int, rom: Path, original_r
         if "emulator" in system.config:
             _logger.debug('emulator: %s', system.config.emulator)
 
+    # power profiles
+    power_prof = system.config.get("power_profile", "balanced")
+    previous_power_profile = apply_power_profile(power_prof)      
+
     # metadata
     md = metadata.get_games_meta_data(ES_GAMES_METADATA, system_name, rom)
 
@@ -173,9 +177,6 @@ def start_rom(args: argparse.Namespace, maxnbplayers: int, rom: Path, original_r
                     [system.config.emulator,
                      effective_core]
                 )
-
-                power_prof = system.config.get("power_profile", "balanced")
-                previous_power_profile = apply_power_profile(power_prof)      
        
                 # run the emulator
                 with (
@@ -187,6 +188,7 @@ def start_rom(args: argparse.Namespace, maxnbplayers: int, rom: Path, original_r
                         controllers = player_controllers,
                     )
                 ):
+
                     # change directory if wanted
                     execution_directory = generator.executionDirectory(system.config, rom)
                     if execution_directory is not None:
