@@ -126,7 +126,7 @@ class LibretroGenerator(Generator):
             if (_SHADERS_DIR / shader_filename).exists():
                 video_shader_dir = _SHADERS_DIR
                 _logger.debug("shader %s found in %s", shader_filename, _SHADERS_DIR)
-            elif (RETROARCH_SHADERS / f"shaders_{shader_type}"):
+            elif (RETROARCH_SHADERS / f"shaders_{shader_type}" / shader_filename).exists():
                 video_shader_dir = RETROARCH_SHADERS / f"shaders_{shader_type}"
                 _logger.debug("shader %s: detected retroarch appimage, falling back to %s", shader_filename, video_shader_dir)
             else:
@@ -159,7 +159,7 @@ class LibretroGenerator(Generator):
             # Write configuration to retroarchcustom.cfg
             bezel = system.config.get('bezel') or None
             # some systems (ie gw) won't bezels
-            if system.config.get_bool('forceNoBezel'):
+            if system.config.get_bool('force_no_bezel'):
                 bezel = None
 
             libretroConfig.writeLibretroConfig(self, retroconfig, system, playersControllers, metadata, guns, wheels, rom, bezel, shader_bezel, gameResolution, gfx_backend)
