@@ -1,23 +1,13 @@
 from __future__ import annotations
 
-from collections import defaultdict
 import logging
-import glob
-import os
-import re
 import shutil
 import subprocess
-import json
 import stat
 import hashlib
-from ctypes import create_string_buffer
 from shutil import copyfile
 from pathlib import Path
 from typing import TYPE_CHECKING
-
-import sdl2
-from sdl2 import joystick
-
 from configgen.generators.ryujinx.ryujinx_config import writeRyujinxConfig
 from runtime.retrobox_paths import (
     DEFAULTS_DIR,
