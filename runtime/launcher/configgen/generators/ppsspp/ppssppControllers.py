@@ -17,6 +17,7 @@ ppssppControlsInit: Final = PPSSPP_CONFIG_INIT / 'controls.ini'
 
 PPSSPP_NINTENDO_CONTROLLERS = {
     "030000007e0500000920000000006803",  # Switch Pro Controller
+    "0500d71f7e0500000920000001800000"
 }
 
 # This configgen is based on PPSSPP 1.5.4.
@@ -148,14 +149,6 @@ ppssppMapping =  { 'a' :             {'button': 'Circle'},
 
 # Create the controller configuration file
 def generateControllerConfig(controller: Controller):
-    is_nintendo = any(kw in controller.real_name.lower()
-                      for kw in ['nintendo', 'switch', 'joy-con', 'pro controller'])
-
-    nintendo_remap = {
-        'a': 'b', 'b': 'a',
-        'x': 'y', 'y': 'x',
-    } if is_nintendo else {}
-
     configFileName = ppssppControlsIni
     Config = CaseSensitiveConfigParser(interpolation=None)
     Config.read(ppssppControlsInit)
@@ -165,21 +158,18 @@ def generateControllerConfig(controller: Controller):
 
     for index in controller.inputs:
         input = controller.inputs[index]
-        effective_name = nintendo_remap.get(input.name, input.name)
 
-        if effective_name not in ppssppMapping or input.type not in ppssppMapping[effective_name]:
+        if input.name not in ppssppMapping or input.type not in ppssppMapping[input.name]:
             continue
 
-        var = ppssppMapping[effective_name][input.type]
+        var = ppssppMapping[input.name][input.type]
         padnum = controller.index
 
         if input.type == 'button':
-            pspcode = nintendo_sdl_name_to_nk_code.get(effective_name) if is_nintendo \
-                else sdlNameToNKCode[effective_name]
+            pspcode = sdlNameToNKCode[input.name]
             val = f"{DEVICE_ID_PAD_0 + padnum}-{pspcode}"
             val = optionValue(Config, section, var, val)
             Config.set(section, var, val)
-
         elif input.type == 'axis':
             nkAxisId = SDLJoyAxisMap[input.id]
             pspcode = axisToCode(nkAxisId, int(input.value))
@@ -212,8 +202,6 @@ def generateControllerConfig(controller: Controller):
 
         mkdir_if_not_exists(configFileName.parent)
 
-    # TODO: hotkey controls will be called via gamepadly.
-    # configuring specific hotkey in ppsspp is not simple without patching
     Config.set(section, "Rewind",        "1-131")
     Config.set(section, "Fast-forward",  "1-132")
     Config.set(section, "Save State",    "1-133")

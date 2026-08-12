@@ -11,7 +11,7 @@ import qrcode
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 
 from configgen.utils.language import _detect_language
-from runtime.retrobox_paths import RESOURCES_DIR, ES_GUNS_ART_METADATA, _DECORATIONS_DIR, _DECORATIONS_DIR
+from runtime.retrobox_paths import _DECORATIONS_DEF_DIR, RESOURCES_DIR, ES_GUNS_ART_METADATA, _DECORATIONS_DIR, _DECORATIONS_DIR
 from ..exceptions import RetroboxException
 from . import metadata
 from .videoMode import get_alt_decoration
@@ -72,17 +72,42 @@ def get_bezel_infos(
     bez_systems_dir = Path(f"{_DECORATIONS_DIR}/{bezel}/systems")
     bez_root_dir = Path(f"{_DECORATIONS_DIR}/{bezel}")
 
+    default_bez_games_dir = Path(f"{_DECORATIONS_DEF_DIR}/{bezel}/games")
+    default_bez_systems_dir = Path(f"{_DECORATIONS_DEF_DIR}/{bezel}/systems")
+    default_bez_root_dir = Path(f"{_DECORATIONS_DEF_DIR}/{bezel}")
+
+
     candidates: list[BezelInfos] = [
         build(bez_games_dir / system_name, rom_base, True),
         build(bez_games_dir, rom_base, True),
     ]
+
+    # user-provided bezels in $RETROBOX_ROOTDIR/decorations
     if alt_decoration != "0":
-        candidates.append(build(bez_systems_dir, f"{system_name}-{alt_decoration!s}", False))
-    candidates.append(build(bez_systems_dir, system_name, False, f"_{_detect_language()}" ))
-    candidates.append(build(bez_systems_dir, system_name, False))
+        candidates.append(
+            build(bez_systems_dir, f"{system_name}-{alt_decoration!s}", False))
+
+    candidates.append(
+        build(bez_systems_dir, system_name, False, f"_{_detect_language()}" ))
+    candidates.append(
+        build(bez_systems_dir, system_name, False))
     if alt_decoration != "0":
         candidates.append(build(bez_root_dir, f"default-{alt_decoration!s}", True))
     candidates.append(build(bez_root_dir, "default", True))
+
+    # default bezels from RetroBat ($RETROBOX_ROOTDIR/resources/decorations)
+    candidates.append(build(default_bez_games_dir / system_name, rom_base, True))
+    candidates.append(build(default_bez_games_dir, rom_base, True))
+
+    if alt_decoration != "0":
+        candidates.append(
+            build(default_bez_systems_dir, f"{system_name}-{alt_decoration!s}", False))
+    candidates.append(
+        build(default_bez_systems_dir, system_name, False))
+
+    if alt_decoration != "0":
+        candidates.append(build(default_bez_root_dir, f"default-{alt_decoration!s}", True))
+    candidates.append(build(default_bez_root_dir, "default", True))
 
     for candidate in candidates:
         if candidate["png"].exists():

@@ -48,7 +48,11 @@ _logger = logging.getLogger(__name__)
 
 class LibretroGenerator(Generator):
     def _core_filename(self, core: str) -> str:
-        """Traduce nombres alias de Batocera a nombres de fichero upstream de RetroArch."""
+        """
+        Translates libretro upstream core names to batocera names.
+        This is intended to be temporal, as I plan to progresively match
+        core names in systems declaration to the actual cores in retroarch
+        """
         _MAP = {
             'pce':                    'mednafen_pce',
             'pce_fast':               'mednafen_pce_fast',
@@ -122,8 +126,10 @@ class LibretroGenerator(Generator):
             if (_SHADERS_DIR / shader_filename).exists():
                 video_shader_dir = _SHADERS_DIR
                 _logger.debug("shader %s found in %s", shader_filename, _SHADERS_DIR)
+            elif (RETROARCH_SHADERS / f"shaders_{shader_type}"):
+                video_shader_dir = RETROARCH_SHADERS / f"shaders_{shader_type}"
+                _logger.debug("shader %s: detected retroarch appimage, falling back to %s", shader_filename, video_shader_dir)
             else:
-                #video_shader_dir = RETROARCH_SHADERS / f"shaders_{shader_type}"
                 video_shader_dir = RETROARCH_SHADERS
                 _logger.debug("shader %s: falling back to %s", shader_filename, video_shader_dir)
             video_shader = video_shader_dir / shader_filename
@@ -453,11 +459,14 @@ class LibretroGenerator(Generator):
         
         forced_x11 = \
             system.config.get_bool("force_x11", False, return_values=(True, False))
+        forced_gamescope = \
+            system.config.get_bool("force_gamescope", False, return_values=(True, False))
 
         # generate bash wrapper
         command_wrapper = [generate_bash_wrapper(
             system.config.emulator, _RETROARCH_BIN, args_array,
-            force_x11=forced_x11
+            force_x11=forced_x11,
+            force_gamescope=forced_gamescope
         )]
 
         return Command.Command(array=command_wrapper, env={

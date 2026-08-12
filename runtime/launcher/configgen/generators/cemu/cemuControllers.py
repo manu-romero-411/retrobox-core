@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING
 
 import pyudev
 
-from runtime.launcher.configgen.controller import normalize_sdl_guid_for_emulator
 from runtime.retrobox_paths import mkdir_if_not_exists
 
 from .cemuPaths import CEMU_CONTROLLER_PROFILES
@@ -267,7 +266,7 @@ def generateControllerConfig(system: Emulator, playersControllers: Controllers) 
         # Create controller configuration
         controllerNode = ET.SubElement(root, 'controller')
         addTextElement(controllerNode, 'api', api)
-        addTextElement(controllerNode, 'uuid', f"{guid_n[pad.index]}_{normalize_sdl_guid_for_emulator(pad.guid)}") # controller guid
+        addTextElement(controllerNode, 'uuid', f"{guid_n[pad.index]}_{pad.guid}") # controller guid
         addTextElement(controllerNode, 'display_name', pad.real_name) # controller name
         addTextElement(controllerNode, 'rumble', system.config.get('cemu_rumble', '0')) # % chosen
         addAnalogControl(controllerNode, 'axis')

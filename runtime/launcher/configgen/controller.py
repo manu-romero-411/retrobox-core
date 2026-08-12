@@ -9,6 +9,8 @@ from dataclasses import InitVar, dataclass, field, replace
 from pathlib import Path
 from typing import TYPE_CHECKING, Final, Literal, Self, TypedDict, Unpack, cast
 
+import evdev
+
 from runtime.retrobox_paths import _FRONTEND_DIR, _USER_HOME, ES_INPUT_CFG
 
 _logger: Final = logging.getLogger(__name__)
@@ -115,84 +117,27 @@ def normalize_sdl_guid_for_emulator(raw_guid: str) -> str:
     # cualquier otro bus → USB HID, igual que lo ve SDL+HIDAPI
     return _HIDAPI_BUS + g[4:]
 
-def map_hidraw_to_evdev() -> dict[str, str]:
-    """
-    Correspondencia entre nodos hidraw y event, para poder leer
-    capacidades evdev de mandos que SDL expone vía hidraw.
-    """
-    mapping: dict[str, str] = {}
-    for h in glob.glob("/sys/class/hidraw/hidraw*"):
-        hid = os.path.basename(h)
-        devpath = os.path.realpath(os.path.join(h, "device"))
-        for root, dirs, _files in os.walk(devpath):
-            for d in dirs:
-                if d.startswith("event"):
-                    mapping[f"/dev/{hid}"] = f"/dev/input/{d}"
-    return mapping
+def evdev_to_hidraw():
 
-def get_dpad_button_indices_evdev(evdev_path):
-    """
-    Lee las capacidades evdev del dispositivo y devuelve
-    {direction: joystick_button_index} para BTN_DPAD_*.
-    """
-    try:
-        import evdev
-        dev = evdev.InputDevice(evdev_path)
-        caps = dev.capabilities()
-        btn_codes = sorted(caps.get(evdev.ecodes.EV_KEY, []))
-        dev.close()
+    result = {}
 
-        dpad_ecodes = {
-            'up':    evdev.ecodes.BTN_DPAD_UP,    # 0x220
-            'down':  evdev.ecodes.BTN_DPAD_DOWN,  # 0x221
-            'left':  evdev.ecodes.BTN_DPAD_LEFT,  # 0x222
-            'right': evdev.ecodes.BTN_DPAD_RIGHT, # 0x223
-        }
-        return {
-            direction: btn_codes.index(code)
-            for direction, code in dpad_ecodes.items()
-            if code in btn_codes
-        }
-    except Exception as e:
-        _logger.debug("get_dpad_button_indices(%s): %s", evdev_path, e)
-        return {}
+    for hid_path in glob.glob('/sys/class/hidraw/hidraw*'):
+        hid_dev = os.path.realpath(os.path.join(hid_path, "device"))
 
-def get_dpad_button_indices_sysfs(evdev_path):
-    """
-    Lee /sys/.../capabilities/key para calcular los índices SDL
-    de BTN_DPAD_* sin depender de python-evdev.
-    """
-    dev_name = os.path.basename(evdev_path)  # eventX
-    caps_path = f"/sys/class/input/{dev_name}/device/capabilities/key"
+        events = []
+        for root, dirs, files in os.walk(hid_dev):
+            for dir in dirs:
+                if dir.startswith("event"):
+                    event_path = os.path.join(root, dir)
+                    if "/input" in event_path and "/event" in event_path:
+                        events.append(event_path)
 
-    BTN_DPAD_UP    = 0x220
-    BTN_DPAD_DOWN  = 0x221
-    BTN_DPAD_LEFT  = 0x222
-    BTN_DPAD_RIGHT = 0x223
-
-    try:
-        with open(caps_path) as f:
-            hex_str = f.read().strip()
-
-        # chunks big-endian separados por espacios
-        bits = int(hex_str.replace(' ', ''), 16)
-
-        # SDL solo cuenta BTN_* (>= 0x100), en orden ascendente
-        btn_codes = sorted(i for i in range(bits.bit_length()) if (bits >> i) & 1 and i >= 0x100)
-
-        result = {}
-        for direction, code in [('up',    BTN_DPAD_UP),
-                                 ('down',  BTN_DPAD_DOWN),
-                                 ('left',  BTN_DPAD_LEFT),
-                                 ('right', BTN_DPAD_RIGHT)]:
-            if code in btn_codes:
-                result[direction] = btn_codes.index(code)
-                print("dpad sysfs: %s → code 0x%x → button %d", direction, code, result[direction])
-
-        return result
-    except Exception as e:
-        print("get_dpad_button_indices_sysfs(%s): %s", evdev_path, e)
-        return {}
+        if events:
+            for ev in events:
+                ev_name = os.path.basename(ev)
+                hid_name = os.path.basename(hid_path)
+                result[f"/dev/input/{ev_name}"] = f"/dev/{hid_name}"
+    return result
 
 def getJoystickHardwareIds(device_path: str, /) -> tuple[str, str] | None:
     """
@@ -246,6 +191,8 @@ def getJoystickHardwareIds(device_path: str, /) -> tuple[str, str] | None:
         print(f"[DEBUG_HW] Error unívoco en sysfs para {base_name}: {e}")
 
     return None
+
+
 
 class _RelaxedDict(TypedDict):
     centered: bool
@@ -532,6 +479,60 @@ class Controller:
                 return controller
 
         return None
+
+    def has_motion_controls(self) -> bool:
+        """
+        Comprueba si el mando identificado por su GUID SDL tiene soporte de
+        controles de movimiento (acelerómetro y/o giroscopio).
+
+        Arguments:
+        guid: (str) GUID SDL del mando (formato hexadecimal de 32 caracteres).
+        Returns:
+        (bool) True si el mando expone acelerómetro o giroscopio, False en
+        cualquier otro caso (no encontrado, sin soporte, error de SDL, etc).
+        """
+        try:
+            import sdl2
+        except ImportError:
+            return False
+
+        guid_normalized = normalize_sdl_guid_for_emulator(self.guid)
+
+        try:
+            if sdl2.SDL_WasInit(sdl2.SDL_INIT_GAMECONTROLLER) == 0:
+                sdl2.SDL_Init(sdl2.SDL_INIT_GAMECONTROLLER | sdl2.SDL_INIT_SENSOR)
+
+            import ctypes
+
+            for i in range(sdl2.SDL_NumJoysticks()):
+                sdl_guid = sdl2.SDL_JoystickGetDeviceGUID(i)
+
+                buf = ctypes.create_string_buffer(33)  # 32 chars + null
+                sdl2.SDL_JoystickGetGUIDString(sdl_guid, buf, 33)
+
+                guid_str = normalize_sdl_guid_for_emulator(buf.value.decode().lower())
+
+                if guid_str != guid_normalized:
+                    continue
+
+                if not sdl2.SDL_IsGameController(i):
+                    return False
+
+                controller = sdl2.SDL_GameControllerOpen(i)
+                if not controller:
+                    return False
+
+                try:
+                    accel = bool(sdl2.SDL_GameControllerHasSensor(controller, sdl2.SDL_SENSOR_ACCEL))
+                    gyro = bool(sdl2.SDL_GameControllerHasSensor(controller, sdl2.SDL_SENSOR_GYRO))
+                    return accel or gyro
+                finally:
+                    sdl2.SDL_GameControllerClose(controller)
+
+        except Exception:
+            return False
+
+        return False
 
 def generate_sdl_game_controller_config(controllers: Controllers, /, ignore_buttons: list[str] | None = None) -> str:
     return "\n".join(controller.generate_sdl_game_db_line(ignore_buttons = ignore_buttons) for controller in controllers)

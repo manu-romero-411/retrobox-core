@@ -191,7 +191,8 @@ def generate_bash_wrapper(
     emu_bin: Path,
     emu_args: list[str],
     unset_vars: list[str] | None = None,
-    force_x11: bool = False
+    force_x11: bool = False,
+    force_gamescope: bool = False
     ) -> str:
     """This function is used to wrap emulator commands to bash scripts.
     Useful when an emulator needs to run on a pure shell context
@@ -206,6 +207,10 @@ def generate_bash_wrapper(
         env_lines += "export GDK_BACKEND=x11\n"
         env_lines += "export WAYLAND_DISPLAY=\n"
 
+    gamescope_run = ""
+    if force_gamescope:
+        gamescope_run = "gamescope -f -- "
+    
     if unset_vars:
         for var in unset_vars:
             env_lines += f'unset {shlex.quote(var)}\n'

@@ -15,6 +15,7 @@ from PIL import Image
 
 from ... import Command
 from runtime.retrobox_paths import (
+    _DECORATIONS_DEF_DIR,
     RESOURCES_DIR,
     BIOS,
     DEFAULTS_DIR,
@@ -142,7 +143,7 @@ class MameGenerator(Generator):
         commandArray += [ "-languagepath", "/usr/bin/mame/language/" ]      # Translations can be left on ROM filesystem
         commandArray += [ "-pluginspath", f"/usr/bin/mame/plugins/;{MAME_SAVES / 'plugins'}" ]
         commandArray += [ "-samplepath",  MAME_BIOS / "samples" ] # Current batocera storage location for MAME samples
-        commandArray += [ "-artpath",     f"{MAME_ARTWORK_DIR}/;/usr/bin/mame/artwork/;{MAME_BIOS / 'artwork'};{_DECORATIONS_DIR}" ] # first for systems ; second for overlays
+        commandArray += [ "-artpath",     f"{MAME_ARTWORK_DIR}/;/usr/bin/mame/artwork/;{MAME_BIOS / 'artwork'};{_DECORATIONS_DEF_DIR};{_DECORATIONS_DIR}" ] # first for systems ; second for overlays
 
         # Enable cheats
         commandArray += [ "-cheat" ]

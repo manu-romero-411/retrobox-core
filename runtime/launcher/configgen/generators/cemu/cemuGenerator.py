@@ -7,7 +7,8 @@ import subprocess
 from os import environ
 from typing import TYPE_CHECKING, cast
 from xml.dom import minidom
-from runtime.retrobox_paths import SAVES, configure_emulator, mkdir_if_not_exists
+from configgen.utils.bios_files import check_biosfile
+from runtime.retrobox_paths import BIOS, SAVES, configure_emulator, mkdir_if_not_exists
 
 from ... import Command
 from ...controller import generate_sdl_game_controller_config
@@ -57,6 +58,9 @@ class CemuGenerator(Generator):
         mkdir_if_not_exists(CEMU_SAVES / "graphicPacks")
         mkdir_if_not_exists(CEMU_CONTROLLER_PROFILES)
 
+        # if keys file is not big enough, we should exit
+        check_biosfile(CEMU_BIOS / "keys.txt", min_size = 1024)
+
         # Create the settings file
         CemuGenerator.CemuConfig(CEMU_CONFIG / "settings.xml", system)
 
@@ -72,7 +76,7 @@ class CemuGenerator(Generator):
             array=commandArray,
             env={
                 "XDG_CONFIG_HOME":f"{_CEMU_XDG}",
-                "XDG_DATA_HOME":f"{SAVES}",
+                "XDG_DATA_HOME":f"{BIOS}",
                 "SDL_GAMECONTROLLERCONFIG": generate_sdl_game_controller_config(playersControllers),
                 "SDL_JOYSTICK_HIDAPI": "0"
             }

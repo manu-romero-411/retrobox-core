@@ -196,12 +196,14 @@ def createLibretroConfig(
         else:
             _logger.debug("Discrete GPU is not available on the system. Using default.")
 
-    retroarch_config['audio_driver'] = system.config.get("audio_driver", '"pipewire"')
+    retroarch_config['audio_driver'] = system.config.get("audio_driver", '"pulse"')
+    retroarch_config['audio_enable'] = "true"
+    retroarch_config['audio_sync'] = "true"
 
     # audio latency in 64 = best balance with audio perf
     retroarch_config['audio_latency'] = system.config.get("audio_latency", '64')
     retroarch_config['audio_volume'] = system.config.get("audio_volume", '0')
-    retroarch_config['audio_out_rate'] = system.config.get("audio_out_rate", '44100')
+    retroarch_config['audio_out_rate'] = system.config.get("audio_out_rate", '48000')
 
     display_rotate = system.config.get_str("display.rotate")
 
@@ -232,11 +234,9 @@ def createLibretroConfig(
     retroarch_config['video_fullscreen_x'] = gameResolution["width"]
     retroarch_config['video_fullscreen_y'] = gameResolution["height"]
 
-    # don't use anymore this value while it doesn't allow the shaders to work
-    retroarch_config['video_black_frame_insertion'] = 'false'
 
     # required at least on x86 x86_64 otherwise, the game is paused at launch
-    retroarch_config['pause_nonactive'] = 'false'
+    retroarch_config['pause_nonactive'] = 'true'
 
     mkdir_if_not_exists(_RETROARCH_CONFIG / 'cache')
     retroarch_config['cache_directory'] = _RETROARCH_CONFIG / 'cache'
@@ -247,10 +247,12 @@ def createLibretroConfig(
 
     retroarch_config['video_fullscreen'] = 'true'
     retroarch_config['video_windowed_fullscreen'] = 'true'
-    #retroarch_config['video_hard_sync'] = 'false'
+    retroarch_config['video_hard_sync'] = 'true'
     retroarch_config['video_max_swapchain_images'] = '3'
-    retroarch_config['video_frame_delay'] = '0'
+    retroarch_config['video_frame_delay'] = '1'
+    retroarch_config['video_frame_delay_auto'] = 'false'
     retroarch_config['video_black_frame_insertion'] = '0'
+    retroarch_config['video_swap_interval'] = '1'
 
     retroarch_config['sort_savefiles_enable'] = 'false'     # ensure we don't save system.name + core
     retroarch_config['sort_savestates_enable'] = 'false'    # ensure we don't save system.name + core

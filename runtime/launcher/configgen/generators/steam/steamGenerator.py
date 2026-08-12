@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from ...batoceraTypes import HotkeysContext
 
 POLL_INTERVAL = 4
-LAUNCH_TIMEOUT = 90  # segundos esperando a que aparezca el reaper
+LAUNCH_TIMEOUT = 300  # segundos esperando a que aparezca el reaper
 
 
 def _find_steam_binary() -> str:
@@ -38,20 +38,33 @@ def _make_wrapper(steam_bin: str, app_id: str | None) -> str:
         launch_cmd = f'"{steam_bin}" -silent -applaunch {app_id} > /dev/null 2>&1 &'
         monitor = f"""\
 APPID="{app_id}"
-LAUNCH_TIMEOUT={LAUNCH_TIMEOUT}
 POLL={POLL_INTERVAL}
 MAX_TOTAL={MAX_TOTAL}
+LAUNCH_TIMEOUT={LAUNCH_TIMEOUT}  # shaders pueden tardar varios minutos
+
+REG="$HOME/.steam/registry.vdf"
+[ -f "$REG" ] || REG="$HOME/.local/share/Steam/registry.vdf"
+
+_running_appid() {{
+    [ -f "$REG" ] || return 1
+    awk -F'"' '/"RunningAppID"/ {{ print $4; exit }}' "$REG"
+}}
 
 START=$(date +%s)
 _elapsed() {{ echo $(( $(date +%s) - START )); }}
 _timeout() {{ [ "$(_elapsed)" -ge "$MAX_TOTAL" ]; }}
 
-# Fase 1: esperar a que aparezca el reaper (puede tardar si compila shaders)
 echo "[steam-wrapper] Esperando arranque del juego (AppId=$APPID)..."
 APPEARED=0
 DEADLINE=$(( START + LAUNCH_TIMEOUT ))
 while [ "$(date +%s)" -lt "$DEADLINE" ]; do
-    if pgrep -f "SteamLaunch AppId=$APPID" > /dev/null 2>&1; then
+    RID="$(_running_appid)"
+    if [ -n "$RID" ] && [ "$RID" = "$APPID" ]; then
+        APPEARED=1
+        break
+    fi
+    # fallback si no hay registry.vdf legible
+    if [ -z "$RID" ] && pgrep -f "SteamLaunch AppId=$APPID" > /dev/null 2>&1; then
         APPEARED=1
         break
     fi
@@ -65,34 +78,29 @@ fi
 
 echo "[steam-wrapper] Juego detectado, monitorizando cierre..."
 
-# Fase 2: esperar a que desaparezca, con confirmación anti-relaunch
 while true; do
     _timeout && echo "[steam-wrapper] Timeout global, saliendo." && exit 0
 
-    if ! pgrep -f "SteamLaunch AppId=$APPID" > /dev/null 2>&1; then
-        # Reaper desapareció — esperar y confirmar que no vuelve
-        # (Steam puede relanzar el proceso tras compilar shaders)
-        echo "[steam-wrapper] Reaper desapareció, confirmando..."
-        sleep 8
-        if ! pgrep -f "SteamLaunch AppId=$APPID" > /dev/null 2>&1; then
-            echo "[steam-wrapper] Juego AppId=$APPID terminado."
+    RID="$(_running_appid)"
+    if [ -n "$RID" ]; then
+        # registry.vdf disponible: fuente fiable, sin parpadeos por shaders
+        if [ "$RID" != "$APPID" ]; then
+            echo "[steam-wrapper] Juego AppId=$APPID terminado (RunningAppID=$RID)."
             exit 0
         fi
-        echo "[steam-wrapper] Falsa alarma, el juego relanzó (shaders?), continuando..."
+    else
+        # fallback al método antiguo si no hay registry.vdf
+        if ! pgrep -f "SteamLaunch AppId=$APPID" > /dev/null 2>&1; then
+            sleep 8
+            if ! pgrep -f "SteamLaunch AppId=$APPID" > /dev/null 2>&1; then
+                echo "[steam-wrapper] Juego AppId=$APPID terminado."
+                exit 0
+            fi
+        fi
     fi
 
     sleep "$POLL"
 done
-"""
-    else:
-        launch_cmd = f'"{steam_bin}" -silent > /dev/null 2>&1 &'
-        monitor = f"""\
-echo "[steam-wrapper] Sin appid, esperando a que Steam cierre..."
-sleep 5
-while pgrep -x steam > /dev/null 2>&1; do
-    sleep {POLL_INTERVAL}
-done
-echo "[steam-wrapper] Steam cerrado."
 """
 
     script = f"""#!/usr/bin/env bash
