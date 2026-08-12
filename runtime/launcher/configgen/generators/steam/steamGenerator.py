@@ -15,7 +15,10 @@ if TYPE_CHECKING:
     from ...batoceraTypes import HotkeysContext
 
 POLL_INTERVAL = 4
-LAUNCH_TIMEOUT = 300  # segundos esperando a que aparezca el reaper
+LAUNCH_TIMEOUT = 300  # segundos esperando a que aparezca el reaper / Steam
+
+BIGPICTURE_ROM_NAME = "steam.steam"
+BIGPICTURE_ROM_CONTENT = "steam"
 
 
 def _find_steam_binary() -> str:
@@ -31,12 +34,73 @@ def _find_steam_binary() -> str:
     return "steam"
 
 
-def _make_wrapper(steam_bin: str, app_id: str | None) -> str:
+def _is_bigpicture_rom(rom) -> bool:
+    """
+    rom "steam.webapp" cuyo único contenido (tras strip) es la palabra "steam"
+    -> lanzar Steam en modo Big Picture en vez de un applaunch de un juego concreto.
+    """
+    if rom.name.lower() != BIGPICTURE_ROM_NAME:
+        return False
+    try:
+        with rom.open() as f:
+            content = f.read().strip()
+    except OSError:
+        return False
+    return content == BIGPICTURE_ROM_CONTENT
+
+
+def _make_wrapper(steam_bin: str, app_id: str | None, big_picture: bool = False) -> str:
     MAX_TOTAL = 7200  # 2h timeout global de seguridad
 
-    if app_id:
-        launch_cmd = f'"{steam_bin}" -silent -applaunch {app_id} > /dev/null 2>&1 &'
+    if big_picture:
+        # Big Picture: no hay AppId que vigilar, ni tiene sentido pollear
+        # RunningAppID/procesos de juego concretos. Solo esperamos a que
+        # Steam arranque y luego a que el propio Steam se cierre.
+        launch_cmd = f'"{steam_bin}" -bigpicture > /dev/null 2>&1 &'
         monitor = f"""\
+POLL={POLL_INTERVAL}
+MAX_TOTAL={MAX_TOTAL}
+LAUNCH_TIMEOUT={LAUNCH_TIMEOUT}
+
+echo "[steam-wrapper] Esperando arranque de Steam (Big Picture)..."
+START=$(date +%s)
+_elapsed() {{ echo $(( $(date +%s) - START )); }}
+
+DEADLINE=$(( START + LAUNCH_TIMEOUT ))
+APPEARED=0
+while [ "$(date +%s)" -lt "$DEADLINE" ]; do
+    if pgrep -x steam > /dev/null 2>&1; then
+        APPEARED=1
+        break
+    fi
+    sleep "$POLL"
+done
+
+if [ "$APPEARED" -eq 0 ]; then
+    echo "[steam-wrapper] Steam no arrancó tras ${{LAUNCH_TIMEOUT}}s, saliendo."
+    exit 0
+fi
+
+echo "[steam-wrapper] Steam detectado, esperando a que se cierre (sin vigilar juegos)..."
+
+while true; do
+    if [ "$(_elapsed)" -ge "$MAX_TOTAL" ]; then
+        echo "[steam-wrapper] Timeout global, saliendo."
+        exit 0
+    fi
+    if ! pgrep -x steam > /dev/null 2>&1; then
+        echo "[steam-wrapper] Steam se ha cerrado."
+        exit 0
+    fi
+    sleep "$POLL"
+done
+"""
+    else:
+        launch_cmd = ""
+        monitor = ""
+        if app_id:
+            launch_cmd = f'"{steam_bin}" -silent -applaunch {app_id} > /dev/null 2>&1 &'
+            monitor = f"""\
 APPID="{app_id}"
 POLL={POLL_INTERVAL}
 MAX_TOTAL={MAX_TOTAL}
@@ -125,18 +189,19 @@ class SteamGenerator(Generator):
                 os.remove(old)
             except OSError:
                 pass
-            
+
         steam_bin = _find_steam_binary()
         app_id: str | None = None
+        big_picture = _is_bigpicture_rom(rom)
 
-        if rom.name != "Steam.steam":
+        if not big_picture:
             with rom.open() as f:
                 first_line = f.readline().strip()
             # first_line: "steam://rungameid/24780"
             if first_line.startswith("steam://rungameid/"):
                 app_id = first_line.removeprefix("steam://rungameid/")
 
-        wrapper_path = _make_wrapper(steam_bin, app_id)
+        wrapper_path = _make_wrapper(steam_bin, app_id, big_picture=big_picture)
 
         #env = {"SDL_JOYSTICK_HIDAPI_XBOX": "0"}
         env = {}

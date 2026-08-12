@@ -80,20 +80,6 @@
 		<region>wr</region>
 	</game>
 	<game>
-		<path>./hbo_max.webapp</path>
-		<name>Max (HBO Max)</name>
-		<desc>Plataforma de streaming de Warner Bros. Discovery con contenido de HBO, DC, Cartoon Network y producciones originales exclusivas.</desc>
-		<genre>Streaming</genre>
-		<image>./app-icons/hbo_max.png</image>
-		<marquee>./app-icons/hbo_max.png</marquee>
-		<rating>0</rating>
-		<releasedate>20200527T000000</releasedate>
-		<developer>Warner Bros. Discovery</developer>
-		<publisher>Warner Bros. Discovery</publisher>
-		<lang>en</lang>
-		<region>wr</region>
-	</game>
-	<game>
 		<path>./netflix.webapp</path>
 		<name>Netflix</name>
 		<desc>El mayor servicio de streaming del mundo, con series, películas y documentales originales disponibles en más de 190 países.</desc>
@@ -104,20 +90,6 @@
 		<releasedate>20070116T000000</releasedate>
 		<developer>Netflix Inc.</developer>
 		<publisher>Netflix Inc.</publisher>
-		<lang>en</lang>
-		<region>wr</region>
-	</game>
-	<game>
-		<path>./kodi.kodi</path>
-		<name>Kodi</name>
-		<desc>Centro multimedia de código abierto para reproducir vídeo, música, imágenes y podcasts desde cualquier fuente local o en red.</desc>
-		<genre>Streaming</genre>
-		<image>./app-icons/kodi.png</image>
-		<marquee>./app-icons/kodi.png</marquee>
-		<rating>0</rating>
-		<releasedate>20040101T000000</releasedate>
-		<developer>Kodi Foundation</developer>
-		<publisher>Kodi Foundation</publisher>
 		<lang>en</lang>
 		<region>wr</region>
 	</game>
@@ -136,23 +108,6 @@
 		<region>wr</region>
 	</game>
 	<game>
-		<path>./youtube.webapp</path>
-		<name>YouTube</name>
-		<desc>Plataforma de vídeo online con millones de vídeos subidos por usuarios y creadores de todo el mundo.</desc>
-		<genre>Streaming</genre>
-		<image>./app-icons/youtube.png</image>
-		<marquee>./app-icons/youtube.png</marquee>
-		<rating>0</rating>
-		<releasedate>20050214T000000</releasedate>
-		<developer>Google LLC</developer>
-		<publisher>Google LLC</publisher>
-		<playcount>6</playcount>
-		<lastplayed>20260723T210509</lastplayed>
-		<gametime>3141</gametime>
-		<lang>en</lang>
-		<region>wr</region>
-	</game>
-	<game>
 		<path>./amazon_prime_video.webapp</path>
 		<name>Amazon Prime Video</name>
 		<desc>Servicio de streaming de Amazon con películas, series originales y eventos deportivos en directo incluido con Prime.</desc>
@@ -167,6 +122,72 @@
 		<lastplayed>20260809T200916</lastplayed>
 		<gametime>142</gametime>
 		<lang>en</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./hbo_max.webapp</path>
+		<name>Max (HBO Max)</name>
+		<desc>Plataforma de streaming de Warner Bros. Discovery con contenido de HBO, DC, Cartoon Network y producciones originales exclusivas.</desc>
+		<genre>Streaming</genre>
+		<image>./app-icons/hbo_max.png</image>
+		<marquee>./app-icons/hbo_max.png</marquee>
+		<rating>0</rating>
+		<releasedate>20200527T000000</releasedate>
+		<developer>Warner Bros. Discovery</developer>
+		<publisher>Warner Bros. Discovery</publisher>
+		<playcount>1</playcount>
+		<lastplayed>20260812T230314</lastplayed>
+		<gametime>17</gametime>
+		<lang>en</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./kodi.kodi</path>
+		<name>Kodi</name>
+		<desc>Centro multimedia de código abierto para reproducir vídeo, música, imágenes y podcasts desde cualquier fuente local o en red.</desc>
+		<genre>Streaming</genre>
+		<image>./app-icons/kodi.png</image>
+		<marquee>./app-icons/kodi.png</marquee>
+		<rating>0</rating>
+		<releasedate>20040101T000000</releasedate>
+		<developer>Kodi Foundation</developer>
+		<publisher>Kodi Foundation</publisher>
+		<playcount>1</playcount>
+		<lastplayed>20260812T230254</lastplayed>
+		<lang>en</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./youtube.webapp</path>
+		<name>YouTube</name>
+		<desc>Plataforma de vídeo online con millones de vídeos subidos por usuarios y creadores de todo el mundo.</desc>
+		<genre>Streaming</genre>
+		<image>./app-icons/youtube.png</image>
+		<marquee>./app-icons/youtube.png</marquee>
+		<rating>0</rating>
+		<releasedate>20050214T000000</releasedate>
+		<developer>Google LLC</developer>
+		<publisher>Google LLC</publisher>
+		<playcount>8</playcount>
+		<lastplayed>20260812T230444</lastplayed>
+		<gametime>3225</gametime>
+		<lang>en</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./steam.steam</path>
+		<name>Steam</name>
+		<desc>La más grande plataforma de distribución de juegos de PC.</desc>
+		<genre>Streaming</genre>
+		<image>./app-icons/steam.png</image>
+		<marquee>./app-icons/steam.png</marquee>
+		<rating>5</rating>
+		<releasedate>20030912T000000</releasedate>
+		<developer>Valve</developer>
+		<publisher>Valve</publisher>
+		<playcount>2</playcount>
+		<lastplayed>20260812T235156</lastplayed>
+		<lang>es</lang>
 		<region>wr</region>
 	</game>
 </gameList>
