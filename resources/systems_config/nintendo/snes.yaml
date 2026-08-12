@@ -21,9 +21,23 @@ snes:
   emulators:
     libretro:
       cores:
+        bsnes2014_accuracy: {}
+        bsnes2014_balanced: {}
+        bsnes2014_performance: {}
+        bsnes_cplusplus98: {}
+        bsnes_hd_beta: {}
+        bsnes-jg: {}
         bsnes: {}
-        bsnes_hd: {}
+        bsnes_mercury_accuracy: {}
+        bsnes_mercury_balanced: {}
+        bsnes_mercury_performance: {}
         mesen-s: {}
-        snes9x:
+        snes9x: {}
+        snes9x2002: {}
+        snes9x2005: {}
+        snes9x2005_plus: {}
+        snes9x2010: {}
+    ares:
+      cores:
+        snes:
           default: true
-        snes9x_next: {}

@@ -16,7 +16,10 @@ nes:
   emulators:
     libretro:
       cores:
-        fceumm:
-          default: true
+        fceumm: {}
         mesen: {}
         nestopia: {}
+    ares:
+      cores:
+        nes:
+          default: true
