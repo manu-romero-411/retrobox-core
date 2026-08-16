@@ -1,0 +1,45 @@
+#!/bin/sh
+LOG="/tmp/retrobox-labwc.log"
+TTYSAVE=/tmp/retrobox-ttysave
+#VT_ORIG=2
+VT_ORIG=$(cat "${TTYSAVE}" 2>/dev/null || echo 1)
+
+mkdir -p "$(dirname "$LOG")"
+
+log() { echo "$(date '+%Y-%m-%d %H:%M:%S') $*" >>"$LOG"; }
+
+monitor_and_kill() {
+    EXIT_RETRY=7
+    while pgrep -fi "$1" >/dev/null 2>&1; do
+        EXIT_RETRY=$((EXIT_RETRY - 1))
+        sleep 1
+        if [ ${EXIT_RETRY} -eq 0 ]; then
+            pgrep "$1" | xargs kill -9
+        fi
+    done
+    log "$1 finalizado; saliendo de labwc"
+}
+
+quit_labwc() {
+    labwc --exit 2>/dev/null || pkill -x labwc
+    vt_origen=$(cat "${TTYSAVE}" 2>/dev/null || echo 1)
+    sudo /usr/local/bin/go2tty "$vt_origen"
+}
+
+# Dar un poco de tiempo a labwc para arrancar
+sleep 3
+
+cd /var/penguin/juegos/retrobox || {
+    log "No se pudo entrar en /var/penguin/juegos/retrobox"
+    quit_labwc
+    exit 1
+}
+
+log "Iniciando launcher"
+./retrobox.sh
+log "retrobox terminó con código $?"
+
+# Si retrobox.sh termina pero EmulationStation sigue vivo, esperamos
+monitor_and_kill emulationstation
+
+quit_labwc

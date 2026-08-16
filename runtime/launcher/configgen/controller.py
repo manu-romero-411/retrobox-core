@@ -282,32 +282,35 @@ class Controller:
             if sdl2.SDL_WasInit(sdl2.SDL_INIT_JOYSTICK) == 0:
                 sdl2.SDL_Init(sdl2.SDL_INIT_JOYSTICK)
 
+            import ctypes
+
+            matches: list[str] = []
             for i in range(sdl2.SDL_NumJoysticks()):
                 joy = sdl2.SDL_JoystickOpen(i)
                 if not joy:
                     continue
 
-                import ctypes
-
                 sdl_guid = sdl2.SDL_JoystickGetGUID(joy)
-
-                buf = ctypes.create_string_buffer(33)  # 32 chars + null
+                buf = ctypes.create_string_buffer(33)
                 sdl2.SDL_JoystickGetGUIDString(sdl_guid, buf, 33)
-
                 guid_str = buf.value.decode().lower()
 
-                if guid_str == guid and i == index:
-                    if hasattr(sdl2, "SDL_JoystickPath"):
-                        path = sdl2.SDL_JoystickPath(joy)
-                        if path:
-                            return path.decode()
+                if guid_str == guid and hasattr(sdl2, "SDL_JoystickPath"):
+                    path = sdl2.SDL_JoystickPath(joy)
+                    if path:
+                        matches.append(path.decode())
+
+            if not matches:
+                return None
+
+            # `index` no es fiable entre procesos: solo desambigua entre mandos
+            # con el mismo GUID (modelos duplicados), nunca filtra por posición absoluta.
+            return matches[min(index, len(matches) - 1)]
 
         except Exception:
             pass
 
         return None
-
-
     @staticmethod
     def find_device_path_evdev(
         real_name: str,
