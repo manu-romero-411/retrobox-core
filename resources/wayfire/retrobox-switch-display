@@ -31,11 +31,11 @@ if [[ "$hdmi_state" == "yes" && "$edp_state" == "no" ]]; then
     # Único caso especial: HDMI es la única activa -> volver a portátil
     wlr-randr --output "$HDMI" --off
     wlr-randr --output "$EDP" --on --preferred --pos 0,0
-    "${SCRIPT_DIR}/switch-audio.sh" laptop
+    "${SCRIPT_DIR}/retrobox-switch-audio-out" laptop
 else
     # Caso por defecto: activar HDMI a 1080p60, apagar portátil
     wlr-randr --output "$EDP" --off
     wlr-randr --output "$HDMI" --on --preferred --pos 0,0
     sleep 3
-    "${SCRIPT_DIR}/switch-audio.sh" hdmi
+    "${SCRIPT_DIR}/retrobox-switch-audio-out" hdmi
 fi

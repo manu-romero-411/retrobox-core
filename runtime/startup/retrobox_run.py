@@ -113,9 +113,17 @@ def run_emulationstation(args: list[str]) -> int:
         _logger.error("EmulationStation binary not found at %s", ES_EXECUTABLE)
         return 1
     _logger.info("=========")
+
+    # Fuerza a SDL2 a usar el backend nativo de Wayland en vez de pasar
+    # por XWayland/XRandR. "wayland,x11" deja x11 como fallback por si
+    # el backend wayland de SDL fallara al iniciar por cualquier motivo.
+    es_env = os.environ.copy()
+    es_env["SDL_VIDEODRIVER"] = "wayland,x11"
+
     result = subprocess.run(
         [str(ES_EXECUTABLE), "--home", str(_FRONTEND_DIR), *map(str, args)],
         cwd=str(_FRONTEND_DIR),
+        env=es_env,
         check=False,
     )
     call_retrohook(

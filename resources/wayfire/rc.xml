@@ -54,7 +54,7 @@
     <!-- Terminal opcional -->
     <keybind key="W-t">
       <action name="Execute">
-        <command>xterm</command>
+        <command>kitty</command>
       </action>
     </keybind>
     <!-- Salir de labwc manualmente -->
