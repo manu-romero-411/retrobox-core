@@ -47,12 +47,14 @@ from configgen.utils.overlayfs import mount_overlayfs
 from configgen.utils.squashfs import mount_squashfs
 from runtime.gamepadly.gamepadly_manager import GamepadManager
 from runtime.retrobox_paths import (
+    _UTILS_DIR,
     ES_GAMES_METADATA,
     HOOKS,
     RUNTIME_DIR,
     SAVES,
     GUN_OVERLAYS_DIR,
     HUD_CONFIG_FILE,
+    USERDATA,
     mkdir_if_not_exists,
 )
 
@@ -540,26 +542,57 @@ def getHudConfig(system: Emulator, systemName: str, emulator: str, core: str, ro
 
 _POWER_PROFILES_BIN = "powerprofilesctl"
 _VALID_POWER_PROFILES = {"power-saver", "balanced", "performance"}
+_NVIDIA_POWERD_SCRIPT = _UTILS_DIR / "nvidia-powerd-service"
+
+def _set_nvidia_powerd(enable: bool) -> None:
+    """
+    Arranca o para nvidia-powerd.service vía el script nvidia-powerd-service.
+    No lanza excepciones: solo registra avisos si algo falla.
+    """
+    if not os.path.isfile(_NVIDIA_POWERD_SCRIPT) or not os.access(_NVIDIA_POWERD_SCRIPT, os.X_OK):
+        _logger.debug("%s not found or not executable, skipping nvidia-powerd management", _NVIDIA_POWERD_SCRIPT)
+        return
+
+    action = "start" if enable else "stop"
+    try:
+        subprocess.run(
+            [_NVIDIA_POWERD_SCRIPT, action],
+            check=True, capture_output=True, text=True, timeout=15,
+        )
+        _logger.info("nvidia-powerd %s", "started" if enable else "stopped")
+    except subprocess.CalledProcessError as e:
+        _logger.warning(
+            "failed to %s nvidia-powerd: %s",
+            action, e.stderr.strip() if e.stderr else e,
+        )
+    except Exception as e:
+        _logger.warning("failed to %s nvidia-powerd: %s", action, e)
+
 
 def apply_power_profile(desired_profile: str) -> str | None:
     """
     Aplica el power-profile pedido. Devuelve el perfil que estaba activo antes
     (o None si no se pudo leer / powerprofilesctl no está disponible).
+    También arranca nvidia-powerd si el perfil es 'performance', y lo para
+    en cualquier otro caso.
     """
-    if shutil.which(_POWER_PROFILES_BIN) is None:
-        _logger.debug("%s not found, skipping power profile management", _POWER_PROFILES_BIN)
-        return None
-
     desired_profile = (desired_profile or "balanced").strip().lower()
     if desired_profile not in _VALID_POWER_PROFILES:
         _logger.warning("unknown power_profile '%s', falling back to 'balanced'", desired_profile)
         desired_profile = "balanced"
 
+    # Gestión de nvidia-powerd: independiente de powerprofilesctl.
+    _set_nvidia_powerd(desired_profile == "performance")
+
+    if shutil.which(_POWER_PROFILES_BIN) is None:
+        _logger.debug("%s not found, skipping power profile management", _POWER_PROFILES_BIN)
+        return None
+
     previous_profile = None
     try:
         result = subprocess.run(
             [_POWER_PROFILES_BIN, "get"],
-            check=True, capture_output=True, text=True
+            check=True, capture_output=True, text=True,
         )
         previous_profile = result.stdout.strip()
         _logger.debug("current power profile before launch: %s", previous_profile)
@@ -570,7 +603,7 @@ def apply_power_profile(desired_profile: str) -> str | None:
         try:
             subprocess.run(
                 [_POWER_PROFILES_BIN, "set", desired_profile],
-                check=True, capture_output=True, text=True
+                check=True, capture_output=True, text=True,
             )
             _logger.info("power profile set to '%s'", desired_profile)
         except Exception as e:
@@ -580,8 +613,11 @@ def apply_power_profile(desired_profile: str) -> str | None:
 
     return previous_profile
 
-
 def restore_power_profile(previous_profile: str | None) -> None:
+    # nvidia-powerd solo debe quedar activo si volvemos a 'performance';
+    # en 'balanced', 'power-saver', o si no hay perfil previo válido, se para.
+    _set_nvidia_powerd(previous_profile == "performance")
+
     if not previous_profile or previous_profile not in _VALID_POWER_PROFILES:
         return
     try:
