@@ -1014,22 +1014,6 @@
 		<region>wr</region>
 	</game>
 	<game>
-		<path>./rpcs3.menu</path>
-		<name>RPCS3 (PlayStation 3)</name>
-		<desc>Run RPCS3 (PlayStation 3).</desc>
-		<genre>Emulator</genre>
-		<image>./media/rpcs3-logo.png</image>
-		<marquee>./media/rpcs3-logo.png</marquee>
-		<rating>0</rating>
-		<developer>RPCS3 Team</developer>
-		<publisher>RPCS3 Team</publisher>
-		<playcount>6</playcount>
-		<lastplayed>20260804T100333</lastplayed>
-		<gametime>1132</gametime>
-		<lang>en</lang>
-		<region>wr</region>
-	</game>
-	<game>
 		<path>./redream.menu</path>
 		<name>Redream (Dreamcast)</name>
 		<desc>Run Redream Emulator (Dreamcast).</desc>
@@ -1122,6 +1106,22 @@
 		<playcount>5</playcount>
 		<lastplayed>20260811T165020</lastplayed>
 		<gametime>227</gametime>
+		<lang>en</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./rpcs3.menu</path>
+		<name>RPCS3 (PlayStation 3)</name>
+		<desc>Run RPCS3 (PlayStation 3).</desc>
+		<genre>Emulator</genre>
+		<image>./media/rpcs3-logo.png</image>
+		<marquee>./media/rpcs3-logo.png</marquee>
+		<rating>0</rating>
+		<developer>RPCS3 Team</developer>
+		<publisher>RPCS3 Team</publisher>
+		<playcount>9</playcount>
+		<lastplayed>20260819T212157</lastplayed>
+		<gametime>1733</gametime>
 		<lang>en</lang>
 		<region>wr</region>
 	</game>

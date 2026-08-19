@@ -8,6 +8,7 @@ ps3:
   - .psn
   - .iso
   - .squashfs
+  - .pkg
   platform:
   - ps3
   theme: ps3
