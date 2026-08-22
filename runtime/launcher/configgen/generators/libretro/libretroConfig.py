@@ -19,6 +19,8 @@ from ...utils import bezels as bezelsUtil
 from ...utils import esSettings
 from ...utils import metadata as metadataUtils
 from ...utils import videoMode
+from ...utils import audio
+
 from .libretroPaths import (
     _RETROARCH_CONFIG,
     RETROARCH_CORE_CUSTOM,
@@ -36,6 +38,16 @@ if TYPE_CHECKING:
     from ..Generator import Generator
     from ...gun import Gun, Guns
     from ...batoceraTypes import BezelInfo, DeviceInfoMapping, Resolution
+
+
+_AUDIO_BACKEND_ORDER = ["pipewire", "pulse", "alsathread", "alsa", "null"]
+
+_AUDIO_BACKEND_CHECKS = {
+    "pipewire": audio.pipewire_is_available,
+    "pulse": audio.pulse_is_available,
+    "alsathread": audio.alsa_is_available,   # mismo backend ALSA, distinto driver RA
+    "alsa": audio.alsa_is_available,
+}
 
 _logger = logging.getLogger(__name__)
 
@@ -196,7 +208,7 @@ def createLibretroConfig(
         else:
             _logger.debug("Discrete GPU is not available on the system. Using default.")
 
-    retroarch_config['audio_driver'] = system.config.get("audio_driver", '"pulse"')
+    retroarch_config['audio_driver'] = f'"{audio_backend_get(system)}"'
     retroarch_config['audio_enable'] = "true"
     retroarch_config['audio_sync'] = "true"
 
@@ -266,7 +278,7 @@ def createLibretroConfig(
     # Input configuration
     retroarch_config['input_joypad_driver'] = 'udev'
     retroarch_config['input_driver'] = 'udev'                    # driver for mouse/keyboard. udev required for guns.
-    retroarch_config['input_max_users'] = "8"                   # Allow up to 16 players
+    retroarch_config['input_max_users'] = str(max(len(controllers), 1))  # limitar a los mandos conectados; 1 mínimo (teclado)
 
     retroarch_config['input_libretro_device_p1'] = '1'           # Default devices choices
     retroarch_config['input_libretro_device_p2'] = '1'
@@ -1365,3 +1377,21 @@ def writeBezelCfgConfig(cfgFile: Path, overlay_png_file: Path, /) -> None:
     fd.write("overlay0_full_screen = true\n")
     fd.write("overlay0_descs = 0\n")
     fd.close()
+
+
+def audio_backend_get(system: Emulator) -> str:
+    backend = system.config.get("audio_driver", "pipewire")
+
+    try:
+        start = _AUDIO_BACKEND_ORDER.index(backend)
+    except ValueError:
+        _logger.debug("audio_driver desconocido (%s), cascada completa desde pipewire", backend)
+        start = 0
+
+    for candidate in _AUDIO_BACKEND_ORDER[start:]:
+        if candidate == "null":
+            return "null"
+        if _AUDIO_BACKEND_CHECKS[candidate]():
+            return candidate
+
+    return "null"
