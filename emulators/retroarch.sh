@@ -215,7 +215,7 @@ function install_source() {
     cd "${RETROARCH_SRC}" || exit 1
     CFLAGS="${EXTRA_CFLAGS}" CXXFLAGS="${EXTRA_CFLAGS}" ./configure \
       --prefix="${INSTALL_DIR}/app" \
-      --enable-vulkan --enable-pipewire --enable-alsa --enable-networking --enable-discord \
+      --enable-opengles --enable-opengles3 --enable-vulkan --enable-pipewire --enable-alsa --enable-networking --enable-discord \
       || exit 1
     make -j"$(nproc)" || exit 1
     make install || exit 1
