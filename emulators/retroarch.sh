@@ -12,6 +12,7 @@ RETROARCH_SRC="${SRC_DIR}/RetroArch"
 TMP_DIR="$(mktemp -d)"
 SOURCE_UPSTREAM="https://github.com/libretro/RetroArch.git"
 MUPEN64_NEXT_UPSTREAM="https://github.com/libretro/mupen64plus-libretro-nx.git"
+FLYCAST_UPSTREAM="https://github.com/flyinghead/flycast.git"
 ARCH="$(uname -m)"
 
 # Flags de optimización para el propio frontend (Ryzen 7 7435HS). OJO: esto NO
@@ -27,6 +28,14 @@ CORES=(
   fbneo
   mupen64plus_next
   # añade aquí el resto de cores que uses
+)
+
+# Cores que en no-x64 se compilan aparte (compile_<core>_from_source) en vez de
+# usar el .so precompilado del buildbot, por choque de contexto GL/GLES entre
+# cómo viene compilado ese core y cómo se configura el frontend en esta arquitectura.
+CORES_COMPILADOS_APARTE_NO_X64=(
+  mupen64plus_next
+  flycast
 )
 
 ## FUNCIONES
@@ -86,8 +95,7 @@ function check_deps_appimage() {
 }
 
 # Compila mupen64plus_next desde fuente en vez de usar el .so precompilado del
-# buildbot.
-
+# buildbot (choque de contexto GL/GLES en no-x64).
 function compile_mupen64_next_from_source() {
   echo "[INFO] Compilando mupen64plus_next desde fuente (platform=unix, OpenGL de escritorio)..."
   local core_src="${SRC_DIR}/mupen64plus-libretro-nx"
@@ -96,7 +104,6 @@ function compile_mupen64_next_from_source() {
 
   local jobbs
   jobbs="$(nproc)"
-
   [[ "${ARCH}" != "x86_64" && "${ARCH}" != "amd64" ]] && jobbs=2
 
   (
@@ -110,6 +117,34 @@ function compile_mupen64_next_from_source() {
 
   mkdir -p "${INSTALL_DIR}/app/share/retroarch/cores"
   cp "${core_src}/mupen64plus_next_libretro.so" "${INSTALL_DIR}/app/share/retroarch/cores/"
+}
+
+# Compila flycast desde fuente contra OpenGL de escritorio (-DUSE_GLES=OFF), por
+# si el .so del buildbot para esta arch viene compilado GLES-only y no casa con
+# el frontend (mismo patrón que mupen64plus_next, pero con CMake en vez de Makefile).
+function compile_flycast_from_source() {
+  echo "[INFO] Compilando flycast desde fuente (CMake, OpenGL de escritorio, sin GLES)..."
+  local core_src="${SRC_DIR}/flycast"
+  [[ -d "${core_src}" ]] && rm -rf "${core_src}"
+  git clone --depth 1 --recursive "${FLYCAST_UPSTREAM}" "${core_src}"
+
+  local jobbs
+  jobbs="$(nproc)"
+  [[ "${ARCH}" != "x86_64" && "${ARCH}" != "amd64" ]] && jobbs=2
+
+  (
+    cd "${core_src}" || exit 1
+    mkdir -p build && cd build || exit 1
+    cmake .. -DCMAKE_BUILD_TYPE=Release -DLIBRETRO=ON -DUSE_GLES=OFF -DUSE_GLES2=OFF \
+      || exit 1
+    cmake --build . -j"${jobbs}" || exit 1
+  ) || error "Fallo al compilar flycast desde fuente"
+
+  [[ -f "${core_src}/build/flycast_libretro.so" ]] \
+    || error "El build de flycast terminó pero no encuentro flycast_libretro.so"
+
+  mkdir -p "${INSTALL_DIR}/app/share/retroarch/cores"
+  cp "${core_src}/build/flycast_libretro.so" "${INSTALL_DIR}/app/share/retroarch/cores/"
 }
 
 function download_cores() {
@@ -149,12 +184,18 @@ function download_cores() {
     return
   fi
 
+  local core skip
   for core in ${cores_list}; do
-    # mupen64plus_next en no-x64 lo compilamos aparte (compile_mupen64_next_from_source)
-    # con el contexto GLES correcto; el precompilado del buildbot para esa arch
-    # pide un contexto que no coincide con cómo se configura el frontend aquí.
-    if [[ "${core}" == "mupen64plus_next" && "${ARCH}" != "x86_64" && "${ARCH}" != "amd64" ]]; then
-      echo "[INFO] Saltando mupen64plus_next precompilado (se compila desde fuente en esta arquitectura)."
+    # Estos cores en no-x64 se compilan aparte (ver CORES_COMPILADOS_APARTE_NO_X64)
+    # por el choque de contexto GL/GLES entre el .so precompilado y el frontend.
+    skip=0
+    if [[ "${ARCH}" != "x86_64" && "${ARCH}" != "amd64" ]]; then
+      for c in "${CORES_COMPILADOS_APARTE_NO_X64[@]}"; do
+        [[ "${core}" == "${c}" ]] && skip=1 && break
+      done
+    fi
+    if [[ "${skip}" -eq 1 ]]; then
+      echo "[INFO] Saltando ${core} precompilado (se compila desde fuente en esta arquitectura)."
       continue
     fi
     echo "[INFO] Descargando core: ${core}..."
@@ -253,6 +294,7 @@ function install_source() {
 
   if [[ "${ARCH}" != "x86_64" && "${ARCH}" != "amd64" ]]; then
     compile_mupen64_next_from_source
+    compile_flycast_from_source
   fi
 
   download_frontend_assets
