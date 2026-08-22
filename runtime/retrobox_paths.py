@@ -94,6 +94,9 @@ ES_GUNS_ART_METADATA: Final = DEFAULTS_DIR / 'data' / 'gamesbuttonsdb.xml'
 _SYSTEM_SCRIPTS:      Final = RESOURCES_DIR / 'scripts'
 _UTILS_DIR:      Final = RESOURCES_DIR / 'utils'
 
+# utils
+_NVIDIA_POWERD_SCRIPT = _UTILS_DIR / "nvidia-powerd-service"
+
 # Runtime dir
 RUNTIME_DIR: Final = Path('/tmp/retrobox-run')
 

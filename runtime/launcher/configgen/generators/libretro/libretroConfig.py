@@ -247,12 +247,6 @@ def createLibretroConfig(
 
     retroarch_config['video_fullscreen'] = 'true'
     retroarch_config['video_windowed_fullscreen'] = 'true'
-    retroarch_config['video_hard_sync'] = 'true'
-    retroarch_config['video_max_swapchain_images'] = '3'
-    retroarch_config['video_frame_delay'] = '1'
-    retroarch_config['video_frame_delay_auto'] = 'false'
-    retroarch_config['video_black_frame_insertion'] = '0'
-    retroarch_config['video_swap_interval'] = '1'
 
     retroarch_config['sort_savefiles_enable'] = 'false'     # ensure we don't save system.name + core
     retroarch_config['sort_savestates_enable'] = 'false'    # ensure we don't save system.name + core
@@ -633,7 +627,7 @@ def createLibretroConfig(
             retroarch_config['run_ahead_secondary_instance'] = 'true'
 
     # Auto frame delay (input delay reduction via frame timing)
-    retroarch_config['video_frame_delay_auto'] = system.config.get_bool('video_frame_delay_auto', return_values=('true', 'false'))
+    retroarch_config['video_frame_delay_auto'] = system.config.get_bool('video_frame_delay_auto', False, return_values=('true', 'false'))
 
     # Retroachievement option
     if (ra_sound := system.config.get("retroachievements.sound", "none")) != "none":

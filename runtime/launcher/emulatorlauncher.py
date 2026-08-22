@@ -47,6 +47,7 @@ from configgen.utils.overlayfs import mount_overlayfs
 from configgen.utils.squashfs import mount_squashfs
 from runtime.gamepadly.gamepadly_manager import GamepadManager
 from runtime.retrobox_paths import (
+    _NVIDIA_POWERD_SCRIPT,
     _UTILS_DIR,
     ES_GAMES_METADATA,
     HOOKS,
@@ -72,6 +73,10 @@ _logger = logging.getLogger(__name__)
 _player_controllers_lock = threading.Lock()
 # A global variable to hold the current, up-to-date list of player controllers
 _active_player_controllers = []
+
+_POWER_PROFILES_BIN = "powerprofilesctl"
+_VALID_POWER_PROFILES = {"power-saver", "balanced", "performance"}
+
 
 def main(args: argparse.Namespace, maxnbplayers: int) -> int:
     """
@@ -540,17 +545,25 @@ def getHudConfig(system: Emulator, systemName: str, emulator: str, core: str, ro
     configstr = configstr.replace("%EMULATORCORE%", hudConfig_protectStr(emulatorstr))
     return configstr.replace("%THUMBNAIL%", hudConfig_protectStr(game_thumbnail))
 
-_POWER_PROFILES_BIN = "powerprofilesctl"
-_VALID_POWER_PROFILES = {"power-saver", "balanced", "performance"}
-_NVIDIA_POWERD_SCRIPT = _UTILS_DIR / "nvidia-powerd-service"
 
 def _set_nvidia_powerd(enable: bool) -> None:
     """
     Arranca o para nvidia-powerd.service vía el script nvidia-powerd-service.
     No lanza excepciones: solo registra avisos si algo falla.
+    
+    Se asegura de que el binario 'nvidia-powerd' exista realmente en el sistema 
+    antes de intentar nada, garantizando compatibilidad total con sistemas 
+    AMD, Intel, Apple, Qualcomm, Nvidia antiguas o dispositivos como la Switch.
     """
+    # 1. Verificar que nuestro script helper exista y sea ejecutable
     if not os.path.isfile(_NVIDIA_POWERD_SCRIPT) or not os.access(_NVIDIA_POWERD_SCRIPT, os.X_OK):
         _logger.debug("%s not found or not executable, skipping nvidia-powerd management", _NVIDIA_POWERD_SCRIPT)
+        return
+
+    # 2. Verificar que el binario real del sistema exista en el PATH
+    # Si no existe, abortamos silenciosamente. Esto protege a sistemas sin nvidia-powerd.
+    if shutil.which("nvidia-powerd") is None:
+        _logger.debug("nvidia-powerd binary not found in system PATH, skipping nvidia-powerd management")
         return
 
     action = "start" if enable else "stop"
@@ -567,7 +580,6 @@ def _set_nvidia_powerd(enable: bool) -> None:
         )
     except Exception as e:
         _logger.warning("failed to %s nvidia-powerd: %s", action, e)
-
 
 def apply_power_profile(desired_profile: str) -> str | None:
     """

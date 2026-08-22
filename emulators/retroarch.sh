@@ -85,15 +85,32 @@ function check_deps_appimage() {
 }
 
 function download_cores() {
-  if [[ "${ARCH}" != "x86_64" && "${ARCH}" != "amd64" ]]; then
-    echo "[AVISO] Descarga de cores solo soportada para x86_64 por ahora (arquitectura detectada: ${ARCH}); saltando."
-    return
-  fi
+  # Mapeo de arquitectura detectada -> carpeta del buildbot
+  local buildbot_arch=""
+  case "${ARCH}" in
+    x86_64|amd64)
+      buildbot_arch="x86_64"
+      ;;
+    aarch64|arm64)
+      buildbot_arch="aarch64"
+      ;;
+    armv7l|armhf)
+      buildbot_arch="armhf"
+      ;;
+    i686|i386|x86)
+      buildbot_arch="x86"
+      ;;
+    *)
+      echo "[AVISO] Arquitectura no soportada para descarga de cores (detectada: ${ARCH}); saltando."
+      return
+      ;;
+  esac
 
   mkdir -p "${INSTALL_DIR}/app/share/retroarch/cores"
-  local base="https://buildbot.libretro.com/nightly/linux/x86_64/latest"
 
-  echo "[INFO] Obteniendo lista de cores disponibles desde el buildbot..."
+  local base="https://buildbot.libretro.com/nightly/linux/${buildbot_arch}/latest"
+
+  echo "[INFO] Obteniendo lista de cores disponibles desde el buildbot (${buildbot_arch})..."
 
   # Descargamos el índice HTML, filtramos los .so.zip, y limpiamos para quedarnos solo con el nombre del core
   local cores_list
@@ -116,13 +133,29 @@ function download_cores() {
 }
 
 function download_selected_cores() {
-  if [[ "${ARCH}" != "x86_64" && "${ARCH}" != "amd64" ]]; then
-    echo "[AVISO] Descarga de cores solo soportada para x86_64 por ahora (arquitectura detectada: ${ARCH}); saltando."
-    return
-  fi
+  # Mapeo de arquitectura detectada -> carpeta del buildbot
+  local buildbot_arch=""
+  case "${ARCH}" in
+    x86_64|amd64)
+      buildbot_arch="x86_64"
+      ;;
+    aarch64|arm64)
+      buildbot_arch="aarch64"
+      ;;
+    armv7l|armhf)
+      buildbot_arch="armhf"
+      ;;
+    i686|i386|x86)
+      buildbot_arch="x86"
+      ;;
+    *)
+      echo "[AVISO] Arquitectura no soportada para descarga de cores (detectada: ${ARCH}); saltando."
+      return
+      ;;
+  esac
 
-  mkdir -p "${INSTALL_DIR}/cores"
-  local base="https://buildbot.libretro.com/nightly/linux/x86_64/latest"
+  mkdir -p "${INSTALL_DIR}/app/share/retroarch/cores"
+  local base="https://buildbot.libretro.com/nightly/linux/${buildbot_arch}/latest"
 
   for core in "${CORES[@]}"; do
     echo "[INFO] Descargando core: ${core}..."
