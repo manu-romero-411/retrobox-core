@@ -266,7 +266,7 @@ def createLibretroConfig(
     # Input configuration
     retroarch_config['input_joypad_driver'] = 'udev'
     retroarch_config['input_driver'] = 'udev'                    # driver for mouse/keyboard. udev required for guns.
-    retroarch_config['input_max_users'] = "16"                   # Allow up to 16 players
+    retroarch_config['input_max_users'] = "8"                   # Allow up to 16 players
 
     retroarch_config['input_libretro_device_p1'] = '1'           # Default devices choices
     retroarch_config['input_libretro_device_p2'] = '1'
