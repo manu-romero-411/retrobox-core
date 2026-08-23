@@ -1340,6 +1340,43 @@ def writeBezelConfig(
             bezelsUtil.addQRCode(overlay_png_file, qrcode_output_png, cheevos_id, system)
             overlay_png_file = qrcode_output_png
 
+
+    # Ajustar el viewport al aspect ratio REAL del core (pillarbox/letterbox
+    # dentro del hueco del bezel) en vez de asumir que el core llena
+    # exactamente el hueco que declara el .info del bezel.
+    if all(k in retroarchConfig for k in
+           ('custom_viewport_x', 'custom_viewport_y',
+            'custom_viewport_width', 'custom_viewport_height')):
+        core_ratio = generator.getInGameRatio(system.config, gameResolution, rom)
+        if core_ratio:
+            vp_x = float(cast(Any, retroarchConfig['custom_viewport_x']))
+            vp_y = float(cast(Any, retroarchConfig['custom_viewport_y']))
+            vp_w = float(cast(Any, retroarchConfig['custom_viewport_width']))
+            vp_h = float(cast(Any, retroarchConfig['custom_viewport_height']))
+            box_ratio = vp_w / vp_h
+
+            if abs(box_ratio - core_ratio) > 0.01:
+                if box_ratio > core_ratio:
+                    # el hueco es más ancho que el core -> pillarbox horizontal
+                    new_w = vp_h * core_ratio
+                    vp_x += (vp_w - new_w) / 2
+                    vp_w = new_w
+                else:
+                    # el hueco es más alto que el core -> letterbox vertical
+                    new_h = vp_w / core_ratio
+                    vp_y += (vp_h - new_h) / 2
+                    vp_h = new_h
+
+                _logger.debug(
+                    "Ajustando viewport de %sx%s a %sx%s para respetar aspect ratio del core (%.4f)",
+                    retroarchConfig['custom_viewport_width'], retroarchConfig['custom_viewport_height'],
+                    vp_w, vp_h, core_ratio
+                )
+                retroarchConfig['custom_viewport_x']      = vp_x
+                retroarchConfig['custom_viewport_y']      = vp_y
+                retroarchConfig['custom_viewport_width']  = vp_w
+                retroarchConfig['custom_viewport_height'] = vp_h
+
     if gunsBordersSize is not None:
         _logger.debug("Draw gun borders")
         output_png_file = Path("/tmp/bezel_gunborders.png")
