@@ -1293,21 +1293,21 @@ def writeBezelConfig(
                 delta = int(infos["width"]-new_x)
                 borderx = delta//2
             _logger.debug("Bezel_stretch: need to cut off %s pixels", borderx)
-            retroarchConfig['custom_viewport_x']      = (infos["left"] - borderx/2) * wratio
-            retroarchConfig['custom_viewport_y']      = infos["top"] * hratio
-            retroarchConfig['custom_viewport_width']  = (infos["width"]  - infos["left"] - infos["right"] + borderx)  * wratio
-            retroarchConfig['custom_viewport_height'] = (infos["height"] - infos["top"]  - infos["bottom"]) * hratio
-            retroarchConfig['video_message_pos_x']    = infos["messagex"] * wratio
-            retroarchConfig['video_message_pos_y']    = infos["messagey"] * hratio
+            retroarchConfig['custom_viewport_x']      = int(round((infos["left"] - borderx/2) * wratio))
+            retroarchConfig['custom_viewport_y']      = int(round(infos["top"] * hratio))
+            retroarchConfig['custom_viewport_width']  = int(round((infos["width"]  - infos["left"] - infos["right"] + borderx)  * wratio))
+            retroarchConfig['custom_viewport_height'] = int(round((infos["height"] - infos["top"]  - infos["bottom"]) * hratio))
+            retroarchConfig['video_message_pos_x']    = int(round(infos["messagex"] * wratio))
+            retroarchConfig['video_message_pos_y']    = int(round(infos["messagey"] * hratio))
         else:
             xoffset = gameResolution["width"]  - (infos["width"] * wratio)
             yoffset = gameResolution["height"] - (infos["height"] * hratio)
-            retroarchConfig['custom_viewport_x']      = infos["left"] * wratio + xoffset/2
-            retroarchConfig['custom_viewport_y']      = infos["top"] * hratio + yoffset/2
-            retroarchConfig['custom_viewport_width']  = (infos["width"]  - infos["left"] - infos["right"]) * wratio
-            retroarchConfig['custom_viewport_height'] = (infos["height"] - infos["top"]  - infos["bottom"]) * hratio
-            retroarchConfig['video_message_pos_x']    = infos["messagex"] * wratio + xoffset/2
-            retroarchConfig['video_message_pos_y']    = infos["messagey"] * hratio + yoffset/2
+            retroarchConfig['custom_viewport_x']      = int(round(infos["left"] * wratio + xoffset/2))
+            retroarchConfig['custom_viewport_y']      = int(round(infos["top"] * hratio + yoffset/2))
+            retroarchConfig['custom_viewport_width']  = int(round((infos["width"]  - infos["left"] - infos["right"]) * wratio))
+            retroarchConfig['custom_viewport_height'] = int(round((infos["height"] - infos["top"]  - infos["bottom"]) * hratio))
+            retroarchConfig['video_message_pos_x']    = int(round(infos["messagex"] * wratio + xoffset/2))
+            retroarchConfig['video_message_pos_y']    = int(round(infos["messagey"] * hratio + yoffset/2))
 
         if create_new_bezel_file is True:
             # Padding left and right borders for ultrawide screens (larger than 16:9 aspect ratio)
@@ -1372,10 +1372,10 @@ def writeBezelConfig(
                     retroarchConfig['custom_viewport_width'], retroarchConfig['custom_viewport_height'],
                     vp_w, vp_h, core_ratio
                 )
-                retroarchConfig['custom_viewport_x']      = vp_x
-                retroarchConfig['custom_viewport_y']      = vp_y
-                retroarchConfig['custom_viewport_width']  = vp_w
-                retroarchConfig['custom_viewport_height'] = vp_h
+                retroarchConfig['custom_viewport_x']      = int(round(vp_x))
+                retroarchConfig['custom_viewport_y']      = int(round(vp_y))
+                retroarchConfig['custom_viewport_width']  = int(round(vp_w))
+                retroarchConfig['custom_viewport_height'] = int(round(vp_h))
 
     if gunsBordersSize is not None:
         _logger.debug("Draw gun borders")
