@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 from shutil import copyfile
-from typing import TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING
 
 from runtime.launcher.configgen import Command
-
+from ..Generator import Generator  # <- lo importamos desde el módulo correcto
 from ...controller import generate_sdl_game_controller_config
 from ...controllersConfig import _logger
 from . import flycastControllers
