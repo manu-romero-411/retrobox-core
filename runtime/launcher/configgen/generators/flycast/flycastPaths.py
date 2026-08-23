@@ -5,7 +5,7 @@ from typing import Final
 from runtime.retrobox_paths import BIOS, DEFAULTS_DIR, EMULATORS, SAVES
 
 _FLYCAST_EMUDIR: Final = EMULATORS / 'flycast'
-FLYCAST_BIN: Final = _FLYCAST_EMUDIR / 'flycast.AppImage'
+FLYCAST_BIN: Final = _FLYCAST_EMUDIR / 'app' / 'bin' / 'flycast'
 _FLYCAST_XDG: Final = _FLYCAST_EMUDIR / 'config'
 FLYCAST_CONFIG_DIR: Final = _FLYCAST_XDG / 'flycast'
 FLYCAST_MAPPING: Final = FLYCAST_CONFIG_DIR / 'mappings'

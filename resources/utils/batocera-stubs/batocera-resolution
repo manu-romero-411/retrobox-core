@@ -3,8 +3,7 @@
 # Implementa solo los subcomandos que usa configgen
 #
 # Depurar: BATOCERA_RES_DEBUG=1 ./batocera-resolution currentResolution
-echo 1920x1080
-exit 0
+
 _debug() {
     [ -n "$BATOCERA_RES_DEBUG" ] && echo "[debug] $*" >&2
 }
