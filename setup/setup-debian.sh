@@ -40,7 +40,7 @@ log_info "Installing udev rules..."
 sudo cp "${RETROBOX_ROOTDIR}/resources/udev/"*.rules /etc/udev/rules.d/
 sudo usermod -aG input "$(whoami)"
 sudo udevadm control --reload-rules
-sudo udevadm trigger
+sudo udevadm trigger || true
 cat <<EOF | sudo tee /etc/udev/rules.d/99-input.rules
 KERNEL=="uinput", MODE="0660", GROUP="input", OPTIONS+="static_node=uinput"
 EOF
