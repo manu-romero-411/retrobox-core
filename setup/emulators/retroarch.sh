@@ -6,8 +6,9 @@ set -eo pipefail
 ## VARIABLES
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd -P)"
-INSTALL_DIR="${SCRIPT_DIR}/retroarch"
-SRC_DIR="${SCRIPT_DIR}/_src"
+RETROBOX_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. >/dev/null 2>&1 && pwd -P)"
+INSTALL_DIR="${RETROBOX_ROOT}/emulators/retroarch"
+SRC_DIR="${RETROBOX_ROOT}/emulators/_src"
 RETROARCH_SRC="${SRC_DIR}/RetroArch"
 TMP_DIR="$(mktemp -d)"
 SOURCE_UPSTREAM="https://github.com/libretro/RetroArch.git"
@@ -65,7 +66,7 @@ function check_deps() {
   else
     sudo apt-get install -y \
       build-essential cmake make git pkg-config \
-      libsdl2-dev libvulkan-dev \
+      libsdl2-dev libvulkan-dev libx11-xcb-dev \
       libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev libx11-dev \
       libfreetype6-dev libxml2-dev \
       libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev \
