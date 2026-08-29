@@ -98,19 +98,21 @@ function check_deps_appimage() {
 # Compila mupen64plus_next desde fuente en vez de usar el .so precompilado del
 # buildbot (choque de contexto GL/GLES en no-x64).
 function compile_mupen64_next_from_source() {
-  echo "[INFO] Compilando mupen64plus_next desde fuente (platform=unix, OpenGL de escritorio)..."
+  echo "[INFO] Compilando mupen64plus_next desde fuente (platform=unix, OpenGL de escritorio, RDP: GLideN64+angrylion+parallel, RSP: HLE+cxd4+parallel)..."
   local core_src="${SRC_DIR}/mupen64plus-libretro-nx"
   [[ -d "${core_src}" ]] && rm -rf "${core_src}"
-  git clone --depth 1 "${MUPEN64_NEXT_UPSTREAM}" "${core_src}"
+  git clone --depth 1 --shallow-submodules --recursive "${MUPEN64_NEXT_UPSTREAM}" "${core_src}"
 
   local jobbs
   jobbs="$(nproc)"
   [[ "${ARCH}" != "x86_64" && "${ARCH}" != "amd64" ]] && jobbs=2
 
+  local m64p_flags=(platform=unix CORE_NAME=mupen64plus-next HAVE_THR_AL=1 LLE=1 HAVE_PARALLEL_RSP=1 HAVE_PARALLEL_RDP=1)
+
   (
     cd "${core_src}" || exit 1
-    make platform=unix CORE_NAME=mupen64plus-next clean
-    make platform=unix CORE_NAME=mupen64plus-next -j"${jobbs}"
+    make "${m64p_flags[@]}" clean
+    make "${m64p_flags[@]}" -j"${jobbs}"
   ) || error "Fallo al compilar mupen64plus_next desde fuente"
 
   [[ -f "${core_src}/mupen64plus_next_libretro.so" ]] \
