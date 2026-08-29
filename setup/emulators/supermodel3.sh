@@ -2,7 +2,7 @@
 ## INSTALADOR DE SUPERMODEL
 ## FECHA DE CREACIÓN: 30 de julio de 2026
 set -eo pipefail
-set -x
+
 ## VARIABLES
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd -P)"

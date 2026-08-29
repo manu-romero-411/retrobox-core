@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import xml.etree.ElementTree as ET
 
-from runtime.retrobox_paths import ES_SETTINGS_CFG
+from runtime.paths import ES_SETTINGS_CFG
 
 # Return value for ES InvertButtons (are confirm/cancel swapped)
 def getInvertButtonsValue() -> bool:

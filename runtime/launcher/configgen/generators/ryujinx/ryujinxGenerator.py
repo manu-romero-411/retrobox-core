@@ -9,7 +9,7 @@ from shutil import copyfile
 from pathlib import Path
 from typing import TYPE_CHECKING
 from configgen.generators.ryujinx.ryujinx_config import writeRyujinxConfig
-from runtime.retrobox_paths import (
+from runtime.paths import (
     DEFAULTS_DIR,
     SAVES,
     configure_emulator,

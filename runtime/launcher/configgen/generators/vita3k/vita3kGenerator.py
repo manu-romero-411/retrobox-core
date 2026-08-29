@@ -9,7 +9,7 @@ import ruamel.yaml.util
 from ... import Command
 from ...controller import generate_sdl_game_controller_config
 from .vita3k_paths import _VITA3K_CFGDIR, _VITA3K_SAVES, _VITA3K_XDG, VITA3K_BIN, VITA3K_CFG
-from runtime.retrobox_paths import CACHE, SAVES, mkdir_if_not_exists
+from runtime.paths import CACHE, SAVES, mkdir_if_not_exists
 
 
 if TYPE_CHECKING:

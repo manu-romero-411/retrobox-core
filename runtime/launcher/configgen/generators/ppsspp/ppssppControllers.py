@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Final
 
-from runtime.retrobox_paths import mkdir_if_not_exists
+from runtime.paths import mkdir_if_not_exists
 from ...utils.configparser import CaseSensitiveConfigParser
 from .ppssppPaths import PPSSPP_CONFIG_INIT, _PPSSPP_SYSDIR
 

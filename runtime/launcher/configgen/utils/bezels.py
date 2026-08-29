@@ -11,7 +11,7 @@ import qrcode
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 
 from configgen.utils.language import _detect_language
-from runtime.retrobox_paths import _DECORATIONS_DEF_DIR, RESOURCES_DIR, ES_GUNS_ART_METADATA, _DECORATIONS_DIR
+from runtime.paths import _DECORATIONS_DEF_DIR, RESOURCES_DIR, ES_GUNS_ART_METADATA, _DECORATIONS_DIR
 from ..exceptions import RetroboxException
 from . import metadata
 from .videoMode import get_alt_decoration

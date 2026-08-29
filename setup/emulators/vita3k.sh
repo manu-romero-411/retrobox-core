@@ -29,7 +29,7 @@ function error() {
   exit 1
 }
 
-function desinstalar() {
+function vita3k_uninstall() {
   rm -r "${INSTALL_DIR}"
 }
 
@@ -49,7 +49,7 @@ function resolve_arch() {
   esac
 }
 
-function appimage_install(){
+function vita3k_appimage_inst(){
   resolve_arch
 
   if ! command -v curl &> /dev/null; then
@@ -76,7 +76,7 @@ function appimage_install(){
   echo "[INFO] Instalación (AppImage descomprimida, ${ARCH}) completada."
 }
 
-function binary_install(){
+function vita3k_binary_inst(){
   resolve_arch
 
   if ! command -v curl &> /dev/null; then
@@ -147,7 +147,7 @@ function ensure_qt6() {
   echo "[INFO] Usando Qt6_ROOT=${Qt6_ROOT}"
 }
 
-function compilar() {
+function vita3k_source_build() {
   mkdir -p "${SRC_DIR}"
   check_deps
   ensure_qt6
@@ -177,11 +177,11 @@ function compilar() {
 
 ## LLAMADAS
 case "$1" in
-"-i") appimage_install;;
-"-b") binary_install;;
-"-c") compilar;;
-"-u"|"-d") desinstalar;;
-*)  exit 1;;
+  "-i") vita3k_appimage_inst;;
+  "-b") vita3k_binary_inst;;
+  "-s") vita3k_source_build;;
+  "-u") vita3k_uninstall;;
+  *)  exit 1;;
 esac
 
 exit 0

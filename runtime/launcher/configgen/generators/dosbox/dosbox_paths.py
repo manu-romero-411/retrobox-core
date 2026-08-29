@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Final
 
-from runtime.retrobox_paths import EMULATORS
+from runtime.paths import EMULATORS
 
 
 _DOSBOX_DIR: Final = EMULATORS / 'dosbox'

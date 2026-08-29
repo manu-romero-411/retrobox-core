@@ -1,6 +1,6 @@
 from typing import Final
 
-from runtime.retrobox_paths import EMULATORS
+from runtime.paths import EMULATORS
 
 
 _DOSBOX_X_EMUDIR: Final = EMULATORS / 'dosbox-x'

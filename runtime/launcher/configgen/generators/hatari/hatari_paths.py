@@ -2,7 +2,7 @@
 
 from typing import Final
 
-from runtime.retrobox_paths import EMULATORS
+from runtime.paths import EMULATORS
 
 _HATARI_DIR: Final = EMULATORS / "hatari"
 _HATARI_XDG: Final = _HATARI_DIR / "configs"

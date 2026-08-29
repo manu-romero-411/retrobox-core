@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Final
 
-from runtime.retrobox_paths import BIOS, CHEATS, DEFAULTS_DIR, EMULATORS, ROMS, SAVES
+from runtime.paths import BIOS, CHEATS, DEFAULTS_DIR, EMULATORS, ROMS, SAVES
 
 # directorios y ejecutable de retroarch y su config
 _MAME_DIR: Final = EMULATORS / "mame"

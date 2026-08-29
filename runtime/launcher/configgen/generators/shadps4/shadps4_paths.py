@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Final
 
-from runtime.retrobox_paths import EMULATORS, ROMS, SAVES
+from runtime.paths import EMULATORS, ROMS, SAVES
 
 # Set the paths using Path objects
 _SHADPS4_DIR: Final = EMULATORS / "shadps4"

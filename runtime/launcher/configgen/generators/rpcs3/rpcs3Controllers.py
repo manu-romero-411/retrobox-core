@@ -5,7 +5,7 @@ import logging
 from pathlib import Path
 from typing import TYPE_CHECKING, Final, TypedDict
 
-from runtime.retrobox_paths import mkdir_if_not_exists
+from runtime.paths import mkdir_if_not_exists
 from .rpcs3Paths import _RPCS3_CFGDIR
 
 if TYPE_CHECKING:

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from runtime.retrobox_paths import ROMS
+from runtime.paths import ROMS
 
 from ... import Command
 from ...controller import generate_sdl_game_controller_config

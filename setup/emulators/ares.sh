@@ -20,7 +20,7 @@ function error() {
   exit 1
 }
 
-function desinstalar() {
+function ares_uninstall() {
   rm -r "${INSTALL_DIR}"
 }
 
@@ -82,7 +82,7 @@ function build_librashader() {
   cp "${so_file}" "${INSTALL_DIR}/lib/librashader.so"
 }
 
-function instalar() {
+function ares_source_inst() {
   mkdir -p "${INSTALL_DIR}" "${SRC_DIR}"
   check_deps
   build_ares
@@ -96,8 +96,8 @@ function instalar() {
 
 ## LLAMADAS
 case "$1" in
-  "-i") instalar;;
-  "-u"|"-d") desinstalar;;
+  "-s") ares_source_inst;;
+  "-u") ares_uninstall;;
   *)  exit 1;;
 esac
 

@@ -17,7 +17,7 @@ from ...gun import Guns
 from ...input import Input
 from ...utils import vulkan
 from ...utils.configparser import CaseSensitiveConfigParser
-from runtime.retrobox_paths import CACHE, CHEATS, LOGS, ROMS, SAVES, SCREENSHOTS, ensure_parents_and_open, mkdir_if_not_exists
+from runtime.paths import CACHE, CHEATS, LOGS, ROMS, SAVES, SCREENSHOTS, ensure_parents_and_open, mkdir_if_not_exists
 _logger = logging.getLogger(__name__)
 
 def getGfxRatioFromConfig(config: SystemConfig, gameResolution: Resolution):

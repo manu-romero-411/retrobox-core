@@ -10,7 +10,7 @@ from runtime.launcher.configgen.generators.hatari.hatari_paths import HATARI_CFG
 
 from . import libretroMAMEConfig
 from ... import controllersConfig
-from runtime.retrobox_paths import DEFAULTS_DIR, ES_GAMES_METADATA, SAVES, SHADER_BEZELS_DIR, mkdir_if_not_exists, USERDATA
+from runtime.paths import DEFAULTS_DIR, ES_GAMES_METADATA, SAVES, SHADER_BEZELS_DIR, mkdir_if_not_exists, USERDATA
 from ...controller import Controller
 from ...settings.unixSettings import UnixSettings
 from ...utils import vulkan

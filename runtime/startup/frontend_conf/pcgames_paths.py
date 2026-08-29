@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 import re
 
-from runtime.retrobox_paths import _USER_HOME, _XDG_CONFIG, _XDG_DATA
+from runtime.paths import _USER_HOME, _XDG_CONFIG, _XDG_DATA
 
 def _env_paths(var_name: str) -> tuple[Path, ...]:
     """Lee una variable de entorno con rutas separadas por `os.pathsep`

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Final
 
-from runtime.retrobox_paths import DATAINIT_DIR, EMULATORS, SAVES
+from runtime.paths import DATAINIT_DIR, EMULATORS, SAVES
 
 MUPEN_CONFIG_DIR: Final = EMULATORS / 'mupen64plus'
 MUPEN_CUSTOM: Final = MUPEN_CONFIG_DIR / 'mupen64plus.cfg'

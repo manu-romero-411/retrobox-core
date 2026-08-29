@@ -1,6 +1,6 @@
 from typing import Final
 
-from runtime.retrobox_paths import EMULATORS
+from runtime.paths import EMULATORS
 
 _OPENMSX_INST: Final = EMULATORS / 'openmsx'
 _OPENMSX_XDG: Final = _OPENMSX_INST / 'configs'

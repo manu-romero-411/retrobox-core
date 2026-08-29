@@ -24,8 +24,8 @@ from runtime.launcher.configgen.generators.libretro.libretroPaths import (
     RETROARCH_SHADERS,
     RETROARCH_SHARE
 )
-from runtime.retrobox_paths import (
-    _UTILS_DIR,
+from runtime.paths import (
+    UTILS_DIR,
     BIOS,
     CMDFILES_DIR,
     OVERLAYS,
@@ -243,8 +243,8 @@ class LibretroGenerator(Generator):
                         shutil.copy(saveFile, newSaveFile)
                 # Generates a script to copy the saves back on exit
                 # Starts by making sure script paths exist
-                mkdir_if_not_exists(_UTILS_DIR / "gb2savesync")
-                script_file = _UTILS_DIR / "gb2savesync" / "exitsync.sh"
+                mkdir_if_not_exists(UTILS_DIR / "gb2savesync")
+                script_file = UTILS_DIR / "gb2savesync" / "exitsync.sh"
                 if script_file.exists():
                     script_file.unlink()
                 GBMultiScript = script_file.open("w")

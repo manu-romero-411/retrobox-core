@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Final
 
 from ... import Command
-from runtime.retrobox_paths import BIOS, EMULATORS, SAVES, SCREENSHOTS, USERDATA, mkdir_if_not_exists
+from runtime.paths import BIOS, EMULATORS, SAVES, SCREENSHOTS, USERDATA, mkdir_if_not_exists
 from ...controller import generate_sdl_game_controller_config, write_sdl_controller_db
 from ...settings.unixSettings import UnixSettings
 from ..Generator import Generator

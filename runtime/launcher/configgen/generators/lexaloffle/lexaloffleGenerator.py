@@ -4,7 +4,7 @@ import os
 from typing import TYPE_CHECKING, Final
 
 from configgen.generators.lexaloffle.lexaloffle_paths import PICO8_BIN_PATH, PICO8_CONTROLLERS, PICO8_ROOT_PATH, VOX_BIN_PATH, VOX_CONTROLLERS, VOX_ROOT_PATH
-from runtime.retrobox_paths import (
+from runtime.paths import (
     BIOS,
     SCREENSHOTS,
     ensure_parents_and_open

@@ -1,7 +1,7 @@
 
 from typing import Final
 
-from runtime.retrobox_paths import EMULATORS, ROMS
+from runtime.paths import EMULATORS, ROMS
 
 REDREAM_DIR: Final = EMULATORS / "redream"
 REDREAM_BIN: Final = REDREAM_DIR / "redream"

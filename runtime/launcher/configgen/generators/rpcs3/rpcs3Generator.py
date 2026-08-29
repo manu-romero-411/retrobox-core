@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any, cast
 from ruamel.yaml import YAML
 
 from ... import Command
-from runtime.retrobox_paths import BIOS, CACHE, configure_emulator, mkdir_if_not_exists
+from runtime.paths import BIOS, CACHE, configure_emulator, mkdir_if_not_exists
 from ...exceptions import RetroboxException
 from ...utils import vulkan
 from ...utils.configparser import CaseSensitiveConfigParser

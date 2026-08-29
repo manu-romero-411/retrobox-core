@@ -12,7 +12,7 @@ import time
 from pathlib import Path
 from typing import TYPE_CHECKING, Final
 
-from runtime.retrobox_paths import ROTATION_FILE, DEFAULTS_DIR, _UTILS_DIR
+from runtime.paths import ROTATION_FILE, DEFAULTS_DIR, UTILS_DIR
 from ..exceptions import RetroboxException
 
 if TYPE_CHECKING:
@@ -27,7 +27,7 @@ _GLXINFO_BIN: Final = Path("/usr/bin/glxinfo")
 # Set a specific video mode
 def changeMode(videomode: str) -> None:
     if checkModeExists(videomode):
-        cmd = [f"{_UTILS_DIR}/batocera-stubs/batocera-resolution", "setMode", videomode]
+        cmd = [f"{UTILS_DIR}/batocera-stubs/batocera-resolution", "setMode", videomode]
         _logger.debug("setVideoMode(%s): %s", videomode, cmd)
         max_tries = 2  # maximum number of tries to set the mode
         for i in range(max_tries):
@@ -42,7 +42,7 @@ def changeMode(videomode: str) -> None:
                 time.sleep(1)
 
 def getCurrentMode() -> str:  # noqa: RET503
-    proc = subprocess.Popen([f"{_UTILS_DIR}/batocera-stubs/batocera-resolution currentMode"], stdout=subprocess.PIPE, shell=True)
+    proc = subprocess.Popen([f"{UTILS_DIR}/batocera-stubs/batocera-resolution currentMode"], stdout=subprocess.PIPE, shell=True)
     (out, _) = proc.communicate()
     for val in out.decode().splitlines():
         return val # return the first line
@@ -51,7 +51,7 @@ def getCurrentMode() -> str:  # noqa: RET503
         raise AssertionError("unreachable")
 
 def getRefreshRate() -> str:  # noqa: RET503
-    proc = subprocess.Popen([f"{_UTILS_DIR}/batocera-stubs/batocera-resolution refreshRate"], stdout=subprocess.PIPE, shell=True)
+    proc = subprocess.Popen([f"{UTILS_DIR}/batocera-stubs/batocera-resolution refreshRate"], stdout=subprocess.PIPE, shell=True)
     (out, _) = proc.communicate()
     for val in out.decode().splitlines():
         return val # return the first line
@@ -124,19 +124,19 @@ def getScreensInfos(config: SystemConfig) -> list[ScreenInfo]:
     return res
 
 def getScreens() -> list[str]:
-    proc = subprocess.Popen([f"{_UTILS_DIR}/batocera-stubs/batocera-resolution listOutputs"], stdout=subprocess.PIPE, shell=True)
+    proc = subprocess.Popen([f"{UTILS_DIR}/batocera-stubs/batocera-resolution listOutputs"], stdout=subprocess.PIPE, shell=True)
     (out, _) = proc.communicate()
     return out.decode().splitlines()
 
 def minTomaxResolution() -> None:
-    proc = subprocess.Popen([f"{_UTILS_DIR}/batocera-stubs/batocera-resolution minTomaxResolution"], stdout=subprocess.PIPE, shell=True)
+    proc = subprocess.Popen([f"{UTILS_DIR}/batocera-stubs/batocera-resolution minTomaxResolution"], stdout=subprocess.PIPE, shell=True)
     proc.communicate()
 
 def getCurrentResolution(name: str | None = None) -> Resolution:
     if name is None:
-        cmd = f"{_UTILS_DIR}/batocera-stubs/batocera-resolution currentResolution"
+        cmd = f"{UTILS_DIR}/batocera-stubs/batocera-resolution currentResolution"
     else:
-        cmd = f"{_UTILS_DIR}/batocera-stubs/batocera-resolution --screen {name} currentResolution"
+        cmd = f"{UTILS_DIR}/batocera-stubs/batocera-resolution --screen {name} currentResolution"
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
     (out, _) = proc.communicate()
     result = out.decode().strip()
@@ -158,12 +158,12 @@ def getCurrentResolution(name: str | None = None) -> Resolution:
     return {"width": int(vals[0]), "height": int(vals[1])}
 
 def getCurrentOutput() -> str:
-    proc = subprocess.Popen([f"{_UTILS_DIR}/batocera-stubs/batocera-resolution currentOutput"], stdout=subprocess.PIPE, shell=True)
+    proc = subprocess.Popen([f"{UTILS_DIR}/batocera-stubs/batocera-resolution currentOutput"], stdout=subprocess.PIPE, shell=True)
     (out, _) = proc.communicate()
     return out.decode().strip()
 
 def supportSystemRotation() -> bool:
-    proc = subprocess.Popen([f"{_UTILS_DIR}/batocera-stubs/batocera-resolution supportSystemRotation"], stdout=subprocess.PIPE, shell=True)
+    proc = subprocess.Popen([f"{UTILS_DIR}/batocera-stubs/batocera-resolution supportSystemRotation"], stdout=subprocess.PIPE, shell=True)
     proc.communicate()
     return proc.returncode == 0
 
@@ -178,7 +178,7 @@ def checkModeExists(videomode: str) -> bool:
             return True
 
     # specific resolution given
-    proc = subprocess.Popen([f"{_UTILS_DIR}/batocera-stubs/batocera-resolution listModes"], stdout=subprocess.PIPE, shell=True)
+    proc = subprocess.Popen([f"{UTILS_DIR}/batocera-stubs/batocera-resolution listModes"], stdout=subprocess.PIPE, shell=True)
     (out, _) = proc.communicate()
     for valmod in out.decode().splitlines():
         vals = valmod.split(":")

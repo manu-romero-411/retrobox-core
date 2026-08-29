@@ -26,7 +26,7 @@ function check_dependencies(){
     fi
 }
 
-function install_wine_version(){
+function m2emu_wine_install(){
     echo "[INFO] Verificando dependencias del sistema..."
     check_dependencies
 
@@ -52,7 +52,7 @@ function install_wine_version(){
     echo "[INFO] Instalación de Model2Emu completada con éxito."
 }
 
-function uninstall_app(){
+function m2emu_uninstall(){
     echo "[INFO] Buscando instalaciones de Model2Emu..."
     local found=0
 
@@ -84,8 +84,8 @@ fi
 echo "[INFO] Ejecutando acción para el parámetro: $1"
 
 case $1 in
-    "-i") install_wine_version;;
-    "-u") uninstall_app;;
+    "-i") m2emu_wine_install;;
+    "-u") m2emu_uninstall;;
     *)
         echo "[ERROR] Parámetro no reconocido."
         exit 1

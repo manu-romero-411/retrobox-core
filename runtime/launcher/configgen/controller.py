@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Final, Literal, Self, TypedDict, Unpack, cast
 
 import evdev
 
-from runtime.retrobox_paths import _FRONTEND_DIR, _USER_HOME, ES_INPUT_CFG
+from runtime.paths import FRONTEND_DIR, _USER_HOME, ES_INPUT_CFG
 
 _logger: Final = logging.getLogger(__name__)
 
@@ -410,7 +410,7 @@ class Controller:
     @classmethod
     def load_for_players(cls, max_players: int, args: Namespace, /) -> ControllerList:
         cfg_roots = []
-        for conffile in (ES_INPUT_CFG, _FRONTEND_DIR / 'es_input.cfg'):
+        for conffile in (ES_INPUT_CFG, FRONTEND_DIR / 'es_input.cfg'):
             es_input_exists = conffile.exists()
             print(f"[DEBUG] buscando es_input.cfg en: {conffile} → {es_input_exists}")
             if es_input_exists:

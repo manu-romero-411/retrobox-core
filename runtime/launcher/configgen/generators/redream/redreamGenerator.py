@@ -6,7 +6,7 @@ from ... import Command
 from ...controller import generate_sdl_game_controller_config
 from ..Generator import Generator
 from .redream_paths import _REDREAM_ROMS, REDREAM_BIN, REDREAM_CFG, REDREAM_DIR
-from runtime.retrobox_paths import mkdir_if_not_exists
+from runtime.paths import mkdir_if_not_exists
 
 if TYPE_CHECKING:
     from ...batoceraTypes import HotkeysContext

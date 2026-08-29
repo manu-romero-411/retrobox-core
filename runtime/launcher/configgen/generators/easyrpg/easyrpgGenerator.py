@@ -3,8 +3,10 @@ from __future__ import annotations
 import codecs
 from typing import TYPE_CHECKING
 
+from runtime.paths import EMULATORS
+
 from ... import Command
-from runtime.retrobox_paths import CONFIGS, SAVES, mkdir_if_not_exists
+from runtime.paths import SAVES, mkdir_if_not_exists
 from ...controller import Controller
 from ..Generator import Generator
 
@@ -26,11 +28,11 @@ class EasyRPGGenerator(Generator):
         commandArray: list[str | Path] = ["easyrpg-player"]
 
         # FPS
-        if system.config.display_fps:
+        if system.config.get_bool("display_fps", False):
             commandArray.append("--show-fps")
 
         # Test Play (Debug Mode)
-        if system.config.get_bool('testplay'):
+        if system.config.get_bool('testplay', False):
             commandArray.append("--test-play")
 
         # Game Region (Encoding)
@@ -43,7 +45,7 @@ class EasyRPGGenerator(Generator):
         commandArray.extend(["--save-path", savePath])
 
         # Dir for logs and conf
-        configdir = CONFIGS / "easyrpg"
+        configdir = EMULATORS / "easyrpg"
         mkdir_if_not_exists(configdir)
 
         commandArray.extend(["--project-path", rom])

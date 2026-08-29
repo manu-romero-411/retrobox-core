@@ -1,7 +1,7 @@
 
 from typing import Final
 
-from runtime.retrobox_paths import BIOS, CHEATS, EMULATORS, ROMS, SAVES
+from runtime.paths import BIOS, CHEATS, EMULATORS, ROMS, SAVES
 
 _MELONDS_DIR: Final = EMULATORS / "melonds"
 _MELONDS_XDG: Final = _MELONDS_DIR / "configs"

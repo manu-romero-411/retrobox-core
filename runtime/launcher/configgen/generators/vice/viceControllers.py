@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from runtime.retrobox_paths import mkdir_if_not_exists
+from runtime.paths import mkdir_if_not_exists
 
 if TYPE_CHECKING:
     from pathlib import Path

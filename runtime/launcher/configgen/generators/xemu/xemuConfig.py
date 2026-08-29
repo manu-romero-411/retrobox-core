@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from runtime.retrobox_paths import BIOS, SAVES, SCREENSHOTS, ensure_parents_and_open
+from runtime.paths import BIOS, SAVES, SCREENSHOTS, ensure_parents_and_open
 from ...utils import vulkan
 from ...utils.configparser import CaseSensitiveConfigParser
 from .xemuPaths import XEMU_CONFIG

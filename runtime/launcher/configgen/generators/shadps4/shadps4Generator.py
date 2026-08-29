@@ -25,7 +25,7 @@ import tomlkit
 from runtime.launcher.configgen.generators.shadps4.shadps4_paths import _SHADPS4_CFGDIR, _SHADPS4_USER_CFGDIR, SHADPS4_BIN, SHADPS4_DLCS, SHADPS4_ROMS, SHADPS4_SAVES, SHADPS4_TOML
 
 from ... import Command
-from runtime.retrobox_paths import configure_emulator, mkdir_if_not_exists
+from runtime.paths import configure_emulator, mkdir_if_not_exists
 from ...controller import generate_sdl_game_controller_config
 from ...utils import vulkan
 from ..Generator import Generator

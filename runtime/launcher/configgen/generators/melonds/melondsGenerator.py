@@ -9,7 +9,7 @@ from runtime.launcher.configgen import Command
 from runtime.launcher.configgen.controller import Controller
 from runtime.launcher.configgen.generators.Generator import Generator
 from runtime.launcher.configgen.generators.melonds.melonds_paths import _MELONDS_CHEATS, _MELONDS_CFGDIR, _MELONDS_ROMS, _MELONDS_SAVES, _MELONDS_XDG, DSI_ARM7_BIOS, DSI_ARM9_BIOS, DSI_FIRMWARE, DSI_NAND, MELONDS_CFG, NDS_ARM7_BIOS, NDS_ARM9_BIOS, NDS_FIRMWARE
-from runtime.retrobox_paths import BIOS, mkdir_if_not_exists
+from runtime.paths import BIOS, mkdir_if_not_exists
 
 if TYPE_CHECKING:
     from runtime.launcher.configgen.batoceraTypes import HotkeysContext

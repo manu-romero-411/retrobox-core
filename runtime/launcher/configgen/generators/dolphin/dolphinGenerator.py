@@ -13,7 +13,7 @@ from runtime.launcher.configgen.Emulator import generate_bash_wrapper
 
 from . import dolphinControllers
 from ... import Command
-from runtime.retrobox_paths import BIOS, HUD_CONFIG_FILE, ROMS, SAVES, USERDATA, configure_emulator, mkdir_if_not_exists
+from runtime.paths import BIOS, HUD_CONFIG_FILE, ROMS, SAVES, USERDATA, configure_emulator, mkdir_if_not_exists
 from ...utils import vulkan
 from ...utils.configparser import CaseSensitiveConfigParser
 from ..Generator import Generator

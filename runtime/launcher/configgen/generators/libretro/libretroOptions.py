@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from runtime.retrobox_paths import BIOS, ES_GAMES_METADATA, ROMS, ensure_parents_and_open
+from runtime.paths import BIOS, ES_GAMES_METADATA, ROMS, ensure_parents_and_open
 from ...gun import Guns, guns_need_crosses
 from ...utils import videoMode
 from ...utils import metadata as _metadataUtils

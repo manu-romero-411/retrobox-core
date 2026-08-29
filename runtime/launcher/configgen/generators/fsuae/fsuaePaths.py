@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Final
 
-from runtime.retrobox_paths import EMULATORS, BIOS, SAVES
+from runtime.paths import EMULATORS, BIOS, SAVES
 
 _FSUAE_EMUDIR: Final = EMULATORS / 'fs-uae'
 _FSUAE_XDG: Final = _FSUAE_EMUDIR / 'configs'

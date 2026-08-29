@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, ClassVar, Final, cast
 
-from runtime.retrobox_paths import EMULATORS, RESOURCES_DIR, SAVES, mkdir_if_not_exists
+from runtime.paths import EMULATORS, RESOURCES_DIR, SAVES, mkdir_if_not_exists
 
 if TYPE_CHECKING:
     from .Emulator import Emulator

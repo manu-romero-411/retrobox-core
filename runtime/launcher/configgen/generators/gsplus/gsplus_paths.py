@@ -1,7 +1,7 @@
 
 from typing import Final
 
-from runtime.retrobox_paths import EMULATORS
+from runtime.paths import EMULATORS
 
 
 _GSPLUS_DIR: Final = EMULATORS / 'gsplus'

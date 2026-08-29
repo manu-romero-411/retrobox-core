@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 from xml.dom import minidom
 
-from runtime.retrobox_paths import _DECORATIONS_DEF_DIR, BIOS, CMDFILES_DIR, DEFAULTS_DIR, EMULATORS, MAME_ARTWORK_DIR, MAME_SOFTWARE_DIR, ROMS, SAVES, _DECORATIONS_DIR, mkdir_if_not_exists
+from runtime.paths import _DECORATIONS_DEF_DIR, BIOS, CMDFILES_DIR, DEFAULTS_DIR, EMULATORS, MAME_ARTWORK_DIR, MAME_SOFTWARE_DIR, ROMS, SAVES, _DECORATIONS_DIR, mkdir_if_not_exists
 from ..mame.mameCommon import is_atom_floppy
 
 if TYPE_CHECKING:

@@ -6,7 +6,7 @@ from runtime.launcher.configgen.Emulator import generate_bash_wrapper
 
 from . import ppssppConfig
 from ... import Command
-from runtime.retrobox_paths import SAVES, configure_emulator, ensure_symlink
+from runtime.paths import SAVES, configure_emulator, ensure_symlink
 from ...controller import Controller, generate_sdl_game_controller_config
 from ..Generator import Generator
 from . import ppssppControllers

@@ -1,6 +1,6 @@
 from typing import Final
 
-from runtime.retrobox_paths import DEFAULTS_DIR, EMULATORS, SAVES
+from runtime.paths import DEFAULTS_DIR, EMULATORS, SAVES
 
 _RYUJINX_EMUDIR: Final = EMULATORS / "ryujinx"
 RYUJINX_BIN: Final = _RYUJINX_EMUDIR / "ryujinx.AppImage"

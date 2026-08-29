@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 
 from . import vpinballOptions
 from ... import Command
-from runtime.retrobox_paths import EMULATORS, mkdir_if_not_exists
+from runtime.paths import EMULATORS, mkdir_if_not_exists
 from ...controller import generate_sdl_game_controller_config
 from ...utils.batoceraServices import batoceraServices
 from ...utils.configparser import CaseSensitiveConfigParser

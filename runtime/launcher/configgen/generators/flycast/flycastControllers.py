@@ -5,7 +5,7 @@ import logging
 from typing import TYPE_CHECKING, Final, Literal
 
 from runtime.launcher.configgen.generators.flycast.flycastPaths import FLYCAST_MAPPING
-from runtime.retrobox_paths import mkdir_if_not_exists
+from runtime.paths import mkdir_if_not_exists
 
 if TYPE_CHECKING:
     from runtime.launcher.configgen.controller import Controller

@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Final
 from runtime.launcher.configgen.generators.hatari.hatari_paths import _HATARI_CFGDIR, HATARI_CFG
 
 from ... import Command
-from runtime.retrobox_paths import BIOS, mkdir_if_not_exists
+from runtime.paths import BIOS, mkdir_if_not_exists
 from ...exceptions import RetroboxException
 from ...utils.configparser import CaseSensitiveConfigParser
 from ..Generator import Generator

@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, Any
 import tomlkit
 
 from ... import Command
-from runtime.retrobox_paths import CACHE, SAVES, configure_emulator, mkdir_if_not_exists
+from runtime.paths import CACHE, SAVES, configure_emulator, mkdir_if_not_exists
 from ...controller import generate_sdl_game_controller_config
 from ...utils import vulkan
 from ..Generator import Generator

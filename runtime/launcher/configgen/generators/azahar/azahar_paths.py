@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Final
 
-from runtime.retrobox_paths import EMULATORS, SAVES
+from runtime.paths import EMULATORS, SAVES
 
 _AZAHAR_DIR: Final  = EMULATORS / 'azahar'
 _AZAHAR_XDG: Final = _AZAHAR_DIR / 'configs'

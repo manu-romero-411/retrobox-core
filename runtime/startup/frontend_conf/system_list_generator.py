@@ -17,8 +17,8 @@ from yaml.parser import ParserError
 # )
 _logger = logging.getLogger(__name__)
 
-from runtime.retrobox_paths import (
-    _SYSTEMS_CONF_DIR,
+from runtime.paths import (
+    SYSTEMS_CONF_DIR,
     ES_SYSTEMS_CFG,
     ES_SYSTEMS_TMP,
     ROMS,
@@ -78,7 +78,7 @@ def _append_emulator_nodes(parent_elem, emulators_data):
             core_elem = ET.SubElement(emulator_elem, "core", **core_attrs)
             core_elem.text = core_name
 
-def generate_es_systems(base_path: Path = _SYSTEMS_CONF_DIR, output_path: Path = ES_SYSTEMS_TMP):
+def generate_es_systems(base_path: Path = SYSTEMS_CONF_DIR, output_path: Path = ES_SYSTEMS_TMP):
     """
     Recorre la estructura de directorios YAML generada y reconstruye 
     el archivo es_systems.cfg original.

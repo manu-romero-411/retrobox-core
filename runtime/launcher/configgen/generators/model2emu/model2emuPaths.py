@@ -1,5 +1,5 @@
 from typing import Final
-from runtime.retrobox_paths import DEFAULTS_DIR, EMULATORS, ROMS
+from runtime.paths import DEFAULTS_DIR, EMULATORS, ROMS
 
 MODEL2_ROMS: Final = ROMS / "model2"
 

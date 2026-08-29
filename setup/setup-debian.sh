@@ -1,10 +1,15 @@
 #!/usr/bin/env bash
-# Instalación de dependencias de Retrobox para Debian, Ubuntu y Linux Mint.
-# Probado en Debian 13 y Linux Mint 22
+# Install Retrobox's system dependencies on Debian, Ubuntu, and Linux Mint.
+# Tested on Debian 13 and Linux Mint 22.
 set -euo pipefail
-RETROBOX_ROOTDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. >/dev/null 2>&1 && pwd -P)"
 
-echo "[retrobox] Installing system dependencies (apt)..."
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd -P)"
+RETROBOX_ROOTDIR="$(cd "${SCRIPT_DIR}/.." >/dev/null 2>&1 && pwd -P)"
+
+# shellcheck source=lib/log.sh
+source "${SCRIPT_DIR}/lib/log.sh"
+
+log_info "Installing system dependencies (apt)..."
 sudo apt-get update
 sudo apt-get install -y \
     git \
@@ -31,14 +36,13 @@ sudo apt-get install -y \
     power-profiles-daemon \
     python3-ruamel.yaml
 
-sudo cp ${RETROBOX_ROOTDIR}/resources/udev/*.rules /etc/udev/rules.d/
-sudo usermod -aG input $(whoami)
+log_info "Installing udev rules..."
+sudo cp "${RETROBOX_ROOTDIR}/resources/udev/"*.rules /etc/udev/rules.d/
+sudo usermod -aG input "$(whoami)"
 sudo udevadm control --reload-rules
 sudo udevadm trigger
-cat << EOF | sudo tee /etc/udev/rules.d/99-input.rules
+cat <<EOF | sudo tee /etc/udev/rules.d/99-input.rules
 KERNEL=="uinput", MODE="0660", GROUP="input", OPTIONS+="static_node=uinput"
 EOF
 
-git clone https://github.com/RetroBat-Official/retrobat-bezels ${RETROBOX_ROOTDIR}/resources/decorations
-
-echo "[retrobox] System dependencies sucessfully installed."
+log_ok "System dependencies successfully installed."

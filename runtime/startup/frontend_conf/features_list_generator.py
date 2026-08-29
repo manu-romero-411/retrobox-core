@@ -18,8 +18,8 @@ from yaml.parser import ParserError
 
 _logger = logging.getLogger(__name__)
 
-from runtime.retrobox_paths import (
-    _EMU_FEATURES_DIR,
+from runtime.paths import (
+    EMU_FEATURES_DIR,
     ES_FEATURES_CFG,
     ES_FEATURES_TMP
 )
@@ -95,7 +95,7 @@ def build_system_elements(parent_elem, systems_list):
                 sys_elem.set(str(k), str(v))
         build_features_elements(sys_elem, sys_data)
 
-def generate_es_features(yaml_dir: Path = _EMU_FEATURES_DIR, output_path: Path = ES_FEATURES_TMP):
+def generate_es_features(yaml_dir: Path = EMU_FEATURES_DIR, output_path: Path = ES_FEATURES_TMP):
     """
     entrypoint to the es_features.cfg generator
     """

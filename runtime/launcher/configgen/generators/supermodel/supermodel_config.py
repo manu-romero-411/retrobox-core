@@ -1,6 +1,6 @@
 
 from pathlib import Path
-from runtime.retrobox_paths import ensure_parents_and_open
+from runtime.paths import ensure_parents_and_open
 
 from ...Emulator import Emulator
 from ...gun import Guns

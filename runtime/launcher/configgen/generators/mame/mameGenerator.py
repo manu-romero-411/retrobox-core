@@ -14,7 +14,7 @@ from xml.dom import minidom
 from PIL import Image
 
 from ... import Command
-from runtime.retrobox_paths import (
+from runtime.paths import (
     _DECORATIONS_DEF_DIR,
     RESOURCES_DIR,
     BIOS,

@@ -8,7 +8,7 @@ from configgen.generators.libretro.libretroPaths import (
     _RETROARCH_VIDEO_FILTERS
 )
 
-from runtime.retrobox_paths import (
+from runtime.paths import (
     _DECORATIONS_DEF_DIR,
     _DECORATIONS_DIR,
     _GAMEPADLY_PROFILES,

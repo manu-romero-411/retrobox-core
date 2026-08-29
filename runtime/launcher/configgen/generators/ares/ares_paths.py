@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from runtime.retrobox_paths import EMULATORS, SAVES, SCREENSHOTS
+from runtime.paths import EMULATORS, SAVES, SCREENSHOTS
 
 _ARES_EMUDIR: Path = EMULATORS / "ares"
 _ARES_XDG: Path = _ARES_EMUDIR / "configs"

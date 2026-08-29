@@ -6,9 +6,8 @@ set -eo pipefail
 
 ## VARIABLES
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd -P)"
-ROOTDIR="$(realpath "$SCRIPT_DIR/..")"
 
-GITHUB_REPO="hrydgard/ppsspp" # Repositorio oficial (o cámbialo al fork de AppImages que uses)
+GITHUB_REPO="hrydgard/ppsspp"
 INSTALL_DIR="${SCRIPT_DIR}/ppsspp"
 TMP_DIR="$(mktemp -d)"
 
@@ -93,18 +92,9 @@ function uninstall_app() {
 
 ## LLAMADAS
 
-
-if [[ -z "$1" ]]; then
-    echo "Uso: $0 [-f | -i | -u]"
-    echo "  -i : Instalar usando AppImage"
-    echo "  -u : Desinstalar"
-    exit 1
-fi
-
 echo "[INFO] Ejecutando acción para el parámetro: $1"
 
 case "$1" in
-    "-f") install_flatpak;;
     "-i") install_appimage;;
     "-u") uninstall_app;;
     *)

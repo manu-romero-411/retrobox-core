@@ -37,8 +37,8 @@ from startup.env_handling import apply_env_defaults
 
 apply_env_defaults(RETROBOX_ROOTDIR)
 
-from runtime.retrobox_paths import (
-    _FRONTEND_DIR,
+from runtime.paths import (
+    FRONTEND_DIR,
     ES_FEATURES_CFG,
     ES_FEATURES_TMP,
     ES_INI_CFG,
@@ -121,8 +121,8 @@ def run_emulationstation(args: list[str]) -> int:
     es_env["SDL_VIDEODRIVER"] = "wayland,x11"
 
     result = subprocess.run(
-        [str(ES_EXECUTABLE), "--home", str(_FRONTEND_DIR), *map(str, args)],
-        cwd=str(_FRONTEND_DIR),
+        [str(ES_EXECUTABLE), "--home", str(FRONTEND_DIR), *map(str, args)],
+        cwd=str(FRONTEND_DIR),
         env=es_env,
         check=False,
     )

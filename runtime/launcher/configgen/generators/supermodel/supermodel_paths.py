@@ -1,6 +1,6 @@
 from typing import Final
 
-from runtime.retrobox_paths import EMULATORS, SAVES
+from runtime.paths import EMULATORS, SAVES
 
 _SUPERMODEL_EMUDIR: Final = EMULATORS / 'supermodel'
 _SUPERMODEL_CFGDIR: Final = _SUPERMODEL_EMUDIR / 'Config'

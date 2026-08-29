@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Final
 
-from runtime.retrobox_paths import ensure_parents_and_open
+from runtime.paths import ensure_parents_and_open
 from ...utils import vulkan
 from ...utils.configparser import CaseSensitiveConfigParser
 from .ppssppPaths import _PPSSPP_SYSDIR

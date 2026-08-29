@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 from runtime.launcher.configgen.generators.duckstation.duckstation_generator import _DUCKSTATION_XDG, DUCKSTATION_CFG
 
 from ... import Command
-from runtime.retrobox_paths import (
+from runtime.paths import (
     BIOS,
     CACHE,
     CHEATS,

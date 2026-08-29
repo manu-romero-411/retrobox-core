@@ -6,7 +6,7 @@ import re
 from typing import TYPE_CHECKING
 
 from ... import Command
-from runtime.retrobox_paths import EMULATORS, ROMS, SAVES, mkdir_if_not_exists
+from runtime.paths import EMULATORS, ROMS, SAVES, mkdir_if_not_exists
 from ...settings.unixSettings import UnixSettings
 from ..Generator import Generator
 from . import openborControllers

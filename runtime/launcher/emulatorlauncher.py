@@ -46,10 +46,13 @@ from configgen.utils.logger import setup_logging
 from configgen.utils.overlayfs import mount_overlayfs
 from configgen.utils.squashfs import mount_squashfs
 from runtime.gamepadly.gamepadly_manager import GamepadManager
-from runtime.retrobox_paths import (
-    _NVIDIA_POWERD_SCRIPT,
-    _UTILS_DIR,
+from runtime.paths import (
+    _GAMEPADLY_PROFILES,
+    _GAMEPADLY_USER_PROFILES,
+    NVIDIA_POWERD_SCRIPT,
     ES_GAMES_METADATA,
+    ES_INPUT_CFG,
+    GAMEPADLY_MAPPER,
     HOOKS,
     RUNTIME_DIR,
     SAVES,
@@ -188,11 +191,15 @@ def start_rom(args: argparse.Namespace, maxnbplayers: int, rom: Path, original_r
                 # run the emulator
                 with (
                     GamepadManager(
-                        system      = system_name,
-                        emulator    = system.config.emulator,
-                        core        = effective_core,
-                        rom         = rom,
-                        controllers = player_controllers,
+                        system            = system_name,
+                        emulator          = system.config.emulator,
+                        core              = effective_core,
+                        rom               = rom,
+                        controllers       = player_controllers,
+                        mapper_script     = GAMEPADLY_MAPPER,
+                        profiles_dir      = _GAMEPADLY_PROFILES,
+                        user_profiles_dir = _GAMEPADLY_USER_PROFILES,
+                        es_input          = ES_INPUT_CFG,
                     )
                 ):
 
@@ -556,8 +563,8 @@ def _set_nvidia_powerd(enable: bool) -> None:
     AMD, Intel, Apple, Qualcomm, Nvidia antiguas o dispositivos como la Switch.
     """
     # 1. Verificar que nuestro script helper exista y sea ejecutable
-    if not os.path.isfile(_NVIDIA_POWERD_SCRIPT) or not os.access(_NVIDIA_POWERD_SCRIPT, os.X_OK):
-        _logger.debug("%s not found or not executable, skipping nvidia-powerd management", _NVIDIA_POWERD_SCRIPT)
+    if not os.path.isfile(NVIDIA_POWERD_SCRIPT) or not os.access(NVIDIA_POWERD_SCRIPT, os.X_OK):
+        _logger.debug("%s not found or not executable, skipping nvidia-powerd management", NVIDIA_POWERD_SCRIPT)
         return
 
     # 2. Verificar que el binario real del sistema exista en el PATH
@@ -569,7 +576,7 @@ def _set_nvidia_powerd(enable: bool) -> None:
     action = "start" if enable else "stop"
     try:
         subprocess.run(
-            [_NVIDIA_POWERD_SCRIPT, action],
+            [NVIDIA_POWERD_SCRIPT, action],
             check=True, capture_output=True, text=True, timeout=15,
         )
         _logger.info("nvidia-powerd %s", "started" if enable else "stopped")

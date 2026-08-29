@@ -18,7 +18,7 @@ from .flycastPaths import (
     FLYCAST_VMUA1,
     FLYCAST_VMUA2
 )
-from runtime.retrobox_paths import (
+from runtime.paths import (
     configure_emulator,
     ensure_parents_and_open,
     mkdir_if_not_exists

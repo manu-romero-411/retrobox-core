@@ -1,7 +1,7 @@
 from __future__ import annotations
 from pathlib import Path
 from typing import Final
-from runtime.retrobox_paths import BIOS, EMULATORS, SAVES
+from runtime.paths import BIOS, EMULATORS, SAVES
 
 _DOLPHIN_DIR:  Final = EMULATORS / 'dolphin-emu'
 _DOLPHIN_XDG:  Final = _DOLPHIN_DIR / 'config'

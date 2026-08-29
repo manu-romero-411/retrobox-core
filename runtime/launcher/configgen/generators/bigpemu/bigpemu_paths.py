@@ -1,6 +1,6 @@
 from typing import Final
 
-from runtime.retrobox_paths import EMULATORS
+from runtime.paths import EMULATORS
 
 _BIGPEMU_DIR: Final = EMULATORS / 'bigpemu'
 _BIGPEMU_XDG: Final = _BIGPEMU_DIR / 'configs'

@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Final
 from .model2emuPaths import M2EMU_EMUDIR, M2EMU_RESOURCES, M2EMU_WINEPREFIX, MODEL2_ROMS
 
 from ... import Command
-from runtime.retrobox_paths import configure_emulator, mkdir_if_not_exists
+from runtime.paths import configure_emulator, mkdir_if_not_exists
 from ...controller import generate_sdl_game_controller_config
 from ...utils.configparser import CaseSensitiveConfigParser
 from ..Generator import Generator

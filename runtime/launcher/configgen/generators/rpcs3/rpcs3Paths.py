@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Final
 
-from runtime.retrobox_paths import EMULATORS
+from runtime.paths import EMULATORS
 
 
 _RPCS3_DIR: Final = EMULATORS / 'rpcs3'

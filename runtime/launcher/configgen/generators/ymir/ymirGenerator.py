@@ -20,7 +20,7 @@ from typing import TYPE_CHECKING, TypedDict, cast
 import tomlkit
 
 from ... import Command
-from runtime.retrobox_paths import EMULATORS, ROMS, BIOS, SAVES, SCREENSHOTS, mkdir_if_not_exists
+from runtime.paths import EMULATORS, ROMS, BIOS, SAVES, SCREENSHOTS, mkdir_if_not_exists
 from ...controller import write_sdl_controller_db
 from ..Generator import Generator
 

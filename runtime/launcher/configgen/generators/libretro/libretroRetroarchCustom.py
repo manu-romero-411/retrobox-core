@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from runtime.retrobox_paths import BIOS, CHEATS, RECORDINGS, RESOURCES_DIR, SAVES, SCREENSHOTS, mkdir_if_not_exists, USERDATA
+from runtime.paths import BIOS, CHEATS, RECORDINGS, RESOURCES_DIR, SAVES, SCREENSHOTS, mkdir_if_not_exists, USERDATA
 from ...settings.unixSettings import UnixSettings
 from .libretroPaths import _RETROARCH_CONFIG, _RETROARCH_SHARE, RETROARCH_ASSETS, RETROARCH_CUSTOM, RETROARCH_SHADERS
 

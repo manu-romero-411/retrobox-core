@@ -9,7 +9,7 @@ import zipfile
 from pathlib import Path
 from typing import TYPE_CHECKING, cast
 from .openmsxPaths import _OPENMSX_INST, _OPENMSX_CFGDIR
-from runtime.retrobox_paths import (
+from runtime.paths import (
     BIOS,
     SCREENSHOTS,
     USERDATA,

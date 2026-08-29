@@ -8,7 +8,7 @@ from .supermodel_config import configPadsIni
 from .supermodel_paths import _SUPERMODEL_EMUDIR, SUPERMODEL_BIN
 
 from ... import Command
-from runtime.retrobox_paths import (
+from runtime.paths import (
     EMULATORS,
     LOGS
 )

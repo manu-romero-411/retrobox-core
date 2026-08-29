@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Final
 
-from runtime.retrobox_paths import EMULATORS
+from runtime.paths import EMULATORS
 
 # directorios y ejecutable de retroarch y su config
 _RETROARCH_DIR: Final = EMULATORS / "retroarch"

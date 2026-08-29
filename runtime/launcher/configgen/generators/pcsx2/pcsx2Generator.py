@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from .pcsx2_config import configureINI
-from runtime.retrobox_paths import (
+from runtime.paths import (
     configure_emulator,
     mkdir_if_not_exists,
 )

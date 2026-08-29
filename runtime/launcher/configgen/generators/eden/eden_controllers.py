@@ -9,7 +9,7 @@ from sdl2 import joystick
 from ...controller import _DEFAULT_SDL_MAPPING, Controllers, evdev_to_hidraw
 from .edenPaths import EDEN_RARE_DPAD_GUIDS
 from ...input import Input
-from runtime.retrobox_paths import DEFAULTS_DIR
+from runtime.paths import DEFAULTS_DIR
 
 _logger = logging.getLogger(__name__)
 

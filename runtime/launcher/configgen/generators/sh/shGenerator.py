@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from runtime.launcher.configgen import Command
 from runtime.launcher.configgen.controller import generate_sdl_game_controller_config, write_sdl_controller_db
 from runtime.launcher.configgen.generators.Generator import Generator
-from runtime.retrobox_paths import EMULATORS
+from runtime.paths import EMULATORS
 
 
 if TYPE_CHECKING:

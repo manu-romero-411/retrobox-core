@@ -1,6 +1,6 @@
 from typing import Final
 
-from runtime.retrobox_paths import BIOS, EMULATORS, SAVES
+from runtime.paths import BIOS, EMULATORS, SAVES
 
 
 _SCUMMVM_DIR: Final = EMULATORS / "scummvm"

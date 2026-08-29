@@ -304,5 +304,13 @@ resources/hooks/retrohook.d/**
 !resources/hooks/retrohook.d/_frontend/emulationstation/on-frontend-start/00_setup.sh
 .aider*
 
+# Marcador de setup ya realizado (lo escribe retrobox.sh en el primer setup con éxito)
+/.retrobox_setup_done
+
 # Allow the decorations submodule
 !resources/decorations/
+
+
+*.gbc
+*.gb
+

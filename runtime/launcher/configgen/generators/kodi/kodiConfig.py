@@ -4,7 +4,7 @@ import hashlib
 from typing import TYPE_CHECKING, Final
 from xml.dom import minidom
 
-from runtime.retrobox_paths import _USER_HOME
+from runtime.paths import _USER_HOME
 
 if TYPE_CHECKING:
     from pathlib import Path

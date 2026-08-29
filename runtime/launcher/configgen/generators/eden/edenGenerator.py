@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 from .eden_config import _eden_write_config
 from ..Generator import Generator
 from ... import Command
-from runtime.retrobox_paths import DEFAULTS_DIR, SAVES, configure_emulator
+from runtime.paths import DEFAULTS_DIR, SAVES, configure_emulator
 from .edenPaths import _EDEN_INI, _EDEN_XDG, EDEN_BIN, setup_eden_environments
 
 _logger = logging.getLogger(__name__)

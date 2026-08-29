@@ -8,7 +8,7 @@ from os import environ
 from typing import TYPE_CHECKING, cast
 from xml.dom import minidom
 from configgen.utils.bios_files import check_biosfile
-from runtime.retrobox_paths import BIOS, SAVES, configure_emulator, mkdir_if_not_exists
+from runtime.paths import BIOS, SAVES, configure_emulator, mkdir_if_not_exists
 
 from ... import Command
 from ...controller import generate_sdl_game_controller_config

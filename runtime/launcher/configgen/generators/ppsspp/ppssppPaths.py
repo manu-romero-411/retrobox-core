@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Final
 
-from runtime.retrobox_paths import CONF_INIT, EMULATORS, SAVES
+from runtime.paths import CONF_INIT, EMULATORS, SAVES
 
 _PPSSPP_EMUDIR: Final = EMULATORS / 'ppsspp'
 _PPSSPP_XDG: Final = _PPSSPP_EMUDIR / 'config'

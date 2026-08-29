@@ -2,7 +2,7 @@
 from pathlib import Path
 from typing import Final
 
-from runtime.retrobox_paths import EMULATORS
+from runtime.paths import EMULATORS
 
 
 _PYXEL_DIR: Final = EMULATORS / "pyxel"

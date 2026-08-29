@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, Any
 from pathlib import Path
 import yaml
 
-from runtime.retrobox_paths import _SYSTEMS_CONF_DIR, DEFAULTS_DIR, ES_SETTINGS_CFG, _SHADERS_DIR, configure_emulator
+from runtime.paths import SYSTEMS_CONF_DIR, DEFAULTS_DIR, ES_SETTINGS_CFG, _SHADERS_DIR, configure_emulator
 
 from .config import Config, SystemConfig
 from .exceptions import MissingEmulator, RetroboxException
@@ -88,7 +88,7 @@ def _load_system_config(system_name: str, rom: Path) -> dict[str, Any]:
         return data
 
     # 1. Cargar las opciones globales desde defaults.yml si existe en _ES_SYSTEMS_DIR
-    defaults_path = _SYSTEMS_CONF_DIR / "defaults.yml"
+    defaults_path = SYSTEMS_CONF_DIR / "defaults.yml"
     if defaults_path.exists():
         try:
             with open(defaults_path, 'r', encoding='utf-8') as f:
@@ -109,8 +109,8 @@ def _load_system_config(system_name: str, rom: Path) -> dict[str, Any]:
 
     # 2. Buscar el archivo YAML del sistema específico dentro de la estructura de _ES_SYSTEMS_DIR
     sys_yaml_path = None
-    if _SYSTEMS_CONF_DIR.exists():
-        for path in _SYSTEMS_CONF_DIR.glob(f"**/{system_name}.yaml"):
+    if SYSTEMS_CONF_DIR.exists():
+        for path in SYSTEMS_CONF_DIR.glob(f"**/{system_name}.yaml"):
             sys_yaml_path = path
             break
 

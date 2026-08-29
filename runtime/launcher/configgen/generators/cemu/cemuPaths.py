@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Final
 
-from runtime.retrobox_paths import BIOS, EMULATORS, ROMS, SAVES
+from runtime.paths import BIOS, EMULATORS, ROMS, SAVES
 
 _CEMU_EMUDIR: Final  = EMULATORS / 'cemu'
 _CEMU_XDG: Final = _CEMU_EMUDIR / 'config'

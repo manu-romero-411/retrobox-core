@@ -1,6 +1,6 @@
 from typing import Final
 
-from runtime.retrobox_paths import BIOS, EMULATORS
+from runtime.paths import BIOS, EMULATORS
 
 _PCSX2_DIR: Final = EMULATORS / 'pcsx2'
 _PCSX2_XDG: Final = _PCSX2_DIR / 'config'

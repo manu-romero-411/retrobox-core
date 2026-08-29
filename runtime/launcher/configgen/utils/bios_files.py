@@ -2,7 +2,7 @@ import hashlib
 from pathlib import Path
 
 from configgen.exceptions import RetroboxException
-from runtime.retrobox_paths import BIOS
+from runtime.paths import BIOS
 
 MIN_KEYFILE_SIZE = 1024  # 1 KB
 

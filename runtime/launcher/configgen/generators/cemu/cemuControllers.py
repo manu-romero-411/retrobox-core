@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 import pyudev
 
-from runtime.retrobox_paths import mkdir_if_not_exists
+from runtime.paths import mkdir_if_not_exists
 
 from .cemuPaths import CEMU_CONTROLLER_PROFILES
 

@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Generator
 from runtime.launcher.configgen import Command
 from runtime.launcher.configgen.controller import generate_sdl_game_controller_config
 from runtime.launcher.configgen.generators.gsplus.gsplus_paths import _GSPLUS_CFGDIR, GSPLUS_CFG
-from runtime.retrobox_paths import BIOS, mkdir_if_not_exists
+from runtime.paths import BIOS, mkdir_if_not_exists
 from runtime.launcher.configgen.settings.unixSettings import UnixSettings
 
 

@@ -4,7 +4,7 @@ import logging
 
 from configgen.exceptions import RetroboxException
 from runtime.launcher.configgen import Command
-from runtime.retrobox_paths import SCREENSHOTS, configure_emulator, mkdir_if_not_exists
+from runtime.paths import SCREENSHOTS, configure_emulator, mkdir_if_not_exists
 from ..Generator import Generator
 from .ares_config import _ares_resolve_shader, write_ares_config
 from .ares_paths import _ARES_LIBDIR, _ARES_SHADERS_DIR, _ARES_SHARE, ARES_BIN, _ARES_CFGDIR, _ARES_SAVES, _ARES_XDG

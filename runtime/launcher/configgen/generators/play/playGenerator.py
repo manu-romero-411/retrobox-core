@@ -4,7 +4,7 @@ import re
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import TYPE_CHECKING, Final, cast
-from runtime.retrobox_paths import (
+from runtime.paths import (
     CACHE,
     SAVES,
     EMULATORS,

@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any, NotRequired, TypedDict
 from runtime.launcher.configgen.generators.bigpemu.bigpemu_paths import BIGPEMU_CFG
 
 from ... import Command
-from runtime.retrobox_paths import mkdir_if_not_exists
+from runtime.paths import mkdir_if_not_exists
 from ...controller import generate_sdl_game_controller_config
 from ...utils import videoMode
 from ..Generator import Generator

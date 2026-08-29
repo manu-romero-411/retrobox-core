@@ -1,6 +1,6 @@
 from typing import Final
 
-from runtime.retrobox_paths import EMULATORS, SAVES
+from runtime.paths import EMULATORS, SAVES
 
 
 _VITA3K_DIR: Final =  EMULATORS / 'vita3k'
