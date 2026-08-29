@@ -4,10 +4,10 @@
 ## FECHAS DE MODIFICACIÓN: Configurado para entorno Wine personalizado
 
 ## VARIABLES
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd -P)"
+RETROBOX_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. >/dev/null 2>&1 && pwd -P)"
 
 DOWNLOAD_URL="https://github.com/batocera-linux/model2emu/raw/refs/heads/main/m2emulator.zip"
-INSTALL_DIR="${SCRIPT_DIR}/model2emu"
+INSTALL_DIR="${RETROBOX_ROOT}/emulators/model2emu"
 EMU_DIR="$INSTALL_DIR/drive_c/model2emu"
 
 ## FUNCIONES

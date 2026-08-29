@@ -5,9 +5,9 @@ set -eo pipefail
 
 ## VARIABLES
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd -P)"
-INSTALL_DIR="${SCRIPT_DIR}/ares"
-SRC_DIR="${SCRIPT_DIR}/_src"
+RETROBOX_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. >/dev/null 2>&1 && pwd -P)"
+INSTALL_DIR="${RETROBOX_ROOT}/ares"
+SRC_DIR="${RETROBOX_ROOT}/_src"
 ARES_SRC="${SRC_DIR}/ares"
 LIBRASHADER_SRC="${SRC_DIR}/librashader"
 ARES_REPO="https://github.com/ares-emulator/ares.git"

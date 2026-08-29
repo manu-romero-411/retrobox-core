@@ -4,13 +4,13 @@
 set -o pipefail
 
 ## VARIABLES
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd -P)"
+RETROBOX_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. >/dev/null 2>&1 && pwd -P)"
 
 REPO_OWNER="projects"
 REPO_NAME="Ryubing"
 API_URL="https://git.ryujinx.app/api/v1/repos/${REPO_OWNER}/${REPO_NAME}/releases/latest"
 
-INSTALL_DIR="${SCRIPT_DIR}/ryujinx"
+INSTALL_DIR="${RETROBOX_ROOT}/emulators/ryujinx"
 TMP_DIR="$(mktemp -d)"
 
 ## FUNCIONES DE CONTROL

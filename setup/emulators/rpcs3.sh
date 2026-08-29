@@ -5,8 +5,8 @@ set -eo pipefail
 
 ## VARIABLES
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd -P)"
-INSTALL_DIR="${SCRIPT_DIR}/rpcs3"
+RETROBOX_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. >/dev/null 2>&1 && pwd -P)"
+INSTALL_DIR="${RETROBOX_ROOT}/emulators/rpcs3"
 TMP_DIR="$(mktemp -d)"
 REPO="RPCS3/rpcs3-binaries-linux"
 API_URL="https://api.github.com/repos/$REPO/releases"

@@ -5,10 +5,10 @@
 set -eo pipefail
 
 ## VARIABLES
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd -P)"
+RETROBOX_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. >/dev/null 2>&1 && pwd -P)"
 
 GITHUB_REPO="hrydgard/ppsspp"
-INSTALL_DIR="${SCRIPT_DIR}/ppsspp"
+INSTALL_DIR="${RETROBOX_ROOT}/emulators/ppsspp"
 TMP_DIR="$(mktemp -d)"
 
 ## FUNCIONES

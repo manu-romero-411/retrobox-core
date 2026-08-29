@@ -8,9 +8,9 @@ set -eo pipefail
 
 ## VARIABLES
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd -P)"
-INSTALL_DIR="${SCRIPT_DIR}/dolphin-emu"
-SRC_DIR="${SCRIPT_DIR}/_src"
+RETROBOX_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. >/dev/null 2>&1 && pwd -P)"
+INSTALL_DIR="${RETROBOX_ROOT}/emulators/dolphin-emu"
+SRC_DIR="${RETROBOX_ROOT}/emulators/_src"
 DOLPHIN_SRC="${SRC_DIR}/dolphin-emu"
 TMP_DIR="$(mktemp -d)"
 ARCH="$(uname -m)"

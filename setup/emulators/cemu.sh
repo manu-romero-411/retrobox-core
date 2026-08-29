@@ -4,9 +4,9 @@
 ## FECHAS DE MODIFICACIÓN: Creado con soporte para AppImage (x86_64) y Flatpak
 
 ## VARIABLES
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd -P)"
+RETROBOX_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. >/dev/null 2>&1 && pwd -P)"
 GITHUB_REPO="cemu-project/Cemu"
-APPIMAGE_DIR="${SCRIPT_DIR}/cemu"
+APPIMAGE_DIR="${RETROBOX_ROOT}/emulators/cemu"
 BIN_LINK="/usr/local/bin/cemu"
 
 ## FUNCIONES

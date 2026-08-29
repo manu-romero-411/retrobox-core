@@ -4,8 +4,8 @@
 set -o pipefail
 
 ## VARIABLES
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd -P)"
-INSTALL_DIR="${SCRIPT_DIR}/eden-emu"
+RETROBOX_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. >/dev/null 2>&1 && pwd -P)"
+INSTALL_DIR="${RETROBOX_ROOT}/emulators/eden-emu"
 TMP_DIR="$(mktemp -d)"
 REPO_OWNER="eden-emu"
 REPO_NAME="eden"
