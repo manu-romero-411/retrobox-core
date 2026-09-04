@@ -20,9 +20,9 @@ megadrive:
     libretro:
       cores:
         blastem: {}
-        genesisplusgx:
+        genesis_plus_gx:
           default: true
-        genesisplusgx-wide: {}
+        genesis_plus_gx-wide: {}
         picodrive: {}
     ares:
       cores:

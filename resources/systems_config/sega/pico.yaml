@@ -15,7 +15,7 @@ pico:
   emulators:
     libretro:
       cores:
-        genesisplusgx:
+        genesis_plus_gx:
           default: true
-        genesisplusgx-wide: {}
+        genesis_plus_gx-wide: {}
         picodrive: {}

@@ -1,5 +1,5 @@
 emulator_name: libretro
-core_name: genesisplusgx
+core_name: genesis_plus_gx
 features:
   - netplay
   - cheevos

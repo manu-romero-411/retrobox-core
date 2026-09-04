@@ -94,69 +94,6 @@ groups:
           value: ai_service_pause
           description: ""
           preset: switchauto
-      LATENCY REDUCTION:
-        - name: "RUN-AHEAD FRAMES"
-          value: runahead
-          description: "Enables run-ahead. Doubles CPU requirements. High numbers can result in visible jitter."
-          choices:
-            - name: None
-              value: 0
-            - name: 1
-              value: 1
-            - name: 2
-              value: 2
-            - name: 3
-              value: 3
-            - name: 4
-              value: 4
-            - name: 5
-              value: 5
-            - name: 6
-              value: 6
-        - name: "USE SECOND INSTANCE FOR RUN-AHEAD"
-          value: secondinstance
-          description: "Can prevent audio skips on button presses when using run-ahead."
-          choices:
-            - name: On
-              value: 1
-            - name: Off
-              value: 0
-        - name: "USE PRE-EMPTIVE FRAMES"
-          value: preemptiveframes
-          description: "Use preemptive frames instead of run-ahead. Only runs ahead when controller state changes."
-          choices:
-            - name: On
-              value: true
-            - name: Off
-              value: false
-        - name: AUTOMATIC FRAME DELAY
-          value: video_frame_delay_auto
-          description: Automatically decrease frame delay temporarily to prevent frame drops. Can introduce stuttering.
-          choices:
-            - name: On
-              value: 1
-            - name: Off
-              value: 0
-        - name: VARIABLE REFRESH RATE
-          value: vrr_runloop_enable
-          description: "Don't deviate from core requested timing. G-Sync, FreeSync, HDMI 2.1 VRR."
-          choices:
-            - name: On
-              value: 1
-            - name: Off
-              value: 0
-        - name: THREADED VIDEO
-          value: video_threaded
-          description: Improves performance at the cost of latency and more video stuttering.
-          choices:
-            - name: On
-              value: 1
-            - name: Off
-              value: 0
-        - name: VSYNC
-          value: use_vsync
-          description: Can cause conflict with KDE Plasma's Wayland compositor, but mitigates tearing on X11.
-          preset: switchauto
     items:
       - name: DISCORD RPC
         value: discordrpc
@@ -166,60 +103,6 @@ groups:
             value: 1
           - name: Off
             value: 0
-      - name: GAME ASPECT RATIO
-        value: ratio
-        description: Force the game to render in this aspect ratio. Not all systems support all ratios.
-        choices:
-          - name: 4/3
-            value: 4/3
-          - name: 16/9
-            value: 16/9
-          - name: Full
-            value: full
-          - name: 16/10
-            value: 16/10
-          - name: 16/15
-            value: 16/15
-          - name: 21/9
-            value: 21/9
-          - name: 1/1
-            value: 1/1
-          - name: 2/1
-            value: 2/1
-          - name: 3/2
-            value: 3/2
-          - name: 3/4
-            value: 3/4
-          - name: 4/1
-            value: 4/1
-          - name: 9/16
-            value: 9/16
-          - name: 5/4
-            value: 5/4
-          - name: 6/5
-            value: 6/5
-          - name: 7/9
-            value: 7/9
-          - name: 8/3
-            value: 8/3
-          - name: 8/7
-            value: 8/7
-          - name: 19/12
-            value: 19/12
-          - name: 19/14
-            value: 19/14
-          - name: 30/17
-            value: 30/17
-          - name: 32/9
-            value: 32/9
-          - name: Config
-            value: config
-          - name: Square pixel
-            value: squarepixel
-          - name: Core provided
-            value: core
-          - name: Custom
-            value: custom
       - name: REWIND
         value: rewind
         description: "Store past states to rewind to in realtime, if the core supports it."
@@ -236,22 +119,6 @@ groups:
             value: 1
           - name: Off
             value: 0
-      - name: RUMBLE LEVEL
-        value: rumble_gain
-        description: For emulators and controllers supporting force feedback.
-        choices:
-          - name: disabled
-            value: 1
-          - name: "20%"
-            value: 20
-          - name: "40%"
-            value: 40
-          - name: "60%"
-            value: 60
-          - name: "80%"
-            value: 80
-          - name: "100%"
-            value: 100
       - name: AUDIO VOLUME GAIN
         value: audio_volume
         description: Set game audio level gain in dB.

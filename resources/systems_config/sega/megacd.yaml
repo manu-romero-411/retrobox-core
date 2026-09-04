@@ -14,6 +14,6 @@ megacd:
   emulators:
     libretro:
       cores:
-        genesisplusgx:
+        genesis_plus_gx:
           default: true
         picodrive: {}

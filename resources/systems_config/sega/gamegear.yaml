@@ -15,7 +15,7 @@ gamegear:
     libretro:
       cores:
         gearsystem: {}
-        genesisplusgx:
+        genesis_plus_gx:
           default: true
         picodrive: {}
         smsplus: {}

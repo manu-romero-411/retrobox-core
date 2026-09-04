@@ -15,5 +15,5 @@ sg1000:
     libretro:
       cores:
         gearsystem: {}
-        genesisplusgx:
+        genesis_plus_gx:
           default: true
