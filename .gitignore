@@ -310,3 +310,6 @@ resources/hooks/retrohook.d/**
 *.gbc
 *.gb
 
+/bios_ld/
+/bios_ld/*
+!/bios/bios_core_overrides.yaml

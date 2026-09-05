@@ -9,8 +9,11 @@
 #   retrobox.sh --setup-emulator <name>      build a single emulator from
 #                                            source (repeatable)
 #   retrobox.sh --setup-emulator             list available emulators
+#   retrobox.sh --bios-check [system...]    check installed RetroArch BIOS
+#                                            files against what the cores
+#                                            need (all systems if none given)
 #
-# Both of the above are maintenance operations: they run and then exit,
+# All of the above are maintenance operations: they run and then exit,
 # they don't start the frontend afterwards. Any other argument is passed
 # through to runtime/startup/retrobox_run.py untouched.
 set -eo pipefail
@@ -21,6 +24,8 @@ RUN_SCRIPT="${RETROBOX_ROOTDIR}/runtime/startup/retrobox_run.py"
 
 # shellcheck source=setup/setup.sh
 source "${SETUP_DIR}/setup.sh"
+# shellcheck source=setup/bios-check.sh
+source "${SETUP_DIR}/bios-check.sh"
 
 function usage() {
     cat <<EOF
@@ -34,6 +39,10 @@ Usage: $(basename "${BASH_SOURCE[0]}") [OPTIONS] [-- ARGS...]
                                repeated to install several at once. Called
                                with no name, lists every installer available
                                under setup/emulators/.
+  --bios-check [system...]    Check installed RetroArch BIOS files under
+                               bios/<system>/ against what each system's
+                               cores require. With no system given, checks
+                               everything defined in resources/systems_config.
   -h, --help                  Show this help and exit.
 
 With no options, Retrobox runs the platform setup automatically the first
@@ -43,7 +52,9 @@ EOF
 }
 
 force_setup=0
+do_bios_check=0
 declare -a emulators_to_setup=()
+declare -a bios_check_systems=()
 declare -a frontend_args=()
 
 while [[ $# -gt 0 ]]; do
@@ -59,6 +70,14 @@ while [[ $# -gt 0 ]]; do
             fi
             emulators_to_setup+=("$2")
             shift 2
+            ;;
+        --bios-check)
+            do_bios_check=1
+            shift
+            while [[ -n "${1:-}" && "${1:0:1}" != "-" ]]; do
+                bios_check_systems+=("$1")
+                shift
+            done
             ;;
         -h|--help)
             usage
@@ -89,6 +108,13 @@ if [[ "${#emulators_to_setup[@]}" -gt 0 ]]; then
     for name in "${emulators_to_setup[@]}"; do
         setup_emulator "${name}" || status=1
     done
+    did_maintenance=1
+    [[ "${status}" -eq 0 ]] || exit "${status}"
+fi
+
+if [[ "${do_bios_check}" -eq 1 ]]; then
+    bios_check "${bios_check_systems[@]}"
+    status=$?
     did_maintenance=1
     [[ "${status}" -eq 0 ]] || exit "${status}"
 fi
