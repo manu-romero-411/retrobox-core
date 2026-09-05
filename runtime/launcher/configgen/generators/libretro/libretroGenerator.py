@@ -76,7 +76,7 @@ class LibretroGenerator(Generator):
 
             lightgun = system.config.get_bool('lightgun_map') if 'lightgun_map' in system.config else True
             libretroControllers.writeControllersConfig(retroconfig, system, playersControllers, lightgun)
-            libretroConfig.writeLibretroConfigToFile(retroconfig, libretroConfig.rarch_custom_paths())
+            libretroConfig.writeLibretroConfigToFile(retroconfig, libretroConfig.rarch_custom_paths(system))
 
             bezel = system.config.get('bezel') or None
             if system.config.get_bool('force_no_bezel'):

@@ -142,9 +142,13 @@ def open_unix_settings(path: Path, /) -> UnixSettings:
         return UnixSettings(path, separator=' ')
 
 
-def rarch_custom_paths() -> dict[str, str]:
+def rarch_custom_paths(system: Emulator) -> dict[str, str]:
     """Rutas fijas de retroarch.cfg. Función pura: quien la llama decide
     dónde y cuándo aplicarla (ver LibretroGenerator.generate)."""
+    
+    mkdir_if_not_exists(BIOS / system.name)
+    mkdir_if_not_exists(SAVES / system.name)
+    
     return {
         'core_options_path': f'"{_RETROARCH_CFGDIR}/cores/retroarch-core-options.cfg"',
         'assets_directory': f'"{RETROARCH_ASSETS}"',
@@ -153,7 +157,7 @@ def rarch_custom_paths() -> dict[str, str]:
         'extraction_directory': f'"{_RETROARCH_SHARE}/extractions/"',
         'cheat_database_path': f'"{CHEATS}/cht/"',
         'cheat_settings_path': f'"{CHEATS}/saves/"',
-        'system_directory': f'"{BIOS}/"',
+        'system_directory': f'"{BIOS}/{system.name}"',
         'joypad_autoconfig_dir': f'"{_RETROARCH_CFGDIR}/autoconfig/"',
         'video_shader_dir': f'"{RETROARCH_SHADERS}/"',
         'video_font_path': '"/usr/share/fonts/liberation-mono-fonts/LiberationMono-Regular.ttf"',

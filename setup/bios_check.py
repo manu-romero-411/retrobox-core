@@ -8,14 +8,18 @@ Fuentes de información:
         Define qué cores de libretro usa cada sistema.
   - emulators/retroarch/app/share/retroarch/cores/<core>_libretro.info
         Define qué ficheros de firmware necesita cada core (firmwareN_path,
-        firmwareN_opt, firmwareN_desc).
+        firmwareN_opt, firmwareN_desc). Se usa como base cuando el core no
+        tiene entrada en el override.
   - setup/bios_core_overrides.yaml (opcional)
-        Para cores que sirven a varios sistemas a la vez (p.ej.
-        genesis_plus_gx: Mega Drive + Master System + Game Gear + Mega-CD),
-        el .info trae TODAS las firmware mezcladas. Este fichero permite
-        indicar a mano qué ficheros de firmware corresponden a cada sistema
-        para ese core. Si un core es ambiguo (usado por >1 sistema) y no
-        tiene entrada aquí, se avisa y se hace un best-effort.
+        Lista, a mano, exactamente qué ficheros hacen falta para un
+        (core, sistema) dado. Si un core aparece aquí para un sistema, esa
+        lista SUSTITUYE por completo lo derivado del .info para ese
+        sistema — todo lo que pongas se trata como necesario, sin concepto
+        de "opcional". Útil tanto para cores que sirven a varios sistemas
+        a la vez (p.ej. genesis_plus_gx: Mega Drive + Master System + Game
+        Gear + Mega-CD, cuyo .info mezcla toda la firmware) como para
+        cores con ficheros que ni siquiera aparecen en su .info (p.ej.
+        pcsx2 necesita también patches.zip, que no está declarado ahí).
 
 Uso:
   bios_check.py                  # comprueba todos los sistemas
@@ -48,6 +52,22 @@ OVERRIDES_FILE = os.path.join(
 
 INFO_LINE_RE = re.compile(r'^\s*([A-Za-z0-9_]+)\s*=\s*"?([^"\n]*)"?\s*$')
 
+FOLDER_HINT_RE = re.compile(r"\bfolder\b|\bdirectory\b|\bdirectorio\b|\bcarpeta\b", re.I)
+
+
+def guess_kind(path, desc):
+    """
+    Algunos cores declaran como 'firmware' lo que en realidad es una carpeta
+    entera (p.ej. pcsx2: firmware*_desc = "'pcsx2/bios' folder"). El .info
+    no tiene un campo estructurado para esto, así que lo detectamos por
+    texto en la descripción (o porque la ruta termina en "/").
+    """
+    if FOLDER_HINT_RE.search(desc or ""):
+        return "dir"
+    if path.endswith("/"):
+        return "dir"
+    return "file"
+
 
 def log(msg):
     print(msg)
@@ -59,10 +79,18 @@ def load_yaml(path):
 
 
 def load_overrides():
+    """
+    Returns: core -> system -> list[str filename]
+
+    Formato plano, idéntico para cualquier core: si (core, system) aparece
+    aquí, esa lista sustituye por completo lo que se comprobaría para ese
+    core en ese sistema (tanto si el core es de un solo sistema, como
+    pcsx2, como si es multi-sistema, como genesis_plus_gx). No hay
+    "opcional": todo lo listado se trata como necesario.
+    """
     if not os.path.isfile(OVERRIDES_FILE):
         return {}
     data = load_yaml(OVERRIDES_FILE) or {}
-    # Normalize: core -> system -> list[str]
     return {
         core: {system: list(files or []) for system, files in systems.items()}
         for core, systems in data.items()
@@ -118,8 +146,8 @@ def discover_systems():
 
 def parse_core_info(core_name):
     """
-    Returns list of firmware dicts [{index, path, desc, optional}], or None
-    if the .info file doesn't exist (core not built/installed).
+    Returns list of firmware dicts [{index, path, desc, optional, kind}],
+    or None if the .info file doesn't exist (core not built/installed).
     """
     info_path = os.path.join(CORES_INFO_DIR, f"{core_name}_libretro.info")
     if not os.path.isfile(info_path):
@@ -145,12 +173,14 @@ def parse_core_info(core_name):
         path = kv.get(f"firmware{i}_path")
         if not path:
             continue
+        desc = kv.get(f"firmware{i}_desc", "")
         firmware.append(
             {
                 "index": i,
                 "path": path,
-                "desc": kv.get(f"firmware{i}_desc", ""),
+                "desc": desc,
                 "optional": kv.get(f"firmware{i}_opt", "false").lower() == "true",
+                "kind": guess_kind(path, desc),
             }
         )
     return firmware
@@ -167,36 +197,80 @@ def build_core_usage(systems):
 
 def resolve_wanted_firmware(core_name, system_key, all_firmware, core_usage, overrides):
     """
-    Decide qué entradas de firmware (de all_firmware) aplican a este sistema
-    para este core. Devuelve (wanted_list, status) donde status es uno de:
-    'single-system', 'override', 'ambiguous'.
+    Decide qué ficheros hacen falta para este (core, system). Devuelve
+    (wanted_list, status) donde status es uno de:
+      'override'       -> había entrada en bios_core_overrides.yaml, se usa
+                           tal cual (sustituye lo derivado del .info).
+      'single-system'   -> sin override, pero el core solo lo usa este
+                           sistema, así que se usan todas sus firmware.
+      'ambiguous'       -> sin override y el core lo usan varios sistemas;
+                           best-effort mostrando todas las firmware conocidas.
+    all_firmware puede ser None si el core no está instalado (no existe su
+    .info); en ese caso solo puede resolverse vía override.
     """
-    used_by = core_usage.get(core_name, {system_key})
-
-    if len(used_by) <= 1:
-        return all_firmware, "single-system"
-
     core_overrides = overrides.get(core_name, {})
+
     if system_key in core_overrides:
-        wanted_paths = set(core_overrides[system_key])
-        by_path = {fw["path"]: fw for fw in all_firmware}
+        wanted_paths = core_overrides[system_key]
+        by_path = {fw["path"]: fw for fw in (all_firmware or [])}
         wanted = []
         for p in wanted_paths:
             if p in by_path:
                 wanted.append(by_path[p])
             else:
-                # El override menciona un fichero que ya no aparece en el
-                # .info actual del core (puede haber cambiado de versión).
+                # El override menciona un fichero que no aparece en el
+                # .info del core (o el core ni está instalado): lo
+                # comprobamos igualmente como entrada "manual".
                 wanted.append(
-                    {"index": -1, "path": p, "desc": "(definido en override)", "optional": False}
+                    {
+                        "index": -1,
+                        "path": p,
+                        "desc": "",
+                        "optional": False,
+                        "kind": guess_kind(p, ""),
+                    }
                 )
         return wanted, "override"
+
+    if all_firmware is None:
+        return [], "single-system"
+
+    used_by = core_usage.get(core_name, {system_key})
+    if len(used_by) <= 1:
+        return all_firmware, "single-system"
 
     return all_firmware, "ambiguous"
 
 
-def check_bios_file(system_key, filename):
-    return os.path.isfile(os.path.join(BIOS_DIR, system_key, filename))
+def check_bios_path(system_key, entry):
+    """
+    Comprueba la entrada (fichero o carpeta) bajo bios/<system_key>/.
+    Devuelve una tupla (status, detail):
+      status: 'ok_file' | 'ok_dir' | 'empty_dir' | 'missing'
+      detail: nº de ficheros dentro, si es carpeta; si no, None.
+    Trata una carpeta vacía como si faltara: una carpeta 'bios' vacía no
+    sirve de nada, y así evitamos falsos "OK".
+    """
+    full_path = os.path.join(BIOS_DIR, system_key, entry["path"])
+    kind = entry.get("kind") or "file"
+
+    if kind == "dir":
+        if not os.path.isdir(full_path):
+            return "missing", None
+        try:
+            contents = [f for f in os.listdir(full_path) if not f.startswith(".")]
+        except OSError:
+            contents = []
+        if not contents:
+            return "empty_dir", 0
+        return "ok_dir", len(contents)
+
+    # kind == "file": si por lo que sea existe como carpeta en vez de
+    # fichero, lo tratamos igualmente como no válido (missing), en vez de
+    # reventar más adelante.
+    if os.path.isfile(full_path):
+        return "ok_file", None
+    return "missing", None
 
 
 def run_check(system_filter=None):
@@ -217,7 +291,6 @@ def run_check(system_filter=None):
         target_systems = systems
 
     missing_required = 0
-    missing_optional = 0
     ambiguous_cores = set()
     cores_not_built = set()
 
@@ -226,22 +299,36 @@ def run_check(system_filter=None):
         if not info["cores"]:
             continue
 
-        log(f"\n=== {info['fullname']} ({system_key}) ===")
+        printed_header = False
+
+        def ensure_header():
+            nonlocal printed_header
+            if not printed_header:
+                log(f"\n=== {info['fullname']} ({system_key}) ===")
+                printed_header = True
 
         for core in info["cores"]:
             all_firmware = parse_core_info(core)
-            if all_firmware is None:
+
+            if all_firmware is None and core not in overrides:
                 cores_not_built.add(core)
+                ensure_header()
                 log(f"  [SKIP] core '{core}' no está instalado/compilado "
                     f"(no existe {core}_libretro.info)")
                 continue
 
-            if not all_firmware:
-                continue  # este core no necesita firmware
-
             wanted, status = resolve_wanted_firmware(
                 core, system_key, all_firmware, core_usage, overrides
             )
+
+            if not wanted:
+                continue
+
+            ensure_header()
+
+            if all_firmware is None:
+                log(f"  [NOTA] core '{core}' no está instalado, pero tiene "
+                    f"override definido; se comprueba igualmente.")
 
             if status == "ambiguous":
                 ambiguous_cores.add(core)
@@ -252,20 +339,35 @@ def run_check(system_filter=None):
                     f"falsos positivos de otros sistemas).")
 
             for fw in wanted:
-                exists = check_bios_file(system_key, fw["path"])
-                if exists:
+                status_check, detail = check_bios_path(system_key, fw)
+
+                if status_check == "ok_file":
                     log(f"  [OK]      {core}: {fw['path']}")
                     continue
-                if fw["optional"]:
-                    missing_optional += 1
-                    log(f"  [MISSING] {core}: {fw['path']} (opcional) — {fw['desc']}")
+                if status_check == "ok_dir":
+                    shown = fw['path'] if fw['path'].endswith('/') else fw['path'] + '/'
+                    log(f"  [OK]      {core}: {shown} (carpeta, {detail} ficheros)")
+                    continue
+
+                if status_check == "empty_dir":
+                    note = "carpeta vacía"
+                else:
+                    note = "carpeta ausente" if fw.get("kind") == "dir" else "ausente"
+
+                suffix = f" — {fw['desc']}" if fw.get("desc") else ""
+
+                # El único caso en que algo puede quedar como "opcional" es
+                # cuando NO hay override y se usa tal cual lo que declara el
+                # .info del core (firmwareN_opt). En cuanto hay override
+                # para ese (core, system), todo es requerido.
+                if status != "override" and fw.get("optional"):
+                    log(f"  [MISSING] {core}: {fw['path']} ({note}, opcional){suffix}")
                 else:
                     missing_required += 1
-                    log(f"  [MISSING] {core}: {fw['path']} (REQUERIDA) — {fw['desc']}")
+                    log(f"  [MISSING] {core}: {fw['path']} ({note}, REQUERIDA){suffix}")
 
     log("\n" + "=" * 60)
-    log(f"Resumen: {missing_required} BIOS requeridas ausentes, "
-        f"{missing_optional} opcionales ausentes.")
+    log(f"Resumen: {missing_required} BIOS requeridas ausentes.")
     if ambiguous_cores:
         log(f"Cores ambiguos sin override ({len(ambiguous_cores)}): "
             f"{', '.join(sorted(ambiguous_cores))}")

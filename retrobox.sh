@@ -12,6 +12,15 @@
 #   retrobox.sh --bios-check [system...]    check installed RetroArch BIOS
 #                                            files against what the cores
 #                                            need (all systems if none given)
+#   retrobox.sh --bios-fetch [opts] [system...]
+#                                            download missing BIOS files for
+#                                            the given systems straight from
+#                                            the RetroBIOS project, one file
+#                                            at a time (no full repo clone).
+#                                            Run '--bios-fetch --list' for
+#                                            available systems, or
+#                                            '--bios-fetch --dry-run <system>'
+#                                            to preview without downloading.
 #
 # All of the above are maintenance operations: they run and then exit,
 # they don't start the frontend afterwards. Any other argument is passed
@@ -26,6 +35,8 @@ RUN_SCRIPT="${RETROBOX_ROOTDIR}/runtime/startup/retrobox_run.py"
 source "${SETUP_DIR}/setup.sh"
 # shellcheck source=setup/bios-check.sh
 source "${SETUP_DIR}/bios-check.sh"
+# shellcheck source=setup/bios-fetch.sh
+source "${SETUP_DIR}/bios-fetch.sh"
 
 function usage() {
     cat <<EOF
@@ -43,6 +54,16 @@ Usage: $(basename "${BASH_SOURCE[0]}") [OPTIONS] [-- ARGS...]
                                bios/<system>/ against what each system's
                                cores require. With no system given, checks
                                everything defined in resources/systems_config.
+  --bios-fetch [opts] [system...]
+                               Download BIOS files for the given system(s)
+                               (Batocera native_id, e.g. psx, gba, dreamcast,
+                               neocd) straight from the RetroBIOS project
+                               (github.com/Abdess/retrobios), one file at a
+                               time, verifying checksums. Everything after
+                               --bios-fetch is forwarded as-is; run
+                               '--bios-fetch --list' to see available
+                               systems, or '--bios-fetch --dry-run <system>'
+                               to preview without downloading.
   -h, --help                  Show this help and exit.
 
 With no options, Retrobox runs the platform setup automatically the first
@@ -53,8 +74,10 @@ EOF
 
 force_setup=0
 do_bios_check=0
+do_bios_fetch=0
 declare -a emulators_to_setup=()
 declare -a bios_check_systems=()
+declare -a bios_fetch_args=()
 declare -a frontend_args=()
 
 while [[ $# -gt 0 ]]; do
@@ -78,6 +101,15 @@ while [[ $# -gt 0 ]]; do
                 bios_check_systems+=("$1")
                 shift
             done
+            ;;
+        --bios-fetch)
+            do_bios_fetch=1
+            shift
+            # Everything from here on belongs to bios_fetch.py (it has its
+            # own flags like --list/--all/--dry-run/--force/--refresh mixed
+            # with system names), so just forward the rest of argv as-is.
+            bios_fetch_args=("$@")
+            break
             ;;
         -h|--help)
             usage
@@ -114,6 +146,13 @@ fi
 
 if [[ "${do_bios_check}" -eq 1 ]]; then
     bios_check "${bios_check_systems[@]}"
+    status=$?
+    did_maintenance=1
+    [[ "${status}" -eq 0 ]] || exit "${status}"
+fi
+
+if [[ "${do_bios_fetch}" -eq 1 ]]; then
+    bios_fetch "${bios_fetch_args[@]}"
     status=$?
     did_maintenance=1
     [[ "${status}" -eq 0 ]] || exit "${status}"
