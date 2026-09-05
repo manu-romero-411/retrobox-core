@@ -157,7 +157,7 @@ def rarch_custom_paths(system: Emulator) -> dict[str, str]:
         'extraction_directory': f'"{_RETROARCH_SHARE}/extractions/"',
         'cheat_database_path': f'"{CHEATS}/cht/"',
         'cheat_settings_path': f'"{CHEATS}/saves/"',
-        'system_directory': f'"{BIOS}/{system.name}"',
+        'system_directory': f'"{BIOS}/"',
         'joypad_autoconfig_dir': f'"{_RETROARCH_CFGDIR}/autoconfig/"',
         'video_shader_dir': f'"{RETROARCH_SHADERS}/"',
         'video_font_path': '"/usr/share/fonts/liberation-mono-fonts/LiberationMono-Regular.ttf"',
