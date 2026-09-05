@@ -46,6 +46,7 @@ class AmiberryGenerator(Generator):
     def generate(self, system, rom, playersControllers, metadata, guns, wheels, gameResolution):
         mkdir_if_not_exists(_RETROARCH_CUSTOM.parent)
         mkdir_if_not_exists(_AMIBERRY_PLUGINS)
+        mkdir_if_not_exists(_BIOS_DIR)
 
         retroconfig = UnixSettings(_RETROARCH_CUSTOM, separator=' ')
         amiberryconf = UnixSettings(_CONFIG, separator=' ')
