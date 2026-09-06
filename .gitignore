@@ -220,23 +220,23 @@ __marimo__/
 .streamlit/secrets.toml
 
 # otros directorios y archivos
-frontend/emulationstation*
-frontend/.emulationstation/music/
-frontend/.emulationstation/music/*
-frontend/.emulationstation/tmp/
-frontend/.emulationstation/tmp/*
-frontend/.emulationstation/resources/
-frontend/.emulationstation/resources/*
-frontend/.emulationstation/recovery/
-frontend/.emulationstation/recovery/*
-frontend/.emulationstation/music/*
-frontend/.emulationstation/es_log.*
-frontend/.emulationstation/es_settings.*
-frontend/.emulationstation/es_*input*
-frontend/.emulationstation/es_systems*.*
-frontend/.emulationstation/es_features*.*
-bios/
-bios/*
+/frontend/emulationstation*
+/frontend/.emulationstation/music/
+/frontend/.emulationstation/music/*
+/frontend/.emulationstation/tmp/
+/frontend/.emulationstation/tmp/*
+/frontend/.emulationstation/resources/
+/frontend/.emulationstation/resources/*
+/frontend/.emulationstation/recovery/
+/frontend/.emulationstation/recovery/*
+/frontend/.emulationstation/music/*
+/frontend/.emulationstation/es_log.*
+/frontend/.emulationstation/es_settings.*
+/frontend/.emulationstation/es_*input*
+/frontend/.emulationstation/es_systems*.*
+/frontend/.emulationstation/es_features*.*
+/bios/
+/bios/*
 cheats/
 cheats/*
 decorations/
@@ -256,8 +256,6 @@ frontend/themes/
 frontend/emulationstation
 logs/
 logs/*
-music/
-music/*
 resources/alsa/
 resources/alsa/*
 resources/datainit/
@@ -306,7 +304,8 @@ resources/hooks/retrohook.d/**
 # Allow the decorations submodule
 !resources/decorations/
 
-
+/setup/.packages/
+/setup/.packages/*
 *.gbc
 *.gb
 
