@@ -1,47 +1,17 @@
 emulator_name: pcsx2
 core_name: pcsx2
-features:
-  - cheevos
 sharedFeatures:
-  - power_profile
-  - tdp
-  - videomode
-  - bezel
-  - bezel_stretch
-  - hud
-  - hud_corner
-  - bezel.tattoo
-  - bezel.tattoo_corner
-  - bezel.tattoo_file
-  - bezel.resize_tattoo
   - use_guns
   - use_wheels
   - wheel_rotation
   - wheel_deadzone
   - wheel_midzone
   - discordrpc
+  - autosave
 groups:
   GENERAL:
     submenus:
       RENDERING:
-        - name: SHADER SET
-          value: pcsx2_shaderset
-          description: None
-          choices:
-            - name: scanlines
-              value: 1
-            - name: diagonal filter
-              value: 2
-            - name: triangular filter
-              value: 3
-            - name: wave filter
-              value: 4
-            - name: lottes crt
-              value: 5
-            - name: 4xrgss
-              value: 6
-            - name: nxagss
-              value: 7
         - name: GRAPHICS API
           value: pcsx2_gfxbackend
           description: Choose which graphics API library to use.
@@ -86,153 +56,7 @@ groups:
               value: 7
             - name: 8x Native (~2880p/5K)
               value: 8
-        - name: MIPMAPPING
-          value: pcsx2_mipmapping
-          description: Choose mipmapping type.
-          choices:
-            - name: Off
-              value: 0
-            - name: Basic (generated Mipmaps)
-              value: 1
-            - name: Full (PS2 Mipmaps)
-              value: 2
-        - name: TEXTURE FILTERING
-          value: pcsx2_texture_filtering
-          description: Control the texture filtering of the emulation.
-          choices:
-            - name: Nearest
-              value: 0
-            - name: Bilinear (Forced)
-              value: 1
-            - name: Bilinear (PS2)
-              value: 2
-            - name: Bilinear (Forced excluding sprite)
-              value: 3
-        - name: TRILINEAR FILTERING
-          value: pcsx2_trilinear_filtering
-          description: Control the texture's trilinear filtering of the emulation.
-          choices:
-            - name: Off (None)
-              value: 0
-            - name: Trilinear (PS2)
-              value: 1
-            - name: Trilinear (Forced)
-              value: 2
-        - name: ANISOTROPIC FILTERING
-          value: pcsx2_anisotropic_filtering
-          description: Improves clarity of distant textures.
-          choices:
-            - name: Off
-              value: 0
-            - name: 2x
-              value: 2
-            - name: 4x
-              value: 4
-            - name: 8x
-              value: 8
-            - name: 16x
-              value: 16
-        - name: DITHERING
-          value: pcsx2_dithering
-          description: Reduces banding between colours and improves the preceived colour depth.
-          choices:
-            - name: Off
-              value: 0
-            - name: Unscaled (Default)
-              value: 1
-            - name: Scaled
-              value: 2
-            - name: Force 32bit
-              value: 3
-        - name: BLENDING ACCURACY
-          value: pcsx2_blending
-          description: "The higher the setting, the more blending is emulated in the shader accurately, and the higher the speed penalty will be."
-          choices:
-            - name: Minimum
-              value: 0
-            - name: Basic (Recommended)
-              value: 1
-            - name: Medium
-              value: 2
-            - name: High
-              value: 3
-            - name: Full (Slow)
-              value: 4
-            - name: Maximum (Very Slow)
-              value: 5
-        - name: TEXTURE PRELOADING
-          value: pcsx2_texture_loading
-          description: Uploads entire textures at once instead of small pieces. Improves performance in most games.
-          choices:
-            - name: None
-              value: 0
-            - name: Partial
-              value: 1
-            - name: Full (Hash Cache)
-              value: 2
-        - name: FXAA
-          value: pcsx2_fxaa
-          description: "Applies the FXAA anti-aliasing algorithm to improve the visual quality of games."
-          choices:
-            - name: Disabled
-              value: false
-            - name: Enabled
-              value: true
       DISPLAY:
-        - name: OSD MESSAGES
-          value: pcsx2_osd_messages
-          description: "Display on screen information like savestate, config warning etc..."
-          choices:
-            - name: Enabled (Default)
-              value: true
-            - name: Disabled
-              value: false
-        - name: OSD MESSAGES POSITION
-          value: pcsx2_osd_messages_position
-          description: "Choose the on-screen position for system messages."
-          choices:
-            - name: Top Left
-              value: 1
-            - name: Top Center (Default)
-              value: 2
-            - name: Top Right
-              value: 3
-            - name: Center Left
-              value: 4
-            - name: Center
-              value: 5
-            - name: Center Right
-              value: 6
-            - name: Bottom Left
-              value: 7
-            - name: Bottom Center
-              value: 8
-            - name: Bottom Right
-              value: 9
-        - name: OSD PERFORMANCE POSITION
-          value: pcsx2_osd_performance_position
-          description: "Choose the on-screen position for performance metrics (FPS, CPU usage, etc.)."
-          choices:
-            - name: None (Default)
-              value: 0
-            - name: Top Left
-              value: 1
-            - name: Top Center
-              value: 2
-            - name: Top Right
-              value: 3
-            - name: Center Left
-              value: 4
-            - name: Center
-              value: 5
-            - name: Center Right
-              value: 6
-            - name: Bottom Left
-              value: 7
-            - name: Bottom Center
-              value: 8
-            - name: Bottom Right
-              value: 9
         - name: GAME ASPECT RATIO
           value: pcsx2_ratio
           description: Force the game to render in this aspect ratio. Not all systems support all ratios.
@@ -257,70 +81,6 @@ groups:
               value: "4:3"
             - name: "Widescreen (16:9)"
               value: "16:9"
-        - name: DEINTERLACING
-          value: pcsx2_deinterlacing
-          description: FMV movie deinterlacing.
-          choices:
-            - name: None
-              value: 1
-            - name: Weave (Top Field First)
-              value: 2
-            - name: Weave (Bottom Field First)
-              value: 3
-            - name: Bob (Top Field First)
-              value: 4
-            - name: Bob (Bottom Field First)
-              value: 5
-            - name: Blend (Top Field First)
-              value: 6
-            - name: Blend (Bottom Field First)
-              value: 7
-            - name: Adaptive (Top Field First)
-              value: 8
-            - name: Adaptive (Bottom Field First)
-              value: 9
-        - name: BILINEAR FILTERING
-          value: pcsx2_bilinear_filtering
-          description: Smooths the overall picture as it is displayed on the screen. Corrects positioning between pixels.
-          choices:
-            - name: None
-              value: 0
-            - name: Bilinear (Smooth)
-              value: 1
-            - name: Bilinear (Sharp)
-              value: 2
-        - name: ENABLE WIDESCREEN PATCHES
-          value: pcsx2_EnableWideScreenPatches
-          description: Enhancement. Only works with a 16/9 ratio and bezels disabled.
-          choices:
-            - name: Disabled
-              value: false
-            - name: Enabled
-              value: true
-        - name: "ANTI-BLUR"
-          value: pcsx2_blur
-          description: Enable to improve bluriness.
-          choices:
-            - name: Disabled
-              value: false
-            - name: Enabled
-              value: true
-        - name: VSYNC
-          value: use_vsync
-          description: Fix screen tearing. CPU heavy.
-          choices:
-            - name: Disabled
-              value: 0
-            - name: Enabled
-              value: 1
-        - name: INTERLACING PATCHES
-          value: pcsx2_interlacing_patches
-          description: "Enable No-interlacing Patches."
-          choices:
-            - name: Disabled
-              value: false
-            - name: Enabled
-              value: true
         - name: INTEGER SCALING
           value: pcsx2_scaling
           description: Can sharpen images in lower resolutions.
@@ -338,14 +98,6 @@ groups:
             value: 0
           - name: Show (specific games)
             value: 1
-      - name: CHEATS
-        value: pcsx2_cheats
-        description: Automatically loads and applies cheats on game start.
-        choices:
-          - name: Disabled
-            value: false
-          - name: Enabled
-            value: true
       - name: MULTITAP
         value: pcsx2_multitap
         description: Allows up to 8 controllers in supported games.
@@ -379,14 +131,6 @@ groups:
             value: ps3_ps2_emu_bios.bin
   ADVANCED OPTIONS:
     items:
-      - name: TEXTURE REPLACEMENTS
-        value: pcsx2_texture_replacements
-        description: Allows user replaceable textures.
-        choices:
-          - name: Off
-            value: false
-          - name: On
-            value: true
       - name: TIME CRISIS FOG HACK
         value: pcsx2_crisis_fog
         description: "Necessary for some guns to replace fog textures as a workaround in Time Crisis - Crisis Zone."
