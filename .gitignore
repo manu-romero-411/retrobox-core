@@ -235,6 +235,9 @@ __marimo__/
 /frontend/.emulationstation/es_*input*
 /frontend/.emulationstation/es_systems*.*
 /frontend/.emulationstation/es_features*.*
+/frontend/music/
+/frontend/music/*
+.retrobox_emulationstation.version
 /bios/
 /bios/*
 cheats/

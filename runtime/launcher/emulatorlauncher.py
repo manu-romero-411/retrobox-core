@@ -231,7 +231,7 @@ def start_rom(args: argparse.Namespace, maxnbplayers: int, rom: Path, original_r
                         or hud_bezel is not None:
                             cmd.env["MANGOHUD"] = "1"
                             cmd.env["MANGOHUD_DLSYM"] = "1"
-                            cmd.env["MANGOHUD_CONFIGFILE"] = HUD_CONFIG_FILE
+                            cmd.env["MANGOHUD_CONFIGFILE"] = str(HUD_CONFIG_FILE)
 
                             hudconfig = getHudConfig(
                                 system, args.systemname, system.config.emulator,
@@ -539,7 +539,7 @@ def getHudConfig(system: Emulator, systemName: str, emulator: str, core: str, ro
 
     # predefined values
     if mode == "perf":
-        configstr += f"position={hud_position}\nbackground_alpha=0.4\nlegacy_layout=false\ncustom_text=%GAMENAME%\ncustom_text=%SYSTEMNAME%\ncustom_text=%EMULATORCORE%\nfps\ngpu_name\nengine_version\nvulkan_driver\nresolution\nram\ngpu_stats\ngpu_temp\ncpu_stats\ncpu_temp\ncore_load"
+        configstr += f"position={hud_position}\nbackground_alpha=0.4\nlegacy_layout=false\ncustom_text=%GAMENAME%\ncustom_text=%SYSTEMNAME%\ncustom_text=%EMULATORCORE%\nfps\ngpu_name\nengine_version\nvulkan_driver\nresolution\nram\ngpu_stats\ngpu_temp\ncpu_stats\ncpu_temp\ncore_load\n"
     elif mode == "game":
         configstr += f"position={hud_position}\nbackground_alpha=0\nlegacy_layout=false\nfont_size=32\nimage_max_width=200\nimage=%THUMBNAIL%\ncustom_text=%GAMENAME%\ncustom_text=%SYSTEMNAME%\ncustom_text=%EMULATORCORE%"
     elif mode == "custom" and (hud_custom := system.config.get_str('hud_custom')):
