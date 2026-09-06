@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 
 from ...exceptions import RetroboxException
 from ...utils.configparser import CaseSensitiveConfigParser
-from .dolphinPaths import _DOLPHIN_CFGDIR
+from .dolphin_paths import _DOLPHIN_CFGDIR
 
 if TYPE_CHECKING:
     from collections.abc import Mapping

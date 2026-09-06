@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, BinaryIO
 from ...utils.configparser import CaseSensitiveConfigParser
 from ...utils import vulkan
 from runtime.paths import BIOS, ROMS, SAVES, mkdir_if_not_exists
-from .dolphinPaths import (
+from .dolphin_paths import (
     _DOLPHIN_CFGDIR,
     _DOLPHIN_GC_CARD_A,
     _DOLPHIN_GC_CARD_B,

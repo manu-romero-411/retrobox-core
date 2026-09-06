@@ -1,9 +1,6 @@
 emulator_name: dolphin
 core_name: dolphin
-features:
-  - cheevos
 sharedFeatures:
-  - power_profile
   - tdp
   - videomode
   - bezel
@@ -35,14 +32,6 @@ groups:
               value: 2
             - name: Stretch to window
               value: 3
-        - name: VSYNC
-          value: vsync
-          description: Fix screen tearing. CPU heavy.
-          preset: switchauto
-        - name: "SHOW ON-SCREEN DISPLAY MESSAGES"
-          value: ShowDpMsg
-          description: Show on screen display messages (memory card saves..).
-          preset: switchauto
       RENDERING:
         - name: GRAPHICS API
           value: gfxbackend
@@ -72,89 +61,6 @@ groups:
               value: 7
             - name: 8x 5K (5120x4224)
               value: 8
-        - name: UBERSHADERS
-          value: ubershaders
-          description: "May not work well on all hardware. Hybrid is preferred, where supported."
-          choices:
-            - name: No Ubershaders
-              value: 0
-            - name: Exclusive Ubershaders
-              value: 1
-            - name: Hybrid Ubershaders
-              value: 2
-            - name: Skip Drawing
-              value: 3
-        - name: "PRE-CACHE SHADERS"
-          value: wait_for_shaders
-          description: "Compile shaders on next launch of game (one time). Reduces micro-freezes. Vulkan only."
-          preset: switchauto
-        - name: ANISOTROPIC FILTERING
-          value: anisotropic_filtering
-          description: Improves clarity of distant textures.
-          choices:
-            - name: Off
-              value: 0
-            - name: 2x
-              value: 1
-            - name: 4x
-              value: 2
-            - name: 8x
-              value: 3
-            - name: 16x
-              value: 4
-        - name: "ANTI-ALIASING"
-          value: antialiasing
-          description: Enhancement. Smooth out jagged edges on 3D object polygons.
-          choices:
-            - name: Off
-              value: 0
-            - name: 2x
-              value: 2
-            - name: 4x
-              value: 4
-            - name: 8x
-              value: 8
-        - name: "ANTI-ALIASING MODE"
-          value: use_ssaa
-          description: "Use SSAA instead of MSAA for anti-aliasing. SSAA may look better but has a higher performance cost."
-          preset: switchauto
-        - name: LOAD CUSTOM TEXTURES
-          value: hires_textures
-          description: ""
-          preset: switchauto
-        - name: MANUAL TEXTURE SAMPLING
-          value: manual_texture_sampling
-          description: Enabling will allow for correct emulation of texture wrapping. This comes at a cost of potential worse performance.
-          preset: switchauto
-      EMULATION:
-        - name: DUAL CORE MODE
-          value: dual_core
-          description: Usually not much faster than single core mode.
-          preset: switchauto
-        - name: GPU SYNC
-          value: gpu_sync
-          description: Speed hack for dual core mode to fix some glitches.
-          preset: switchauto
-        - name: PERFORMANCE HACKS
-          value: perf_hacks
-          description: "Increase emulator performance, at the cost of accuracy/stability."
-          preset: switchauto
-        - name: ENABLE CHEATS
-          value: enable_cheats
-          description: To use game cheats or 16/9 Aspect Ratio Fix codes.
-          preset: switchauto
-        - name: MEMORY MANAGEMENT UNIT
-          value: enable_mmu
-          description: Required by some games.
-          preset: switchauto
-        - name: FAST DISK TRANSFER RATE
-          value: enable_fastdisc
-          description: Enhancement. Removes disc loading.
-          preset: switchauto
-        - name: VBI SKIP
-          value: vbi_hack
-          description: "Skips Vertical Blank Interrupts when lag is detected, allowing for smooth audio playback when emulation speed is not 100%."
-          preset: switchauto
   CONTROLS:
     submenus:
       GAMECUBE CONTROLLER 1:
@@ -378,12 +284,6 @@ groups:
         value: rumble
         description: Enable controller rumble capabilities if supported by the controller.
         preset: switchauto
-  AUDIO:
-    items:
-      - name: DOLBY PRO LOGIC II
-        value: dplii
-        description: Enables Dolby Pro Logic II for surround sound. May impact performance.
-        preset: switchauto
 systems:
   - name: gamecube
     groups:
@@ -394,27 +294,6 @@ systems:
               value: widescreen_hack
               description: Enhancement. Only works with a 16/9 ratio and bezels disabled.
               preset: switchauto
-          EMULATION:
-            - name: ENABLE BOOT ANIMATION
-              value: dolphin_SkipIPL
-              description: Enable Gamecube boot animation and BIOS access (requires IPL.bin BIOS in appropriate user directory).
-              preset: switchauto
-            - name: GAMECUBE LANGUAGE
-              value: gamecube_language
-              description: Change the Gamecube system language.
-              choices:
-                - name: English/Japanese
-                  value: 0
-                - name: German
-                  value: 1
-                - name: French
-                  value: 2
-                - name: Spanish
-                  value: 3
-                - name: Italian
-                  value: 4
-                - name: Dutch
-                  value: 5
   - name: wii
     groups:
       GENERAL:
@@ -453,14 +332,6 @@ systems:
                   value: it
                 - name: Wiimote Sideway + Nunchuk
                   value: in
-            - name: SENSOR BAR POSITION
-              value: sensorbar_position
-              description: Position of wii sensor bar relative to the disaply for real wiimotes.
-              choices:
-                - name: Bottom (Default)
-                  value: 0
-                - name: Top
-                  value: 1
             - name: DUALSHOCK MOTION CONTROL
               value: dsmotion
               description: Emulate the Wiimote pointer with a DS4's gyroscope.
@@ -468,10 +339,4 @@ systems:
             - name: MOUSE AS WIIMOTE POINTER
               value: mouseir
               description: Emulate the Wiimote pointer with a mouse.
-              preset: switchauto
-          LIGHT GUNS:
-            - name: SHOW LIGHT GUN CROSSHAIRS
-              order: 99
-              value: dolphin_crosshair
-              description: ""
               preset: switchauto
