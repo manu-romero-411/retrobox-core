@@ -12,6 +12,11 @@
 #                                  source, auto-detecting which flag it wants
 #   list_available_emulators   -> prints every setup/emulators/*.sh found,
 #                                  with the flag each would be called with
+#   setup_util <name>          -> runs setup/utils/<name>.sh, auto-detecting
+#                                  which flag it wants (same convention as
+#                                  setup_emulator)
+#   list_available_utils       -> prints every setup/utils/*.sh found, with
+#                                  the flag each would be called with
 
 SETUP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd -P)"
 RETROBOX_ROOTDIR="$(cd "${SETUP_DIR}/.." >/dev/null 2>&1 && pwd -P)"
@@ -37,6 +42,9 @@ readonly SETUP_MARKER="${RETROBOX_ROOTDIR}/.retrobox_setup_done"
 # flags below immediately followed by ")" or "|" without it actually being
 # implemented, this would report a false positive — acceptable for a
 # convenience tool like this one, but worth knowing.
+#
+# setup/utils/ installers follow the exact same convention, so this same
+# scan is reused for both.
 # ---------------------------------------------------------------------------
 
 # Preferred, in order, for building from source. "-s" is the convention
@@ -170,14 +178,10 @@ function run_platform_setup() {
     esac
 }
 
-function setup_emulator() {
-    local name="$1"
-    local script="${SETUP_DIR}/emulators/${name}.sh"
-
-    if [[ ! -f "${script}" ]]; then
-        log_err "No installer found for emulator '${name}' (expected ${script})."
-        return 1
-    fi
+# $1 = human-readable kind ("emulator" or "utility"), $2 = installer script,
+# $3 = name (for logging).
+function _run_installer() {
+    local kind="$1" script="$2" name="$3"
 
     local flag
     flag="$(_source_build_flag "${script}")"
@@ -192,7 +196,7 @@ function setup_emulator() {
         flag="${fallback}"
     fi
 
-    log_info "Running installer for '${name}' (${flag})..."
+    log_info "Running ${kind} installer for '${name}' (${flag})..."
     if bash "${script}" "${flag}"; then
         log_ok "'${name}' installed."
     else
@@ -201,17 +205,44 @@ function setup_emulator() {
     fi
 }
 
-function list_available_emulators() {
+function setup_emulator() {
+    local name="$1"
+    local script="${SETUP_DIR}/emulators/${name}.sh"
+
+    if [[ ! -f "${script}" ]]; then
+        log_err "No installer found for emulator '${name}' (expected ${script})."
+        return 1
+    fi
+
+    _run_installer "emulator" "${script}" "${name}"
+}
+
+function setup_util() {
+    local name="$1"
+    local script="${SETUP_DIR}/utils/${name}.sh"
+
+    if [[ ! -f "${script}" ]]; then
+        log_err "No installer found for utility '${name}' (expected ${script})."
+        return 1
+    fi
+
+    _run_installer "utility" "${script}" "${name}"
+}
+
+# $1 = directory (emulators/ or utils/), $2 = label for the log line.
+function _list_available_installers() {
+    local dir="$1" label="$2"
+
     shopt -s nullglob
-    local -a scripts=("${SETUP_DIR}"/emulators/*.sh)
+    local -a scripts=("${dir}"/*.sh)
     shopt -u nullglob
 
     if [[ "${#scripts[@]}" -eq 0 ]]; then
-        log_warn "No emulator installers found in ${SETUP_DIR}/emulators/."
+        log_warn "No ${label} installers found in ${dir}/."
         return 0
     fi
 
-    log_info "Available emulator installers:"
+    log_info "Available ${label} installers:"
     local f name flag
     for f in "${scripts[@]}"; do
         name="$(basename "${f}" .sh)"
@@ -223,6 +254,14 @@ function list_available_emulators() {
             printf '  - %-14s (source build: %s)\n' "${name}" "${flag}"
         fi
     done
+}
+
+function list_available_emulators() {
+    _list_available_installers "${SETUP_DIR}/emulators" "emulator"
+}
+
+function list_available_utils() {
+    _list_available_installers "${SETUP_DIR}/utils" "utility"
 }
 
 function mark_setup_done() {

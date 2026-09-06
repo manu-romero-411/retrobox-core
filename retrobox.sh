@@ -9,6 +9,9 @@
 #   retrobox.sh --setup-emulator <name>      build a single emulator from
 #                                            source (repeatable)
 #   retrobox.sh --setup-emulator             list available emulators
+#   retrobox.sh --setup-util <name>          run a single utility installer
+#                                            (e.g. mangohud) (repeatable)
+#   retrobox.sh --setup-util                 list available utility installers
 #   retrobox.sh --bios-check [system...]    check installed RetroArch BIOS
 #                                            files against what the cores
 #                                            need (all systems if none given)
@@ -50,6 +53,11 @@ Usage: $(basename "${BASH_SOURCE[0]}") [OPTIONS] [-- ARGS...]
                                repeated to install several at once. Called
                                with no name, lists every installer available
                                under setup/emulators/.
+  --setup-util <name>         Run a single utility installer (e.g.
+                               --setup-util mangohud). Can be repeated to
+                               install several at once. Called with no name,
+                               lists every installer available under
+                               setup/utils/.
   --bios-check [system...]    Check installed RetroArch BIOS files under
                                bios/<system>/ against what each system's
                                cores require. With no system given, checks
@@ -76,6 +84,7 @@ force_setup=0
 do_bios_check=0
 do_bios_fetch=0
 declare -a emulators_to_setup=()
+declare -a utils_to_setup=()
 declare -a bios_check_systems=()
 declare -a bios_fetch_args=()
 declare -a frontend_args=()
@@ -92,6 +101,14 @@ while [[ $# -gt 0 ]]; do
                 exit 0
             fi
             emulators_to_setup+=("$2")
+            shift 2
+            ;;
+        --setup-util)
+            if [[ -z "${2:-}" || "${2:0:1}" == "-" ]]; then
+                list_available_utils
+                exit 0
+            fi
+            utils_to_setup+=("$2")
             shift 2
             ;;
         --bios-check)
@@ -139,6 +156,15 @@ if [[ "${#emulators_to_setup[@]}" -gt 0 ]]; then
     status=0
     for name in "${emulators_to_setup[@]}"; do
         setup_emulator "${name}" || status=1
+    done
+    did_maintenance=1
+    [[ "${status}" -eq 0 ]] || exit "${status}"
+fi
+
+if [[ "${#utils_to_setup[@]}" -gt 0 ]]; then
+    status=0
+    for name in "${utils_to_setup[@]}"; do
+        setup_util "${name}" || status=1
     done
     did_maintenance=1
     [[ "${status}" -eq 0 ]] || exit "${status}"
