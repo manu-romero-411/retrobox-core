@@ -220,17 +220,15 @@ def start_rom(args: argparse.Namespace, maxnbplayers: int, rom: Path, original_r
 
                     if system.config.get_bool('hud_support'):
                         hud_bezel = getHudBezel(
-                            system,
-                            generator,
-                            rom,
-                            game_resolution,
+                            system, generator, rom, game_resolution,
                             system.guns_borders_size_name(guns),
-                            system.guns_border_ratio_type(guns))
+                            system.guns_border_ratio_type(guns)
+                        )
 
-                        if ((hud := system.config.get('hud')) and hud.lower() != 'none')\
-                        or hud_bezel is not None:
+                        if ((hud := system.config.get('hud')) and hud.lower() != 'none') or hud_bezel is not None:
+                            # 1. Activamos MangoHud vía variables de entorno.
+                            # Esto es suficiente para que la Vulkan Implicit Layer se active.
                             cmd.env["MANGOHUD"] = "1"
-                            cmd.env["MANGOHUD_DLSYM"] = "1"
                             cmd.env["MANGOHUD_CONFIGFILE"] = str(HUD_CONFIG_FILE)
 
                             hudconfig = getHudConfig(
@@ -242,15 +240,12 @@ def start_rom(args: argparse.Namespace, maxnbplayers: int, rom: Path, original_r
                                 f.write(hudconfig)
 
                             if generator.usesOpenGLDirectPreload(system.config):
-                                # OpenGL: LD_PRELOAD directo, sin pasar por el wrapper mangohud
-                                # (que lo pisaría con su propio shim vía --dlsym)
-                                cmd.env["LD_PRELOAD"] =\
-                                    "/usr/local/lib64/mangohud/libMangoHud_opengl.so"
-                            elif not generator.hasInternalMangoHUDCall():
-                                # Vulkan (u otros):
-                                # dejamos que mangohud gestione el layer/preload él mismo
-                                cmd.array.insert(0, "--dlsym")
-                                cmd.array.insert(0, "mangohud")
+                                # OpenGL: LD_PRELOAD directo a la ruta correcta de nuestra instalación
+                                cmd.env["LD_PRELOAD"] = "/usr/local/lib/mangohud/lib64/libMangoHud_opengl.so"
+                            
+                            # ELIMINADO: Ya no insertamos "mangohud" y "--dlsym" en cmd.array para Vulkan.
+                            # La Vulkan Implicit Layer lo gestionará automáticamente sin provocar el 
+                            # error fatal de "eglStreamPostD3DTextureANGLE" en Asahi.
 
                     # generate the gun help
                     try:
