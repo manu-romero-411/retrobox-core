@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # setup/utils/mangohud.sh — build & install MangoHud from source, following
-# the exact version/patch set Batocera ships for it, with dual 32+64 bit
-# OpenGL/Vulkan support, installed under /usr/local.
+# the exact version/patch set Batocera ships for it, installed under
+# /usr/local. On x86_64 this builds dual 32+64 bit OpenGL/Vulkan support,
+# same as Batocera; on any other host (aarch64 and friends) there's no
+# 32-bit companion build, so it's 64-bit only.
 #
 # Invoked by setup/setup.sh's setup_util() as:
 #   bash setup/utils/mangohud.sh -s     (source build — the only option
@@ -17,11 +19,15 @@
 #      batocera.linux repo to read which tag Batocera builds, and downloads
 #      every patch in that same folder.
 #   3. Clones MangoHud at that tag (with submodules) and applies the patches.
-#   4. Builds it twice (native 64-bit + 32-bit via gcc -m32), with
-#      --prefix /usr/local, mirroring Batocera's meson options.
-#   5. Installs both trees under /usr/local/lib/mangohud/{lib64,lib32},
-#      fixes the `mangohud` wrapper and recreates the $LIB compatibility
-#      symlinks used by the project's own upstream build.sh.
+#   4. Builds it for the native architecture, plus a second 32-bit pass via
+#      gcc -m32 when the host is x86_64, with --prefix /usr/local, mirroring
+#      Batocera's meson options.
+#   5. Installs the tree(s) under /usr/local/lib/mangohud/{lib64,lib32},
+#      fixes the `mangohud` wrapper and recreates the $LIB/$PLATFORM
+#      compatibility symlinks used by the project's own upstream build.sh
+#      (only the x86_64 32-bit-companion ones are architecture-specific;
+#      other 64-bit-only hosts get a smaller, generic set — see
+#      fix_wrapper_and_symlinks below).
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd -P)"
@@ -217,28 +223,45 @@ install_build_deps() {
                         dbus-devel json-devel wayland-devel libxkbcommon-devel
                         libX11-devel libdrm-devel mesa-libGL-devel
                         vulkan-loader-devel vulkan-headers libcurl-devel)
-            local deps32=(glibc-devel.i686 libstdc++-devel.i686 libX11-devel.i686
-                          wayland-devel.i686 libxkbcommon-devel.i686
-                          mesa-libGL-devel.i686 vulkan-loader-devel.i686)
-            as_root dnf install -y "${deps[@]}" "${deps32[@]}"
+            local -a all_deps=("${deps[@]}")
+
+            # The i686 (32-bit) multilib devel packages only exist as
+            # companions to an x86_64 install; on any other host (aarch64,
+            # etc.) there's no 32-bit build to satisfy, so skip them.
+            if [[ "${MACHINE}" == "x86_64" ]]; then
+                local deps32=(glibc-devel.i686 libstdc++-devel.i686 libX11-devel.i686
+                              wayland-devel.i686 libxkbcommon-devel.i686
+                              mesa-libGL-devel.i686 vulkan-loader-devel.i686)
+                all_deps+=("${deps32[@]}")
+            fi
+
+            as_root dnf install -y "${all_deps[@]}"
             ;;
         apt)
-            if ! dpkg --print-foreign-architectures | grep -q i386; then
-                log_info "Enabling the i386 architecture for 32-bit libs..."
-                as_root dpkg --add-architecture i386
-                as_root apt-get update
-            fi
             local deps=(meson ninja-build git python3-mako glslang-tools
                         libdbus-1-dev nlohmann-json3-dev libwayland-dev
                         libxkbcommon-dev libx11-dev libdrm-dev libgl1-mesa-dev
                         libvulkan-dev libcurl4-openssl-dev)
-            # gcc/g++-multilib bring in whichever 32-bit libstdc++-dev
-            # matches the current gcc version, instead of pinning a
-            # versioned package name (libstdc++-12-dev...) that breaks the
-            # moment the distro bumps its gcc version.
-            local deps32=(gcc-multilib g++-multilib libx11-dev:i386
-                          libwayland-dev:i386 libxkbcommon-dev:i386
-                          libgl1-mesa-dev:i386)
+            local -a all_deps=("${deps[@]}")
+
+            # Same reasoning as the dnf branch: the i386 foreign-arch
+            # packages are only needed to build MangoHud's 32-bit
+            # companion, which only happens on x86_64 hosts.
+            if [[ "${MACHINE}" == "x86_64" ]]; then
+                if ! dpkg --print-foreign-architectures | grep -q i386; then
+                    log_info "Enabling the i386 architecture for 32-bit libs..."
+                    as_root dpkg --add-architecture i386
+                    as_root apt-get update
+                fi
+                # gcc/g++-multilib bring in whichever 32-bit libstdc++-dev
+                # matches the current gcc version, instead of pinning a
+                # versioned package name (libstdc++-12-dev...) that breaks
+                # the moment the distro bumps its gcc version.
+                local deps32=(gcc-multilib g++-multilib libx11-dev:i386
+                              libwayland-dev:i386 libxkbcommon-dev:i386
+                              libgl1-mesa-dev:i386)
+                all_deps+=("${deps32[@]}")
+            fi
 
             local -a apt_install_opts=(install -y)
             local backports_suite
@@ -248,10 +271,10 @@ install_build_deps() {
                 apt_install_opts+=(-t "${backports_suite}")
             fi
 
-            as_root apt-get "${apt_install_opts[@]}" "${deps[@]}" "${deps32[@]}"
+            as_root apt-get "${apt_install_opts[@]}" "${all_deps[@]}"
             ;;
         *)
-            log_warn "Unrecognized package manager; install meson, ninja, glslang, dbus/json/wayland/x11/drm/vulkan (dev) manually, in both 32 and 64 bit."
+            log_warn "Unrecognized package manager; install meson, ninja, glslang, dbus/json/wayland/x11/drm/vulkan (dev) manually for your architecture (plus the 32-bit multilib variants too, if this is an x86_64 host)."
             ;;
     esac
 }
@@ -280,7 +303,11 @@ build_arch() {
         export PKG_CONFIG_PATH="/usr/lib32/pkgconfig:/usr/lib/i386-linux-gnu/pkgconfig:/usr/lib/pkgconfig:${PKG_CONFIG_PATH:-}"
     else
         unset CC CXX
-        export PKG_CONFIG_PATH="/usr/lib64/pkgconfig:/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/lib/pkgconfig:${PKG_CONFIG_PATH:-}"
+        # ${MACHINE}-linux-gnu covers the Debian/Ubuntu multiarch layout on
+        # whatever the native architecture is (x86_64-linux-gnu,
+        # aarch64-linux-gnu, ...); /usr/lib64 covers Fedora-style hosts.
+        # Harmless if a given path doesn't exist — pkg-config just skips it.
+        export PKG_CONFIG_PATH="/usr/lib64/pkgconfig:/usr/lib/${MACHINE}-linux-gnu/pkgconfig:/usr/lib/pkgconfig:${PKG_CONFIG_PATH:-}"
     fi
 
     log_info "Configuring the ${bits}-bit build..."
@@ -318,25 +345,41 @@ fix_wrapper_and_symlinks() {
 
     ln_safe() { [[ -e "$2" || -L "$2" ]] || as_root ln -sv "$1" "$2"; }
 
-    ln_safe lib64 "${libbase}/x86_64"
-    ln_safe lib64 "${libbase}/x86_64-linux-gnu"
-    ln_safe .     "${libbase}/lib64/x86_64"
-    ln_safe .     "${libbase}/lib64/x86_64-linux-gnu"
+    # $PLATFORM-token aliases for the native build: some of MangoHud's own
+    # files reference the actual platform name (e.g. "x86_64", "aarch64")
+    # rather than $LIB, so alias both spellings of the host's GNU triplet
+    # onto the real lib64 tree. This part is architecture-agnostic.
+    ln_safe lib64 "${libbase}/${MACHINE}"
+    ln_safe lib64 "${libbase}/${MACHINE}-linux-gnu"
+    ln_safe .     "${libbase}/lib64/${MACHINE}"
+    ln_safe .     "${libbase}/lib64/${MACHINE}-linux-gnu"
 
     if [[ "${MACHINE}" == "x86_64" ]]; then
+        # x86_64 is a biarch host: glibc's $LIB dynamic-string-token
+        # expands to "lib64" for 64-bit processes but plain "lib" for
+        # 32-bit ones, and old NPTL TLS-capable builds are additionally
+        # looked up under tls/<platform>. Recreate every alias MangoHud's
+        # own upstream build.sh sets up for this case.
         ln_safe lib32 "${libbase}/i686"
         ln_safe lib32 "${libbase}/i386-linux-gnu"
         ln_safe lib32 "${libbase}/i686-linux-gnu"
         ln_safe ../lib32 "${libbase}/tls/i686"
-        # glibc's $LIB dynamic-string-token expands to "lib64" for 64-bit
-        # processes but plain "lib" for 32-bit ones on biarch x86_64 hosts.
+        ln_safe ../lib64 "${libbase}/tls/x86_64"
         # The mangohud wrapper embeds $LIB in the preload path, so without
-        # this alias a 32-bit process would look for the library under
-        # ${libbase}/lib, which otherwise never gets created.
+        # this alias a 32-bit process (for which $LIB expands to plain
+        # "lib") would look for the library under ${libbase}/lib, which
+        # otherwise never gets created; same reasoning for its tls subdir.
         ln_safe lib32 "${libbase}/lib"
+        ln_safe ../tls "${libbase}/lib/tls"
+    else
+        # Single-arch host (aarch64 and similar): there's no 32-bit
+        # companion build, so none of the tls/<platform> dance above
+        # applies — that's an x86-only legacy NPTL mechanism. We don't
+        # know for certain whether this host's glibc expands $LIB to
+        # "lib64" or plain "lib" for a 64-bit process, so alias both
+        # names onto the same real tree; harmless either way.
+        ln_safe lib64 "${libbase}/lib"
     fi
-    ln_safe ../lib64 "${libbase}/tls/x86_64"
-    ln_safe ../tls   "${libbase}/lib/tls"
 
     echo "${libbase}/lib64" | as_root tee /etc/ld.so.conf.d/mangohud.conf >/dev/null
     [[ "${MACHINE}" == "x86_64" ]] && echo "${libbase}/lib32" | as_root tee -a /etc/ld.so.conf.d/mangohud.conf >/dev/null
@@ -360,7 +403,7 @@ do_install() {
     if [[ "${MACHINE}" == "x86_64" ]]; then
         build_arch 32 "${SRC_DIR}/build/meson32" "lib/mangohud/lib32"
     else
-        log_warn "Non-x86_64 host (${MACHINE}); skipping the 32-bit build."
+        log_info "Host has no 32-bit companion build on this architecture (${MACHINE}); building 64-bit only."
     fi
 
     merge_stage_into_prefix
