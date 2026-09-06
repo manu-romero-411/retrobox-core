@@ -337,50 +337,40 @@ merge_stage_into_prefix() {
 fix_wrapper_and_symlinks() {
     local libbase="${PREFIX}/lib/mangohud"
     local bin="${PREFIX}/bin/mangohud"
-
     log_info "Fixing the mangohud wrapper and creating the \$LIB symlinks..."
-    [[ -f "${bin}" ]] && as_root sed -i "s:${PREFIX}/\\\$LIB:${libbase}/\\\$LIB:g" "${bin}"
-
+    
+    if [[ -f "${bin}" ]]; then
+        # Insertar definición de LIB después del shebang para que bash la expanda correctamente
+        as_root sed -i '1a LIB=lib\nif [ "$(uname -m)" = "x86_64" ]; then\n    LIB=lib64\nfi' "${bin}"
+        
+        # Reemplazar cualquier referencia a /usr/local/$LIB por la ruta correcta
+        # Nota: usamos \$ sin escapar adicional para que bash lo interprete como $ literal
+        as_root sed -i "s|/usr/local/\$LIB|${libbase}/\$LIB|g" "${bin}"
+    fi
+    
     as_root mkdir -p "${libbase}/tls"
-
     ln_safe() { [[ -e "$2" || -L "$2" ]] || as_root ln -sv "$1" "$2"; }
-
-    # $PLATFORM-token aliases for the native build: some of MangoHud's own
-    # files reference the actual platform name (e.g. "x86_64", "aarch64")
-    # rather than $LIB, so alias both spellings of the host's GNU triplet
-    # onto the real lib64 tree. This part is architecture-agnostic.
+    
+    # $PLATFORM-token aliases for the native build
     ln_safe lib64 "${libbase}/${MACHINE}"
     ln_safe lib64 "${libbase}/${MACHINE}-linux-gnu"
     ln_safe .     "${libbase}/lib64/${MACHINE}"
     ln_safe .     "${libbase}/lib64/${MACHINE}-linux-gnu"
-
+    
     if [[ "${MACHINE}" == "x86_64" ]]; then
-        # x86_64 is a biarch host: glibc's $LIB dynamic-string-token
-        # expands to "lib64" for 64-bit processes but plain "lib" for
-        # 32-bit ones, and old NPTL TLS-capable builds are additionally
-        # looked up under tls/<platform>. Recreate every alias MangoHud's
-        # own upstream build.sh sets up for this case.
+        # x86_64 biarch setup
         ln_safe lib32 "${libbase}/i686"
         ln_safe lib32 "${libbase}/i386-linux-gnu"
         ln_safe lib32 "${libbase}/i686-linux-gnu"
         ln_safe ../lib32 "${libbase}/tls/i686"
         ln_safe ../lib64 "${libbase}/tls/x86_64"
-        # The mangohud wrapper embeds $LIB in the preload path, so without
-        # this alias a 32-bit process (for which $LIB expands to plain
-        # "lib") would look for the library under ${libbase}/lib, which
-        # otherwise never gets created; same reasoning for its tls subdir.
         ln_safe lib32 "${libbase}/lib"
         ln_safe ../tls "${libbase}/lib/tls"
     else
-        # Single-arch host (aarch64 and similar): there's no 32-bit
-        # companion build, so none of the tls/<platform> dance above
-        # applies — that's an x86-only legacy NPTL mechanism. We don't
-        # know for certain whether this host's glibc expands $LIB to
-        # "lib64" or plain "lib" for a 64-bit process, so alias both
-        # names onto the same real tree; harmless either way.
+        # Single-arch host (aarch64, etc.): $LIB expands to "lib"
         ln_safe lib64 "${libbase}/lib"
     fi
-
+    
     echo "${libbase}/lib64" | as_root tee /etc/ld.so.conf.d/mangohud.conf >/dev/null
     [[ "${MACHINE}" == "x86_64" ]] && echo "${libbase}/lib32" | as_root tee -a /etc/ld.so.conf.d/mangohud.conf >/dev/null
     as_root ldconfig
