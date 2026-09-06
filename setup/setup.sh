@@ -21,6 +21,11 @@
 #                               setup_emulator)
 # list_available_music       -> prints every setup/music/*.sh found, with
 #                               the flag each would be called with
+# setup_bezeles <name>         -> runs setup/decorations/<name>.sh, auto-detecting
+#                                which flag it wants (same convention as
+#                                setup_emulator)
+# list_available_bezels        -> prints every setup/decorations/*.sh found, with
+#                                the flag each would be called with
 
 SETUP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd -P)"
 RETROBOX_ROOTDIR="$(cd "${SETUP_DIR}/.." >/dev/null 2>&1 && pwd -P)"
@@ -197,6 +202,16 @@ function setup_music() {
     _run_installer "music" "${script}" "${name}"
 }
 
+function setup_bezeles() {
+    local name="$1"
+    local script="${SETUP_DIR}/decorations/${name}.sh"
+    if [[ ! -f "${script}" ]]; then
+        log_err "No installer found for bezel pack '${name}' (expected ${script})."
+        return 1
+    fi
+    _run_installer "bezel" "${script}" "${name}"
+}
+
 function _list_available_installers() {
     local dir="$1" label="$2"
     shopt -s nullglob
@@ -230,6 +245,10 @@ function list_available_utils() {
 
 function list_available_music() {
     _list_available_installers "${SETUP_DIR}/music" "music"
+}
+
+function list_available_bezels() {
+    _list_available_installers "${SETUP_DIR}/decorations" "bezel"
 }
 
 function mark_setup_done() {

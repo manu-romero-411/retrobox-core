@@ -66,6 +66,11 @@ Usage: $(basename "${BASH_SOURCE[0]}") [OPTIONS] [-- ARGS...]
                             repeated to install several at once. Called
                             with no name, lists every installer available
                             under setup/music/.
+--setup-bezel <name>        Install a single bezel/decoration pack (e.g.
+                            --setup-bezel switch-online). Can be
+                            repeated to install several at once. Called
+                            with no name, lists every installer available
+                            under setup/decorations/.
 --bios-check [system...]    Check installed RetroArch BIOS files under
                             bios/<system>/ against what each system's
                             cores require. With no system given, checks
@@ -94,6 +99,7 @@ do_bios_fetch=0
 declare -a emulators_to_setup=()
 declare -a utils_to_setup=()
 declare -a music_to_setup=()
+declare -a bezels_to_setup=()
 declare -a bios_check_systems=()
 declare -a bios_fetch_args=()
 declare -a frontend_args=()
@@ -126,6 +132,14 @@ case "$1" in
         exit 0
     fi
     music_to_setup+=("$2")
+    shift 2
+    ;;
+--setup-bezel)
+    if [[ -z "${2:-}" || "${2:0:1}" == "-" ]]; then
+        list_available_bezels
+        exit 0
+    fi
+    bezels_to_setup+=("$2")
     shift 2
     ;;
 --bios-check)
@@ -188,6 +202,15 @@ if [[ "${#music_to_setup[@]}" -gt 0 ]]; then
     status=0
     for name in "${music_to_setup[@]}"; do
         setup_music "${name}" || status=1
+    done
+    did_maintenance=1
+    [[ "${status}" -eq 0 ]] || exit "${status}"
+fi
+
+if [[ "${#bezels_to_setup[@]}" -gt 0 ]]; then
+    status=0
+    for name in "${bezels_to_setup[@]}"; do
+        setup_bezeles "${name}" || status=1
     done
     did_maintenance=1
     [[ "${status}" -eq 0 ]] || exit "${status}"
