@@ -3,7 +3,7 @@ from __future__ import annotations
 import codecs
 import logging
 import re
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Final
 
 from ...exceptions import RetroboxException
 from ...utils.configparser import CaseSensitiveConfigParser
@@ -21,6 +21,20 @@ if TYPE_CHECKING:
 _logger = logging.getLogger(__name__)
 
 NINTENDO_PRO_NAMES = {"Nintendo Switch Pro Controller", "Pro Controller"}
+
+# Roles canónicos que controllers.py::_DEFAULT_SDL_MAPPING ya asigna a
+# 'start', 'pageup'/'pagedown' (shoulders) y 'l2'/'r2' (triggers) al generar
+# el SDL_GAMECONTROLLERCONFIG desde es_input.cfg (ver write_sdl_controller_db).
+# Cualquier mando que pase por ese generador expone estos nombres simbólicos
+# en Dolphin para ese rol, sea cual sea el modelo físico: no hace falta
+# identificar el dispositivo por nombre, basta con saber que el rol existe
+# en el mapeo GameCube/Wii y que el pad tiene la entrada correspondiente.
+_DOLPHIN_SYMBOLIC_TARGETS: Final[dict[str, str]] = {
+    "Buttons/Start": "Start",
+    "Buttons/Z":     "`Shoulder R`",
+    "Triggers/L":    "`Trigger L`",
+    "Triggers/R":    "`Trigger R`",
+}
 
 # Create the controller configuration file
 def generateControllerConfig(system: Emulator, playersControllers: Controllers, metadata: Mapping[str, str], wheels: DeviceInfoMapping, rom: Path, guns: Guns) -> None:
@@ -589,9 +603,9 @@ def generateControllerConfig_wheel(f: codecs.StreamReaderWriter, pad: Controller
     for x in pad.inputs:
         input = pad.inputs[x]
         if input.name in wheelMapping:
-            write_key(f, wheelMapping[input.name], input.type, input.id, input.value, pad.axis_count, False, None, None)
+            write_key(f, wheelMapping[input.name], input.type, input.id, input.value, pad.axis_count, False, None)
             if input.name == "joystick1left" and "joystick1right" in wheelMapping:
-                write_key(f, wheelMapping["joystick1right"], input.type, input.id, input.value, pad.axis_count, True, None, None)
+                write_key(f, wheelMapping["joystick1right"], input.type, input.id, input.value, pad.axis_count, True, None)
 
 def generateControllerConfig_nintendo_pro(
     f: codecs.StreamReaderWriter,
@@ -662,6 +676,15 @@ def generateControllerConfig_any_auto(f: codecs.StreamReaderWriter, pad: Control
                 if x == "joystick2left":
                     currentMapping[anyReplacements["joystick2right"]] = anyReverseAxes[currentMapping["joystick2left"]]
 
+    # Qué targets simbólicos (Start/Shoulder/Trigger) aplican a ESTE pad: el
+    # target debe estar en el mapeo GameCube/Wii actual Y la entrada física
+    # correspondiente debe existir de verdad en el pad. No depende del modelo
+    # de mando, solo de qué roles tiene mapeados es_input.cfg para él.
+    symbolic_targets_in_use = {
+        keyname for name, keyname in currentMapping.items()
+        if keyname in _DOLPHIN_SYMBOLIC_TARGETS and name in pad.inputs
+    }
+
     for x in pad.inputs:
         input = pad.inputs[x]
 
@@ -669,21 +692,17 @@ def generateControllerConfig_any_auto(f: codecs.StreamReaderWriter, pad: Control
         if input.name in currentMapping:
             keyname = currentMapping[input.name]
 
+        if keyname in symbolic_targets_in_use:
+            continue  # se escribe una única vez, simbólico, al final del bloque
+
         # Write the configuration for this key
         if keyname is not None:
-            write_key(f, keyname, input.type, input.id, input.value, pad.axis_count, False, None, None)
+            write_key(f, keyname, input.type, input.id, input.value, pad.axis_count, False, None)
             if 'Triggers' in keyname and input.type == 'axis':
-                write_key(f, f'{keyname}-Analog', input.type, input.id, input.value, pad.axis_count, False, None, None)
-            if 'Buttons/Z' in keyname and "pageup" in pad.inputs:
-                # Create dictionary for both L1/R1 to pass to write_key
-                gcz_ids = {
-                    "pageup": pad.inputs["pageup"].id,
-                    "pagedown": pad.inputs["pagedown"].id
-                }
-                write_key(f, keyname, input.type, input.id, input.value, pad.axis_count, False, None, gcz_ids)
+                write_key(f, f'{keyname}-Analog', input.type, input.id, input.value, pad.axis_count, False, None)
         # Write the 2nd part
         if input.name in { "joystick1up", "joystick1left", "joystick2up", "joystick2left"} and keyname is not None:
-            write_key(f, anyReverseAxes[keyname], input.type, input.id, input.value, pad.axis_count, True, None, None)
+            write_key(f, anyReverseAxes[keyname], input.type, input.id, input.value, pad.axis_count, True, None)
         
         # DualShock / Nintendo Pro Controller Motion control
         if system.config.get_bool("dsmotion"):
@@ -730,6 +749,14 @@ def generateControllerConfig_any_auto(f: codecs.StreamReaderWriter, pad: Control
                 f.write("Main Stick/Gate Size = 95.0\n")
                 f.write("C-Stick/Gate Size = 88.0\n")
 
+    # Targets con nombre simbólico (Start/Shoulder/Trigger), escritos una sola
+    # vez cada uno, al margen de cuántas entradas físicas del pad apunten a ellos.
+    for target_key in symbolic_targets_in_use:
+        symbolic_value = _DOLPHIN_SYMBOLIC_TARGETS[target_key]
+        f.write(f"{target_key} = {symbolic_value}\n")
+        if target_key in ("Triggers/L", "Triggers/R"):
+            f.write(f"{target_key}-Analog = {symbolic_value}\n")
+
 def generateControllerConfig_any_from_profiles(f: codecs.StreamReaderWriter, pad: Controller, system: Emulator) -> bool:
     glob_path: Path | None = None
     if system.name == "gamecube":
@@ -760,17 +787,13 @@ def generateControllerConfig_any_from_profiles(f: codecs.StreamReaderWriter, pad
 
     return False
 
-def write_key(f: codecs.StreamReaderWriter, keyname: str, input_type: str, input_id: str, input_value: str, input_global_id: int, reverse: bool, hotkey_id: str | None, gcz_ids: Mapping[str, str] | None) -> None:
+def write_key(f: codecs.StreamReaderWriter, keyname: str, input_type: str, input_id: str, input_value: str, input_global_id: int, reverse: bool, hotkey_id: str | None) -> None:
     f.write(f"{keyname} = ")
     if hotkey_id is not None:
         f.write(f"`Button {hotkey_id}` & ")
     f.write("`")
     if input_type == "button":
-        # Map L1 & R1 both to Z with OR operator
-        if keyname == "Buttons/Z" and gcz_ids is not None:
-            f.write(f"Button {gcz_ids['pageup']}`|`Button {gcz_ids['pagedown']}")
-        else:
-            f.write(f"Button {input_id}")
+        f.write(f"Button {input_id}")
     elif input_type == "hat":
         hat_directions = {
             "1": "Pad N",
