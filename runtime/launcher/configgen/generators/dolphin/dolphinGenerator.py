@@ -11,6 +11,7 @@ from ... import Command
 from runtime.paths import configure_emulator, mkdir_if_not_exists
 from ..Generator import Generator
 from .dolphin_paths import (
+    _DOLPHIN_CFGDIR,
     _DOLPHIN_LOCALE,
     _DOLPHIN_XDG,
     DOLPHIN_BIN,
@@ -35,6 +36,7 @@ class DolphinGenerator(Generator):
         # Dirs required for saves
         mkdir_if_not_exists(DOLPHIN_SAVES / "StateSaves")
         mkdir_if_not_exists(DOLPHIN_SAVES / "GameSettings")
+        mkdir_if_not_exists(_DOLPHIN_CFGDIR)
 
         # Controller mapping (per-pad ini files: GCPadNew.ini / WiimoteNew.ini)
         dolphin_controllers.generateControllerConfig(system, playersControllers, metadata, wheels, rom, guns)

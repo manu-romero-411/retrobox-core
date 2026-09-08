@@ -33,9 +33,8 @@
 #   5. Configures with CMake using the flags above, with ScreenScraper's dev
 #      login baked in from $SCREENSCRAPER_DEV_LOGIN.
 #   6. Builds natively with `cmake --build -j$(nproc)`.
-#   7. Copies the resulting binary into frontend/ (as "emulationstation" or
-#      "emulationstation_arm64", matching whichever the host architecture
-#      produces) and syncs resources/ + locale/ alongside it, tracking every
+#   7. Copies the resulting binary into frontend/ (as "emulationstation")
+#      and syncs resources/ + locale/ alongside it, tracking every
 #      file touched in a manifest so -u can remove exactly that later
 #      without disturbing frontend/themes, frontend/music, etc.
 set -euo pipefail
@@ -59,11 +58,7 @@ SRC_DIR="${WORKDIR}/batocera-emulationstation"
 BUILD_DIR="${SRC_DIR}/build"
 PATCH_FILE="${WORKDIR}/retrobox.patch"
 
-MACHINE="$(uname -m)"
-case "${MACHINE}" in
-    aarch64|arm64) BIN_NAME="${BIN_NAME:-emulationstation_arm64}" ;;
-    *)             BIN_NAME="${BIN_NAME:-emulationstation}" ;;
-esac
+BIN_NAME="${BIN_NAME:-emulationstation}"
 
 # ---------------------------------------------------------------------------
 # Helpers
