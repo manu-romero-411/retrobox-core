@@ -13,6 +13,9 @@ log_info "Installing system dependencies (apt)..."
 sudo apt-get update
 sudo apt-get install -y \
     git \
+    unzip \
+    7zip \
+    wget \
     libfreeimage3 \
     libsdl2-2.0-0 \
     libsdl2-mixer-2.0-0 \

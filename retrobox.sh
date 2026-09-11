@@ -41,9 +41,9 @@ RUN_SCRIPT="${RETROBOX_ROOTDIR}/runtime/startup/retrobox_run.py"
 # shellcheck source=setup/setup.sh
 source "${SETUP_DIR}/setup.sh"
 # shellcheck source=setup/bios-check.sh
-source "${SETUP_DIR}/bios/bios-check.sh"
+#source "${SETUP_DIR}/bios/bios-check.sh"
 # shellcheck source=setup/bios-fetch.sh
-source "${SETUP_DIR}/bios/bios-fetch.sh"
+#source "${SETUP_DIR}/bios/bios-fetch.sh"
 
 function usage() {
 cat <<EOF

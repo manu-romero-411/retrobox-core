@@ -28,6 +28,25 @@
 #      (only the x86_64 32-bit-companion ones are architecture-specific;
 #      other 64-bit-only hosts get a smaller, generic set — see
 #      fix_wrapper_and_symlinks below).
+#
+#      NOTE on $LIB: MangoHud's bin/mangohud.in wrapper template never
+#      bakes a resolved lib path — it hardcodes the literal string "$LIB"
+#      into LD_PRELOAD/LD_LIBRARY_PATH and relies on ld.so's own dynamic
+#      string token substitution to turn it into "lib64"/"lib32" at exec
+#      time. That substitution does not reliably happen for every launcher
+#      (e.g. apps launched through a bundled/portable interpreter such as
+#      sharun, which needs SHARUN_ALLOW_LD_PRELOAD=1 just to attempt
+#      preloading at all, and known to mishandle $LIB regardless of host
+#      arch — see flightlessmango/MangoHud#665 for the same failure on
+#      plain aarch64 too). Since retrobox only ever wraps 64-bit emulator
+#      binaries, $LIB's runtime bitness-selection is never actually needed
+#      here, so fix_wrapper_and_symlinks() hardcodes the real 64-bit dir
+#      directly into the installed wrapper instead of trusting ld.so to
+#      expand $LIB — this fixes OpenGL/LD_PRELOAD hooking (e.g. Dolphin)
+#      unconditionally, on any host arch. Vulkan was never affected by
+#      this, since its implicit-layer JSON is resolved by the Vulkan
+#      loader via dlopen(), a different code path that does expand $LIB
+#      correctly.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd -P)"
@@ -171,9 +190,33 @@ PYEOF
 
 fetch_and_patch_source() {
     rm -rf "${SRC_DIR}"
-    log_info "Cloning MangoHud (${BATOCERA_VERSION})..."
-    git clone --quiet --recurse-submodules --branch "${BATOCERA_VERSION}" --depth 1 \
-        "${MANGOHUD_GIT_URL}" "${SRC_DIR}"
+
+    if [[ "${BATOCERA_VERSION}" =~ ^[0-9a-fA-F]{40}$ ]]; then
+        # Batocera no siempre pinea un tag de release (v0.8.4 etc.); a
+        # veces MANGOHUD_VERSION es directamente un hash de commit (p.ej.
+        # "Version: Commits from Jun 15, 2024" -> un SHA de 40 caracteres
+        # en mangohud.mk). Un SHA no es ni rama ni tag, así que `git
+        # clone --branch` no puede resolverlo -- ni con "tag/" delante
+        # (esa ref no existe) ni a pelo (tampoco existe como rama).
+        # GitHub sí permite obtener un commit alcanzable arbitrario por
+        # su SHA (uploadpack.allowReachableSHA1InWant), así que en este
+        # caso hacemos un fetch directo de ese commit en vez de un clone
+        # por ref.
+        log_info "Cloning MangoHud at commit ${BATOCERA_VERSION}..."
+        mkdir -p "${SRC_DIR}"
+        git -C "${SRC_DIR}" init --quiet
+        git -C "${SRC_DIR}" remote add origin "${MANGOHUD_GIT_URL}"
+        git -C "${SRC_DIR}" fetch --quiet --depth 1 origin "${BATOCERA_VERSION}"
+        git -C "${SRC_DIR}" checkout --quiet FETCH_HEAD
+        git -C "${SRC_DIR}" submodule update --init --recursive --depth 1
+    else
+        # Aquí sí es un tag real (p.ej. "v0.8.4"). --branch resuelve
+        # tags igual que ramas -- sin "tag/" delante, esa ref no existe
+        # en el repo de MangoHud.
+        log_info "Cloning MangoHud (${BATOCERA_VERSION})..."
+        git clone --quiet --recurse-submodules --branch "${BATOCERA_VERSION}" --depth 1 \
+            "${MANGOHUD_GIT_URL}" "${SRC_DIR}"
+    fi
 
     cd "${SRC_DIR}"
     shopt -s nullglob
@@ -338,22 +381,41 @@ fix_wrapper_and_symlinks() {
     local libbase="${PREFIX}/lib/mangohud"
     local bin="${PREFIX}/bin/mangohud"
     log_info "Fixing the mangohud wrapper and creating the \$LIB symlinks..."
-    
+
     if [[ -f "${bin}" ]]; then
         # Use single quotes so bash doesn't mangle the backslashes.
         # \\* matches zero or more literal backslashes before $LIB,
         # covering both "\$LIB" (meson's default) and bare "$LIB".
         as_root sed -i 's|/usr/local/\\*\$LIB|/usr/local/lib/mangohud/\\$LIB|g' "${bin}"
+
+        # MangoHud's bin/mangohud.in wrapper hardcodes the literal string
+        # "$LIB" into LD_PRELOAD/LD_LIBRARY_PATH and expects ld.so to
+        # expand it to "lib64"/"lib32" at exec time based on the target
+        # process's ELF class. That expansion doesn't reliably happen for
+        # every launcher (e.g. apps run through a bundled/portable
+        # interpreter like sharun, which needs SHARUN_ALLOW_LD_PRELOAD=1
+        # just to attempt preloading at all — and the same "$LIB isn't
+        # populated" failure is independently reported on plain aarch64,
+        # see flightlessmango/MangoHud#665), breaking OpenGL/LD_PRELOAD
+        # hooking while Vulkan (resolved via dlopen() in the Vulkan
+        # loader, a different code path) keeps working.
+        #
+        # retrobox only ever wraps 64-bit emulator binaries, so $LIB's
+        # runtime bitness-selection is never actually needed here —
+        # hardcode the real 64-bit dir directly into the installed
+        # wrapper instead of trusting ld.so to expand $LIB, on any host
+        # architecture.
+        as_root sed -i 's|\\*\$LIB|lib64|g' "${bin}"
     fi
     as_root mkdir -p "${libbase}/tls"
     ln_safe() { [[ -e "$2" || -L "$2" ]] || as_root ln -sv "$1" "$2"; }
-    
+
     # $PLATFORM-token aliases for the native build
     ln_safe lib64 "${libbase}/${MACHINE}"
     ln_safe lib64 "${libbase}/${MACHINE}-linux-gnu"
     ln_safe .     "${libbase}/lib64/${MACHINE}"
     ln_safe .     "${libbase}/lib64/${MACHINE}-linux-gnu"
-    
+
     if [[ "${MACHINE}" == "x86_64" ]]; then
         # x86_64 biarch setup
         ln_safe lib32 "${libbase}/i686"
@@ -367,7 +429,7 @@ fix_wrapper_and_symlinks() {
         # Single-arch host (aarch64, etc.): $LIB expands to "lib"
         ln_safe lib64 "${libbase}/lib"
     fi
-    
+
     echo "${libbase}/lib64" | as_root tee /etc/ld.so.conf.d/mangohud.conf >/dev/null
     [[ "${MACHINE}" == "x86_64" ]] && echo "${libbase}/lib32" | as_root tee -a /etc/ld.so.conf.d/mangohud.conf >/dev/null
     as_root ldconfig
@@ -396,7 +458,7 @@ do_install() {
     merge_stage_into_prefix
     fix_wrapper_and_symlinks
 
-    rm -rf "${WORKDIR}"
+    #rm -rf "${WORKDIR}"
     log_ok "MangoHud ${BATOCERA_VERSION} installed into ${PREFIX}."
 }
 

@@ -3,7 +3,7 @@ runtime.paths — punto de entrada único de paths y constantes de
 Retrobox.
 
 Internamente dividido por subsistema:
-    _base.py       -> genérico (XDG, ROOTDIR, bootstrap de .env, helpers de FS)
+    _base.py       -> genérico (XDG, ROOTDIR, bootstrap de retrobox.ini, helpers de FS)
     _configgen.py  -> configgen / emulatorlauncher / launcher
     _frontend.py   -> EmulationStation (runtime/startup/frontend_conf)
     _gamepadly.py  -> las 4 constantes que necesita emulatorlauncher.py
@@ -21,6 +21,8 @@ en este __init__.py.
 """
 
 from __future__ import annotations
+import logging
+from pathlib import Path
 
 from ._base import (
     CACHE,
@@ -33,6 +35,7 @@ from ._base import (
     HOOKS,
     LOGS,
     RESOURCES_DIR,
+    RETROBOX_INI,
     RETROBOX_ROOTDIR,
     ROMS,
     USERDATA,
@@ -111,6 +114,7 @@ __all__ = [
     "DEFAULTS_DIR",
     "EMULATORS",
     "ENV_FILE",
+    "RETROBOX_INI",
     "HOME_INIT",
     "HOOKS",
     "LOGS",
@@ -157,3 +161,57 @@ __all__ = [
     # _gamepadly
     "GAMEPADLY_MAPPER",
 ]
+
+class DirectoryCreationError(OSError):
+    """
+    Raised when a required directory cannot be created or accessed.
+
+    Wraps the underlying OSError (FileNotFoundError, PermissionError, etc.)
+    and carries the path that failed, so callers can build meaningful
+    error messages or notifications.
+    """
+
+    def __init__(self, path: Path, original: OSError) -> None:
+        self.path = path
+        self.original = original
+        super().__init__(f"{original}: {path}")
+
+
+def safe_mkdir(directory: Path, *, notify: bool = True) -> Path:
+    """
+    Create a directory (and its parents) with unified error handling.
+
+    On failure, logs the error, optionally sends a desktop notification,
+    and raises DirectoryCreationError so the caller can decide whether
+    to abort or continue.
+
+    Args:
+        directory: The directory path to create.
+        notify: If True, send a desktop notification on failure.
+
+    Returns:
+        The same `directory` Path, for chaining convenience.
+
+    Raises:
+        DirectoryCreationError: If the directory cannot be created.
+    """
+    try:
+        directory.mkdir(parents=True, exist_ok=True)
+    except OSError as exc:
+        # Lazy import to avoid a circular dependency at module load time
+        # (notifications.py is in runtime/utils, which may not be on the
+        # import path yet when _base.py first runs).
+        from runtime.utils.notifications import notify_error  # pylint: disable=import-outside-toplevel
+
+        msg = f"Cannot create directory: {directory}"
+        detail = f"{type(exc).__name__}: {exc}"
+
+        _logger = logging.getLogger(__name__)
+        _logger.error("%s (%s)", msg, detail)
+
+        if notify:
+            notify_error(msg, detail)
+
+        raise DirectoryCreationError(directory, exc) from exc
+
+    return directory

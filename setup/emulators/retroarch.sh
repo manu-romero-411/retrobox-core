@@ -64,8 +64,8 @@ function check_deps() {
       || error "No se pudieron instalar las dependencias de compilación (dnf)"
   else
     sudo apt-get install -y \
-      build-essential cmake make git pkg-config \
-      libsdl2-dev libvulkan-dev libx11-xcb-dev \
+      build-essential cmake make git unzip 7zip curl pkg-config \
+      libsdl2-dev libsdl2-mixer-dev libvulkan-dev libx11-xcb-dev \
       libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev libx11-dev \
       libfreetype6-dev libxml2-dev \
       libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev \

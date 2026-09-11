@@ -226,8 +226,8 @@ def start_rom(args: argparse.Namespace, maxnbplayers: int, rom: Path, original_r
                         )
 
                         if ((hud := system.config.get('hud')) and hud.lower() != 'none') or hud_bezel is not None:
-                            # 1. Activamos MangoHud vía variables de entorno.
-                            # Esto es suficiente para que la Vulkan Implicit Layer se active.
+                            # 1. Enable MangoHud via environment variables.
+                            # This is enough for the Vulkan Implicit Layer to kick in.
                             cmd.env["MANGOHUD"] = "1"
                             cmd.env["MANGOHUD_CONFIGFILE"] = str(HUD_CONFIG_FILE)
 
@@ -240,12 +240,22 @@ def start_rom(args: argparse.Namespace, maxnbplayers: int, rom: Path, original_r
                                 f.write(hudconfig)
 
                             if generator.usesOpenGLDirectPreload(system.config):
-                                # OpenGL: LD_PRELOAD directo a la ruta correcta de nuestra instalación
-                                cmd.env["LD_PRELOAD"] = "/usr/local/lib/mangohud/lib64/libMangoHud_opengl.so"
-                            
-                            # ELIMINADO: Ya no insertamos "mangohud" y "--dlsym" en cmd.array para Vulkan.
-                            # La Vulkan Implicit Layer lo gestionará automáticamente sin provocar el 
-                            # error fatal de "eglStreamPostD3DTextureANGLE" en Asahi.
+                                # OpenGL: run through the mangohud wrapper in
+                                # dlsym-hook mode. The installed wrapper now
+                                # hardcodes the real lib64 path instead of
+                                # relying on ld.so to expand "$LIB" (several
+                                # launchers, including sharun-wrapped
+                                # emulators, never expand it), so
+                                # "mangohud --dlsym" is safe to use again
+                                # instead of setting LD_PRELOAD by hand here.
+                                cmd.array = ["mangohud", "--dlsym", *cmd.array]
+
+                            # Vulkan: MANGOHUD=1 is enough to trigger the
+                            # Vulkan Implicit Layer on its own. We
+                            # deliberately do NOT prepend "mangohud" to
+                            # cmd.array here, since doing so triggers a
+                            # fatal "eglStreamPostD3DTextureANGLE" error on
+                            # Asahi.
 
                     # generate the gun help
                     try:
@@ -470,12 +480,12 @@ import re
 
 def _sanitize_hook_name(name: str) -> str:
     """
-    Sanitiza un nombre para usarlo como componente de ruta en retrohook.d/.
-    Solo afecta a la búsqueda del directorio de hooks, no a los args pasados al script.
+    Sanitize a name for use as a path component under retrohook.d/.
+    Only affects the hook directory lookup, not the args passed to the script.
     """
-    name = name.replace("/", "_")          # único caracter realmente ilegal en Linux
+    name = name.replace("/", "_")          # the only truly illegal char on Linux
     name = re.sub(r"[\x00-\x1f\x7f]", "", name)  # control chars
-    return name[:255]                      # límite de filename en ext4/btrfs
+    return name[:255]                      # filename limit on ext4/btrfs
 
 def call_retrohook(
     platform: str,
@@ -484,8 +494,8 @@ def call_retrohook(
     extra_args: Iterable[str | Path] = (),
 ) -> None:
     """
-    Invoca el sistema de hooks de retrobox.
-    Delega toda la lógica de jerarquía y ejecución al script bash retrohook.
+    Invoke retrobox's hook system.
+    Delegates all hierarchy and execution logic to the retrohook bash script.
     """
 
     if not HOOKS.is_file() or not os.access(HOOKS, os.X_OK):
@@ -493,7 +503,7 @@ def call_retrohook(
         return
 
     game_stem = Path(game).stem
-    game_hook_name = _sanitize_hook_name(game_stem)  # para la ruta
+    game_hook_name = _sanitize_hook_name(game_stem)  # for the path
 
     cmd = [str(HOOKS), platform, game_hook_name, state, str(game), *map(str, extra_args)]
 
@@ -511,8 +521,7 @@ def getHudConfig(system: Emulator, systemName: str, emulator: str, core: str, ro
     configstr = ""
 
     if bezel != "" and bezel != "none" and bezel is not None:
-        configstr = f"background_image={hudConfig_protectStr(bezel)}\nlegacy_layout=false\n"
-
+        configstr = f"image={hudConfig_protectStr(bezel)}\nlegacy_layout=false\n"
     if (mode := system.config.get('hud', 'none')) == 'none':
         return configstr + "background_alpha=0\n" # hide the background
 
@@ -550,20 +559,21 @@ def getHudConfig(system: Emulator, systemName: str, emulator: str, core: str, ro
 
 def _set_nvidia_powerd(enable: bool) -> None:
     """
-    Arranca o para nvidia-powerd.service vía el script nvidia-powerd-service.
-    No lanza excepciones: solo registra avisos si algo falla.
-    
-    Se asegura de que el binario 'nvidia-powerd' exista realmente en el sistema 
-    antes de intentar nada, garantizando compatibilidad total con sistemas 
-    AMD, Intel, Apple, Qualcomm, Nvidia antiguas o dispositivos como la Switch.
+    Start or stop nvidia-powerd.service via the nvidia-powerd-service script.
+    Never raises: only logs warnings if something fails.
+
+    Makes sure the 'nvidia-powerd' binary actually exists on the system
+    before attempting anything, guaranteeing full compatibility with
+    AMD, Intel, Apple, Qualcomm, older Nvidia systems, or devices like
+    the Switch.
     """
-    # 1. Verificar que nuestro script helper exista y sea ejecutable
+    # 1. Check that our helper script exists and is executable
     if not os.path.isfile(NVIDIA_POWERD_SCRIPT) or not os.access(NVIDIA_POWERD_SCRIPT, os.X_OK):
         _logger.debug("%s not found or not executable, skipping nvidia-powerd management", NVIDIA_POWERD_SCRIPT)
         return
 
-    # 2. Verificar que el binario real del sistema exista en el PATH
-    # Si no existe, abortamos silenciosamente. Esto protege a sistemas sin nvidia-powerd.
+    # 2. Check that the real system binary exists in PATH.
+    # If it doesn't, abort silently. This protects systems without nvidia-powerd.
     if shutil.which("nvidia-powerd") is None:
         _logger.debug("nvidia-powerd binary not found in system PATH, skipping nvidia-powerd management")
         return
@@ -585,17 +595,17 @@ def _set_nvidia_powerd(enable: bool) -> None:
 
 def apply_power_profile(desired_profile: str) -> str | None:
     """
-    Aplica el power-profile pedido. Devuelve el perfil que estaba activo antes
-    (o None si no se pudo leer / powerprofilesctl no está disponible).
-    También arranca nvidia-powerd si el perfil es 'performance', y lo para
-    en cualquier otro caso.
+    Apply the requested power profile. Returns the profile that was active
+    before (or None if it couldn't be read / powerprofilesctl isn't
+    available). Also starts nvidia-powerd if the profile is 'performance',
+    and stops it in any other case.
     """
     desired_profile = (desired_profile or "balanced").strip().lower()
     if desired_profile not in _VALID_POWER_PROFILES:
         _logger.warning("unknown power_profile '%s', falling back to 'balanced'", desired_profile)
         desired_profile = "balanced"
 
-    # Gestión de nvidia-powerd: independiente de powerprofilesctl.
+    # nvidia-powerd management: independent of powerprofilesctl.
     _set_nvidia_powerd(desired_profile == "performance")
 
     if shutil.which(_POWER_PROFILES_BIN) is None:
@@ -628,8 +638,9 @@ def apply_power_profile(desired_profile: str) -> str | None:
     return previous_profile
 
 def restore_power_profile(previous_profile: str | None) -> None:
-    # nvidia-powerd solo debe quedar activo si volvemos a 'performance';
-    # en 'balanced', 'power-saver', o si no hay perfil previo válido, se para.
+    # nvidia-powerd should only stay active if we're going back to
+    # 'performance'; for 'balanced', 'power-saver', or no valid previous
+    # profile, it gets stopped.
     _set_nvidia_powerd(previous_profile == "performance")
 
     if not previous_profile or previous_profile not in _VALID_POWER_PROFILES:
