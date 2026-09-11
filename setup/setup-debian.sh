@@ -13,6 +13,7 @@ log_info "Installing system dependencies (apt)..."
 sudo apt-get update
 sudo apt-get install -y \
     git \
+    libnotify-bin \
     unzip \
     7zip \
     wget \
