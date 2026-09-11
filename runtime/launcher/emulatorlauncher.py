@@ -521,7 +521,7 @@ def getHudConfig(system: Emulator, systemName: str, emulator: str, core: str, ro
     configstr = ""
 
     if bezel != "" and bezel != "none" and bezel is not None:
-        configstr = f"image={hudConfig_protectStr(bezel)}\nlegacy_layout=false\n"
+        configstr = f"background_image={hudConfig_protectStr(bezel)}\nlegacy_layout=false\n"
     if (mode := system.config.get('hud', 'none')) == 'none':
         return configstr + "background_alpha=0\n" # hide the background
 

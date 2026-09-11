@@ -3,12 +3,15 @@
 # the exact version/patch set Batocera ships for it, installed under
 # /usr/local. On x86_64 this builds dual 32+64 bit OpenGL/Vulkan support,
 # same as Batocera; on any other host (aarch64 and friends) there's no
-# 32-bit companion build, so it's 64-bit only.
+# 32-bit companion build, so it's 64-bit only. The 32-bit pass on x86_64
+# can also be skipped explicitly with -n (see usage below).
 #
 # Invoked by setup/setup.sh's setup_util() as:
-#   bash setup/utils/mangohud.sh -s     (source build — the only option
-#                                        this installer has)
-#   bash setup/utils/mangohud.sh -u     (uninstall)
+#   bash setup/utils/mangohud.sh -s        (source build — the only option
+#                                            this installer has)
+#   bash setup/utils/mangohud.sh -s -n     (source build, 64-bit only, even
+#                                            on x86_64)
+#   bash setup/utils/mangohud.sh -u        (uninstall)
 #
 # i.e. via `retrobox.sh --setup-util mangohud`.
 #
@@ -20,14 +23,14 @@
 #      every patch in that same folder.
 #   3. Clones MangoHud at that tag (with submodules) and applies the patches.
 #   4. Builds it for the native architecture, plus a second 32-bit pass via
-#      gcc -m32 when the host is x86_64, with --prefix /usr/local, mirroring
-#      Batocera's meson options.
+#      gcc -m32 when the host is x86_64 (unless -n was given), with
+#      --prefix /usr/local, mirroring Batocera's meson options.
 #   5. Installs the tree(s) under /usr/local/lib/mangohud/{lib64,lib32},
 #      fixes the `mangohud` wrapper and recreates the $LIB/$PLATFORM
 #      compatibility symlinks used by the project's own upstream build.sh
 #      (only the x86_64 32-bit-companion ones are architecture-specific;
-#      other 64-bit-only hosts get a smaller, generic set — see
-#      fix_wrapper_and_symlinks below).
+#      other 64-bit-only hosts — real ones, or x86_64 run with -n — get a
+#      smaller, generic set — see fix_wrapper_and_symlinks below).
 #
 #      NOTE on $LIB: MangoHud's bin/mangohud.in wrapper template never
 #      bakes a resolved lib path — it hardcodes the literal string "$LIB"
@@ -68,11 +71,27 @@ SRC_DIR="${WORKDIR}/MangoHud"
 PATCH_DIR="${WORKDIR}/patches"
 STAGE_DIR="${WORKDIR}/stage"
 
+# Parches propios de retrobox (background_image/image, etc.), mantenidos a
+# mano en el repo -- no se descargan de ningún sitio. Se generan con
+# `git format-patch` contra un tag limpio de MangoHud y se aplican DESPUÉS
+# de los de Batocera (ver apply_patches_from_dir en fetch_and_patch_source).
+LOCAL_PATCH_DIR="${SCRIPT_DIR}/mangohud-patches"
+
 MACHINE="$(uname -m)"
+
+# Set by argument parsing at the bottom of the script. When 1, the 32-bit
+# (i386) build pass is skipped even on an x86_64 host.
+SKIP_32BIT=1
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
+# True (0) when a 32-bit companion build should actually happen: only on
+# x86_64 hosts, and only when the caller hasn't opted out with -n.
+want_32bit() {
+    [[ "${MACHINE}" == "x86_64" && "${SKIP_32BIT}" -eq 0 ]]
+}
 
 detect_pkg_manager() {
     if command -v dnf >/dev/null 2>&1; then
@@ -153,6 +172,7 @@ fetch_batocera_recipe() {
     curl -fsSL "${BATOCERA_MK_RAW_URL}" -o "${WORKDIR}/mangohud.mk"
 
     BATOCERA_VERSION="$(sed -n 's/^MANGOHUD_VERSION\s*=\s*//p' "${WORKDIR}/mangohud.mk" | tr -d '[:space:]')"
+    #BATOCERA_VERSION="v0.7.2"
     if [[ -z "${BATOCERA_VERSION}" ]]; then
         log_err "Could not extract MANGOHUD_VERSION from mangohud.mk"
         exit 1
@@ -188,6 +208,38 @@ for e in picked:
 PYEOF
 }
 
+# Aplica, en orden, todos los ficheros de un directorio de parches sobre
+# ${SRC_DIR}. Se usa tanto para los parches oficiales de Batocera (descargados
+# en tiempo de ejecución en ${PATCH_DIR}) como para los propios de retrobox
+# (versionados en ${LOCAL_PATCH_DIR}).
+#
+# Se intenta primero `git apply` a secas (rápido, funciona igual con diffs
+# planos que con la cabecera mbox de `git format-patch`), luego `git apply
+# --3way` (reconstruye el contexto a partir de los blobs base cuando el
+# parche trae líneas "index" -- caso de nuestros propios parches, generados
+# con format-patch; no aporta nada con los diffs planos de Batocera, pero
+# tampoco hace daño) y por último `patch --fuzz=3` como red de seguridad
+# final. Si Batocera avanza de versión y un parche deja de aplicar limpio,
+# esto da más margen antes de fallar del todo -- pero no es infalible: un
+# aviso aquí siempre merece revisión manual antes de dar el build por bueno.
+apply_patches_from_dir() {
+    local dir="$1" label="$2"
+    shopt -s nullglob
+    local patches=("${dir}"/*)
+    shopt -u nullglob
+    if [[ "${#patches[@]}" -eq 0 ]]; then
+        log_warn "No hay parches de ${label} que aplicar."
+        return 0
+    fi
+    for p in "${patches[@]}"; do
+        log_info "Aplicando parche (${label}): $(basename "${p}")"
+        git apply --whitespace=nowarn -p1 "${p}" 2>/dev/null \
+            || git apply --whitespace=nowarn -p1 --3way "${p}" 2>/dev/null \
+            || patch -p1 --forward --fuzz=3 < "${p}" \
+            || log_warn "El parche $(basename "${p}") (${label}) no se pudo aplicar -- revísalo a mano contra el MangoHud actual."
+    done
+}
+
 fetch_and_patch_source() {
     rm -rf "${SRC_DIR}"
 
@@ -214,23 +266,13 @@ fetch_and_patch_source() {
         # tags igual que ramas -- sin "tag/" delante, esa ref no existe
         # en el repo de MangoHud.
         log_info "Cloning MangoHud (${BATOCERA_VERSION})..."
-        git clone --quiet --recurse-submodules --branch "${BATOCERA_VERSION}" --depth 1 \
+        git clone --quiet --recurse-submodules --depth 1 \
             "${MANGOHUD_GIT_URL}" "${SRC_DIR}"
     fi
 
     cd "${SRC_DIR}"
-    shopt -s nullglob
-    local patches=("${PATCH_DIR}"/*)
-    shopt -u nullglob
-    if [[ "${#patches[@]}" -eq 0 ]]; then
-        log_warn "No patches to apply (did the batocera.linux repo layout change?)."
-    fi
-    for p in "${patches[@]}"; do
-        log_info "Applying patch: $(basename "${p}")"
-        git apply --whitespace=nowarn -p1 "${p}" 2>/dev/null \
-            || patch -p1 --forward < "${p}" \
-            || { log_err "Patch $(basename "${p}") could not be applied."; exit 1; }
-    done
+    apply_patches_from_dir "${PATCH_DIR}" "batocera"
+    apply_patches_from_dir "${LOCAL_PATCH_DIR}" "retrobox"
     cd - >/dev/null
 }
 
@@ -269,9 +311,9 @@ install_build_deps() {
             local -a all_deps=("${deps[@]}")
 
             # The i686 (32-bit) multilib devel packages only exist as
-            # companions to an x86_64 install; on any other host (aarch64,
-            # etc.) there's no 32-bit build to satisfy, so skip them.
-            if [[ "${MACHINE}" == "x86_64" ]]; then
+            # companions to an x86_64 install, and are only needed when a
+            # 32-bit build is actually going to happen (skipped with -n).
+            if want_32bit; then
                 local deps32=(glibc-devel.i686 libstdc++-devel.i686 libX11-devel.i686
                               wayland-devel.i686 libxkbcommon-devel.i686
                               mesa-libGL-devel.i686 vulkan-loader-devel.i686)
@@ -284,13 +326,15 @@ install_build_deps() {
             local deps=(meson ninja-build git python3-mako glslang-tools
                         libdbus-1-dev nlohmann-json3-dev libwayland-dev
                         libxkbcommon-dev libx11-dev libdrm-dev libgl1-mesa-dev
-                        libvulkan-dev libcurl4-openssl-dev)
+                        libvulkan-dev libcurl4-openssl-dev
+                        libyaml-cpp-dev libwayland-egl-backend-dev)
             local -a all_deps=("${deps[@]}")
 
             # Same reasoning as the dnf branch: the i386 foreign-arch
             # packages are only needed to build MangoHud's 32-bit
-            # companion, which only happens on x86_64 hosts.
-            if [[ "${MACHINE}" == "x86_64" ]]; then
+            # companion, which only happens on x86_64 hosts and only when
+            # that pass hasn't been skipped with -n.
+            if want_32bit; then
                 if ! dpkg --print-foreign-architectures | grep -q i386; then
                     log_info "Enabling the i386 architecture for 32-bit libs..."
                     as_root dpkg --add-architecture i386
@@ -302,7 +346,7 @@ install_build_deps() {
                 # the moment the distro bumps its gcc version.
                 local deps32=(gcc-multilib g++-multilib libx11-dev:i386
                               libwayland-dev:i386 libxkbcommon-dev:i386
-                              libgl1-mesa-dev:i386)
+                              libgl1-mesa-dev:i386 libvulkan-dev:i386)
                 all_deps+=("${deps32[@]}")
             fi
 
@@ -317,7 +361,7 @@ install_build_deps() {
             as_root apt-get "${apt_install_opts[@]}" "${all_deps[@]}"
             ;;
         *)
-            log_warn "Unrecognized package manager; install meson, ninja, glslang, dbus/json/wayland/x11/drm/vulkan (dev) manually for your architecture (plus the 32-bit multilib variants too, if this is an x86_64 host)."
+            log_warn "Unrecognized package manager; install meson, ninja, glslang, dbus/json/wayland/x11/drm/vulkan (dev) manually for your architecture (plus the 32-bit multilib variants too, if this is an x86_64 host and you didn't pass -n)."
             ;;
     esac
 }
@@ -416,8 +460,8 @@ fix_wrapper_and_symlinks() {
     ln_safe .     "${libbase}/lib64/${MACHINE}"
     ln_safe .     "${libbase}/lib64/${MACHINE}-linux-gnu"
 
-    if [[ "${MACHINE}" == "x86_64" ]]; then
-        # x86_64 biarch setup
+    if want_32bit; then
+        # x86_64 biarch setup (a real 32-bit build was actually produced)
         ln_safe lib32 "${libbase}/i686"
         ln_safe lib32 "${libbase}/i386-linux-gnu"
         ln_safe lib32 "${libbase}/i686-linux-gnu"
@@ -426,12 +470,18 @@ fix_wrapper_and_symlinks() {
         ln_safe lib32 "${libbase}/lib"
         ln_safe ../tls "${libbase}/lib/tls"
     else
-        # Single-arch host (aarch64, etc.): $LIB expands to "lib"
+        # Single-arch host (aarch64, etc.), or x86_64 run with -n: there's
+        # no lib32 tree on disk, so $LIB must resolve to lib64 instead —
+        # pointing "lib" at a nonexistent lib32 here is what produced the
+        # dangling-symlink "No existe el fichero o el directorio" failure
+        # when the 32-bit pass was skipped/missing.
         ln_safe lib64 "${libbase}/lib"
     fi
 
     echo "${libbase}/lib64" | as_root tee /etc/ld.so.conf.d/mangohud.conf >/dev/null
-    [[ "${MACHINE}" == "x86_64" ]] && echo "${libbase}/lib32" | as_root tee -a /etc/ld.so.conf.d/mangohud.conf >/dev/null
+    if want_32bit; then
+        echo "${libbase}/lib32" | as_root tee -a /etc/ld.so.conf.d/mangohud.conf >/dev/null
+    fi
     as_root ldconfig
 }
 
@@ -449,10 +499,11 @@ do_install() {
     fetch_and_patch_source
 
     build_arch 64 "${SRC_DIR}/build/meson64" "lib/mangohud/lib64"
-    if [[ "${MACHINE}" == "x86_64" ]]; then
+
+    if want_32bit; then
         build_arch 32 "${SRC_DIR}/build/meson32" "lib/mangohud/lib32"
     else
-        log_info "Host has no 32-bit companion build on this architecture (${MACHINE}); building 64-bit only."
+        log_info "Skipping the 32-bit (i386) build."
     fi
 
     merge_stage_into_prefix
@@ -470,8 +521,9 @@ do_uninstall() {
 }
 
 usage() {
-    echo "Usage: $(basename "${BASH_SOURCE[0]}") -s | -u"
+    echo "Usage: $(basename "${BASH_SOURCE[0]}") -s [-n] | -u"
     echo "  -s   build and install MangoHud from source (Batocera's recipe)"
+    echo "  -n   (with -s) skip the 32-bit (i386) build, even on x86_64"
     echo "  -u   uninstall the install done by this script"
 }
 
