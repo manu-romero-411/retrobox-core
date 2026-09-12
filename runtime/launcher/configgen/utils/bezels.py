@@ -134,25 +134,38 @@ def fast_image_size(image_file: str | Path) -> tuple[int, int]:
 
 def resizeImage(input_png: str | Path, output_png: str | Path, screen_width: int, screen_height: int, bezel_stretch: bool = False) -> None:
     imgin = Image.open(input_png)
-    fillcolor = 'black'
-    _logger.debug("Resizing bezel: image mode %s", imgin.mode)
-    if imgin.mode != "RGBA":
-        alphaPaste(input_png, output_png, imgin, fillcolor, (screen_width, screen_height), bezel_stretch)
-    else:
+    _logger.debug("Resizing bezel: image mode %s, stretch=%s", imgin.mode, bezel_stretch)
+    
+    if bezel_stretch:
+        # ESTIRAR la imagen a las dimensiones exactas de la pantalla.
+        # Esto distorsiona el aspect ratio si es necesario, pero garantiza que 
+        # el bezel (con su hueco) ocupe toda la pantalla sin relleno negro ni recortes.
         imgout = imgin.resize((screen_width, screen_height), Image.Resampling.BICUBIC)
+        if imgout.mode != "RGBA":
+            imgout = imgout.convert("RGBA")
         imgout.save(output_png, mode="RGBA", format="PNG")
+    else:
+        fillcolor = 'black'
+        if imgin.mode != "RGBA":
+            alphaPaste(input_png, output_png, imgin, fillcolor, (screen_width, screen_height), bezel_stretch)
+        else:
+            # Comportamiento original para RGBA sin estirar
+            imgout = imgin.resize((screen_width, screen_height), Image.Resampling.BICUBIC)
+            imgout.save(output_png, mode="RGBA", format="PNG")
 
 def padImage(input_png: str | Path, output_png: str | Path, screen_width: int, screen_height: int, bezel_width: int, bezel_height: int, bezel_stretch: bool = False) -> None:
     imgin = Image.open(input_png)
     fillcolor = 'black'
     _logger.debug("Padding bezel: image mode %s", imgin.mode)
+    
     if imgin.mode != "RGBA":
         alphaPaste(input_png, output_png, imgin, fillcolor, (screen_width, screen_height), bezel_stretch)
     else:
         if bezel_stretch:
-            imgout = ImageOps.fit(imgin, (screen_width, screen_height))
+            # ESTIRAR en lugar de usar fit (que recorta) o pad (que rellena)
+            imgout = imgin.resize((screen_width, screen_height), Image.Resampling.BICUBIC)
         else:
-            imgout = ImageOps.pad(imgin, (screen_width, screen_height), color=fillcolor, centering=(0.5,0.5))
+            imgout = ImageOps.pad(imgin, (screen_width, screen_height), color=fillcolor, centering=(0.5, 0.5))
         imgout.save(output_png, mode="RGBA", format="PNG")
 
 def addQRCode(input_png: str | Path, output_png: str | Path, code: str, system: Emulator):
@@ -252,6 +265,8 @@ def tatooImage(input_png: Path, output_png: Path, system: Emulator) -> None:
     imgnew.paste(back, (0,0,w,h))
     imgnew.save(output_png, mode="RGBA", format="PNG")
 
+
+
 def alphaPaste(input_png: str | Path, output_png: str | Path, imgin: ImageFile, fillcolor: str, screensize: tuple[int, int], bezel_stretch: bool) -> None:
     # screensize=(screen_width, screen_height)
     imgin = Image.open(input_png)
@@ -259,27 +274,34 @@ def alphaPaste(input_png: str | Path, output_png: str | Path, imgin: ImageFile, 
     # Even if it can load P+A, it can't save P+A as PNG. So we have to recreate a new image to adapt it.
     if 'transparency' not in imgin.info:
         raise RetroboxException("No transparent pixels in the bezel image")
+    
     alpha = imgin.split()[-1]  # alpha from original palette + alpha
-    ix,iy = fast_image_size(input_png)
-    sx,sy = screensize
-    i_ratio = (float(ix) / float(iy))
-    s_ratio = (float(sx) / float(sy))
-
-    if (i_ratio - s_ratio > 0.01):
-        # cut off bezel sides for 16:10 screens
-        new_x = int(ix*s_ratio/i_ratio)
-        delta = int(ix-new_x)
-        borderx = delta//2
-        ix = new_x
-        alpha_new = alpha.crop((borderx, 0, new_x+borderx, iy))
-        alpha = alpha_new
-
-    imgnew = Image.new("RGBA", (ix,iy), (0,0,0,255))
-    imgnew.paste(alpha, (0,0,ix,iy))
+    ix, iy = fast_image_size(input_png)
+    sx, sy = screensize
+    
     if bezel_stretch:
-        imgout = ImageOps.fit(imgnew, screensize)
+        # ESTIRAR el canal alfa a las dimensiones exactas de la pantalla.
+        # Evitamos ImageOps.fit (que recorta) e ImageOps.pad (que rellena de negro).
+        alpha_resized = alpha.resize(screensize, Image.Resampling.BICUBIC)
+        imgout = Image.new("RGBA", screensize, (0, 0, 0, 255))
+        imgout.putalpha(alpha_resized)
     else:
-        imgout = ImageOps.pad(imgnew, screensize, color=fillcolor, centering=(0.5,0.5))
+        i_ratio = (float(ix) / float(iy))
+        s_ratio = (float(sx) / float(sy))
+
+        if (i_ratio - s_ratio > 0.01):
+            # cut off bezel sides for 16:10 screens
+            new_x = int(ix * s_ratio / i_ratio)
+            delta = int(ix - new_x)
+            borderx = delta // 2
+            ix = new_x
+            alpha_new = alpha.crop((borderx, 0, new_x + borderx, iy))
+            alpha = alpha_new
+
+        imgnew = Image.new("RGBA", (ix, iy), (0, 0, 0, 255))
+        imgnew.paste(alpha, (0, 0, ix, iy))
+        imgout = ImageOps.pad(imgnew, screensize, color=fillcolor, centering=(0.5, 0.5))
+        
     imgout.save(output_png, mode="RGBA", format="PNG")
 
 def gunBordersSize(bordersSize: str | None) -> tuple[int, int]:
