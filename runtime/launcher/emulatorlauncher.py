@@ -353,7 +353,7 @@ def getHudBezel(system: Emulator, generator: Generator, rom: Path, gameResolutio
     if generator.supportsInternalBezels():
         _logger.debug("skipping bezels for emulator %s", system.config.emulator)
         return None
-    
+
     # no good reason for a bezel
     bezel = system.config.get_str('bezel', 'none')
     bezel_tattoo = system.config.get_str('bezel.tattoo', '0')
@@ -410,8 +410,10 @@ def getHudBezel(system: Emulator, generator: Generator, rom: Path, gameResolutio
     screen_ratio = gameResolution["width"] / gameResolution["height"]
     bezel_ratio  = bezel_width / bezel_height
 
-    # stretch option (MOVED UP to be used in validation checks)
-    bezel_stretch = system.config.get_bool('bezel_stretch')
+    # Los bezels deben ocupar SIEMPRE toda la resolución objetivo.
+    # Si el aspect ratio del bezel no coincide con el de la pantalla,
+    # se estira en lugar de rechazarlo o rellenarlo con negro.
+    bezel_stretch = True
 
     # the screen and bezel ratio must be approximatly the same, UNLESS stretch is enabled
     if not bezel_stretch and bordersSize is None and abs(screen_ratio - bezel_ratio) > max_ratio_delta:
@@ -472,7 +474,30 @@ def getHudBezel(system: Emulator, generator: Generator, rom: Path, gameResolutio
         _logger.debug("bezel needs to be resized")
         output_png_file = Path("/tmp/bezel.png")
         try:
-            bezelsUtil.resizeImage(overlay_png_file, output_png_file, gameResolution["width"], gameResolution["height"], bezel_stretch)
+            bezelsUtil.resizeImage(
+                overlay_png_file,
+                output_png_file,
+                gameResolution["width"],
+                gameResolution["height"],
+                bezel_stretch,
+            )
+
+            # The PNG has been stretched independently in X/Y. The sidecar .info
+            # must receive the same transformation so the game's opening stays
+            # aligned with the transparent opening in the bezel.
+            if overlay_info_file.exists():
+                output_info_file = Path("/tmp/bezel.info")
+                bezelsUtil.resizeInfo(
+                    overlay_info_file,
+                    output_info_file,
+                    bezel_width,
+                    bezel_height,
+                    gameResolution["width"],
+                    gameResolution["height"],
+                    keep_aspect_ratio=True,
+                )
+                if output_info_file.exists():
+                    overlay_info_file = output_info_file
         except Exception as e:
             _logger.error("failed to resize the image %s", e)
             return None

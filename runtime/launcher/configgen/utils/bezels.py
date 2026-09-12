@@ -132,17 +132,18 @@ def fast_image_size(image_file: str | Path) -> tuple[int, int]:
             return -1, -1
         return struct.unpack('>ii', head[16:24]) #image width, height
 
-def resizeImage(input_png: str | Path, output_png: str | Path, screen_width: int, screen_height: int, bezel_stretch: bool = False) -> None:
+def resizeImage(input_png: str | Path, output_png: str | Path, screen_width: int, screen_height: int, bezel_stretch: bool = True) -> None:
     imgin = Image.open(input_png)
     _logger.debug("Resizing bezel: image mode %s, stretch=%s", imgin.mode, bezel_stretch)
-    
+
     if bezel_stretch:
-        # ESTIRAR la imagen a las dimensiones exactas de la pantalla.
-        # Esto distorsiona el aspect ratio si es necesario, pero garantiza que 
-        # el bezel (con su hueco) ocupe toda la pantalla sin relleno negro ni recortes.
-        imgout = imgin.resize((screen_width, screen_height), Image.Resampling.BICUBIC)
-        if imgout.mode != "RGBA":
-            imgout = imgout.convert("RGBA")
+        # Estirar TODA la imagen a la resolución objetivo.
+        # Convertimos primero a RGBA para conservar tanto el artwork como
+        # la transparencia de los PNG Palette+alpha de TheBezelProject.
+        imgout = imgin.convert("RGBA").resize(
+            (screen_width, screen_height),
+            Image.Resampling.BICUBIC,
+        )
         imgout.save(output_png, mode="RGBA", format="PNG")
     else:
         fillcolor = 'black'
@@ -153,11 +154,90 @@ def resizeImage(input_png: str | Path, output_png: str | Path, screen_width: int
             imgout = imgin.resize((screen_width, screen_height), Image.Resampling.BICUBIC)
             imgout.save(output_png, mode="RGBA", format="PNG")
 
-def padImage(input_png: str | Path, output_png: str | Path, screen_width: int, screen_height: int, bezel_width: int, bezel_height: int, bezel_stretch: bool = False) -> None:
+def resizeInfo(
+    input_info: str | Path,
+    output_info: str | Path,
+    source_width: int,
+    source_height: int,
+    target_width: int,
+    target_height: int,
+    keep_aspect_ratio: bool = True,
+) -> None:
+    """Resize pixel-based coordinates from a bezel .info file.
+
+    When stretching the PNG, this scales coordinates uniformly (or proportionally)
+    so that the inner game viewport preserves its expected aspect ratio.
+    """
+    input_info = Path(input_info)
+    output_info = Path(output_info)
+
+    try:
+        with input_info.open(encoding="utf-8") as f:
+            infos = json.load(f)
+    except Exception as exc:
+        _logger.warning("unable to read bezel info %s: %s", input_info, exc)
+        return
+
+    if source_width <= 0 or source_height <= 0:
+        _logger.warning(
+            "invalid source bezel size %sx%s while resizing %s",
+            source_width, source_height, input_info,
+        )
+        return
+
+    scale_x = target_width / source_width
+    scale_y = target_height / source_height
+
+    infos["width"] = target_width
+    infos["height"] = target_height
+
+    if keep_aspect_ratio and all(k in infos for k in ("left", "right", "top", "bottom")):
+        # Dimensiones originales del espacio reservado para el juego
+        game_orig_w = source_width - infos["left"] - infos["right"]
+        game_orig_h = source_height - infos["top"] - infos["bottom"]
+
+        if game_orig_w > 0 and game_orig_h > 0:
+            aspect_ratio = game_orig_w / game_orig_h
+
+            # Usar la escala vertical (Y) como referencia principal
+            new_top = round(infos["top"] * scale_y)
+            new_bottom = round(infos["bottom"] * scale_y)
+            new_game_h = target_height - new_top - new_bottom
+
+            # Calcular el nuevo ancho proporcional
+            new_game_w = round(new_game_h * aspect_ratio)
+
+            # Centrar horizontalmente el viewport respecto a los límites escalados
+            total_margin_x = target_width - new_game_w
+            orig_margin_ratio = infos["left"] / (infos["left"] + infos["right"]) if (infos["left"] + infos["right"]) > 0 else 0.5
+
+            infos["top"] = new_top
+            infos["bottom"] = new_bottom
+            infos["left"] = round(total_margin_x * orig_margin_ratio)
+            infos["right"] = target_width - new_game_w - infos["left"]
+        else:
+            infos["left"] = round(infos["left"] * scale_x)
+            infos["right"] = round(infos["right"] * scale_x)
+            infos["top"] = round(infos["top"] * scale_y)
+            infos["bottom"] = round(infos["bottom"] * scale_y)
+    else:
+        if "left" in infos:
+            infos["left"] = round(infos["left"] * scale_x)
+        if "right" in infos:
+            infos["right"] = round(infos["right"] * scale_x)
+        if "top" in infos:
+            infos["top"] = round(infos["top"] * scale_y)
+        if "bottom" in infos:
+            infos["bottom"] = round(infos["bottom"] * scale_y)
+
+    with output_info.open("w", encoding="utf-8") as f:
+        json.dump(infos, f, ensure_ascii=False, separators=(",", ":"))
+
+def padImage(input_png: str | Path, output_png: str | Path, screen_width: int, screen_height: int, bezel_width: int, bezel_height: int, bezel_stretch: bool = True) -> None:
     imgin = Image.open(input_png)
     fillcolor = 'black'
     _logger.debug("Padding bezel: image mode %s", imgin.mode)
-    
+
     if imgin.mode != "RGBA":
         alphaPaste(input_png, output_png, imgin, fillcolor, (screen_width, screen_height), bezel_stretch)
     else:
@@ -274,17 +354,19 @@ def alphaPaste(input_png: str | Path, output_png: str | Path, imgin: ImageFile, 
     # Even if it can load P+A, it can't save P+A as PNG. So we have to recreate a new image to adapt it.
     if 'transparency' not in imgin.info:
         raise RetroboxException("No transparent pixels in the bezel image")
-    
+
     alpha = imgin.split()[-1]  # alpha from original palette + alpha
     ix, iy = fast_image_size(input_png)
     sx, sy = screensize
-    
+
     if bezel_stretch:
-        # ESTIRAR el canal alfa a las dimensiones exactas de la pantalla.
-        # Evitamos ImageOps.fit (que recorta) e ImageOps.pad (que rellena de negro).
-        alpha_resized = alpha.resize(screensize, Image.Resampling.BICUBIC)
-        imgout = Image.new("RGBA", screensize, (0, 0, 0, 255))
-        imgout.putalpha(alpha_resized)
+        # No reconstruir la imagen sobre un canvas negro.
+        # Convertir el PNG Palette+alpha directamente a RGBA conserva el
+        # artwork y su transparencia, y después se estira completo.
+        imgout = imgin.convert("RGBA").resize(
+            screensize,
+            Image.Resampling.BICUBIC,
+        )
     else:
         i_ratio = (float(ix) / float(iy))
         s_ratio = (float(sx) / float(sy))
@@ -301,7 +383,7 @@ def alphaPaste(input_png: str | Path, output_png: str | Path, imgin: ImageFile, 
         imgnew = Image.new("RGBA", (ix, iy), (0, 0, 0, 255))
         imgnew.paste(alpha, (0, 0, ix, iy))
         imgout = ImageOps.pad(imgnew, screensize, color=fillcolor, centering=(0.5, 0.5))
-        
+
     imgout.save(output_png, mode="RGBA", format="PNG")
 
 def gunBordersSize(bordersSize: str | None) -> tuple[int, int]:
