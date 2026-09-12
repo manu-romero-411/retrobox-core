@@ -4,20 +4,21 @@
 from __future__ import annotations
 
 import argparse
-from copy import deepcopy
 import contextlib
 import ctypes
-from datetime import datetime
 import json
 import logging
 import os
-from pathlib import Path
+import re
 import shutil
 import signal
 import subprocess
 import sys
 import threading
 import time
+from copy import deepcopy
+from datetime import datetime
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pyudev
@@ -249,24 +250,7 @@ def start_rom(args: argparse.Namespace, maxnbplayers: int, rom: Path, original_r
                                     "installation found (bundled or system)."
                                 )
                             else:
-                                # 1. Enable MangoHud via environment variables.
-                                # This is enough for the Vulkan Implicit Layer to kick in.
-                                cmd.env["MANGOHUD"] = "1"
-                                cmd.env["MANGOHUD_CONFIGFILE"] = str(HUD_CONFIG_FILE)
-
-                                if mangohud_bin == MANGOHUD_BIN and MANGOHUD_VULKAN_LAYER_DIR.is_dir():
-                                    # Point the Vulkan loader at our bundled
-                                    # implicit-layer manifest so it picks up
-                                    # the bezel-capable build instead of
-                                    # whatever the system may already have
-                                    # registered under the same layer name.
-                                    existing_layer_path = os.environ.get("VK_ADD_LAYER_PATH", "")
-                                    cmd.env["VK_ADD_LAYER_PATH"] = os.pathsep.join(
-                                        path for path in (
-                                            str(MANGOHUD_VULKAN_LAYER_DIR),
-                                            existing_layer_path,
-                                        ) if path
-                                    )
+                                _configure_mangohud_env(cmd, mangohud_bin)
 
                                 hudconfig = getHudConfig(
                                     system, args.systemname, system.config.emulator,
@@ -514,8 +498,6 @@ def getHudBezel(system: Emulator, generator: Generator, rom: Path, gameResolutio
     _logger.debug("applying bezel %s", overlay_png_file)
     return overlay_png_file
 
-import re
-
 def _sanitize_hook_name(name: str) -> str:
     """
     Sanitize a name for use as a path component under retrohook.d/.
@@ -620,6 +602,64 @@ def _resolve_mangohud_binary() -> Path | None:
         return Path(system_mangohud)
 
     return None
+
+
+def _configure_mangohud_env(cmd: Command, mangohud_bin: Path) -> None:
+    """Set the environment variables that drive the MangoHud Vulkan layer.
+
+    There are two distinct MangoHud installs that can be in play:
+
+    - The bundled retrobox build (bezel/background_image support),
+      registered under its own "RETROBOX_MANGOHUD" implicit layer so it
+      never collides with a system-wide install.
+    - Whatever system-wide "mangohud" (apt/dnf, etc.) might be
+      installed, registered under the vanilla "MANGOHUD" implicit
+      layer, with no bezel support.
+
+    Only one should ever be enabled for a given launch, and the other
+    one's implicit layer must be actively disabled -- not left alone --
+    so it can't "conquer" a process retrobox is trying to overlay.
+
+    Important Vulkan Loader gotcha: a layer's "disable_environment"
+    check is presence-only, not value-based. Setting a variable to "0"
+    still counts as "present" and forces the layer off regardless of
+    any other variable. So to truly enable a layer, its own *_DISABLE
+    variable must be entirely absent from the child's environment, not
+    merely set to a falsy value. cmd.env supports this via a None
+    sentinel: run_command() strips any key whose value is None from the
+    environment it hands to the child process, instead of just setting
+    it to "0".
+
+    Args:
+        cmd: The Command whose env will be updated in place.
+        mangohud_bin: The MangoHud binary resolved by
+            _resolve_mangohud_binary(), used to tell which of the two
+            installs is actually going to run.
+    """
+    is_retrobox_build = mangohud_bin == MANGOHUD_BIN
+
+    if is_retrobox_build:
+        # Bundled retrobox build: drive it via its own layer, and force
+        # the system layer off.
+        cmd.env["RETROBOX_MANGOHUD"] = "1"
+        cmd.env["RETROBOX_MANGOHUD_DISABLE"] = None
+        cmd.env["MANGOHUD"] = "0"
+        cmd.env["DISABLE_MANGOHUD"] = "1"
+    else:
+        # Fell back to whatever "mangohud" is on PATH. That build has
+        # no notion of RETROBOX_MANGOHUD, and doesn't carry the
+        # background_image/bezel patch, so this is a best-effort
+        # overlay without bezel support.
+        _logger.info(
+            "Using the system MangoHud install for the HUD overlay "
+            "(bezel/background image will not be rendered)."
+        )
+        cmd.env["MANGOHUD"] = "1"
+        cmd.env["DISABLE_MANGOHUD"] = None
+        cmd.env["RETROBOX_MANGOHUD"] = "0"
+        cmd.env["RETROBOX_MANGOHUD_DISABLE"] = "1"
+
+    cmd.env["MANGOHUD_CONFIGFILE"] = str(HUD_CONFIG_FILE)
 
 
 def _set_nvidia_powerd(enable: bool) -> None:
@@ -798,7 +838,6 @@ def _controller_monitor_thread():
             if current_paths != new_paths:
                 _logger.info(">>> [Check 2] Controller state changed. Old Paths: %s. New Paths: %s", current_paths, new_paths)
                 _active_player_controllers = new_active_controllers
-                reconfigure_needed = True
             else:
                 _logger.info(">>> [Check 2] No change in assigned controller paths detected.")
 
@@ -811,14 +850,22 @@ def run_command(command: Command) -> int:
     """
     global proc
 
-    # compute environment : first the current envs, then override by values set at generator level
+    # Compute the environment: current os.environ overridden by
+    # generator-level values. A None value in command.env means "unset
+    # this variable, even if it's currently inherited from the parent
+    # environment" -- e.g. to defeat a login-session default such as
+    # RETROBOX_MANGOHUD_DISABLE=1. This is a local variable rather than
+    # something stored back on `command`, since subprocess.Popen (and
+    # Command itself) only understand str/Path values, never None.
     envvars: dict[str, str | Path] = dict(os.environ)
-    envvars.update(command.env)
-    command.env = envvars
+    for key, value in command.env.items():
+        if value is None:
+            envvars.pop(key, None)
+        else:
+            envvars[key] = value
 
-    #_logger.debug("command: %s", command)
     _logger.info("command: %s", command.array)
-    _logger.debug("env: %s", command.env)
+    _logger.debug("env: %s", envvars)
 
     if not command.array:
         raise BadCommandLineArguments
@@ -832,7 +879,7 @@ def run_command(command: Command) -> int:
     try:
         with subprocess.Popen(
             command.array,
-            env=command.env,
+            env=envvars,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE
         ) as proc:
@@ -853,9 +900,9 @@ def run_command(command: Command) -> int:
 
     return exitcode
 
-def signal_handler(signal: int, frame: FrameType | None):
+def signal_handler(sig: int, frame: FrameType | None):
     global proc
-    _logger.debug('Exiting')
+    _logger.debug('Exiting (signal %s)', sig)
     if proc:
         _logger.debug('killing proc')
         proc.kill()

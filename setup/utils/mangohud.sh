@@ -1,11 +1,7 @@
 #!/usr/bin/env bash
 # setup/utils/mangohud.sh — build & install MangoHud from source, following
-# the exact version/patch set Batocera ships for it, installed under its
-# own private prefix ($RETROBOX_ROOTDIR/resources/mangohud) instead of
-# /usr/local: this build carries retrobox's own bezel-support patches on
-# top of Batocera's, and it must never shadow (or be shadowed by) whatever
-# MangoHud the user may already have installed system-wide for other
-# purposes. On x86_64 this builds dual 32+64 bit OpenGL/Vulkan support,
+# the exact version/patch set Batocera ships for it, installed under
+# /usr/local. On x86_64 this builds dual 32+64 bit OpenGL/Vulkan support,
 # same as Batocera; on any other host (aarch64 and friends) there's no
 # 32-bit companion build, so it's 64-bit only. The 32-bit pass on x86_64
 # can also be skipped explicitly with -n (see usage below).
@@ -20,77 +16,69 @@
 # i.e. via `retrobox.sh --setup-util mangohud`.
 #
 # What -s does:
-#   1. Removes any previous from-source install done by THIS script under
-#      its own prefix (never touches a system-wide dnf/apt/manual install —
-#      that one is left alone on purpose).
+#   1. Detects and removes any existing MangoHud install (dnf, apt, or a
+#      previous from-source install done by this same script).
 #   2. Downloads package/batocera/utils/mangohud/mangohud.mk from the
 #      batocera.linux repo to read which tag Batocera builds, and downloads
 #      every patch in that same folder.
 #   3. Clones MangoHud at that tag (with submodules) and applies the patches.
 #   4. Builds it for the native architecture, plus a second 32-bit pass via
 #      gcc -m32 when the host is x86_64 (unless -n was given), with
-#      --prefix "${PREFIX}", mirroring Batocera's meson options.
-#   5. Installs the tree(s) under "${PREFIX}/lib/mangohud/{lib64,lib32}",
+#      --prefix /usr/local, mirroring Batocera's meson options.
+#   5. Installs the tree(s) under /usr/local/lib/mangohud/{lib64,lib32},
 #      fixes the `mangohud` wrapper and recreates the $LIB/$PLATFORM
 #      compatibility symlinks used by the project's own upstream build.sh
 #      (only the x86_64 32-bit-companion ones are architecture-specific;
 #      other 64-bit-only hosts — real ones, or x86_64 run with -n — get a
-#      smaller, generic set — see fix_wrapper_and_symlinks below). Since
-#      the prefix is private, none of this touches the system-wide loader
-#      cache (no /etc/ld.so.conf.d entry, no ldconfig run).
+#      smaller, generic set — see fix_wrapper_and_symlinks below).
 #
-#      NOTE on $LIB: MangoHud's bin/mangohud.in wrapper template never
-#      bakes a resolved lib path — it hardcodes the literal string "$LIB"
-#      into LD_PRELOAD/LD_LIBRARY_PATH and relies on ld.so's own dynamic
-#      string token substitution to turn it into "lib64"/"lib32" at exec
-#      time. That substitution does not reliably happen for every launcher
-#      (e.g. apps launched through a bundled/portable interpreter such as
-#      sharun, which needs SHARUN_ALLOW_LD_PRELOAD=1 just to attempt
-#      preloading at all, and known to mishandle $LIB regardless of host
-#      arch — see flightlessmango/MangoHud#665 for the same failure on
-#      plain aarch64 too). Since retrobox only ever wraps 64-bit emulator
-#      binaries, $LIB's runtime bitness-selection is never actually needed
-#      here, so fix_wrapper_and_symlinks() hardcodes the real 64-bit dir
-#      directly into the installed wrapper instead of trusting ld.so to
-#      expand $LIB — this fixes OpenGL/LD_PRELOAD hooking (e.g. Dolphin)
-#      unconditionally, on any host arch. Vulkan was never affected by
-#      this, since its implicit-layer JSON is resolved by the Vulkan
-#      loader via dlopen(), a different code path that does expand $LIB
-#      correctly, and stays relative to the manifest file's own location
-#      regardless of which prefix it's installed under.
+#      NOTE on $LIB: MangoHud's bin/mangohud.in wrapper template, by
+#      default, doesn't bake a resolved lib path — it hardcodes the
+#      literal string "$LIB" into LD_PRELOAD/LD_LIBRARY_PATH and relies on
+#      ld.so's own dynamic string token substitution to turn it into
+#      "lib64"/"lib32" at exec time. That substitution does not reliably
+#      happen for every launcher (e.g. apps launched through a
+#      bundled/portable interpreter such as sharun, which needs
+#      SHARUN_ALLOW_LD_PRELOAD=1 just to attempt preloading at all, and
+#      known to mishandle $LIB regardless of host arch — see
+#      flightlessmango/MangoHud#665 for the same failure on plain aarch64
+#      too). Since retrobox only ever wraps 64-bit emulator binaries,
+#      $LIB's runtime bitness-selection is never actually needed here, so
+#      the build passes -Ddynamic_string_tokens=false (meson_opts_common)
+#      to make Meson bake the real absolute libdir straight into the
+#      wrapper at build time instead — this fixes OpenGL/LD_PRELOAD
+#      hooking (e.g. Dolphin) unconditionally, on any host arch, with no
+#      post-install patching needed. Vulkan was never affected by this,
+#      since its implicit-layer JSON is already generated from the
+#      absolute libdir too (src/meson.build's ld_libdir_mangohud_abs),
+#      never from the "$LIB" token.
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd -P)"
+RETROBOX_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. >/dev/null 2>&1 && pwd -P)"
+SCRIPT_DIR="${RETROBOX_ROOT}/setup/utils"
+
 # shellcheck source=../lib/log.sh
 source "${SCRIPT_DIR}/../lib/log.sh"
-
-# setup/utils/mangohud.sh -> setup/utils -> setup -> retrobox root.
-# Honors an already-exported RETROBOX_ROOTDIR (same convention used by
-# runtime.paths on the Python side) instead of always deriving it from
-# this script's own location.
-RETROBOX_ROOTDIR="${RETROBOX_ROOTDIR:-$(cd "${SCRIPT_DIR}/../.." >/dev/null 2>&1 && pwd -P)}"
 
 MANGOHUD_GIT_URL="https://github.com/flightlessmango/MangoHud.git"
 BATOCERA_PKG_DIR="package/batocera/utils/mangohud"
 BATOCERA_MK_RAW_URL="https://raw.githubusercontent.com/batocera-linux/batocera.linux/master/${BATOCERA_PKG_DIR}/mangohud.mk"
 BATOCERA_API_DIR_URL="https://api.github.com/repos/batocera-linux/batocera.linux/contents/${BATOCERA_PKG_DIR}"
 
-# Private prefix: must match runtime.paths._configgen.MANGOHUD_PREFIX_DIR
-# on the Python side, so emulatorlauncher.py finds what we build here.
-PREFIX="${RETROBOX_ROOTDIR}/resources/mangohud"
-STATE_DIR="${PREFIX}/share/retrobox"
-MANIFEST_FILE="${STATE_DIR}/mangohud.manifest"
-VERSION_FILE="${STATE_DIR}/mangohud.version"
+PREFIX="${RETROBOX_ROOT}/resources/mangohud"
+PACKAGE_STATE_DIR="${RETROBOX_ROOT}/setup/.packages/utils/mangohud"
+MANIFEST_FILE="${PACKAGE_STATE_DIR}/mangohud.manifest"
+VERSION_FILE="${PACKAGE_STATE_DIR}/mangohud.version"
 
 WORKDIR="${TMPDIR:-/tmp}/retrobox-mangohud-build"
 SRC_DIR="${WORKDIR}/MangoHud"
 PATCH_DIR="${WORKDIR}/patches"
 STAGE_DIR="${WORKDIR}/stage"
 
-# Retrobox's own patches (background_image/image support, etc.), kept by
-# hand in the repo — not downloaded from anywhere. Generated with
-# `git format-patch` against a clean MangoHud tag and applied AFTER
-# Batocera's own (see apply_patches_from_dir in fetch_and_patch_source).
+# Parches propios de retrobox (background_image/image, etc.), mantenidos a
+# mano en el repo -- no se descargan de ningún sitio. Se generan con
+# `git format-patch` contra un tag limpio de MangoHud y se aplican DESPUÉS
+# de los de Batocera (ver apply_patches_from_dir en fetch_and_patch_source).
 LOCAL_PATCH_DIR="${SCRIPT_DIR}/mangohud-patches"
 
 MACHINE="$(uname -m)"
@@ -129,13 +117,7 @@ as_root() {
 }
 
 # ---------------------------------------------------------------------------
-# Remove any previous retrobox-private MangoHud installation
-#
-# This ONLY ever touches "${PREFIX}" (retrobox's own private install,
-# tracked via MANIFEST_FILE). A system-wide MangoHud installed via
-# dnf/apt, or a manual install elsewhere under /usr, is intentionally
-# left untouched — that's a separate install for the user's other apps
-# and retrobox has no business removing it.
+# Remove any previous MangoHud installation
 # ---------------------------------------------------------------------------
 
 uninstall_from_source_manifest() {
@@ -143,18 +125,62 @@ uninstall_from_source_manifest() {
     log_info "Removing files listed in ${MANIFEST_FILE}..."
     tac "${MANIFEST_FILE}" | while IFS= read -r path; do
         [[ -e "${path}" || -L "${path}" ]] || continue
-        rm -f "${path}" 2>/dev/null || rmdir "${path}" 2>/dev/null || true
+        as_root rm -f "${path}" 2>/dev/null || as_root rmdir "${path}" 2>/dev/null || true
     done
+    # El manifiesto pertenece al usuario, no necesita as_root para borrarse
     rm -f "${MANIFEST_FILE}" "${VERSION_FILE}"
 }
 
 remove_existing_install() {
-    if [[ -f "${MANIFEST_FILE}" ]]; then
-        log_warn "A previous retrobox-private install was detected — cleaning it up before rebuilding."
-        uninstall_from_source_manifest
-    else
-        log_info "No previous retrobox-private MangoHud installation found."
+    local found=0
+    local user_vulkan_dir="${HOME}/.local/share/vulkan/implicit_layer.d"
+    local prefix_vulkan_dir="${PREFIX}/share/vulkan/implicit_layer.d"
+
+    if rpm -q mangohud &>/dev/null 2>&1; then
+        found=1
+        log_warn "MangoHud installed via dnf/rpm — removing it."
+        as_root dnf remove -y mangohud
     fi
+
+    if dpkg -s mangohud &>/dev/null 2>&1; then
+        found=1
+        log_warn "MangoHud installed via apt/dpkg — removing it."
+        as_root apt-get remove -y mangohud
+    fi
+
+    if [[ -f "${MANIFEST_FILE}" ]]; then
+        found=1
+        log_warn "A previous from-source install was detected — cleaning it up before rebuilding."
+        uninstall_from_source_manifest
+    fi
+
+    # Limpiar legacy del sistema
+    for legacy in /usr/lib/mangohud /usr/bin/mangohud /usr/bin/mangoplot \
+                  /usr/share/vulkan/implicit_layer.d/RetroboxMangoHud.x86_64.json \
+                  /usr/share/vulkan/implicit_layer.d/RetroboxMangoHud.x86.json \
+                  /usr/share/vulkan/implicit_layer.d/mangohud.json; do
+        if [[ -e "${legacy}" ]]; then
+            found=1
+            log_warn "Leftover from a manual install under /usr: ${legacy}"
+            as_root rm -rf "${legacy}"
+        fi
+    done
+
+    # Limpiar legacy del directorio de usuario y del prefix
+    for legacy in "${user_vulkan_dir}/RetroboxMangoHud.x86_64.json" \
+                  "${user_vulkan_dir}/RetroboxMangoHud.x86.json" \
+                  "${user_vulkan_dir}/mangohud.json" \
+                  "${prefix_vulkan_dir}/RetroboxMangoHud.x86_64.json" \
+                  "${prefix_vulkan_dir}/RetroboxMangoHud.x86.json" \
+                  "${prefix_vulkan_dir}/mangohud.json"; do
+        if [[ -e "${legacy}" ]]; then
+            found=1
+            log_warn "Leftover from a manual install: ${legacy}"
+            rm -f "${legacy}"
+        fi
+    done
+
+    [[ "${found}" -eq 0 ]] && log_info "No previous MangoHud installation found."
 }
 
 # ---------------------------------------------------------------------------
@@ -168,7 +194,6 @@ fetch_batocera_recipe() {
     curl -fsSL "${BATOCERA_MK_RAW_URL}" -o "${WORKDIR}/mangohud.mk"
 
     BATOCERA_VERSION="$(sed -n 's/^MANGOHUD_VERSION\s*=\s*//p' "${WORKDIR}/mangohud.mk" | tr -d '[:space:]')"
-    #BATOCERA_VERSION="v0.7.2"
     if [[ -z "${BATOCERA_VERSION}" ]]; then
         log_err "Could not extract MANGOHUD_VERSION from mangohud.mk"
         exit 1
@@ -204,34 +229,25 @@ for e in picked:
 PYEOF
 }
 
-# Applies, in order, every file in a patch directory on top of ${SRC_DIR}.
-# Used both for Batocera's official patches (downloaded at runtime into
-# ${PATCH_DIR}) and for retrobox's own (versioned under ${LOCAL_PATCH_DIR}).
-#
-# First tries a plain `git apply` (fast, works with both flat diffs and
-# `git format-patch`'s mbox header), then `git apply --3way` (rebuilds
-# context from the base blobs when the patch carries "index" lines — our
-# own format-patch-generated patches; a no-op for Batocera's flat diffs,
-# but harmless), and finally `patch --fuzz=3` as a last-resort safety net.
-# If Batocera bumps its MangoHud version and a patch stops applying
-# cleanly, this buys more margin before failing outright — but it's not
-# foolproof: a warning here always deserves a manual review before trusting
-# the build.
+# Aplica, en orden, todos los ficheros de un directorio de parches sobre
+# ${SRC_DIR}. Se usa tanto para los parches oficiales de Batocera (descargados
+# en tiempo de ejecución en ${PATCH_DIR}) como para los propios de retrobox
+# (versionados en ${LOCAL_PATCH_DIR}).
 apply_patches_from_dir() {
     local dir="$1" label="$2"
     shopt -s nullglob
     local patches=("${dir}"/*)
     shopt -u nullglob
     if [[ "${#patches[@]}" -eq 0 ]]; then
-        log_warn "No ${label} patches to apply."
+        log_warn "No hay parches de ${label} que aplicar."
         return 0
     fi
     for p in "${patches[@]}"; do
-        log_info "Applying patch (${label}): $(basename "${p}")"
+        log_info "Aplicando parche (${label}): $(basename "${p}")"
         git apply --whitespace=nowarn -p1 "${p}" 2>/dev/null \
             || git apply --whitespace=nowarn -p1 --3way "${p}" 2>/dev/null \
             || patch -p1 --forward --fuzz=3 < "${p}" \
-            || log_warn "Patch $(basename "${p}") (${label}) could not be applied -- review it by hand against the current MangoHud."
+            || log_warn "El parche $(basename "${p}") (${label}) no se pudo aplicar -- revísalo a mano contra el MangoHud actual."
     done
 }
 
@@ -239,15 +255,6 @@ fetch_and_patch_source() {
     rm -rf "${SRC_DIR}"
 
     if [[ "${BATOCERA_VERSION}" =~ ^[0-9a-fA-F]{40}$ ]]; then
-        # Batocera doesn't always pin a release tag (v0.8.4 etc.);
-        # sometimes MANGOHUD_VERSION is a bare commit hash (e.g.
-        # "Version: Commits from Jun 15, 2024" -> a 40-char SHA in
-        # mangohud.mk). A SHA is neither a branch nor a tag, so `git
-        # clone --branch` can't resolve it -- not with "tag/" in front
-        # (that ref doesn't exist) nor bare (not a branch either).
-        # GitHub does allow fetching an arbitrary reachable commit by its
-        # SHA (uploadpack.allowReachableSHA1InWant), so in this case we
-        # fetch that commit directly instead of cloning by ref.
         log_info "Cloning MangoHud at commit ${BATOCERA_VERSION}..."
         mkdir -p "${SRC_DIR}"
         git -C "${SRC_DIR}" init --quiet
@@ -256,9 +263,6 @@ fetch_and_patch_source() {
         git -C "${SRC_DIR}" checkout --quiet FETCH_HEAD
         git -C "${SRC_DIR}" submodule update --init --recursive --depth 1
     else
-        # This is a real tag (e.g. "v0.8.4"). --branch resolves tags
-        # just like branches -- without "tag/" in front, since that ref
-        # doesn't exist in the MangoHud repo.
         log_info "Cloning MangoHud (${BATOCERA_VERSION})..."
         git clone --quiet --recurse-submodules --depth 1 \
             "${MANGOHUD_GIT_URL}" "${SRC_DIR}"
@@ -274,21 +278,7 @@ fetch_and_patch_source() {
 # Build dependencies (including 32-bit)
 # ---------------------------------------------------------------------------
 
-# Detects whether any "*-backports" repository is enabled and prints its
-# suite name (e.g. "trixie-backports", "bookworm-backports",
-# "noble-backports"...), or nothing if none is enabled.
-#
-# Relies on `apt-cache policy`, which already aggregates ALL configured
-# sources regardless of where/how they're declared: the classic one-line
-# format (/etc/apt/sources.list and /etc/apt/sources.list.d/*.list) and the
-# newer deb822 format (*.sources). This way we don't have to hand-parse
-# either format, and it works the same whether the system is on stable with
-# backports enabled, on testing/sid (where backports doesn't exist, so
-# nothing is detected), or on an Ubuntu with its own "<codename>-backports".
 detect_apt_backports_suite() {
-    # The "|| true" is needed because with `set -e` a grep with no matches
-    # (a system without backports, e.g. testing/sid) returns 1 and would
-    # abort the whole script when assigning the result to a variable.
     apt-cache policy 2>/dev/null \
         | grep -oP '\ba=\K[A-Za-z0-9._-]+-backports' \
         | sort -u | head -n1 || true
@@ -304,9 +294,6 @@ install_build_deps() {
                         vulkan-loader-devel vulkan-headers libcurl-devel)
             local -a all_deps=("${deps[@]}")
 
-            # The i686 (32-bit) multilib devel packages only exist as
-            # companions to an x86_64 install, and are only needed when a
-            # 32-bit build is actually going to happen (skipped with -n).
             if want_32bit; then
                 local deps32=(glibc-devel.i686 libstdc++-devel.i686 libX11-devel.i686
                               wayland-devel.i686 libxkbcommon-devel.i686
@@ -324,20 +311,12 @@ install_build_deps() {
                         libyaml-cpp-dev libwayland-egl-backend-dev)
             local -a all_deps=("${deps[@]}")
 
-            # Same reasoning as the dnf branch: the i386 foreign-arch
-            # packages are only needed to build MangoHud's 32-bit
-            # companion, which only happens on x86_64 hosts and only when
-            # that pass hasn't been skipped with -n.
             if want_32bit; then
                 if ! dpkg --print-foreign-architectures | grep -q i386; then
                     log_info "Enabling the i386 architecture for 32-bit libs..."
                     as_root dpkg --add-architecture i386
                     as_root apt-get update
                 fi
-                # gcc/g++-multilib bring in whichever 32-bit libstdc++-dev
-                # matches the current gcc version, instead of pinning a
-                # versioned package name (libstdc++-12-dev...) that breaks
-                # the moment the distro bumps its gcc version.
                 local deps32=(gcc-multilib g++-multilib libx11-dev:i386
                               libwayland-dev:i386 libxkbcommon-dev:i386
                               libgl1-mesa-dev:i386 libvulkan-dev:i386)
@@ -365,7 +344,13 @@ install_build_deps() {
 # ---------------------------------------------------------------------------
 
 meson_opts_common() {
-    local opts=(-Dappend_libdir_mangohud=false -Dwith_xnvctrl=disabled)
+    local opts=(-Dappend_libdir_mangohud=false -Dwith_xnvctrl=disabled
+                -Ddynamic_string_tokens=false)
+
+    if grep -q "'with_mangohud_next'" "${SRC_DIR}/meson_options.txt" 2>/dev/null; then
+        opts+=(-Dwith_mangohud_next=false)
+    fi
+
     pkg-config --exists x11 2>/dev/null && opts+=(-Dwith_x11=enabled) || opts+=(-Dwith_x11=disabled)
     pkg-config --exists wayland-client 2>/dev/null && opts+=(-Dwith_wayland=enabled) || opts+=(-Dwith_wayland=disabled)
     printf '%s\n' "${opts[@]}"
@@ -384,10 +369,6 @@ build_arch() {
         export PKG_CONFIG_PATH="/usr/lib32/pkgconfig:/usr/lib/i386-linux-gnu/pkgconfig:/usr/lib/pkgconfig:${PKG_CONFIG_PATH:-}"
     else
         unset CC CXX
-        # ${MACHINE}-linux-gnu covers the Debian/Ubuntu multiarch layout on
-        # whatever the native architecture is (x86_64-linux-gnu,
-        # aarch64-linux-gnu, ...); /usr/lib64 covers Fedora-style hosts.
-        # Harmless if a given path doesn't exist — pkg-config just skips it.
         export PKG_CONFIG_PATH="/usr/lib64/pkgconfig:/usr/lib/${MACHINE}-linux-gnu/pkgconfig:/usr/lib/pkgconfig:${PKG_CONFIG_PATH:-}"
     fi
 
@@ -406,83 +387,104 @@ build_arch() {
 }
 
 merge_stage_into_prefix() {
-    log_info "Merging into ${PREFIX}..."
-    mkdir -p "${STATE_DIR}"
-    rsync -a "${STAGE_DIR}${PREFIX}/" "${PREFIX}/"
+    log_info "Merging into ${PREFIX} (requires privileges)..."
+    # El directorio de estado del paquete pertenece al usuario, no necesita as_root
+    mkdir -p "${PACKAGE_STATE_DIR}"
+    as_root rsync -a "${STAGE_DIR}${PREFIX}/" "${PREFIX}/"
 
     (cd "${STAGE_DIR}${PREFIX}" && find . -type f -o -type l) \
-        | sed "s|^\.|${PREFIX}|" > "${MANIFEST_FILE}"
-    echo "${BATOCERA_VERSION}" > "${VERSION_FILE}"
+        | sed "s|^\.|${PREFIX}|" | tee "${MANIFEST_FILE}" >/dev/null
+    echo "${BATOCERA_VERSION}" | tee "${VERSION_FILE}" >/dev/null
 }
 
 fix_wrapper_and_symlinks() {
     local libbase="${PREFIX}/lib/mangohud"
-    local bin="${PREFIX}/bin/mangohud"
-    log_info "Fixing the mangohud wrapper and creating the \$LIB symlinks..."
+    local user_json_dir="${HOME}/.local/share/vulkan/implicit_layer.d"
+    local prefix_json_dir="${PREFIX}/share/vulkan/implicit_layer.d"
 
-    if [[ -f "${bin}" ]]; then
-        # Build the search/replace strings by concatenating the (possibly
-        # user-supplied) PREFIX with a literal, single-quoted suffix, so
-        # bash never tries to expand "\$LIB" itself.
-        # \\* matches zero or more literal backslashes before $LIB,
-        # covering both "\$LIB" (meson's default) and bare "$LIB".
-        local search_pattern replace_pattern
-        search_pattern="${PREFIX}"'/\\*\$LIB'
-        replace_pattern="${PREFIX}"'/lib/mangohud/\\$LIB'
-        sed -i "s|${search_pattern}|${replace_pattern}|g" "${bin}"
-
-        # MangoHud's bin/mangohud.in wrapper hardcodes the literal string
-        # "$LIB" into LD_PRELOAD/LD_LIBRARY_PATH and expects ld.so to
-        # expand it to "lib64"/"lib32" at exec time based on the target
-        # process's ELF class. That expansion doesn't reliably happen for
-        # every launcher (e.g. apps run through a bundled/portable
-        # interpreter like sharun, which needs SHARUN_ALLOW_LD_PRELOAD=1
-        # just to attempt preloading at all — and the same "$LIB isn't
-        # populated" failure is independently reported on plain aarch64,
-        # see flightlessmango/MangoHud#665), breaking OpenGL/LD_PRELOAD
-        # hooking while Vulkan (resolved via dlopen() in the Vulkan
-        # loader, a different code path) keeps working.
-        #
-        # retrobox only ever wraps 64-bit emulator binaries, so $LIB's
-        # runtime bitness-selection is never actually needed here —
-        # hardcode the real 64-bit dir directly into the installed
-        # wrapper instead of trusting ld.so to expand $LIB, on any host
-        # architecture.
-        sed -i 's|\\*\$LIB|lib64|g' "${bin}"
+    log_info "Registering MangoHud's libdir with ldconfig..."
+    
+    echo "${libbase}/lib64" | as_root tee /etc/ld.so.conf.d/mangohud.conf >/dev/null
+    if want_32bit; then
+        echo "${libbase}/lib32" | as_root tee -a /etc/ld.so.conf.d/mangohud.conf >/dev/null
     fi
-    mkdir -p "${libbase}/tls"
-    ln_safe() { [[ -e "$2" || -L "$2" ]] || ln -sv "$1" "$2"; }
+    as_root ldconfig
 
-    # $PLATFORM-token aliases for the native build
-    ln_safe lib64 "${libbase}/${MACHINE}"
-    ln_safe lib64 "${libbase}/${MACHINE}-linux-gnu"
-    ln_safe .     "${libbase}/lib64/${MACHINE}"
-    ln_safe .     "${libbase}/lib64/${MACHINE}-linux-gnu"
+    # Registrar la capa implícita de Vulkan en el directorio de usuario (estándar)
+    log_info "Registering MangoHud Vulkan implicit layer in user directory..."
+    mkdir -p "${user_json_dir}"
+    
+    # Registrar también en el directorio del prefix para que el launcher de Python 
+    # (que usa MANGOHUD_VULKAN_LAYER_DIR) lo encuentre y lo inyecte vía VK_ADD_LAYER_PATH.
+    mkdir -p "${prefix_json_dir}"
+
+    local lib_path_64="${libbase}/lib64/libMangoHud.so"
+    local json_content_64
+    json_content_64=$(cat <<EOF
+{
+    "file_format_version" : "1.0.0",
+    "layer" : {
+      "name": "VK_LAYER_RETROBOX_MANGOHUD_overlay_x86_64",
+      "type": "GLOBAL",
+      "api_version": "1.3.0",
+      "library_path": "${lib_path_64}",
+      "implementation_version": "1",
+      "description": "Vulkan Hud Overlay",
+      "functions": {
+         "vkNegotiateLoaderLayerInterfaceVersion": "vkNegotiateLoaderLayerInterfaceVersion"
+      },
+      "enable_environment": {
+        "RETROBOX_MANGOHUD": "1"
+      },
+      "disable_environment": {
+        "RETROBOX_MANGOHUD_DISABLE": "1"
+      }
+    }
+}
+EOF
+)
+
+    echo "${json_content_64}" > "${user_json_dir}/RetroboxMangoHud.x86_64.json"
+    echo "${json_content_64}" > "${prefix_json_dir}/RetroboxMangoHud.x86_64.json"
+    log_info "Created Vulkan layer JSON in user and prefix directories."
 
     if want_32bit; then
-        # x86_64 biarch setup (a real 32-bit build was actually produced)
-        ln_safe lib32 "${libbase}/i686"
-        ln_safe lib32 "${libbase}/i386-linux-gnu"
-        ln_safe lib32 "${libbase}/i686-linux-gnu"
-        ln_safe ../lib32 "${libbase}/tls/i686"
-        ln_safe ../lib64 "${libbase}/tls/x86_64"
-        ln_safe lib32 "${libbase}/lib"
-        ln_safe ../tls "${libbase}/lib/tls"
-    else
-        # Single-arch host (aarch64, etc.), or x86_64 run with -n: there's
-        # no lib32 tree on disk, so $LIB must resolve to lib64 instead —
-        # pointing "lib" at a nonexistent lib32 here is what produced the
-        # dangling "No such file or directory" symlink failure when the
-        # 32-bit pass was skipped/missing.
-        ln_safe lib64 "${libbase}/lib"
+        local lib_path_32="${libbase}/lib32/libMangoHud.so"
+        local json_content_32
+        json_content_32=$(cat <<EOF
+{
+    "file_format_version" : "1.0.0",
+    "layer" : {
+      "name": "VK_LAYER_RETROBOX_MANGOHUD_overlay_x86",
+      "type": "GLOBAL",
+      "api_version": "1.3.0",
+      "library_path": "${lib_path_32}",
+      "implementation_version": "1",
+      "description": "Vulkan Hud Overlay",
+      "functions": {
+         "vkNegotiateLoaderLayerInterfaceVersion": "vkNegotiateLoaderLayerInterfaceVersion"
+      },
+      "enable_environment": {
+        "RETROBOX_MANGOHUD": "1"
+      },
+      "disable_environment": {
+        "RETROBOX_MANGOHUD_DISABLE": "0"
+      }
+    }
+}
+EOF
+)
+        echo "${json_content_32}" > "${user_json_dir}/RetroboxMangoHud.x86.json"
+        echo "${json_content_32}" > "${prefix_json_dir}/RetroboxMangoHud.x86.json"
     fi
+}
 
-    # Deliberately no /etc/ld.so.conf.d entry and no ldconfig run here:
-    # ${PREFIX} is a private prefix, not meant to be visible to the
-    # system-wide dynamic linker. The wrapper above already has the real
-    # lib64 path baked in for OpenGL/LD_PRELOAD, and the Vulkan implicit
-    # layer JSON resolves its library relative to its own location, so
-    # neither needs the system loader to know about this prefix.
+isolate_from_system_env(){
+    cat << EOF > "${HOME}/.config/environment.d/64-retrobox-mangohud.conf"
+# avoid conflict between system's and retrobox's mangohud on vulkan apps
+RETROBOX_MANGOHUD_DISABLE=1
+RETROBOX_MANGOHUD=0
+EOF
 }
 
 # ---------------------------------------------------------------------------
@@ -509,19 +511,44 @@ do_install() {
     merge_stage_into_prefix
     fix_wrapper_and_symlinks
 
-    #rm -rf "${WORKDIR}"
     log_ok "MangoHud ${BATOCERA_VERSION} installed into ${PREFIX}."
 }
 
 do_uninstall() {
     uninstall_from_source_manifest
-    log_ok "MangoHud uninstalled from ${PREFIX}."
+    
+    # Limpiar configuración de ldconfig
+    as_root rm -f /etc/ld.so.conf.d/mangohud.conf
+    as_root ldconfig || true
+    
+    # Limpiar los archivos de la capa de Vulkan del sistema (por si quedaron de instalaciones antiguas)
+    as_root rm -f /usr/share/vulkan/implicit_layer.d/RetroboxMangoHud.x86_64.json
+    as_root rm -f /usr/share/vulkan/implicit_layer.d/RetroboxMangoHud.x86.json
+    as_root rm -f /usr/share/vulkan/implicit_layer.d/MangoHud.json
+    as_root rm -f /usr/share/vulkan/implicit_layer.d/mangohud.json
+
+    # Limpiar los archivos de la capa de Vulkan del usuario y del prefix
+    local user_json_dir="${HOME}/.local/share/vulkan/implicit_layer.d"
+    local prefix_json_dir="${PREFIX}/share/vulkan/implicit_layer.d"
+    
+    rm -f "${user_json_dir}/RetroboxMangoHud.x86_64.json"
+    rm -f "${user_json_dir}/RetroboxMangoHud.x86.json"
+    rm -f "${user_json_dir}/MangoHud.json"
+    rm -f "${user_json_dir}/mangohud.json"
+
+    rm -f "${prefix_json_dir}/RetroboxMangoHud.x86_64.json"
+    rm -f "${prefix_json_dir}/RetroboxMangoHud.x86.json"
+    rm -f "${prefix_json_dir}/MangoHud.json"
+    rm -f "${prefix_json_dir}/mangohud.json"
+
+    as_root rm -f "${HOME}/.config/environment.d/64-retrobox-mangohud.conf"
+
+    log_ok "MangoHud uninstalled."
 }
 
 usage() {
     echo "Usage: $(basename "${BASH_SOURCE[0]}") -s [-n] | -u"
     echo "  -s   build and install MangoHud from source (Batocera's recipe)"
-    echo "       into retrobox's private prefix (${PREFIX})"
     echo "  -n   (with -s) skip the 32-bit (i386) build, even on x86_64"
     echo "  -u   uninstall the install done by this script"
 }

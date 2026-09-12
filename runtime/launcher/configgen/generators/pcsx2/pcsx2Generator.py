@@ -40,10 +40,8 @@ class Pcsx2Generator(Generator):
         }
     
     def usesOpenGLDirectPreload(self, config) -> bool:
-        return config.get("pcsx2_gfxbackend") != "12"
+        return config.get("pcsx2_gfxbackend", "14") == "12"    
     
-  
-
     def generate(self, system, rom, playersControllers, metadata, guns, wheels, gameResolution):
         with Path("/proc/cpuinfo").open(encoding="utf8") as cpuinfo:
             if not re.search(r'^flags\s*:.*\ssse4_1\W', cpuinfo.read(), re.MULTILINE):
