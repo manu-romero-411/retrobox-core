@@ -158,7 +158,7 @@ remove_existing_install() {
     for legacy in /usr/lib/mangohud /usr/bin/mangohud /usr/bin/mangoplot \
                   /usr/share/vulkan/implicit_layer.d/RetroboxMangoHud.x86_64.json \
                   /usr/share/vulkan/implicit_layer.d/RetroboxMangoHud.x86.json \
-                  /usr/share/vulkan/implicit_layer.d/mangohud.json; do
+                  /usr/share/vulkan/implicit_layer.d/retroboxmangohud.json; do
         if [[ -e "${legacy}" ]]; then
             found=1
             log_warn "Leftover from a manual install under /usr: ${legacy}"
@@ -399,6 +399,7 @@ merge_stage_into_prefix() {
 
 fix_wrapper_and_symlinks() {
     local libbase="${PREFIX}/lib/mangohud"
+    local system_json_dir="/usr/local/share/vulkan/implicit_layer.d"
     local user_json_dir="${HOME}/.local/share/vulkan/implicit_layer.d"
     local prefix_json_dir="${PREFIX}/share/vulkan/implicit_layer.d"
 
@@ -444,7 +445,8 @@ fix_wrapper_and_symlinks() {
 EOF
 )
 
-    echo "${json_content_64}" > "${user_json_dir}/RetroboxMangoHud.x86_64.json"
+    echo "${json_content_64}" | as_root tee "${system_json_dir}/RetroboxMangoHud.x86_64.json"
+    #echo "${json_content_64}" > "${user_json_dir}/RetroboxMangoHud.x86_64.json"
     echo "${json_content_64}" > "${prefix_json_dir}/RetroboxMangoHud.x86_64.json"
     log_info "Created Vulkan layer JSON in user and prefix directories."
 
@@ -474,6 +476,7 @@ EOF
 }
 EOF
 )
+        echo "${json_content_32}" | as_root tee "${system_json_dir}/RetroboxMangoHud.x86.json"
         echo "${json_content_32}" > "${user_json_dir}/RetroboxMangoHud.x86.json"
         echo "${json_content_32}" > "${prefix_json_dir}/RetroboxMangoHud.x86.json"
     fi
@@ -524,8 +527,8 @@ do_uninstall() {
     # Limpiar los archivos de la capa de Vulkan del sistema (por si quedaron de instalaciones antiguas)
     as_root rm -f /usr/share/vulkan/implicit_layer.d/RetroboxMangoHud.x86_64.json
     as_root rm -f /usr/share/vulkan/implicit_layer.d/RetroboxMangoHud.x86.json
-    as_root rm -f /usr/share/vulkan/implicit_layer.d/MangoHud.json
-    as_root rm -f /usr/share/vulkan/implicit_layer.d/mangohud.json
+    as_root rm -f /usr/share/vulkan/implicit_layer.d/RetroboxMangoHud.json
+    as_root rm -f /usr/share/vulkan/implicit_layer.d/retroboxmangohud.json
 
     # Limpiar los archivos de la capa de Vulkan del usuario y del prefix
     local user_json_dir="${HOME}/.local/share/vulkan/implicit_layer.d"
@@ -533,13 +536,13 @@ do_uninstall() {
     
     rm -f "${user_json_dir}/RetroboxMangoHud.x86_64.json"
     rm -f "${user_json_dir}/RetroboxMangoHud.x86.json"
-    rm -f "${user_json_dir}/MangoHud.json"
-    rm -f "${user_json_dir}/mangohud.json"
+    rm -f "${user_json_dir}/RetroboxMangoHud.json"
+    rm -f "${user_json_dir}/retroboxmangohud.json"
 
     rm -f "${prefix_json_dir}/RetroboxMangoHud.x86_64.json"
     rm -f "${prefix_json_dir}/RetroboxMangoHud.x86.json"
-    rm -f "${prefix_json_dir}/MangoHud.json"
-    rm -f "${prefix_json_dir}/mangohud.json"
+    rm -f "${prefix_json_dir}/RetroboxMangoHud.json"
+    rm -f "${prefix_json_dir}/retroboxmangohud.json"
 
     as_root rm -f "${HOME}/.config/environment.d/64-retrobox-mangohud.conf"
 
