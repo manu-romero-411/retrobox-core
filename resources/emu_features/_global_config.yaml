@@ -1,3 +1,4 @@
+emulator_name: _global_config
 groups:
   GENERAL:
     submenus:
@@ -35,6 +36,64 @@ groups:
               value: 1
             - name: Off
               value: 0
+        - name: HEADS UP DISPLAY
+          value: hud
+          description: Show context-sensitive info over the game.
+          choices:
+            - name: None
+              value: none
+            - name: Game info/art
+              value: game
+            - name: Performance
+              value: perf
+            - name: Custom
+              value: custom
+        - name: HEADS UP DISPLAY CORNER
+          value: hud_corner
+          description: ""
+          choices:
+            - name: TOP LEFT (NW)
+              value: NW
+            - name: TOP RIGHT (NE)
+              value: NE
+            - name: BOTTOM RIGHT (SE)
+              value: SE
+            - name: BOTTOM LEFT (SW)
+              value: SW
+        - name: CUSTOM HUD TEXT
+          value: hud_custom
+          description: 'MangoHud config string used when HEADS UP DISPLAY is set to Custom. Use \n for newlines.'
+          preset: input
+        - name: SHOW TATTOO OVER BEZEL
+          value: bezel.tattoo
+          description: Show an image overlaid on top of the bezel.
+          choices:
+            - name: "NO"
+              value: "0"
+            - name: SYSTEM CONTROLLERS
+              value: system
+            - name: CUSTOM IMAGE
+              value: custom
+        - name: TATTOO CORNER
+          value: bezel.tattoo_corner
+          description: ""
+          choices:
+            - name: TOP LEFT (NW)
+              value: NW
+            - name: TOP RIGHT (NE)
+              value: NE
+            - name: BOTTOM RIGHT (SE)
+              value: SE
+            - name: BOTTOM LEFT (SW)
+              value: SW
+        - name: CUSTOM .PNG IMAGE PATH
+          value: bezel.tattoo_file
+          description: ""
+          preset: image
+        - name: RESIZE TATTOO
+          value: bezel.resize_tattoo
+          description: Shrink/expand tattoo to fit within the bezel's border.
+          preset: switchauto
       AI GAME TRANSLATION:
         - name: ENABLE AI TRANSLATION SERVICE
           value: ai_service_enabled
@@ -281,6 +340,13 @@ sharedFeatures:
   - integerscale
   - bezel
   - bezel_stretch
+  - hud
+  - hud_corner
+  - hud_custom
+  - bezel.tattoo
+  - bezel.tattoo_corner
+  - bezel.tattoo_file
+  - bezel.resize_tattoo
   - ai_service_enabled
   - ai_target_lang
   - ai_service_url
@@ -294,4 +360,3 @@ sharedFeatures:
   - video_threaded
   - rumble_gain
   - power_profile
-emulator_name: _global_config

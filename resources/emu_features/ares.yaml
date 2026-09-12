@@ -5,6 +5,13 @@ sharedFeatures:
   - videomode
   - bezel
   - bezel_stretch
+  - hud
+  - hud_corner
+  - hud_custom
+  - bezel.tattoo
+  - bezel.tattoo_corner
+  - bezel.tattoo_file
+  - bezel.resize_tattoo
   - shaderset
 groups:
   GENERAL:

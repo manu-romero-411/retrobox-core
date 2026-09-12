@@ -8,6 +8,13 @@ sharedFeatures:
   - integerscale
   - bezel
   - bezel_stretch
+  - hud
+  - hud_corner
+  - hud_custom
+  - bezel.tattoo
+  - bezel.tattoo_corner
+  - bezel.tattoo_file
+  - bezel.resize_tattoo
   - ai_service_enabled
   - ai_target_lang
   - ai_service_url

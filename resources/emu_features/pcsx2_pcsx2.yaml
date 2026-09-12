@@ -6,7 +6,6 @@ sharedFeatures:
   - wheel_rotation
   - wheel_deadzone
   - wheel_midzone
-  - discordrpc
   - autosave
 groups:
   GENERAL:

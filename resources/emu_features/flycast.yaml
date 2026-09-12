@@ -3,10 +3,15 @@ features:
   - cheevos
 sharedFeatures:
   - power_profile
-  - tdp
-  - videomode
   - bezel
   - bezel_stretch
+  - hud
+  - hud_corner
+  - hud_custom
+  - bezel.tattoo
+  - bezel.tattoo_corner
+  - bezel.tattoo_file
+  - bezel.resize_tattoo
   - use_wheels
   - wheel_rotation
   - wheel_deadzone

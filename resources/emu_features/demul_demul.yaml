@@ -1,9 +1,5 @@
 emulator_name: demul
 core_name: demul
-sharedFeatures:
-  - power_profile
-  - tdp
-  - videomode
 groups:
   GENERAL:
     items:
