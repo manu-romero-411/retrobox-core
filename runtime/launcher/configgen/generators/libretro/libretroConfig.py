@@ -55,6 +55,9 @@ coreToP2Device = {'atari800': '513', 'fuse': '513'}
 
 systemNoRewind = {'sega32x', 'psx', 'zxspectrum', 'n64', 'dreamcast', 'atomiswave', 'naomi', 'saturn', 'dice', 'pd777'}
 
+# Mapeo de dispositivo de pistola por core/sistema. OJO: los bloques
+# "gameDependant" se consultan (nunca se mutan) al copiar sobre un dict
+# nuevo en createLibretroConfig — ver el comentario junto a su uso.
 GUN_CORE_MAPPING: dict[str, dict[str, _GunMappingItem]] = {
     "bsnes": {"default": {"device": 260, "p2": 0, "gameDependant": [
         {"key": "type", "value": "justifier", "mapkey": "device", "mapvalue": "516"},
@@ -77,6 +80,16 @@ GUN_CORE_MAPPING: dict[str, dict[str, _GunMappingItem]] = {
     "dolphin": {"default": {"device": 769, "p1": 0, "p2": 1, "p3": 2, "p4": 3}},
 }
 
+# Ajustes fijos de retroarch.cfg que no dependen de system.config. Se
+# reescriben en CADA lanzamiento (como parte del mismo dict que aplica
+# createLibretroConfig), así que ganan siempre sobre cualquier cambio hecho
+# por el usuario desde el menú de RetroArch en la sesión anterior — no hay
+# "solo la primera vez" ni fichero aparte con --appendconfig.
+#
+# Trade-off deliberado: el usuario YA NO puede cambiar estas claves en
+# concreto desde el menú de RetroArch y que el cambio persista (p.ej. subir
+# audio_volume o tocar confirm_close se revertirá en el siguiente
+# lanzamiento). Si alguna necesita ser tocable libremente, sácala de aquí.
 _FIXED_RETROARCH_SETTINGS: dict[str, str] = {
     'menu_driver': '"ozone"',
     'menu_show_load_content_animation': '"false"',
@@ -119,6 +132,8 @@ _FIXED_RETROARCH_SETTINGS: dict[str, str] = {
 
 
 def open_unix_settings(path: Path, /) -> UnixSettings:
+    """Abre (o recrea si está corrupto) un UnixSettings, creando su directorio padre.
+    Público: también lo usa LibretroGenerator.generate() para abrir retroarch.cfg."""
     mkdir_if_not_exists(path.parent)
     try:
         return UnixSettings(path, separator=' ')
@@ -128,9 +143,12 @@ def open_unix_settings(path: Path, /) -> UnixSettings:
 
 
 def rarch_custom_paths(system: Emulator) -> dict[str, str]:
+    """Rutas fijas de retroarch.cfg. Función pura: quien la llama decide
+    dónde y cuándo aplicarla (ver LibretroGenerator.generate)."""
+    
     mkdir_if_not_exists(BIOS / system.name)
     mkdir_if_not_exists(SAVES / system.name)
-
+    
     return {
         'core_options_path': f'"{_RETROARCH_CFGDIR}/cores/retroarch-core-options.cfg"',
         'assets_directory': f'"{RETROARCH_ASSETS}"',
@@ -163,6 +181,11 @@ def createLibretroConfig(
 ) -> dict[str, object]:
 
     core_settings = open_unix_settings(RETROARCH_CORE_CUSTOM)
+
+    # Arranca con los ajustes fijos (ver _FIXED_RETROARCH_SETTINGS): se
+    # reescriben en cada lanzamiento y ganan sobre cualquier cambio hecho
+    # desde el menú de RetroArch en la sesión anterior. Todo lo que sigue
+    # puede sobreescribir claves concretas de este dict según el sistema/core.
     retroarch_config: dict[str, object] = dict(_FIXED_RETROARCH_SETTINGS)
     render_config = system.renderconfig
     system_core = system.config.core
@@ -176,6 +199,7 @@ def createLibretroConfig(
     retroarch_config['builtin_imageviewer_enable'] = 'false'
     retroarch_config['assets_directory'] = str(RETROARCH_ASSETS)
 
+    # Directorio de guardado por sistema
     retroarch_config['sort_savefiles_enable'] = 'false'
     retroarch_config['sort_savestates_enable'] = 'false'
     retroarch_config['savestate_directory'] = Path(f"{SAVES}")
@@ -297,6 +321,8 @@ def createLibretroConfig(
 
         if system.config.core in GUN_CORE_MAPPING:
             base = GUN_CORE_MAPPING[system.config.core].get(system.name, GUN_CORE_MAPPING[system.config.core]["default"])
+            # Copia superficial: no mutar GUN_CORE_MAPPING, que es compartido
+            # entre lanzamientos (a nivel de módulo).
             ragunconf: dict[str, Any] = dict(base)
             raguncoreconf: dict[str, str] = {}
             if "gameDependant" in ragunconf:
@@ -337,15 +363,13 @@ def createLibretroConfig(
 
     retroarch_config['aspect_ratio_index'] = ''
     if ratio := system.config.get_str('ratio'):
-        index = '22'
-        if ratio in ratioIndexes:
-            index = ratioIndexes.index(ratio)
+        index = ratioIndexes.index(ratio) if ratio in ratioIndexes else 22
         if ratio == "full":
             bezel = None
         elif system.config.get_bool(f"{system_core}-autowidescreen"):
             meta = metadataUtils.get_games_meta_data(ES_GAMES_METADATA, system.name, rom)
             if meta.get("video_widescreen") == "true":
-                index = str(ratioIndexes.index("16/9"))
+                index = ratioIndexes.index("16/9")
                 bezel = None
         try:
             if '/' in ratio:
@@ -355,7 +379,7 @@ def createLibretroConfig(
         except (ValueError, TypeError):
             pass
         retroarch_config['video_aspect_ratio_auto'] = 'false'
-        retroarch_config['aspect_ratio_index'] = index
+        retroarch_config['aspect_ratio_index'] = str(index)
 
     retroarch_config['rewind_enable'] = 'true' if system.name not in systemNoRewind and system.config.get_bool('rewind') else 'false'
     retroarch_config['audio_volume'] = system.config.get("audio_volume", '0')
@@ -390,6 +414,18 @@ def createLibretroConfig(
     if (state_filename := system.config.get_str('state_filename')) and state_filename.endswith('.auto'):
         retroarch_config['savestate_auto_load'] = 'true'
 
+    # Valor por defecto: imagen centrada. writeBezelConfig() solo toca estas
+    # claves cuando realmente hay un bezel (o guns borders) con viewport
+    # propio que lo requiera; si bezel es None, esa función corta en su
+    # primer `if` sin escribir nada, y como UnixSettings solo pisa las claves
+    # presentes en este dict, un video_viewport_bias_x/y = 0.0 dejado por un
+    # bezel de una partida anterior se quedaría pegado para siempre. Al
+    # fijarlo aquí ANTES de llamar a writeBezelConfig, cada lanzamiento parte
+    # de centrado y solo se descentra si el bezel actual lo pide de forma
+    # explícita.
+    retroarch_config['video_viewport_bias_x'] = "0.500000"
+    retroarch_config['video_viewport_bias_y'] = "0.500000"
+
     try:
         writeBezelConfig(generator, bezel, shaderBezel, retroarch_config, rom, gameResolution, system, system.guns_borders_size_name(guns), system.guns_border_ratio_type(guns))
     except Exception as e:
@@ -400,9 +436,12 @@ def createLibretroConfig(
     return retroarch_config
 
 
+
+
 def writeLibretroConfigToFile(retroconfig: UnixSettings, config: Mapping[str, object], /) -> None:
     for setting, value in config.items():
         retroconfig.save(setting, value)
+
 
 def writeBezelConfig(generator: Generator, bezel: str | None, shaderBezel: bool, retroarchConfig: dict[str, object], rom: Path, gameResolution: Resolution, system: Emulator, gunsBordersSize: str | None, gunsBordersRatio: str | None, /) -> None:
     retroarchConfig['input_overlay_hide_in_menu'] = "false"
@@ -488,6 +527,8 @@ def writeBezelConfig(generator: Generator, bezel: str | None, shaderBezel: bool,
     qrcode_output_png = Path("/tmp/bezel_qrcode.png")
 
     if bezel_need_adaptation:
+        wratio = gameResolution["width"] / float(infos["width"])
+        hratio = gameResolution["height"] / float(infos["height"])
         if gameResolution["width"] < infos["width"] or gameResolution["height"] < infos["height"]:
             bezel_stretch = True
 
@@ -510,48 +551,28 @@ def writeBezelConfig(generator: Generator, bezel: str | None, shaderBezel: bool,
             bezelsUtil.addQRCode(overlay_png_file, qrcode_output_png, cheevos_id, system)
             overlay_png_file = qrcode_output_png
 
-    # --- CÁLCULO DINÁMICO DE VIEWPORT ---
-    orig_w = infos.get("width", 1920)
-    orig_h = infos.get("height", 1080)
-    left = infos.get("left", 0)
-    right = infos.get("right", 0)
-    top = infos.get("top", 0)
-    bottom = infos.get("bottom", 0)
-
-    orig_game_w = orig_w - left - right
-    orig_game_h = orig_h - top - bottom
-
-    if orig_game_w > 0 and orig_game_h > 0 and (bezel_need_adaptation or bezel_stretch):
-        target_screen_w = gameResolution["width"]
-        target_screen_h = gameResolution["height"]
-
-        # Escala aplicada por padImage para encajar la altura o la anchura
-        scale = min(target_screen_w / float(orig_w), target_screen_h / float(orig_h))
-
-        # El ancho y alto del área jugable escalada
-        target_w = int(round(orig_game_w * scale))
-        target_h = int(round(orig_game_h * scale))
-
-        # Como padImage centra el contenido dentro del lienzo final (target_screen_w x target_screen_h),
-        # las coordenadas X e Y deben incluir el padding generado por el centrado.
-        pad_x = (target_screen_w - (orig_w * scale)) / 2.0
-        pad_y = (target_screen_h - (orig_h * scale)) / 2.0
-
-        target_x = int(round(pad_x + (left * scale)))
-        target_y = int(round(pad_y + (top * scale)))
-
-        retroarchConfig['custom_viewport_x'] = target_x
-        retroarchConfig['custom_viewport_y'] = target_y
-        retroarchConfig['custom_viewport_width'] = target_w
-        retroarchConfig['custom_viewport_height'] = target_h
-        retroarchConfig['aspect_ratio_index'] = str(ratioIndexes.index("custom"))
+        if bezel_stretch:
+            borderx = 0
+            viewportRatio = float(infos["width"]) / float(infos["height"])
+            if viewportRatio - game_ratio > 0.01:
+                borderx = (infos["width"] - int(infos["width"] * game_ratio / viewportRatio)) // 2
+            retroarchConfig['custom_viewport_x'] = int(round((infos["left"] - borderx / 2) * wratio))
+            retroarchConfig['custom_viewport_y'] = int(round(infos["top"] * hratio))
+            retroarchConfig['custom_viewport_width'] = int(round((infos["width"] - infos["left"] - infos["right"] + borderx) * wratio))
+            retroarchConfig['custom_viewport_height'] = int(round((infos["height"] - infos["top"] - infos["bottom"]) * hratio))
+        else:
+            xoffset = gameResolution["width"] - (infos["width"] * wratio)
+            yoffset = gameResolution["height"] - (infos["height"] * hratio)
+            retroarchConfig['custom_viewport_x'] = int(round(infos["left"] * wratio + xoffset / 2))
+            retroarchConfig['custom_viewport_y'] = int(round(infos["top"] * hratio + yoffset / 2))
+            retroarchConfig['custom_viewport_width'] = int(round((infos["width"] - infos["left"] - infos["right"]) * wratio))
+            retroarchConfig['custom_viewport_height'] = int(round((infos["height"] - infos["top"] - infos["bottom"]) * hratio))
     else:
         if viewport_used:
-            retroarchConfig['custom_viewport_x'] = left
-            retroarchConfig['custom_viewport_y'] = top
-            retroarchConfig['custom_viewport_width'] = orig_game_w
-            retroarchConfig['custom_viewport_height'] = orig_game_h
-            retroarchConfig['aspect_ratio_index'] = str(ratioIndexes.index("custom"))
+            retroarchConfig['custom_viewport_x'] = infos["left"]
+            retroarchConfig['custom_viewport_y'] = infos["top"]
+            retroarchConfig['custom_viewport_width'] = infos["width"] - infos["left"] - infos["right"]
+            retroarchConfig['custom_viewport_height'] = infos["height"] - infos["top"] - infos["bottom"]
         retroarchConfig['video_message_pos_x'] = infos.get("messagex", 0.0)
         retroarchConfig['video_message_pos_y'] = infos.get("messagey", 0.0)
 
@@ -571,6 +592,7 @@ def writeBezelConfig(generator: Generator, bezel: str | None, shaderBezel: bool,
         if shaderBezelFile.exists():
             shaderBezelFile.unlink()
         shaderBezelFile.symlink_to(overlay_png_file)
+
 
 def isLowResolution(gameResolution: Resolution, /) -> bool:
     return gameResolution["width"] < 480 or gameResolution["height"] < 480

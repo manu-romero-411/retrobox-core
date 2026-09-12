@@ -494,7 +494,7 @@ def getHudBezel(system: Emulator, generator: Generator, rom: Path, gameResolutio
                     bezel_height,
                     gameResolution["width"],
                     gameResolution["height"],
-                    keep_aspect_ratio=True,
+                    keep_aspect_ratio=not bezel_stretch,
                 )
                 if output_info_file.exists():
                     overlay_info_file = output_info_file

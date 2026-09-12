@@ -32,3 +32,60 @@ groups:
             value: true
           - name: Off
             value: false
+  GENERAL:
+    submenus:
+      GAME RENDERING & SHADERS:
+      - name: GAME ASPECT RATIO
+        value: ratio
+        description: Force the game to render in this aspect ratio. Not all systems support all ratios.
+        choices:
+          - name: 4/3
+            value: 4/3
+          - name: 16/9
+            value: 16/9
+          - name: Full
+            value: full
+          - name: 16/10
+            value: 16/10
+          - name: 16/15
+            value: 16/15
+          - name: 21/9
+            value: 21/9
+          - name: 1/1
+            value: 1/1
+          - name: 2/1
+            value: 2/1
+          - name: 3/2
+            value: 3/2
+          - name: 3/4
+            value: 3/4
+          - name: 4/1
+            value: 4/1
+          - name: 9/16
+            value: 9/16
+          - name: 5/4
+            value: 5/4
+          - name: 6/5
+            value: 6/5
+          - name: 7/9
+            value: 7/9
+          - name: 8/3
+            value: 8/3
+          - name: 8/7
+            value: 8/7
+          - name: 19/12
+            value: 19/12
+          - name: 19/14
+            value: 19/14
+          - name: 30/17
+            value: 30/17
+          - name: 32/9
+            value: 32/9
+          - name: Config
+            value: config
+          - name: Square pixel
+            value: squarepixel
+          - name: Core provided
+            value: core
+          - name: Custom
+            value: custom

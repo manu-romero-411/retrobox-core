@@ -325,7 +325,6 @@ groups:
           - name: hidden
             value: hidden
 
-
 sharedFeatures:
   - use_vsync
   - display_fps
@@ -334,7 +333,6 @@ sharedFeatures:
   - batterymode
   - tdp
   - videomode
-  - ratio
   - shaderset
   - smooth
   - integerscale
