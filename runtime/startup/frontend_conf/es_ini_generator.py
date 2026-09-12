@@ -1,5 +1,4 @@
-"""module for handling emulationstation.ini generation
-"""
+"""Module for handling emulationstation.ini generation."""
 import logging
 from pathlib import Path
 
@@ -21,11 +20,6 @@ from runtime.paths import (
     SCREENSHOTS,
     USERDATA
 )
-
-# logging.basicConfig(
-#     level=logging.INFO,
-#     format="[%(levelname)s] %(message)s"
-# )
 
 _logger = logging.getLogger(__name__)
 

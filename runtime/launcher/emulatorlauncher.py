@@ -49,6 +49,8 @@ from runtime.gamepadly.gamepadly_manager import GamepadManager
 from runtime.paths import (
     _GAMEPADLY_PROFILES,
     _GAMEPADLY_USER_PROFILES,
+    MANGOHUD_BIN,
+    MANGOHUD_VULKAN_LAYER_DIR,
     NVIDIA_POWERD_SCRIPT,
     ES_GAMES_METADATA,
     ES_INPUT_CFG,
@@ -58,7 +60,6 @@ from runtime.paths import (
     SAVES,
     GUN_OVERLAYS_DIR,
     HUD_CONFIG_FILE,
-    USERDATA,
     mkdir_if_not_exists,
 )
 
@@ -82,8 +83,14 @@ _VALID_POWER_PROFILES = {"power-saver", "balanced", "performance"}
 
 
 def main(args: argparse.Namespace, maxnbplayers: int) -> int:
-    """
-Main function that wraps start_rom
+    """Entry point that wraps start_rom, squashing the rom first if needed.
+
+    Args:
+        args: Parsed command-line arguments.
+        maxnbplayers: Maximum number of players/controllers supported.
+
+    Returns:
+        The exit code of the launched emulator command.
     """
     original_rom = args.rom
 
@@ -95,11 +102,19 @@ Main function that wraps start_rom
         return start_rom(args, maxnbplayers, original_rom, original_rom)
 
 def start_rom(args: argparse.Namespace, maxnbplayers: int, rom: Path, original_rom: Path) -> int:
-    """The main ROM start function. This calls everything else in the module.
-    Returns exit code for the emulator command
+    """Run the main ROM start sequence, calling into the rest of the module.
+
+    Args:
+        args: Parsed command-line arguments.
+        maxnbplayers: Maximum number of players/controllers supported.
+        rom: The (possibly squashfs-mounted) rom path to launch.
+        original_rom: The original, unmounted rom path.
+
+    Returns:
+        The exit code of the launched emulator command.
     """
     mkdir_if_not_exists(RUNTIME_DIR)
-    
+
     global _active_player_controllers
 
     player_controllers = Controller.load_for_players(maxnbplayers, args)
@@ -115,7 +130,7 @@ def start_rom(args: argparse.Namespace, maxnbplayers: int, rom: Path, original_r
     system_name: str = args.system
     _logger.debug("Running system: %s", system_name)
     system = Emulator(args, original_rom)
-    
+
     _logger.debug("Settings: %s", {
         key: '***' if 'password' in key else value for key, value in system.config.items()
     })
@@ -128,7 +143,7 @@ def start_rom(args: argparse.Namespace, maxnbplayers: int, rom: Path, original_r
 
     # power profiles
     power_prof = system.config.get("power_profile", "balanced")
-    previous_power_profile = apply_power_profile(power_prof)      
+    previous_power_profile = apply_power_profile(power_prof)
 
     # metadata
     md = metadata.get_games_meta_data(ES_GAMES_METADATA, system_name, rom)
@@ -187,7 +202,7 @@ def start_rom(args: argparse.Namespace, maxnbplayers: int, rom: Path, original_r
                     [system.config.emulator,
                      effective_core]
                 )
-       
+
                 # run the emulator
                 with (
                     GamepadManager(
@@ -226,36 +241,59 @@ def start_rom(args: argparse.Namespace, maxnbplayers: int, rom: Path, original_r
                         )
 
                         if ((hud := system.config.get('hud')) and hud.lower() != 'none') or hud_bezel is not None:
-                            # 1. Enable MangoHud via environment variables.
-                            # This is enough for the Vulkan Implicit Layer to kick in.
-                            cmd.env["MANGOHUD"] = "1"
-                            cmd.env["MANGOHUD_CONFIGFILE"] = str(HUD_CONFIG_FILE)
+                            mangohud_bin = _resolve_mangohud_binary()
 
-                            hudconfig = getHudConfig(
-                                system, args.systemname, system.config.emulator,
-                                effective_core, rom, hud_bezel
-                            )
+                            if mangohud_bin is None:
+                                _logger.info(
+                                    "Skipping the HUD overlay: no usable MangoHud "
+                                    "installation found (bundled or system)."
+                                )
+                            else:
+                                # 1. Enable MangoHud via environment variables.
+                                # This is enough for the Vulkan Implicit Layer to kick in.
+                                cmd.env["MANGOHUD"] = "1"
+                                cmd.env["MANGOHUD_CONFIGFILE"] = str(HUD_CONFIG_FILE)
 
-                            with HUD_CONFIG_FILE.open('w') as f:
-                                f.write(hudconfig)
+                                if mangohud_bin == MANGOHUD_BIN and MANGOHUD_VULKAN_LAYER_DIR.is_dir():
+                                    # Point the Vulkan loader at our bundled
+                                    # implicit-layer manifest so it picks up
+                                    # the bezel-capable build instead of
+                                    # whatever the system may already have
+                                    # registered under the same layer name.
+                                    existing_layer_path = os.environ.get("VK_ADD_LAYER_PATH", "")
+                                    cmd.env["VK_ADD_LAYER_PATH"] = os.pathsep.join(
+                                        path for path in (
+                                            str(MANGOHUD_VULKAN_LAYER_DIR),
+                                            existing_layer_path,
+                                        ) if path
+                                    )
 
-                            if generator.usesOpenGLDirectPreload(system.config):
-                                # OpenGL: run through the mangohud wrapper in
-                                # dlsym-hook mode. The installed wrapper now
-                                # hardcodes the real lib64 path instead of
-                                # relying on ld.so to expand "$LIB" (several
-                                # launchers, including sharun-wrapped
-                                # emulators, never expand it), so
-                                # "mangohud --dlsym" is safe to use again
-                                # instead of setting LD_PRELOAD by hand here.
-                                cmd.array = ["mangohud", "--dlsym", *cmd.array]
+                                hudconfig = getHudConfig(
+                                    system, args.systemname, system.config.emulator,
+                                    effective_core, rom, hud_bezel
+                                )
 
-                            # Vulkan: MANGOHUD=1 is enough to trigger the
-                            # Vulkan Implicit Layer on its own. We
-                            # deliberately do NOT prepend "mangohud" to
-                            # cmd.array here, since doing so triggers a
-                            # fatal "eglStreamPostD3DTextureANGLE" error on
-                            # Asahi.
+                                with HUD_CONFIG_FILE.open('w') as f:
+                                    f.write(hudconfig)
+
+                                if generator.usesOpenGLDirectPreload(system.config):
+                                    # OpenGL: run through the mangohud wrapper in
+                                    # dlsym-hook mode. The installed wrapper now
+                                    # hardcodes the real lib64 path instead of
+                                    # relying on ld.so to expand "$LIB" (several
+                                    # launchers, including sharun-wrapped
+                                    # emulators, never expand it), so
+                                    # "mangohud --dlsym" is safe to use again
+                                    # instead of setting LD_PRELOAD by hand here.
+                                    cmd.array = [str(mangohud_bin), "--dlsym", *cmd.array]
+
+                                # Vulkan: MANGOHUD=1 is enough to trigger the
+                                # Vulkan Implicit Layer on its own. We
+                                # deliberately do NOT prepend the mangohud
+                                # binary to cmd.array here, since doing so
+                                # triggers a fatal
+                                # "eglStreamPostD3DTextureANGLE" error on
+                                # Asahi.
 
                     # generate the gun help
                     try:
@@ -511,7 +549,7 @@ def call_retrohook(
     result = subprocess.run(cmd, check=False)
     if result.returncode != 0:
         _logger.warning("[retrohook] exited with code %s", result.returncode)
-        
+
 def hudConfig_protectStr(string: str | Path | None) -> str:
     if string is None:
         return ""
@@ -555,6 +593,33 @@ def getHudConfig(system: Emulator, systemName: str, emulator: str, core: str, ro
     configstr = configstr.replace("%GAMENAME%", hudConfig_protectStr(game_name))
     configstr = configstr.replace("%EMULATORCORE%", hudConfig_protectStr(emulatorstr))
     return configstr.replace("%THUMBNAIL%", hudConfig_protectStr(game_thumbnail))
+
+
+def _resolve_mangohud_binary() -> Path | None:
+    """Resolve which MangoHud binary to use for the HUD overlay.
+
+    Retrobox ships its own MangoHud build (with bezel support) under
+    MANGOHUD_BIN, kept in a private prefix so it never shadows a
+    system-wide install. That bundled build is preferred; if it's
+    missing, fall back to whatever "mangohud" is on PATH (which may or
+    may not support bezels); if neither is available, the HUD overlay
+    is skipped entirely rather than failing the launch.
+
+    Returns:
+        The Path to the MangoHud binary to use, or None if none is
+        available.
+    """
+    if MANGOHUD_BIN.is_file() and os.access(MANGOHUD_BIN, os.X_OK):
+        return MANGOHUD_BIN
+
+    if system_mangohud := shutil.which("mangohud"):
+        _logger.warning(
+            "Bundled MangoHud not found at %s, falling back to the system "
+            "'mangohud' (bezel support may not be available).", MANGOHUD_BIN
+        )
+        return Path(system_mangohud)
+
+    return None
 
 
 def _set_nvidia_powerd(enable: bool) -> None:
@@ -844,7 +909,7 @@ def launch() -> None:
             help="force emulator",
             type=str, required=False
         )
-        
+
         parser.add_argument("-core",           help="force emulator core",         type=str, required=False)
         parser.add_argument("-netplaymode",    help="host/client",                 type=str, required=False)
         parser.add_argument("-netplaypass",    help="enable spectator mode",       type=str, required=False)
@@ -863,7 +928,7 @@ def launch() -> None:
 
         args = parser.parse_args()
         _logger.debug('args: %s', {k: v for k, v in vars(args).items() if v is not None and v is not False})
-        
+
         exitcode = 0
         try:
             exitcode = main(args, maxnbplayers)
@@ -894,7 +959,7 @@ def launch() -> None:
 
         _logger.debug("Exiting configgen with status %s", exitcode)
 
-        exit(exitcode)
+        sys.exit(exitcode)
 
 if __name__ == '__main__':
     launch()

@@ -1,6 +1,4 @@
-"""
-This submodule regenerates es_systems.cfg based on actual system directories situation
-"""
+"""Regenerate es_systems.cfg from the current systems_config directory tree."""
 import logging
 import os
 from pathlib import Path
@@ -11,12 +9,7 @@ import yaml
 from yaml.scanner import ScannerError
 from yaml.parser import ParserError
 
-# logging.basicConfig(
-#     level=logging.INFO,
-#     format="[%(levelname)s] %(message)s"
-# )
-_logger = logging.getLogger(__name__)
-
+# pylint: disable=wrong-import-position
 from runtime.paths import (
     SYSTEMS_CONF_DIR,
     ES_SYSTEMS_CFG,
@@ -24,6 +17,9 @@ from runtime.paths import (
     ROMS,
     USERDATA
 )
+# pylint: enable=wrong-import-position
+
+_logger = logging.getLogger(__name__)
 
 PYTHON_COMMAND: Final = Path("/usr/bin/python3")
 EMULAUNCHER_COMMAND: Final = USERDATA / "runtime" / "launcher" / "emulatorlauncher.py"
@@ -38,7 +34,7 @@ DEFAULT_COMMAND = [
 ]
 
 def _build_core_attributes(core_props):
-    """Extrae y formatea los atributos de un core (default, incompatible_extensions)."""
+    """Extract and format a core's attributes (default, incompatible_extensions)."""
     core_attrs = {}
     if not isinstance(core_props, dict):
         return core_attrs
@@ -56,8 +52,7 @@ def _build_core_attributes(core_props):
     return core_attrs
 
 def _append_emulator_nodes(parent_elem, emulators_data):
-    """Procesa y añade los nodos de emuladores y sus 
-    respectivos cores ignorando las opciones internas."""
+    """Process and append emulator nodes and their cores, skipping internal options."""
     if not isinstance(emulators_data, dict):
         return
 
@@ -67,22 +62,19 @@ def _append_emulator_nodes(parent_elem, emulators_data):
         if not isinstance(emu_data, dict):
             continue
 
-        # Buscamos la sección de cores de forma segura
+        # Look up the cores section safely
         cores_data = emu_data.get("cores", {})
         if not isinstance(cores_data, dict):
             continue
 
         for core_name, core_props in cores_data.items():
-            # core_props puede contener 'default', 'incompatible_extensions' y 'options'
+            # core_props may contain 'default', 'incompatible_extensions' and 'options'
             core_attrs = _build_core_attributes(core_props)
             core_elem = ET.SubElement(emulator_elem, "core", **core_attrs)
             core_elem.text = core_name
 
 def generate_es_systems(base_path: Path = SYSTEMS_CONF_DIR, output_path: Path = ES_SYSTEMS_TMP):
-    """
-    Recorre la estructura de directorios YAML generada y reconstruye 
-    el archivo es_systems.cfg original.
-    """
+    """Walk the generated YAML directory tree and rebuild es_systems.cfg."""
     if not os.path.exists(base_path):
         raise FileNotFoundError(f"Systems dir not found: {base_path}")
 
@@ -104,9 +96,8 @@ def generate_es_systems(base_path: Path = SYSTEMS_CONF_DIR, output_path: Path = 
 
     root = ET.Element("systemList")
 
-    # Forzar la ruta a string para evitar falsos positivos de iteración en linters
+    # Force the path to a plain string to avoid linter false positives on iteration
     safe_base_dir = os.fspath(base_dir)
-    #print(os.environ)
     for root_dir, _, files in os.walk(safe_base_dir):
         for file in files:
             if not file.endswith(".yaml") or file == "defaults.yml":
@@ -117,7 +108,7 @@ def generate_es_systems(base_path: Path = SYSTEMS_CONF_DIR, output_path: Path = 
                 with open(yaml_path, 'r', encoding='utf-8') as f:
                     data = yaml.safe_load(f)
             except (ScannerError, ParserError) as e:
-                _logger.error("Error de sintaxis en YAML al leer %s: %s", yaml_path, e)
+                _logger.error("YAML syntax error while reading %s: %s", yaml_path, e)
                 continue
 
             if not isinstance(data, dict) or not data:
@@ -128,11 +119,10 @@ def generate_es_systems(base_path: Path = SYSTEMS_CONF_DIR, output_path: Path = 
             system_elem = ET.SubElement(root, "system")
             name_elem = ET.SubElement(system_elem, "name")
             name_elem.text = sys_name
-            #print(f"================ {ROMS}/{sys_name}")
             if "path" not in sys_content:
                 sys_content["path"] = str(Path(f"{ROMS}/{sys_name}"))
 
-            # Asegurar que el campo 'command' esté presente si no viene en el YAML
+            # Ensure the 'command' field is present if it's missing from the YAML
             if "command" not in sys_content:
                 sys_content["command"] = " ".join(DEFAULT_COMMAND)
 

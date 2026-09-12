@@ -1,8 +1,8 @@
-"""
-Constantes de runtime.paths consumidas por configgen y por
-emulatorlauncher.py: directorios de contenido de emuladores (bios, saves,
-screenshots...), estado efímero de una sesión de juego (RUNTIME_DIR y sus
-subdirectorios) y scripts/utilidades del sistema.
+"""runtime.paths constants consumed by configgen and emulatorlauncher.py.
+
+Covers emulator content directories (bios, saves, screenshots...), the
+ephemeral state of an in-progress game session (RUNTIME_DIR and its
+subdirectories), and system scripts/utilities.
 """
 
 from __future__ import annotations
@@ -15,7 +15,7 @@ from ._base import RESOURCES_DIR, USERDATA, check_env_dirs
 EMU_FEATURES_DIR: Final = RESOURCES_DIR / "emu_features"
 SYSTEMS_CONF_DIR: Final = RESOURCES_DIR / "systems_config"
 
-# directories for emulator things
+# Directories for emulator content
 SAVES: Final = check_env_dirs("SAVES_DIR", USERDATA / "saves")
 SCREENSHOTS: Final = check_env_dirs("SCREENSHOTS_DIR", USERDATA / "screenshots")
 RECORDINGS: Final = check_env_dirs("RECORDINGS_DIR", USERDATA / "recordings")
@@ -34,7 +34,21 @@ UTILS_DIR: Final = RESOURCES_DIR / "utils"
 
 NVIDIA_POWERD_SCRIPT: Final = UTILS_DIR / "nvidia-powerd-service"
 
-# Runtime dir (estado efímero de una sesión de juego en curso)
+# ---------------------------------------------------------------------------
+# MangoHud (retrobox's own build, with bezel support)
+#
+# Installed under its own private prefix instead of /usr/local so it never
+# shadows (or gets shadowed by) whatever MangoHud the user may already have
+# installed system-wide. emulatorlauncher.py prefers this build when it's
+# present and only falls back to a system-wide "mangohud" (found via PATH)
+# otherwise. See setup/utils/mangohud.sh for the installer that populates
+# this prefix.
+# ---------------------------------------------------------------------------
+MANGOHUD_PREFIX_DIR: Final = RESOURCES_DIR / "mangohud"
+MANGOHUD_BIN: Final = MANGOHUD_PREFIX_DIR / "bin" / "mangohud"
+MANGOHUD_VULKAN_LAYER_DIR: Final = MANGOHUD_PREFIX_DIR / "share" / "vulkan" / "implicit_layer.d"
+
+# Runtime dir (ephemeral state of an in-progress game session)
 RUNTIME_DIR: Final = Path("/tmp/retrobox-run")
 
 SQUASHFS_DIR: Final = RUNTIME_DIR / "squashfs"
@@ -49,4 +63,12 @@ GUN_OVERLAYS_DIR: Final = RUNTIME_DIR / "batocera-overlays"
 
 
 def configure_emulator(rom: Path, /) -> bool:
+    """Return True when `rom` denotes a "configure the emulator" pseudo-rom.
+
+    Args:
+        rom: The rom path (or pseudo-path) requested by the frontend.
+
+    Returns:
+        True if this is the special "config" rom or a ".menu" entry.
+    """
     return str(rom) == "config" or rom.suffix == ".menu"

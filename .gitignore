@@ -153,6 +153,7 @@ __marimo__/
 /resources/audio_filters/
 /resources/video_filters/
 /setup/.packages/
+/resources/mangohud/
 
 # ==============================================================================
 # RETROBOX: HOOKS (Ignore all, except explicit exceptions)

@@ -1,12 +1,11 @@
-"""
-Constantes de runtime.paths relativas a gamepadly.
+"""runtime.paths constants related to gamepadly.
 
-Tras el cambio en gamepadly_manager.py, el paquete `runtime.gamepadly` ya
-no importa nada de aquí — estas constantes las consume únicamente
-emulatorlauncher.py, que las pasa por parámetro al construir
-GamepadManager(...). Se mantienen en retrobox_paths (y no dentro del
-propio paquete gamepadly) porque siguen siendo, conceptualmente, paths de
-instalación de Retrobox — igual que EMULATORS, BIOS, etc.
+Since the change in gamepadly_manager.py, the `runtime.gamepadly` package
+no longer imports anything from here — these constants are only consumed
+by emulatorlauncher.py, which passes them as parameters when constructing
+GamepadManager(...). They're kept in runtime.paths (rather than inside
+the gamepadly package itself) because, conceptually, they're still
+Retrobox installation paths — same as EMULATORS, BIOS, etc.
 """
 
 from __future__ import annotations

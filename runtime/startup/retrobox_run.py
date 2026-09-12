@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
-"""
-Retrobox project startup script.
+"""Retrobox project startup script.
 
 Manages arguments, prepares the environment, generates configurations,
 and launches the frontend (EmulationStation).
+
+Accepts one flag of its own, "--pcgames-sync", which enables syncing
+installed PC games (Steam, Lutris, Heroic) into their EmulationStation
+ROM directories before startup; without it, the sync is skipped. Any
+other argument is forwarded to EmulationStation untouched.
 """
 
 from __future__ import annotations
@@ -54,11 +58,11 @@ from runtime.paths import (
     DirectoryCreationError,
     mkdir_if_not_exists,
 )
+from runtime.launcher.emulatorlauncher import call_retrohook
 from frontend_conf.es_ini_generator import generate_emulationstation_ini
 from frontend_conf.features_list_generator import generate_es_features
 from frontend_conf.system_list_generator import generate_es_systems
 from frontend_conf.pcgames_utils import heroic_es_sync, lutris_es_sync, steam_es_sync
-from runtime.launcher.emulatorlauncher import call_retrohook
 # pylint: enable=wrong-import-position
 
 
@@ -85,23 +89,23 @@ def is_emulationstation_running(es_binary: Path) -> bool:
     for entry in proc_entries:
         if not entry.name.isdigit():
             continue
-        
+
         pid = int(entry.name)
         if pid == current_pid:
             continue
-            
+
         try:
             cmdline = (entry / "cmdline").read_bytes()
         except (FileNotFoundError, PermissionError, ProcessLookupError):
             continue
-            
+
         if not cmdline:
             continue
-            
+
         argv0 = cmdline.split(b"\0", 1)[0]
         if Path(argv0.decode(errors="replace")).name == es_binary.name:
             return True
-            
+
     return False
 
 
@@ -140,7 +144,7 @@ def run_emulationstation(args: list[str]) -> int:
     if not ES_EXECUTABLE.is_file():
         _logger.error("EmulationStation binary not found at %s", ES_EXECUTABLE)
         return 1
-        
+
     _logger.info("=========")
 
     # Force SDL2 to use the native Wayland backend instead of falling back
@@ -155,14 +159,14 @@ def run_emulationstation(args: list[str]) -> int:
         env=es_env,
         check=False,
     )
-    
+
     call_retrohook(
         "_frontend",
         "emulationstation",
         "on-frontend-stop",
         args,
     )
-    
+
     return result.returncode
 
 
@@ -208,14 +212,16 @@ def _handle_sigterm(signum: int, frame: types.FrameType | None) -> None:
     """
     raise SystemExit(128 + signum)
 
-def main() -> int:
-    """
-    Main entry point for the Retrobox startup script.
+_PCGAMES_SYNC_FLAG = "--pcgames-sync"
 
-    Rebuilds the argv that gets forwarded to the "emulationstation" binary
-    from the parsed namespace, translating parsed values back into their
-    original flag form and dropping anything that wasn't actually provided
-    by the user.
+
+def main() -> int:
+    """Run the main entry point for the Retrobox startup script.
+
+    Consumes the "--pcgames-sync" flag (if present) to decide whether to
+    sync installed PC games (Steam, Lutris, Heroic) before starting the
+    frontend; that flag is never forwarded to EmulationStation. Any other
+    argument is passed straight through to the "emulationstation" binary.
 
     Returns:
         The exit code of the application.
@@ -224,6 +230,9 @@ def main() -> int:
     signal.signal(signal.SIGTERM, _handle_sigterm)
 
     args = sys.argv[1:]
+    do_pcgames_sync = _PCGAMES_SYNC_FLAG in args
+    if do_pcgames_sync:
+        args = [arg for arg in args if arg != _PCGAMES_SYNC_FLAG]
 
     if not USERDATA.is_dir():
         _logger.error("Invalid Retrobox directory: %s", USERDATA)
@@ -233,14 +242,19 @@ def main() -> int:
         _logger.error("Retrobox (EmulationStation) is already running.")
         return 1
 
-    try:
-        steam_es_sync(ROMS / "steam")
-        lutris_es_sync(ROMS / "lutris")
-        heroic_es_sync(ROMS / "heroic")
-    except DirectoryCreationError as exc:
-        # Notification already sent by safe_mkdir; just exit cleanly.
-        _logger.error("Aborting startup: %s", exc)
-        return 1
+    if do_pcgames_sync:
+        try:
+            steam_es_sync(ROMS / "steam")
+            lutris_es_sync(ROMS / "lutris")
+            heroic_es_sync(ROMS / "heroic")
+        except DirectoryCreationError as exc:
+            # Notification already sent by safe_mkdir; just exit cleanly.
+            _logger.error("Aborting startup: %s", exc)
+            return 1
+    else:
+        _logger.debug(
+            "Skipping PC games sync (pass %s to enable it).", _PCGAMES_SYNC_FLAG
+        )
 
     try:
         _logger.info("=========")

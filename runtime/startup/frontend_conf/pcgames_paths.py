@@ -1,3 +1,4 @@
+"""Path/candidate lookup helpers for the Steam, Lutris and Heroic sync."""
 
 import os
 from pathlib import Path
@@ -6,9 +7,15 @@ import re
 from runtime.paths import _USER_HOME, _XDG_CONFIG, _XDG_DATA
 
 def _env_paths(var_name: str) -> tuple[Path, ...]:
-    """Lee una variable de entorno con rutas separadas por `os.pathsep`
-    y las convierte en una tupla de Path. Si la variable no existe o
-    está vacía, devuelve una tupla vacía."""
+    """Read an `os.pathsep`-separated environment variable into paths.
+
+    Args:
+        var_name: Name of the environment variable to read.
+
+    Returns:
+        A tuple of Path objects, or an empty tuple if the variable is
+        unset or empty.
+    """
     raw = os.environ.get(var_name, "")
     if not raw:
         return ()

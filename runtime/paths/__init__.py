@@ -1,23 +1,21 @@
-"""
-runtime.paths — punto de entrada único de paths y constantes de
-Retrobox.
+"""runtime.paths — Retrobox's single entry point for paths and constants.
 
-Internamente dividido por subsistema:
-    _base.py       -> genérico (XDG, ROOTDIR, bootstrap de retrobox.ini, helpers de FS)
+Internally split by subsystem:
+    _base.py       -> generic (XDG, ROOTDIR, retrobox.ini bootstrap, FS helpers)
     _configgen.py  -> configgen / emulatorlauncher / launcher
     _frontend.py   -> EmulationStation (runtime/startup/frontend_conf)
-    _gamepadly.py  -> las 4 constantes que necesita emulatorlauncher.py
-                      para instanciar GamepadManager (gamepadly ya no
-                      importa nada de aquí directamente)
+    _gamepadly.py  -> the 4 constants emulatorlauncher.py needs to
+                      instantiate GamepadManager (gamepadly itself no
+                      longer imports anything from here directly)
 
-Pero de puertas afuera nada cambia: todo se sigue importando igual que
-antes, `from runtime.paths import X`. Ninguno de los ~100
-archivos que ya hacen ese import necesita tocarse.
+Nothing changes from the outside, though: everything is still imported
+the same way as before, `from runtime.paths import X`. None of the
+~100 files that already do that import need to be touched.
 
-Si añades una constante nueva, decide primero de qué subsistema es y
-créala en el _archivo.py correspondiente (o crea uno nuevo si es de un
-subsistema distinto) — y luego añádela aquí. No la definas directamente
-en este __init__.py.
+If you add a new constant, first decide which subsystem it belongs to
+and define it in the corresponding _file.py (or create a new one for a
+different subsystem) — then add it here. Don't define it directly in
+this __init__.py.
 """
 
 from __future__ import annotations
@@ -70,6 +68,9 @@ from ._configgen import (
     _DECORATIONS_DEF_DIR,
     _DECORATIONS_DIR,
     EMU_FEATURES_DIR,
+    MANGOHUD_BIN,
+    MANGOHUD_PREFIX_DIR,
+    MANGOHUD_VULKAN_LAYER_DIR,
     NVIDIA_POWERD_SCRIPT,
     _SHADERS_DEF_DIR,
     _SHADERS_DIR,
@@ -103,9 +104,9 @@ from ._gamepadly import (
     _GAMEPADLY_USER_PROFILES,
 )
 
-# API pública "de verdad" (sin los nombres con guion bajo, que se
-# mantienen importables por compatibilidad pero no deberían usarse en
-# código nuevo fuera de configgen/frontend_conf existente).
+# The "real" public API (without the underscore-prefixed names, which
+# stay importable for compatibility but shouldn't be used in new code
+# outside of the existing configgen/frontend_conf).
 __all__ = [
     # _base
     "CACHE",
@@ -143,6 +144,9 @@ __all__ = [
     "SCREENSHOTS",
     "SHADER_BEZELS_DIR",
     "SQUASHFS_DIR",
+    "MANGOHUD_BIN",
+    "MANGOHUD_PREFIX_DIR",
+    "MANGOHUD_VULKAN_LAYER_DIR",
     "configure_emulator",
     # _frontend
     "ES_EXECUTABLE",

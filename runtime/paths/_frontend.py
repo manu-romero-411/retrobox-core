@@ -1,7 +1,7 @@
-"""
-Constantes de runtime.paths para el frontend (EmulationStation):
-ubicación del binario, archivos de configuración generados y metadata de
-recursos (guns/wheels/gamesdb).
+"""runtime.paths constants for the frontend (EmulationStation).
+
+Covers the binary's location, generated configuration files, and
+resource metadata (guns/wheels/gamesdb).
 """
 
 from __future__ import annotations

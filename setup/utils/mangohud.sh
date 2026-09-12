@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 # setup/utils/mangohud.sh — build & install MangoHud from source, following
-# the exact version/patch set Batocera ships for it, installed under
-# /usr/local. On x86_64 this builds dual 32+64 bit OpenGL/Vulkan support,
+# the exact version/patch set Batocera ships for it, installed under its
+# own private prefix ($RETROBOX_ROOTDIR/resources/mangohud) instead of
+# /usr/local: this build carries retrobox's own bezel-support patches on
+# top of Batocera's, and it must never shadow (or be shadowed by) whatever
+# MangoHud the user may already have installed system-wide for other
+# purposes. On x86_64 this builds dual 32+64 bit OpenGL/Vulkan support,
 # same as Batocera; on any other host (aarch64 and friends) there's no
 # 32-bit companion build, so it's 64-bit only. The 32-bit pass on x86_64
 # can also be skipped explicitly with -n (see usage below).
@@ -16,21 +20,24 @@
 # i.e. via `retrobox.sh --setup-util mangohud`.
 #
 # What -s does:
-#   1. Detects and removes any existing MangoHud install (dnf, apt, or a
-#      previous from-source install done by this same script).
+#   1. Removes any previous from-source install done by THIS script under
+#      its own prefix (never touches a system-wide dnf/apt/manual install —
+#      that one is left alone on purpose).
 #   2. Downloads package/batocera/utils/mangohud/mangohud.mk from the
 #      batocera.linux repo to read which tag Batocera builds, and downloads
 #      every patch in that same folder.
 #   3. Clones MangoHud at that tag (with submodules) and applies the patches.
 #   4. Builds it for the native architecture, plus a second 32-bit pass via
 #      gcc -m32 when the host is x86_64 (unless -n was given), with
-#      --prefix /usr/local, mirroring Batocera's meson options.
-#   5. Installs the tree(s) under /usr/local/lib/mangohud/{lib64,lib32},
+#      --prefix "${PREFIX}", mirroring Batocera's meson options.
+#   5. Installs the tree(s) under "${PREFIX}/lib/mangohud/{lib64,lib32}",
 #      fixes the `mangohud` wrapper and recreates the $LIB/$PLATFORM
 #      compatibility symlinks used by the project's own upstream build.sh
 #      (only the x86_64 32-bit-companion ones are architecture-specific;
 #      other 64-bit-only hosts — real ones, or x86_64 run with -n — get a
-#      smaller, generic set — see fix_wrapper_and_symlinks below).
+#      smaller, generic set — see fix_wrapper_and_symlinks below). Since
+#      the prefix is private, none of this touches the system-wide loader
+#      cache (no /etc/ld.so.conf.d entry, no ldconfig run).
 #
 #      NOTE on $LIB: MangoHud's bin/mangohud.in wrapper template never
 #      bakes a resolved lib path — it hardcodes the literal string "$LIB"
@@ -49,19 +56,28 @@
 #      unconditionally, on any host arch. Vulkan was never affected by
 #      this, since its implicit-layer JSON is resolved by the Vulkan
 #      loader via dlopen(), a different code path that does expand $LIB
-#      correctly.
+#      correctly, and stays relative to the manifest file's own location
+#      regardless of which prefix it's installed under.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd -P)"
 # shellcheck source=../lib/log.sh
 source "${SCRIPT_DIR}/../lib/log.sh"
 
+# setup/utils/mangohud.sh -> setup/utils -> setup -> retrobox root.
+# Honors an already-exported RETROBOX_ROOTDIR (same convention used by
+# runtime.paths on the Python side) instead of always deriving it from
+# this script's own location.
+RETROBOX_ROOTDIR="${RETROBOX_ROOTDIR:-$(cd "${SCRIPT_DIR}/../.." >/dev/null 2>&1 && pwd -P)}"
+
 MANGOHUD_GIT_URL="https://github.com/flightlessmango/MangoHud.git"
 BATOCERA_PKG_DIR="package/batocera/utils/mangohud"
 BATOCERA_MK_RAW_URL="https://raw.githubusercontent.com/batocera-linux/batocera.linux/master/${BATOCERA_PKG_DIR}/mangohud.mk"
 BATOCERA_API_DIR_URL="https://api.github.com/repos/batocera-linux/batocera.linux/contents/${BATOCERA_PKG_DIR}"
 
-PREFIX="/usr/local"
+# Private prefix: must match runtime.paths._configgen.MANGOHUD_PREFIX_DIR
+# on the Python side, so emulatorlauncher.py finds what we build here.
+PREFIX="${RETROBOX_ROOTDIR}/resources/mangohud"
 STATE_DIR="${PREFIX}/share/retrobox"
 MANIFEST_FILE="${STATE_DIR}/mangohud.manifest"
 VERSION_FILE="${STATE_DIR}/mangohud.version"
@@ -71,10 +87,10 @@ SRC_DIR="${WORKDIR}/MangoHud"
 PATCH_DIR="${WORKDIR}/patches"
 STAGE_DIR="${WORKDIR}/stage"
 
-# Parches propios de retrobox (background_image/image, etc.), mantenidos a
-# mano en el repo -- no se descargan de ningún sitio. Se generan con
-# `git format-patch` contra un tag limpio de MangoHud y se aplican DESPUÉS
-# de los de Batocera (ver apply_patches_from_dir en fetch_and_patch_source).
+# Retrobox's own patches (background_image/image support, etc.), kept by
+# hand in the repo — not downloaded from anywhere. Generated with
+# `git format-patch` against a clean MangoHud tag and applied AFTER
+# Batocera's own (see apply_patches_from_dir in fetch_and_patch_source).
 LOCAL_PATCH_DIR="${SCRIPT_DIR}/mangohud-patches"
 
 MACHINE="$(uname -m)"
@@ -113,7 +129,13 @@ as_root() {
 }
 
 # ---------------------------------------------------------------------------
-# Remove any previous MangoHud installation
+# Remove any previous retrobox-private MangoHud installation
+#
+# This ONLY ever touches "${PREFIX}" (retrobox's own private install,
+# tracked via MANIFEST_FILE). A system-wide MangoHud installed via
+# dnf/apt, or a manual install elsewhere under /usr, is intentionally
+# left untouched — that's a separate install for the user's other apps
+# and retrobox has no business removing it.
 # ---------------------------------------------------------------------------
 
 uninstall_from_source_manifest() {
@@ -121,44 +143,18 @@ uninstall_from_source_manifest() {
     log_info "Removing files listed in ${MANIFEST_FILE}..."
     tac "${MANIFEST_FILE}" | while IFS= read -r path; do
         [[ -e "${path}" || -L "${path}" ]] || continue
-        as_root rm -f "${path}" 2>/dev/null || as_root rmdir "${path}" 2>/dev/null || true
+        rm -f "${path}" 2>/dev/null || rmdir "${path}" 2>/dev/null || true
     done
-    as_root rm -f "${MANIFEST_FILE}" "${VERSION_FILE}"
+    rm -f "${MANIFEST_FILE}" "${VERSION_FILE}"
 }
 
 remove_existing_install() {
-    local found=0
-
-    if rpm -q mangohud &>/dev/null 2>&1; then
-        found=1
-        log_warn "MangoHud installed via dnf/rpm — removing it."
-        as_root dnf remove -y mangohud
-    fi
-
-    if dpkg -s mangohud &>/dev/null 2>&1; then
-        found=1
-        log_warn "MangoHud installed via apt/dpkg — removing it."
-        as_root apt-get remove -y mangohud
-    fi
-
     if [[ -f "${MANIFEST_FILE}" ]]; then
-        found=1
-        log_warn "A previous from-source install was detected — cleaning it up before rebuilding."
+        log_warn "A previous retrobox-private install was detected — cleaning it up before rebuilding."
         uninstall_from_source_manifest
+    else
+        log_info "No previous retrobox-private MangoHud installation found."
     fi
-
-    for legacy in /usr/lib/mangohud /usr/bin/mangohud /usr/bin/mangoplot \
-                  /usr/share/vulkan/implicit_layer.d/MangoHud.x86_64.json \
-                  /usr/share/vulkan/implicit_layer.d/MangoHud.x86.json \
-                  /usr/share/vulkan/implicit_layer.d/mangohud.json; do
-        if [[ -e "${legacy}" ]]; then
-            found=1
-            log_warn "Leftover from a manual install under /usr: ${legacy}"
-            as_root rm -rf "${legacy}"
-        fi
-    done
-
-    [[ "${found}" -eq 0 ]] && log_info "No previous MangoHud installation found."
 }
 
 # ---------------------------------------------------------------------------
@@ -208,35 +204,34 @@ for e in picked:
 PYEOF
 }
 
-# Aplica, en orden, todos los ficheros de un directorio de parches sobre
-# ${SRC_DIR}. Se usa tanto para los parches oficiales de Batocera (descargados
-# en tiempo de ejecución en ${PATCH_DIR}) como para los propios de retrobox
-# (versionados en ${LOCAL_PATCH_DIR}).
+# Applies, in order, every file in a patch directory on top of ${SRC_DIR}.
+# Used both for Batocera's official patches (downloaded at runtime into
+# ${PATCH_DIR}) and for retrobox's own (versioned under ${LOCAL_PATCH_DIR}).
 #
-# Se intenta primero `git apply` a secas (rápido, funciona igual con diffs
-# planos que con la cabecera mbox de `git format-patch`), luego `git apply
-# --3way` (reconstruye el contexto a partir de los blobs base cuando el
-# parche trae líneas "index" -- caso de nuestros propios parches, generados
-# con format-patch; no aporta nada con los diffs planos de Batocera, pero
-# tampoco hace daño) y por último `patch --fuzz=3` como red de seguridad
-# final. Si Batocera avanza de versión y un parche deja de aplicar limpio,
-# esto da más margen antes de fallar del todo -- pero no es infalible: un
-# aviso aquí siempre merece revisión manual antes de dar el build por bueno.
+# First tries a plain `git apply` (fast, works with both flat diffs and
+# `git format-patch`'s mbox header), then `git apply --3way` (rebuilds
+# context from the base blobs when the patch carries "index" lines — our
+# own format-patch-generated patches; a no-op for Batocera's flat diffs,
+# but harmless), and finally `patch --fuzz=3` as a last-resort safety net.
+# If Batocera bumps its MangoHud version and a patch stops applying
+# cleanly, this buys more margin before failing outright — but it's not
+# foolproof: a warning here always deserves a manual review before trusting
+# the build.
 apply_patches_from_dir() {
     local dir="$1" label="$2"
     shopt -s nullglob
     local patches=("${dir}"/*)
     shopt -u nullglob
     if [[ "${#patches[@]}" -eq 0 ]]; then
-        log_warn "No hay parches de ${label} que aplicar."
+        log_warn "No ${label} patches to apply."
         return 0
     fi
     for p in "${patches[@]}"; do
-        log_info "Aplicando parche (${label}): $(basename "${p}")"
+        log_info "Applying patch (${label}): $(basename "${p}")"
         git apply --whitespace=nowarn -p1 "${p}" 2>/dev/null \
             || git apply --whitespace=nowarn -p1 --3way "${p}" 2>/dev/null \
             || patch -p1 --forward --fuzz=3 < "${p}" \
-            || log_warn "El parche $(basename "${p}") (${label}) no se pudo aplicar -- revísalo a mano contra el MangoHud actual."
+            || log_warn "Patch $(basename "${p}") (${label}) could not be applied -- review it by hand against the current MangoHud."
     done
 }
 
@@ -244,16 +239,15 @@ fetch_and_patch_source() {
     rm -rf "${SRC_DIR}"
 
     if [[ "${BATOCERA_VERSION}" =~ ^[0-9a-fA-F]{40}$ ]]; then
-        # Batocera no siempre pinea un tag de release (v0.8.4 etc.); a
-        # veces MANGOHUD_VERSION es directamente un hash de commit (p.ej.
-        # "Version: Commits from Jun 15, 2024" -> un SHA de 40 caracteres
-        # en mangohud.mk). Un SHA no es ni rama ni tag, así que `git
-        # clone --branch` no puede resolverlo -- ni con "tag/" delante
-        # (esa ref no existe) ni a pelo (tampoco existe como rama).
-        # GitHub sí permite obtener un commit alcanzable arbitrario por
-        # su SHA (uploadpack.allowReachableSHA1InWant), así que en este
-        # caso hacemos un fetch directo de ese commit en vez de un clone
-        # por ref.
+        # Batocera doesn't always pin a release tag (v0.8.4 etc.);
+        # sometimes MANGOHUD_VERSION is a bare commit hash (e.g.
+        # "Version: Commits from Jun 15, 2024" -> a 40-char SHA in
+        # mangohud.mk). A SHA is neither a branch nor a tag, so `git
+        # clone --branch` can't resolve it -- not with "tag/" in front
+        # (that ref doesn't exist) nor bare (not a branch either).
+        # GitHub does allow fetching an arbitrary reachable commit by its
+        # SHA (uploadpack.allowReachableSHA1InWant), so in this case we
+        # fetch that commit directly instead of cloning by ref.
         log_info "Cloning MangoHud at commit ${BATOCERA_VERSION}..."
         mkdir -p "${SRC_DIR}"
         git -C "${SRC_DIR}" init --quiet
@@ -262,9 +256,9 @@ fetch_and_patch_source() {
         git -C "${SRC_DIR}" checkout --quiet FETCH_HEAD
         git -C "${SRC_DIR}" submodule update --init --recursive --depth 1
     else
-        # Aquí sí es un tag real (p.ej. "v0.8.4"). --branch resuelve
-        # tags igual que ramas -- sin "tag/" delante, esa ref no existe
-        # en el repo de MangoHud.
+        # This is a real tag (e.g. "v0.8.4"). --branch resolves tags
+        # just like branches -- without "tag/" in front, since that ref
+        # doesn't exist in the MangoHud repo.
         log_info "Cloning MangoHud (${BATOCERA_VERSION})..."
         git clone --quiet --recurse-submodules --depth 1 \
             "${MANGOHUD_GIT_URL}" "${SRC_DIR}"
@@ -412,13 +406,13 @@ build_arch() {
 }
 
 merge_stage_into_prefix() {
-    log_info "Merging into ${PREFIX} (requires privileges)..."
-    as_root mkdir -p "${STATE_DIR}"
-    as_root rsync -a "${STAGE_DIR}${PREFIX}/" "${PREFIX}/"
+    log_info "Merging into ${PREFIX}..."
+    mkdir -p "${STATE_DIR}"
+    rsync -a "${STAGE_DIR}${PREFIX}/" "${PREFIX}/"
 
     (cd "${STAGE_DIR}${PREFIX}" && find . -type f -o -type l) \
-        | sed "s|^\.|${PREFIX}|" | as_root tee "${MANIFEST_FILE}" >/dev/null
-    echo "${BATOCERA_VERSION}" | as_root tee "${VERSION_FILE}" >/dev/null
+        | sed "s|^\.|${PREFIX}|" > "${MANIFEST_FILE}"
+    echo "${BATOCERA_VERSION}" > "${VERSION_FILE}"
 }
 
 fix_wrapper_and_symlinks() {
@@ -427,10 +421,15 @@ fix_wrapper_and_symlinks() {
     log_info "Fixing the mangohud wrapper and creating the \$LIB symlinks..."
 
     if [[ -f "${bin}" ]]; then
-        # Use single quotes so bash doesn't mangle the backslashes.
+        # Build the search/replace strings by concatenating the (possibly
+        # user-supplied) PREFIX with a literal, single-quoted suffix, so
+        # bash never tries to expand "\$LIB" itself.
         # \\* matches zero or more literal backslashes before $LIB,
         # covering both "\$LIB" (meson's default) and bare "$LIB".
-        as_root sed -i 's|/usr/local/\\*\$LIB|/usr/local/lib/mangohud/\\$LIB|g' "${bin}"
+        local search_pattern replace_pattern
+        search_pattern="${PREFIX}"'/\\*\$LIB'
+        replace_pattern="${PREFIX}"'/lib/mangohud/\\$LIB'
+        sed -i "s|${search_pattern}|${replace_pattern}|g" "${bin}"
 
         # MangoHud's bin/mangohud.in wrapper hardcodes the literal string
         # "$LIB" into LD_PRELOAD/LD_LIBRARY_PATH and expects ld.so to
@@ -449,10 +448,10 @@ fix_wrapper_and_symlinks() {
         # hardcode the real 64-bit dir directly into the installed
         # wrapper instead of trusting ld.so to expand $LIB, on any host
         # architecture.
-        as_root sed -i 's|\\*\$LIB|lib64|g' "${bin}"
+        sed -i 's|\\*\$LIB|lib64|g' "${bin}"
     fi
-    as_root mkdir -p "${libbase}/tls"
-    ln_safe() { [[ -e "$2" || -L "$2" ]] || as_root ln -sv "$1" "$2"; }
+    mkdir -p "${libbase}/tls"
+    ln_safe() { [[ -e "$2" || -L "$2" ]] || ln -sv "$1" "$2"; }
 
     # $PLATFORM-token aliases for the native build
     ln_safe lib64 "${libbase}/${MACHINE}"
@@ -473,16 +472,17 @@ fix_wrapper_and_symlinks() {
         # Single-arch host (aarch64, etc.), or x86_64 run with -n: there's
         # no lib32 tree on disk, so $LIB must resolve to lib64 instead —
         # pointing "lib" at a nonexistent lib32 here is what produced the
-        # dangling-symlink "No existe el fichero o el directorio" failure
-        # when the 32-bit pass was skipped/missing.
+        # dangling "No such file or directory" symlink failure when the
+        # 32-bit pass was skipped/missing.
         ln_safe lib64 "${libbase}/lib"
     fi
 
-    echo "${libbase}/lib64" | as_root tee /etc/ld.so.conf.d/mangohud.conf >/dev/null
-    if want_32bit; then
-        echo "${libbase}/lib32" | as_root tee -a /etc/ld.so.conf.d/mangohud.conf >/dev/null
-    fi
-    as_root ldconfig
+    # Deliberately no /etc/ld.so.conf.d entry and no ldconfig run here:
+    # ${PREFIX} is a private prefix, not meant to be visible to the
+    # system-wide dynamic linker. The wrapper above already has the real
+    # lib64 path baked in for OpenGL/LD_PRELOAD, and the Vulkan implicit
+    # layer JSON resolves its library relative to its own location, so
+    # neither needs the system loader to know about this prefix.
 }
 
 # ---------------------------------------------------------------------------
@@ -515,14 +515,13 @@ do_install() {
 
 do_uninstall() {
     uninstall_from_source_manifest
-    as_root rm -f /etc/ld.so.conf.d/mangohud.conf
-    as_root ldconfig || true
-    log_ok "MangoHud uninstalled."
+    log_ok "MangoHud uninstalled from ${PREFIX}."
 }
 
 usage() {
     echo "Usage: $(basename "${BASH_SOURCE[0]}") -s [-n] | -u"
     echo "  -s   build and install MangoHud from source (Batocera's recipe)"
+    echo "       into retrobox's private prefix (${PREFIX})"
     echo "  -n   (with -s) skip the 32-bit (i386) build, even on x86_64"
     echo "  -u   uninstall the install done by this script"
 }

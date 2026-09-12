@@ -32,7 +32,12 @@
 #
 # All of the above are maintenance operations: they run and then exit,
 # they don't start the frontend afterwards. Any other argument is passed
-# through to runtime/startup/retrobox_run.py untouched.
+# through to runtime/startup/retrobox_run.py untouched — this includes
+# --pcgames-sync, which is not handled here but recognized by
+# retrobox_run.py itself: it enables syncing installed PC games (Steam,
+# Lutris, Heroic) before starting the frontend, and is stripped before the
+# remaining arguments reach EmulationStation. Without it, the sync is
+# skipped.
 set -eo pipefail
 RETROBOX_ROOTDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd -P)"
 SETUP_DIR="${RETROBOX_ROOTDIR}/setup"
@@ -87,9 +92,19 @@ Usage: $(basename "${BASH_SOURCE[0]}") [OPTIONS] [-- ARGS...]
                             to preview without downloading.
 -h, --help                  Show this help and exit.
 
+Anything else is forwarded as-is to runtime/startup/retrobox_run.py,
+which in turn passes it to the frontend (EmulationStation) — with one
+exception:
+
+--pcgames-sync              Sync installed PC games (Steam, Lutris,
+                            Heroic) into their EmulationStation ROM
+                            directories before starting the frontend.
+                            Without it, the sync is skipped. Handled by
+                            retrobox_run.py, not forwarded to
+                            EmulationStation.
+
 With no options, Retrobox runs the platform setup automatically the first
 time (and only the first time) it's launched, then starts the frontend.
-Anything else you pass is forwarded as-is to the frontend.
 EOF
 }
 

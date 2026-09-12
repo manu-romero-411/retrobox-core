@@ -1,6 +1,4 @@
-"""
-This submodule regenerates es_features.cfg based on YAML configuration files.
-"""
+"""Regenerate es_features.cfg from YAML configuration files."""
 import logging
 import os
 from pathlib import Path
@@ -11,23 +9,22 @@ import yaml
 from yaml.scanner import ScannerError
 from yaml.parser import ParserError
 
-# logging.basicConfig(
-#     level=logging.INFO,
-#     format="[%(levelname)s] %(message)s"
-# )
+ROOTDIR = Path(__file__).resolve().parents[2]
+sys.path.append(str(ROOTDIR))
 
-_logger = logging.getLogger(__name__)
-
+# pylint: disable=wrong-import-position
 from runtime.paths import (
     EMU_FEATURES_DIR,
     ES_FEATURES_CFG,
     ES_FEATURES_TMP
 )
+# pylint: enable=wrong-import-position
 
-ROOTDIR = Path(__file__).resolve().parents[2]
-sys.path.append(str(ROOTDIR))
+_logger = logging.getLogger(__name__)
+
 
 def build_features_elements(parent_elem, data_dict):
+    """Populate `parent_elem` with the features/sharedFeatures/groups of `data_dict`."""
     features = data_dict.get('features')
     if features:
         if isinstance(features, list):
@@ -46,7 +43,7 @@ def build_features_elements(parent_elem, data_dict):
         for group_name, group_content in groups.items():
             if not isinstance(group_content, dict):
                 continue
-            
+
             submenus = group_content.get('submenus', {})
             for submenu_name, items in submenus.items():
                 if isinstance(items, list):
@@ -85,6 +82,7 @@ def build_features_elements(parent_elem, data_dict):
                                     choice_elem.set(str(ck), str(cv))
 
 def build_system_elements(parent_elem, systems_list):
+    """Append a <systems> block under `parent_elem` for each entry in `systems_list`."""
     if not systems_list or not isinstance(systems_list, list):
         return
     systems_container = ET.SubElement(parent_elem, 'systems')
@@ -95,9 +93,17 @@ def build_system_elements(parent_elem, systems_list):
                 sys_elem.set(str(k), str(v))
         build_features_elements(sys_elem, sys_data)
 
+
 def generate_es_features(yaml_dir: Path = EMU_FEATURES_DIR, output_path: Path = ES_FEATURES_TMP):
-    """
-    entrypoint to the es_features.cfg generator
+    """Entry point for the es_features.cfg generator.
+
+    Args:
+        yaml_dir: Directory holding the per-emulator/core feature YAML files.
+        output_path: Where to write the generated es_features.cfg.
+
+    Raises:
+        FileNotFoundError: If `yaml_dir` doesn't exist.
+        NotADirectoryError: If `yaml_dir` exists but isn't a directory.
     """
     if not os.path.exists(yaml_dir):
         raise FileNotFoundError(f"Features dir not found: {yaml_dir}")
@@ -130,7 +136,7 @@ def generate_es_features(yaml_dir: Path = EMU_FEATURES_DIR, output_path: Path = 
 
                 emu_name = data.get('emulator_name')
 
-                # Detectar el fichero especial global
+                # Detect the special global config file
                 if emu_name == '_global_config':
                     global_config_data = data
                     continue
@@ -146,13 +152,13 @@ def generate_es_features(yaml_dir: Path = EMU_FEATURES_DIR, output_path: Path = 
         except (ScannerError, ParserError) as e:
             _logger.error("Error parsing YAML file %s: %s", yfile.name, e)
 
-    # 1. Reconstruir <sharedFeatures> y <globalFeatures> si existe el fichero global
+    # 1. Rebuild <sharedFeatures> and <globalFeatures> if the global config file exists
     if global_config_data:
         groups = global_config_data.get('groups')
         if groups:
             shared_elem = ET.SubElement(root, 'sharedFeatures')
             build_features_elements(root, global_config_data)
-            # Reorganizamos para mover los elementos feature dentro de sharedFeatures
+            # Move the feature elements into sharedFeatures
             root.remove(shared_elem)
             for child in list(root):
                 if child.tag == 'feature':
@@ -167,7 +173,7 @@ def generate_es_features(yaml_dir: Path = EMU_FEATURES_DIR, output_path: Path = 
                 sf_elem = ET.SubElement(global_feats_elem, 'sharedFeature')
                 sf_elem.set('value', str(sf))
 
-    # 2. Reconstruir emuladores y cores
+    # 2. Rebuild emulators and cores
     for emu_name, emu_data in emulator_data_map.items():
         emu_elem = ET.SubElement(root, 'emulator')
         emu_elem.set('name', str(emu_name))
@@ -211,7 +217,7 @@ def generate_es_features(yaml_dir: Path = EMU_FEATURES_DIR, output_path: Path = 
                 if core_systems:
                     build_system_elements(core_elem, core_systems)
 
-    # Generación y formateo final del XML
+    # Final XML generation and formatting
     xml_string = ET.tostring(root, encoding='utf-8')
     parsed_dom = minidom.parseString(xml_string)
     pretty_xml = parsed_dom.toprettyxml(indent="  ", encoding="utf-8")
