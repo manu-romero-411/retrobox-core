@@ -353,6 +353,7 @@ def getHudBezel(system: Emulator, generator: Generator, rom: Path, gameResolutio
     if generator.supportsInternalBezels():
         _logger.debug("skipping bezels for emulator %s", system.config.emulator)
         return None
+    
     # no good reason for a bezel
     bezel = system.config.get_str('bezel', 'none')
     bezel_tattoo = system.config.get_str('bezel.tattoo', '0')
@@ -409,8 +410,11 @@ def getHudBezel(system: Emulator, generator: Generator, rom: Path, gameResolutio
     screen_ratio = gameResolution["width"] / gameResolution["height"]
     bezel_ratio  = bezel_width / bezel_height
 
-    # the screen and bezel ratio must be approximatly the same
-    if bordersSize is None and abs(screen_ratio - bezel_ratio) > max_ratio_delta:
+    # stretch option (MOVED UP to be used in validation checks)
+    bezel_stretch = system.config.get_bool('bezel_stretch')
+
+    # the screen and bezel ratio must be approximatly the same, UNLESS stretch is enabled
+    if not bezel_stretch and bordersSize is None and abs(screen_ratio - bezel_ratio) > max_ratio_delta:
         _logger.debug(
             "screen ratio (%(screen_ratio)s) is too far from the bezel one (%(bezel_ratio)s) : %(screen_ratio)s - %(bezel_ratio)s > %(max_ratio_delta)s",
             {
@@ -424,7 +428,7 @@ def getHudBezel(system: Emulator, generator: Generator, rom: Path, gameResolutio
     # the ingame image and the bezel free space must feet
     ## the bezel top and bottom cover must be minimum
     # in case there is a border, force it
-    if bordersSize is None:
+    if not bezel_stretch and bordersSize is None:
         if "top" in infos and infos["top"] / bezel_height > max_cover:
             _logger.debug('bezel top covers too much the game image : %s / %s > %s', infos["top"], bezel_height, max_cover)
             return None
@@ -435,27 +439,27 @@ def getHudBezel(system: Emulator, generator: Generator, rom: Path, gameResolutio
     # if there is no information about top/bottom, assume default is 0
 
     ## the bezel left and right cover must be maximum
-    ingame_ratio = generator.getInGameRatio(system.config, gameResolution, rom)
-    img_height = bezel_height
-    img_width  = img_height * ingame_ratio
+    if not bezel_stretch and bordersSize is None:
+        ingame_ratio = generator.getInGameRatio(system.config, gameResolution, rom)
+        img_height = bezel_height
+        img_width  = img_height * ingame_ratio
 
-    if "left" not in infos:
-        _logger.debug("bezel has no left info in %s", overlay_info_file)
-        # assume default is 4/3 over 16/9
-        infos_left = (bezel_width - (bezel_height / 3 * 4)) / 2
-        if bordersSize is None and abs((infos_left  - ((bezel_width-img_width)/2.0)) / img_width) > max_cover:
-            _logger.debug("bezel left covers too much the game image : %s / %s > %s", infos_left  - ((bezel_width-img_width)/2.0), img_width, max_cover)
-            return None
+        if "left" not in infos:
+            _logger.debug("bezel has no left info in %s", overlay_info_file)
+            # assume default is 4/3 over 16/9
+            infos_left = (bezel_width - (bezel_height / 3 * 4)) / 2
+            if abs((infos_left  - ((bezel_width-img_width)/2.0)) / img_width) > max_cover:
+                _logger.debug("bezel left covers too much the game image : %s / %s > %s", infos_left  - ((bezel_width-img_width)/2.0), img_width, max_cover)
+                return None
 
-    if "right" not in infos:
-        _logger.debug("bezel has no right info in %s", overlay_info_file)
-        # assume default is 4/3 over 16/9
-        infos_right = (bezel_width - (bezel_height / 3 * 4)) / 2
-        if bordersSize is None and abs((infos_right - ((bezel_width-img_width)/2.0)) / img_width) > max_cover:
-            _logger.debug("bezel right covers too much the game image : %s / %s > %s", infos_right  - ((bezel_width-img_width)/2.0), img_width, max_cover)
-            return None
+        if "right" not in infos:
+            _logger.debug("bezel has no right info in %s", overlay_info_file)
+            # assume default is 4/3 over 16/9
+            infos_right = (bezel_width - (bezel_height / 3 * 4)) / 2
+            if abs((infos_right - ((bezel_width-img_width)/2.0)) / img_width) > max_cover:
+                _logger.debug("bezel right covers too much the game image : %s / %s > %s", infos_right  - ((bezel_width-img_width)/2.0), img_width, max_cover)
+                return None
 
-    if bordersSize is None:
         if "left"  in infos and abs((infos["left"]  - ((bezel_width-img_width)/2.0)) / img_width) > max_cover:
             _logger.debug("bezel left covers too much the game image : %s / %s > %s", infos["left"]  - ((bezel_width-img_width)/2.0), img_width, max_cover)
             return None
@@ -464,8 +468,6 @@ def getHudBezel(system: Emulator, generator: Generator, rom: Path, gameResolutio
             return None
 
     # if screen and bezel sizes doesn't match, resize
-    # stretch option
-    bezel_stretch = system.config.get_bool('bezel_stretch')
     if (bezel_width != gameResolution["width"] or bezel_height != gameResolution["height"]):
         _logger.debug("bezel needs to be resized")
         output_png_file = Path("/tmp/bezel.png")

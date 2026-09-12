@@ -75,16 +75,16 @@ SRC_DIR="${WORKDIR}/MangoHud"
 PATCH_DIR="${WORKDIR}/patches"
 STAGE_DIR="${WORKDIR}/stage"
 
-# Parches propios de retrobox (background_image/image, etc.), mantenidos a
-# mano en el repo -- no se descargan de ningún sitio. Se generan con
-# `git format-patch` contra un tag limpio de MangoHud y se aplican DESPUÉS
-# de los de Batocera (ver apply_patches_from_dir en fetch_and_patch_source).
+# Retrobox's own patches (background_image/image, etc.), maintained manually 
+# in the repo -- not downloaded from anywhere. They are generated with 
+# `git format-patch` against a clean MangoHud tag and applied AFTER 
+# Batocera's patches (see apply_patches_from_dir in fetch_and_patch_source).
 LOCAL_PATCH_DIR="${SCRIPT_DIR}/mangohud-patches"
 
 MACHINE="$(uname -m)"
 
 # Set by argument parsing at the bottom of the script. When 1, the 32-bit
-# (i386) build pass is skipped even on an x86_64 host.
+# (i386) build pass is skipped even on an x86_64 host. Default is 0 (build it).
 SKIP_32BIT=1
 
 # ---------------------------------------------------------------------------
@@ -127,7 +127,7 @@ uninstall_from_source_manifest() {
         [[ -e "${path}" || -L "${path}" ]] || continue
         as_root rm -f "${path}" 2>/dev/null || as_root rmdir "${path}" 2>/dev/null || true
     done
-    # El manifiesto pertenece al usuario, no necesita as_root para borrarse
+    # The manifest belongs to the user, no as_root needed for deletion
     rm -f "${MANIFEST_FILE}" "${VERSION_FILE}"
 }
 
@@ -136,13 +136,13 @@ remove_existing_install() {
     local user_vulkan_dir="${HOME}/.local/share/vulkan/implicit_layer.d"
     local prefix_vulkan_dir="${PREFIX}/share/vulkan/implicit_layer.d"
 
-    if rpm -q mangohud &>/dev/null 2>&1; then
+    if command -v rpm >/dev/null 2>&1 && rpm -q mangohud &>/dev/null 2>&1; then
         found=1
         log_warn "MangoHud installed via dnf/rpm — removing it."
         as_root dnf remove -y mangohud
     fi
 
-    if dpkg -s mangohud &>/dev/null 2>&1; then
+    if command -v dpkg >/dev/null 2>&1 && dpkg -s mangohud &>/dev/null 2>&1; then
         found=1
         log_warn "MangoHud installed via apt/dpkg — removing it."
         as_root apt-get remove -y mangohud
@@ -154,26 +154,41 @@ remove_existing_install() {
         uninstall_from_source_manifest
     fi
 
-    # Limpiar legacy del sistema
-    for legacy in /usr/lib/mangohud /usr/bin/mangohud /usr/bin/mangoplot \
-                  /usr/share/vulkan/implicit_layer.d/RetroboxMangoHud.x86_64.json \
-                  /usr/share/vulkan/implicit_layer.d/RetroboxMangoHud.x86.json \
-                  /usr/share/vulkan/implicit_layer.d/retroboxmangohud.json; do
-        if [[ -e "${legacy}" ]]; then
+    # Clean up system legacy files
+    local system_legacy_files=(
+        "/usr/lib/mangohud"
+        "/usr/bin/mangohud"
+        "/usr/bin/mangoplot"
+        "/usr/share/vulkan/implicit_layer.d/RetroboxMangoHud.x86_64.json"
+        "/usr/share/vulkan/implicit_layer.d/RetroboxMangoHud.x86.json"
+        "/usr/share/vulkan/implicit_layer.d/RetroboxMangoHud.json"
+        "/usr/share/vulkan/implicit_layer.d/retroboxmangohud.json"
+        "/usr/local/share/vulkan/implicit_layer.d/RetroboxMangoHud.x86_64.json"
+        "/usr/local/share/vulkan/implicit_layer.d/RetroboxMangoHud.x86.json"
+        "/usr/local/share/vulkan/implicit_layer.d/RetroboxMangoHud.json"
+        "/usr/local/share/vulkan/implicit_layer.d/retroboxmangohud.json"
+    )
+    for legacy in "${system_legacy_files[@]}"; do
+        if [[ -e "${legacy}" || -L "${legacy}" ]]; then
             found=1
-            log_warn "Leftover from a manual install under /usr: ${legacy}"
+            log_warn "Leftover from a manual install under /usr or /usr/local: ${legacy}"
             as_root rm -rf "${legacy}"
         fi
     done
 
-    # Limpiar legacy del directorio de usuario y del prefix
-    for legacy in "${user_vulkan_dir}/RetroboxMangoHud.x86_64.json" \
-                  "${user_vulkan_dir}/RetroboxMangoHud.x86.json" \
-                  "${user_vulkan_dir}/mangohud.json" \
-                  "${prefix_vulkan_dir}/RetroboxMangoHud.x86_64.json" \
-                  "${prefix_vulkan_dir}/RetroboxMangoHud.x86.json" \
-                  "${prefix_vulkan_dir}/mangohud.json"; do
-        if [[ -e "${legacy}" ]]; then
+    # Clean up user and prefix directory legacy files
+    local user_legacy_files=(
+        "${user_vulkan_dir}/RetroboxMangoHud.x86_64.json"
+        "${user_vulkan_dir}/RetroboxMangoHud.x86.json"
+        "${user_vulkan_dir}/RetroboxMangoHud.json"
+        "${user_vulkan_dir}/retroboxmangohud.json"
+        "${prefix_vulkan_dir}/RetroboxMangoHud.x86_64.json"
+        "${prefix_vulkan_dir}/RetroboxMangoHud.x86.json"
+        "${prefix_vulkan_dir}/RetroboxMangoHud.json"
+        "${prefix_vulkan_dir}/retroboxmangohud.json"
+    )
+    for legacy in "${user_legacy_files[@]}"; do
+        if [[ -e "${legacy}" || -L "${legacy}" ]]; then
             found=1
             log_warn "Leftover from a manual install: ${legacy}"
             rm -f "${legacy}"
@@ -229,25 +244,24 @@ for e in picked:
 PYEOF
 }
 
-# Aplica, en orden, todos los ficheros de un directorio de parches sobre
-# ${SRC_DIR}. Se usa tanto para los parches oficiales de Batocera (descargados
-# en tiempo de ejecución en ${PATCH_DIR}) como para los propios de retrobox
-# (versionados en ${LOCAL_PATCH_DIR}).
+# Applies, in order, all files from a patch directory to ${SRC_DIR}. 
+# Used for both official Batocera patches (downloaded at runtime to ${PATCH_DIR}) 
+# and Retrobox's own patches (versioned in ${LOCAL_PATCH_DIR}).
 apply_patches_from_dir() {
     local dir="$1" label="$2"
     shopt -s nullglob
     local patches=("${dir}"/*)
     shopt -u nullglob
     if [[ "${#patches[@]}" -eq 0 ]]; then
-        log_warn "No hay parches de ${label} que aplicar."
+        log_warn "No ${label} patches to apply."
         return 0
     fi
     for p in "${patches[@]}"; do
-        log_info "Aplicando parche (${label}): $(basename "${p}")"
+        log_info "Applying patch (${label}): $(basename "${p}")"
         git apply --whitespace=nowarn -p1 "${p}" 2>/dev/null \
             || git apply --whitespace=nowarn -p1 --3way "${p}" 2>/dev/null \
             || patch -p1 --forward --fuzz=3 < "${p}" \
-            || log_warn "El parche $(basename "${p}") (${label}) no se pudo aplicar -- revísalo a mano contra el MangoHud actual."
+            || log_warn "Patch $(basename "${p}") (${label}) could not be applied -- review it manually against the current MangoHud."
     done
 }
 
@@ -388,7 +402,7 @@ build_arch() {
 
 merge_stage_into_prefix() {
     log_info "Merging into ${PREFIX} (requires privileges)..."
-    # El directorio de estado del paquete pertenece al usuario, no necesita as_root
+    # The manifest belongs to the user, no as_root needed for the state directory
     mkdir -p "${PACKAGE_STATE_DIR}"
     as_root rsync -a "${STAGE_DIR}${PREFIX}/" "${PREFIX}/"
 
@@ -411,13 +425,14 @@ fix_wrapper_and_symlinks() {
     fi
     as_root ldconfig
 
-    # Registrar la capa implícita de Vulkan en el directorio de usuario (estándar)
-    log_info "Registering MangoHud Vulkan implicit layer in user directory..."
+    # Register the Vulkan implicit layer in the user directory (standard)
+    log_info "Registering MangoHud Vulkan implicit layer in user and prefix directories..."
     mkdir -p "${user_json_dir}"
     
-    # Registrar también en el directorio del prefix para que el launcher de Python 
-    # (que usa MANGOHUD_VULKAN_LAYER_DIR) lo encuentre y lo inyecte vía VK_ADD_LAYER_PATH.
+    # Also register in the prefix directory so the Python launcher (which uses MANGOHUD_VULKAN_LAYER_DIR) 
+    # can find and inject it via VK_ADD_LAYER_PATH.
     mkdir -p "${prefix_json_dir}"
+    mkdir -p "${system_json_dir}"
 
     local lib_path_64="${libbase}/lib64/libMangoHud.so"
     local json_content_64
@@ -445,10 +460,9 @@ fix_wrapper_and_symlinks() {
 EOF
 )
 
-    echo "${json_content_64}" | as_root tee "${system_json_dir}/RetroboxMangoHud.x86_64.json"
-    #echo "${json_content_64}" > "${user_json_dir}/RetroboxMangoHud.x86_64.json"
+    echo "${json_content_64}" | as_root tee "${system_json_dir}/RetroboxMangoHud.x86_64.json" >/dev/null
     echo "${json_content_64}" > "${prefix_json_dir}/RetroboxMangoHud.x86_64.json"
-    log_info "Created Vulkan layer JSON in user and prefix directories."
+    log_info "Created Vulkan layer JSON in system and prefix directories."
 
     if want_32bit; then
         local lib_path_32="${libbase}/lib32/libMangoHud.so"
@@ -470,19 +484,19 @@ EOF
         "RETROBOX_MANGOHUD": "1"
       },
       "disable_environment": {
-        "RETROBOX_MANGOHUD_DISABLE": "0"
+        "RETROBOX_MANGOHUD_DISABLE": "1"
       }
     }
 }
 EOF
 )
-        echo "${json_content_32}" | as_root tee "${system_json_dir}/RetroboxMangoHud.x86.json"
-        echo "${json_content_32}" > "${user_json_dir}/RetroboxMangoHud.x86.json"
+        echo "${json_content_32}" | as_root tee "${system_json_dir}/RetroboxMangoHud.x86.json" >/dev/null
         echo "${json_content_32}" > "${prefix_json_dir}/RetroboxMangoHud.x86.json"
     fi
 }
 
 isolate_from_system_env(){
+    mkdir -p "${HOME}/.config/environment.d"
     cat << EOF > "${HOME}/.config/environment.d/64-retrobox-mangohud.conf"
 # avoid conflict between system's and retrobox's mangohud on vulkan apps
 RETROBOX_MANGOHUD_DISABLE=1
@@ -513,38 +527,21 @@ do_install() {
 
     merge_stage_into_prefix
     fix_wrapper_and_symlinks
+    isolate_from_system_env
 
     log_ok "MangoHud ${BATOCERA_VERSION} installed into ${PREFIX}."
 }
 
 do_uninstall() {
-    uninstall_from_source_manifest
+    # remove_existing_install already handles manifest undoing and legacy file cleanup
+    remove_existing_install
     
-    # Limpiar configuración de ldconfig
+    # Clean up ldconfig configuration
     as_root rm -f /etc/ld.so.conf.d/mangohud.conf
     as_root ldconfig || true
     
-    # Limpiar los archivos de la capa de Vulkan del sistema (por si quedaron de instalaciones antiguas)
-    as_root rm -f /usr/share/vulkan/implicit_layer.d/RetroboxMangoHud.x86_64.json
-    as_root rm -f /usr/share/vulkan/implicit_layer.d/RetroboxMangoHud.x86.json
-    as_root rm -f /usr/share/vulkan/implicit_layer.d/RetroboxMangoHud.json
-    as_root rm -f /usr/share/vulkan/implicit_layer.d/retroboxmangohud.json
-
-    # Limpiar los archivos de la capa de Vulkan del usuario y del prefix
-    local user_json_dir="${HOME}/.local/share/vulkan/implicit_layer.d"
-    local prefix_json_dir="${PREFIX}/share/vulkan/implicit_layer.d"
-    
-    rm -f "${user_json_dir}/RetroboxMangoHud.x86_64.json"
-    rm -f "${user_json_dir}/RetroboxMangoHud.x86.json"
-    rm -f "${user_json_dir}/RetroboxMangoHud.json"
-    rm -f "${user_json_dir}/retroboxmangohud.json"
-
-    rm -f "${prefix_json_dir}/RetroboxMangoHud.x86_64.json"
-    rm -f "${prefix_json_dir}/RetroboxMangoHud.x86.json"
-    rm -f "${prefix_json_dir}/RetroboxMangoHud.json"
-    rm -f "${prefix_json_dir}/retroboxmangohud.json"
-
-    as_root rm -f "${HOME}/.config/environment.d/64-retrobox-mangohud.conf"
+    # Clean up environment config (no root needed for user's home directory)
+    rm -f "${HOME}/.config/environment.d/64-retrobox-mangohud.conf"
 
     log_ok "MangoHud uninstalled."
 }
@@ -555,6 +552,10 @@ usage() {
     echo "  -n   (with -s) skip the 32-bit (i386) build, even on x86_64"
     echo "  -u   uninstall the install done by this script"
 }
+
+# ---------------------------------------------------------------------------
+# Argument Parsing
+# ---------------------------------------------------------------------------
 
 if [[ $# -eq 0 ]]; then
     usage
