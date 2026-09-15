@@ -25,7 +25,7 @@ if TYPE_CHECKING:
         OpenTextModeUpdating,
         OpenTextModeWriting,
     )
-    from collections.abc import Generator
+    from collections.abc import Generator, Iterable
     from io import BufferedRandom, BufferedWriter, TextIOWrapper
 
 
@@ -54,23 +54,36 @@ def check_env_dirs(variable: str, default_dir: Path) -> Path:
 # retrobox.ini: bootstrap, auto-generation and self-healing
 #
 # Three sections with distinct contracts:
-#   [core]    -> Core behavior flags (e.g., AUTOCORRECT_PATHS).
-#   [paths]   -> Keys managed by this module (ROMS_DIR, SAVES_DIR,
-#                BIOS_DIR). Always present. If AUTOCORRECT_PATHS is true,
+#   [core]    -> Core behavior flags: autocorrect_paths, ignore_systems.
+#   [paths]   -> Keys managed by this module (roms_dir, saves_dir,
+#                bios_dir). Always present. If autocorrect_paths is true,
 #                they are guaranteed to be valid directories (auto-healed
 #                if missing or invalid). Read directly via get_configured_path().
 #   [environ] -> Literal dump to os.environ (API keys, STEAM_LIBRARY_DIR,
 #                etc.). No validation or self-healing: whatever is written
-#                there is respected as-is.
+#                there is respected as-is, case included (these become
+#                actual environment variable names).
+#
+# [core] and [paths] key names are lowercase by convention (they're our
+# own parameters, not env var names). Older retrobox.ini files that still
+# have them UPPERCASE are transparently migrated to lowercase the first
+# time they're loaded -- see _normalize_section_keys().
 # ---------------------------------------------------------------------------
 
 # Path keys that retrobox.ini must always have, with their default
 # subdirectory relative to RETROBOX_ROOTDIR (never a fixed absolute path:
 # resolved at runtime against "rootdir").
 _PATH_DEFAULTS: Final[dict[str, str]] = {
-    "ROMS_DIR": "roms",
-    "SAVES_DIR": "saves",
-    "BIOS_DIR": "bios",
+    "roms_dir": "roms",
+    "saves_dir": "saves",
+    "bios_dir": "bios",
+}
+
+# [core] keys that aren't paths (no auto-healing/directory creation),
+# with their default value if missing.
+_CORE_DEFAULTS: Final[dict[str, str]] = {
+    "autocorrect_paths": "true",
+    "ignore_systems": "",
 }
 
 
@@ -104,22 +117,64 @@ def _default_path_value(rootdir: Path, subdir: str) -> str:
     return str((rootdir / subdir).resolve())
 
 
+def _normalize_section_keys(
+    config: CaseSensitiveConfigParser, section: str, canonical_keys: "Iterable[str]"
+) -> bool:
+    """
+    Rename any keys in `section` that case-insensitively match one of
+    `canonical_keys` to their canonical (lowercase) spelling.
+
+    [core] and [paths] key names used to be UPPERCASE (e.g. ROMS_DIR,
+    AUTOCORRECT_PATHS); they're now lowercase (roms_dir,
+    autocorrect_paths). This keeps older retrobox.ini files working by
+    renaming the key in place -- the value is preserved, only the key
+    spelling changes. Unrelated to [environ], which is never touched
+    (its keys are real environment variable names and keep whatever
+    case the user wrote).
+
+    Args:
+        config: The loaded ConfigParser.
+        section: Section name to normalize ("core" or "paths").
+        canonical_keys: The lowercase key names to normalize towards.
+
+    Returns:
+        True if any key was renamed (i.e. the ini needs to be rewritten).
+    """
+    changed = False
+    lookup = {k.lower(): k for k in canonical_keys}
+
+    for existing_key in list(config[section].keys()):
+        canonical = lookup.get(existing_key.lower())
+        if canonical and existing_key != canonical:
+            value = config.get(section, existing_key)
+            config.remove_option(section, existing_key)
+            config.set(section, canonical, value)
+            changed = True
+
+    return changed
+
+
 def _ensure_retrobox_ini(rootdir: Path, ini_path: Path) -> CaseSensitiveConfigParser:
     """
     Load retrobox.ini (if it exists) and guarantee that the [paths] section
-    behaves according to the [core] AUTOCORRECT_PATHS flag.
+    behaves according to the [core] autocorrect_paths flag.
 
     - If the .ini does not exist yet (first boot), it is created with
-      AUTOCORRECT_PATHS=true, and the three path keys pointing to their
-      defaults (absolute paths, resolved against rootdir).
-    - If AUTOCORRECT_PATHS is true and a path key is missing, empty, or
+      autocorrect_paths=true, ignore_systems empty, and the three path
+      keys pointing to their defaults (absolute paths, resolved against
+      rootdir).
+    - Any [core]/[paths] key still spelled UPPERCASE from an older
+      retrobox.ini (e.g. ROMS_DIR, AUTOCORRECT_PATHS) is renamed in
+      place to its current lowercase spelling, preserving its value.
+    - If autocorrect_paths is true and a path key is missing, empty, or
       points to a non-existent/unreadable directory, it is replaced with
       the default path and that default folder is created.
-    - If AUTOCORRECT_PATHS is false, invalid or missing paths are left
+    - If autocorrect_paths is false, invalid or missing paths are left
       exactly as they are in the file, without creating directories or
       overwriting the user's configuration.
-    - The [environ] section is left as-is: its contents are not validated
-      or repaired here, only dumped literally into os.environ by _bootstrap_env().
+    - The [environ] section is left as-is: its contents (including key
+      case) are not validated or repaired here, only dumped literally
+      into os.environ by _bootstrap_env().
 
     The file is rewritten to disk only if something has changed.
 
@@ -143,14 +198,24 @@ def _ensure_retrobox_ini(rootdir: Path, ini_path: Path) -> CaseSensitiveConfigPa
             config.add_section(section)
             changed = True
 
+    # Migrate any leftover UPPERCASE keys from older retrobox.ini files to
+    # their current lowercase spelling. [environ] is intentionally left
+    # alone -- its keys are real environment variable names.
+    if _normalize_section_keys(config, "core", _CORE_DEFAULTS.keys()):
+        changed = True
+    if _normalize_section_keys(config, "paths", _PATH_DEFAULTS.keys()):
+        changed = True
+
     # Determine if autocorrection is enabled (default to True for backward compatibility)
-    autocorrect_raw = config.get("core", "AUTOCORRECT_PATHS", fallback="true").strip().lower()
+    autocorrect_raw = config.get("core", "autocorrect_paths", fallback="true").strip().lower()
     autocorrect = autocorrect_raw in ("true", "1", "yes", "on")
 
-    # If the key was missing entirely, set the default and mark as changed
-    if "AUTOCORRECT_PATHS" not in config["core"]:
-        config.set("core", "AUTOCORRECT_PATHS", "true")
-        changed = True
+    # Fill in any missing [core] keys (autocorrect_paths, ignore_systems)
+    # with their defaults, without touching keys that are already set.
+    for key, default_value in _CORE_DEFAULTS.items():
+        if key not in config["core"]:
+            config.set("core", key, default_value)
+            changed = True
 
     for key, subdir in _PATH_DEFAULTS.items():
         current = config.get("paths", key, fallback="").strip()
@@ -209,7 +274,7 @@ def _bootstrap_env(rootdir: Path) -> CaseSensitiveConfigParser:
 def get_configured_path(key: str, default: Path) -> Path:
     """
     Read `key` from the [paths] section of retrobox.ini, already validated
-    (or intentionally left as-is if AUTOCORRECT_PATHS=false) by 
+    (or intentionally left as-is if autocorrect_paths=false) by 
     _ensure_retrobox_ini during bootstrap.
 
     Does not touch os.environ or disk: it's a simple read from the
@@ -217,7 +282,7 @@ def get_configured_path(key: str, default: Path) -> Path:
     back to `default`.
 
     Args:
-        key: The path key to retrieve (e.g., "ROMS_DIR").
+        key: The path key to retrieve (e.g., "roms_dir").
         default: The fallback Path if the key is missing or empty.
 
     Returns:
@@ -225,6 +290,27 @@ def get_configured_path(key: str, default: Path) -> Path:
     """
     value = _PATHS_CONFIG.get("paths", key, fallback="").strip()
     return Path(value) if value else default
+
+
+def get_ignored_systems() -> frozenset[str]:
+    """
+    Read the [core] ignore_systems key from retrobox.ini.
+
+    ignore_systems is a comma-separated list of system names (matching
+    the top-level key used in each resources/systems_config/.../*.yaml
+    file, e.g. "gba", "psp") that should be skipped when generating
+    es_systems.cfg.
+
+    Does not touch os.environ or disk: like get_configured_path(), it's
+    a simple read from the in-memory ConfigParser already bootstrapped
+    by _ensure_retrobox_ini.
+
+    Returns:
+        A frozenset of lowercased, whitespace-stripped system names.
+        Empty if the key is missing or blank.
+    """
+    raw = _PATHS_CONFIG.get("core", "ignore_systems", fallback="")
+    return frozenset(name.strip().lower() for name in raw.split(",") if name.strip())
 
 
 # ---------------------------------------------------------------------------
@@ -265,7 +351,9 @@ DEFAULTS_DIR: Final[Path] = RESOURCES_DIR / "configgen"
 HOME_INIT: Final[Path] = DATAINIT_DIR / "system"
 CONF_INIT: Final[Path] = HOME_INIT / "configs"
 EMULATORS: Final[Path] = USERDATA / "emulators"
-ROMS: Final[Path] = get_configured_path("ROMS_DIR", USERDATA / "roms")
+ROMS: Final[Path] = get_configured_path("roms_dir", USERDATA / "roms")
+
+IGNORED_SYSTEMS: Final[frozenset[str]] = get_ignored_systems()
 
 CACHE: Final[Path] = _XDG_CACHE / "retrobox"
 LOGS: Final[Path] = USERDATA / "logs"

@@ -19,10 +19,14 @@ from .pcgames_paths import (
     _EPIC_JSON,
     _GOG_JSON,
     _HEROIC_SIDELOAD_JSON,
+    _HEROIC_SYSTEM_YAML,
     _INVALID_FILENAME_CHARS,
     _LUTRIS_DB_CANDIDATES,
+    _LUTRIS_SYSTEM_YAML,
     _SKIP_NAME_RE,
     _STEAM_ROOTS,
+    _STEAM_SYSTEM_YAML,
+    resolve_system_roms_dir,
 )
 
 _logger = logging.getLogger(__name__)
@@ -113,12 +117,19 @@ def lutris_es_sync(target: Path) -> int:
     Scan games installed in Lutris (via its SQLite database) and generate
     a .lynx launcher file for each one in `target`.
 
+    If resources/systems_config/lutris/lutris.yaml defines a "path"
+    override, that directory is used instead of `target` (see
+    resolve_system_roms_dir for details).
+
     Args:
-        target: Directory where .lynx files will be created.
+        target: Default directory where .lynx files will be created,
+            used unless overridden by the system's YAML.
 
     Returns:
         The number of launcher files generated.
     """
+    target = resolve_system_roms_dir(_LUTRIS_SYSTEM_YAML, "lutris", target)
+
     lutris_db = next((c for c in _LUTRIS_DB_CANDIDATES if c.is_file()), None)
     if lutris_db is None:
         _logger.debug("Lutris database not found at: %s", _LUTRIS_DB_CANDIDATES)
@@ -157,12 +168,19 @@ def steam_es_sync(target: Path) -> int:
     Scan games installed in Steam (across all libraries) and generate
     a .steam launcher file for each one in `target`.
 
+    If resources/systems_config/valve/steam.yaml defines a "path"
+    override, that directory is used instead of `target` (see
+    resolve_system_roms_dir for details).
+
     Args:
-        target: Directory where .steam files will be created.
+        target: Default directory where .steam files will be created,
+            used unless overridden by the system's YAML.
 
     Returns:
         The number of launcher files generated.
     """
+    target = resolve_system_roms_dir(_STEAM_SYSTEM_YAML, "steam", target)
+
     steam_root = next((r for r in _STEAM_ROOTS if (r / "steamapps").is_dir()), None)
     if steam_root is None:
         _logger.debug("Steam installation not found at: %s", _STEAM_ROOTS)
@@ -260,12 +278,19 @@ def heroic_es_sync(target: Path) -> int:
     Scan games installed in Heroic (Epic/legendary, GOG, and sideload) and
     generate a .heroic launcher file for each one in `target`.
 
+    If resources/systems_config/heroic/heroic.yaml defines a "path"
+    override, that directory is used instead of `target` (see
+    resolve_system_roms_dir for details).
+
     Args:
-        target: Directory where .heroic files will be created.
+        target: Default directory where .heroic files will be created,
+            used unless overridden by the system's YAML.
 
     Returns:
         The number of launcher files generated.
     """
+    target = resolve_system_roms_dir(_HEROIC_SYSTEM_YAML, "heroic", target)
+
     safe_mkdir(target)
     _clear_pcgame_links(target, "heroic")
 

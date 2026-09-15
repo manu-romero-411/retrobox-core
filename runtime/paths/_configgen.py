@@ -10,16 +10,21 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Final
 
-from ._base import RESOURCES_DIR, USERDATA, check_env_dirs
+from ._base import RESOURCES_DIR, USERDATA, check_env_dirs, get_configured_path
 
 EMU_FEATURES_DIR: Final = RESOURCES_DIR / "emu_features"
 SYSTEMS_CONF_DIR: Final = RESOURCES_DIR / "systems_config"
 
 # Directories for emulator content
-SAVES: Final = check_env_dirs("SAVES_DIR", USERDATA / "saves")
+#
+# SAVES and BIOS are two of the three ini-managed [paths] keys (alongside
+# ROMS in _base.py): always read from retrobox.ini via get_configured_path,
+# never from os.environ. os.environ is only ever populated from [environ]
+# -- it plays no part in resolving these.
+SAVES: Final = get_configured_path("saves_dir", USERDATA / "saves")
 SCREENSHOTS: Final = check_env_dirs("SCREENSHOTS_DIR", USERDATA / "screenshots")
 RECORDINGS: Final = check_env_dirs("RECORDINGS_DIR", USERDATA / "recordings")
-BIOS: Final = check_env_dirs("BIOS_DIR", USERDATA / "bios")
+BIOS: Final = get_configured_path("bios_dir", USERDATA / "bios")
 OVERLAYS: Final = check_env_dirs("OVERLAYS_DIR", USERDATA / "overlay")
 CHEATS: Final = check_env_dirs("CHEATS_DIR", USERDATA / "cheats")
 

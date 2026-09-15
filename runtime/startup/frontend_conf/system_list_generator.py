@@ -11,6 +11,7 @@ from yaml.parser import ParserError
 
 # pylint: disable=wrong-import-position
 from runtime.paths import (
+    IGNORED_SYSTEMS,
     SYSTEMS_CONF_DIR,
     ES_SYSTEMS_CFG,
     ES_SYSTEMS_TMP,
@@ -115,6 +116,13 @@ def generate_es_systems(base_path: Path = SYSTEMS_CONF_DIR, output_path: Path = 
                 continue
 
             sys_name, sys_content = next(iter(data.items()))
+
+            if sys_name.lower() in IGNORED_SYSTEMS:
+                _logger.info(
+                    "Skipping '%s' (listed in [core] ignore_systems): %s",
+                    sys_name, yaml_path,
+                )
+                continue
 
             system_elem = ET.SubElement(root, "system")
             name_elem = ET.SubElement(system_elem, "name")
