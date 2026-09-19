@@ -83,14 +83,14 @@ readonly GAMING_TTY
 if ((TARGET_TTY == GAMING_TTY)); then
   systemctl is-active --quiet "getty@tty${GAMING_TTY}.service" ||
     systemctl start "getty@tty${GAMING_TTY}.service"
-  systemctl is-active --quiet nvidia-powerd.service ||
-    systemctl start nvidia-powerd.service
+  #systemctl is-active --quiet nvidia-powerd.service ||
+  #  systemctl start nvidia-powerd.service
   chvt "${TARGET_TTY}"
 else
   chvt "${TARGET_TTY}"
-  if systemctl is-active --quiet nvidia-powerd.service; then
-    systemctl stop nvidia-powerd.service
-  fi
+  #if systemctl is-active --quiet nvidia-powerd.service; then
+  #  systemctl stop nvidia-powerd.service
+  #fi
   if ((no_stop == 0)); then
     # Stopping the getty tears down the autologin shell (and with it the
     # finished session) so it is not respawned on the gaming TTY.

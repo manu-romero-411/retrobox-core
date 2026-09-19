@@ -182,10 +182,30 @@ index c85af5817..982decd39 100644
 +locale/*
 +build.sh
 diff --git a/es-app/src/ApiSystem.cpp b/es-app/src/ApiSystem.cpp
-index 60f0433cc..22b8bb5d6 100644
+index 60f0433cc..a84554a63 100644
 --- a/es-app/src/ApiSystem.cpp
 +++ b/es-app/src/ApiSystem.cpp
-@@ -2159,7 +2159,8 @@ bool ApiSystem::isScriptingSupported(ScriptId script)
+@@ -591,8 +591,7 @@ bool ApiSystem::launchKodi(Window *window)
+ {
+ 	LOG(LogDebug) << "ApiSystem::launchKodi";
+ 
+-	std::string commandline = InputManager::getInstance()->configureEmulators();
+-	std::string command = "batocera-kodi " + commandline;
++	std::string command = "kodi";
+ 
+ 	ApiSystem::launchExternalWindow_before(window);
+ 
+@@ -2122,8 +2121,7 @@ bool ApiSystem::isScriptingSupported(ScriptId script)
+ #endif
+ 		break;
+ 	case ApiSystem::KODI:
+-		executables.push_back("kodi");
+-		break;
++		return executeScript("command -v kodi > /dev/null 2>&1");
+ 	case ApiSystem::WIFI:
+ 		executables.push_back("batocera-wifi");
+ 		break;
+@@ -2159,7 +2157,8 @@ bool ApiSystem::isScriptingSupported(ScriptId script)
  		executables.push_back("batocera-padsinfo");
  		break;
  	case ApiSystem::EVMAPY:
@@ -195,7 +215,7 @@ index 60f0433cc..22b8bb5d6 100644
  		break;
  	case ApiSystem::BATOCERAPREGAMELISTSHOOK:
  		executables.push_back("batocera-preupdate-gamelists-hook");
-@@ -2186,7 +2187,7 @@ bool ApiSystem::isScriptingSupported(ScriptId script)
+@@ -2186,7 +2185,7 @@ bool ApiSystem::isScriptingSupported(ScriptId script)
  		executables.push_back("batocera-upgrade-torrent");
  		break;
  	case ApiSystem::SUSPEND:
@@ -204,7 +224,7 @@ index 60f0433cc..22b8bb5d6 100644
  	case ApiSystem::VERSIONINFO:
  		executables.push_back("batocera-version");
  		break;
-@@ -2706,7 +2707,7 @@ bool ApiSystem::emuKill()
+@@ -2706,7 +2705,7 @@ bool ApiSystem::emuKill()
  void ApiSystem::suspend()
  {
  	LOG(LogDebug) << "ApiSystem::suspend";
@@ -586,6 +606,7 @@ configure_build() {
         -DGLES2=OFF \
         -DCMAKE_BUILD_TYPE=Release \
         -DBATOCERA=OFF \
+        -DDISABLE_KODI=OFF \
         -DSCREENSCRAPER_DEV_LOGIN="${SCREENSCRAPER_DEV_LOGIN}"
 }
 

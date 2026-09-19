@@ -1,10 +1,14 @@
 #!/bin/bash
-set -e # If a script exits with an error, we should as well.
+set -e
 #
 # Author: Manu Romero (manu4.2012@gmail.com)
 #
 # Hook system for retrobox project. Run scripts before/after running a game or a specific platform, or when retrobox launches/exits.
 # Heavily inspired in Sebastiaan Meijer's (sebastiaan@passthroughpo.st) Qemuhooks script for KVM and VFIO
+#
+# A failing hook does not prevent the remaining hooks of the same
+# platform/game/state from running. Each failure is reported on stderr and,
+# once every hook has been attempted, retrohook exits with status 1.
 
 PLATFORM="$1"
 GAME="$2"
@@ -14,20 +18,32 @@ USERDATA="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd)"
 HOOKPATH="$USERDATA/resources/hooks/retrohook.d/$PLATFORM/$GAME/$STATE"
 mkdir -p "$HOOKPATH"
 
-# check if it's a non-empty executable file
-if [ -f "$HOOKPATH" ] \
-&& [ -s "$HOOKPATH" ] \
-&& [ -x "$HOOKPATH" ]; then
-	"$HOOKPATH" "$@" || exit 1
+failed=0
+
+# Run a single hook if it is a non-empty executable file.
+# A failure is reported and recorded in $failed, but never aborts the script.
+run_hook() {
+	local file="$1"
+	local rc=0
+	shift
+
+	if [ -f "$file" ] &&
+		[ -s "$file" ] &&
+		[ -x "$file" ]; then
+		"$file" "$@" || rc=$?
+		if [ "$rc" -ne 0 ]; then
+			echo "retrohook: hook failed (exit $rc): $file" >&2
+			failed=1
+		fi
+	fi
+}
+
+if [ -f "$HOOKPATH" ]; then
+	run_hook "$HOOKPATH" "$@"
 elif [ -d "$HOOKPATH" ]; then
 	while IFS= read -r file; do
-		# check for null string
-		if [ -f "$file" ] \
-		&& [ -s "$file" ] \
-		&& [ -x "$file" ]; then
-			"$file" "$@" || exit 1
-		fi
+		run_hook "$file" "$@"
 	done < <(find -L "$HOOKPATH" -maxdepth 1 -type f -executable -print | sort)
 fi
 
-exit 0
+exit "$failed"

@@ -1095,21 +1095,6 @@
 		<region>wr</region>
 	</game>
 	<game>
-		<path>./eden.menu</path>
-		<name>Eden (Switch)</name>
-		<desc>Run Eden (Switch). This software is not provided by RetroBat.</desc>
-		<genre>Emulator</genre>
-		<image>./media/eden-logo.png</image>
-		<marquee>./media/eden-logo.png</marquee>
-		<rating>0</rating>
-		<developer>The Eden Team</developer>
-		<playcount>7</playcount>
-		<lastplayed>20260915T213152</lastplayed>
-		<gametime>234</gametime>
-		<lang>en</lang>
-		<region>wr</region>
-	</game>
-	<game>
 		<path>./libretro.menu</path>
 		<name>RetroArch (Multi Cores Emulator)</name>
 		<desc>Run RetroArch (Multi Cores Emulator).</desc>
@@ -1122,6 +1107,21 @@
 		<playcount>9</playcount>
 		<lastplayed>20260919T152441</lastplayed>
 		<gametime>309</gametime>
+		<lang>en</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./eden.menu</path>
+		<name>Eden (Switch)</name>
+		<desc>Run Eden (Switch). This software is not provided by RetroBat.</desc>
+		<genre>Emulator</genre>
+		<image>./media/eden-logo.png</image>
+		<marquee>./media/eden-logo.png</marquee>
+		<rating>0</rating>
+		<developer>The Eden Team</developer>
+		<playcount>9</playcount>
+		<lastplayed>20260919T234225</lastplayed>
+		<gametime>244</gametime>
 		<lang>en</lang>
 		<region>wr</region>
 	</game>
