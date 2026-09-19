@@ -1,53 +1,141 @@
 #!/bin/bash
-# batocera-resolution — wrapper para Fedora/KDE Wayland
-# Implementa solo los subcomandos que usa configgen
+# batocera-resolution: wrapper for Fedora (KDE Plasma Wayland / labwc / X11)
+# Implements only the subcommands used by configgen.
 #
-# Depurar: BATOCERA_RES_DEBUG=1 ./batocera-resolution currentResolution
+# Backend selection:
+#   Wayland, KDE session      -> kscreen-doctor (wlr-randr as a fallback)
+#   Wayland, anything else    -> wlr-randr (labwc, sway and other wlroots compositors)
+#   No Wayland session (X11)  -> xrandr
+# xrandr is NEVER used inside a Wayland session, not even through XWayland,
+# because it would only see the fake XWayland outputs.
+#
+# Debug (also enables shell tracing):
+#   BATOCERA_RES_DEBUG=1 ./batocera-resolution currentResolution
+
+if [ -n "${BATOCERA_RES_DEBUG:-}" ]; then
+    set -x
+fi
+
+have() { command -v "$1" >/dev/null 2>&1; }
 
 _debug() {
-    [ -n "$BATOCERA_RES_DEBUG" ] && echo "[debug] $*" >&2
+    if [ -n "${BATOCERA_RES_DEBUG:-}" ]; then
+        echo "[debug] $*" >&2
+    fi
+    return 0
 }
 
-# Parsea `kscreen-doctor -o` línea a línea (sin truco de RS multi-carácter,
-# que no es portable entre implementaciones de awk) y devuelve la línea
-# "Modes: ..." del output con priority=1 (el principal según KDE).
+# Run a command with a timeout (when available) so a compositor that does not
+# speak the expected protocol cannot make us hang.
+_run() {
+    if have timeout; then
+        timeout 5 "$@"
+    else
+        "$@"
+    fi
+}
+
+# ---------------------------------------------------------------------------
+# Session detection
+# ---------------------------------------------------------------------------
+
+# Find a Wayland socket when WAYLAND_DISPLAY is not exported (e.g. when we are
+# launched from a service or over ssh) but a Wayland session is running.
+_find_wayland_socket() {
+    local s
+    for s in "${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"/wayland-*; do
+        if [ -S "$s" ]; then
+            echo "$s"
+            return 0
+        fi
+    done
+    return 1
+}
+
+# Must be called directly (not inside $(...)) so the export below persists.
+_is_wayland() {
+    [ -n "${WAYLAND_DISPLAY:-}" ] && return 0
+    if [ "${XDG_SESSION_TYPE:-}" = "wayland" ]; then
+        local sock
+        sock=$(_find_wayland_socket) || return 1
+        export WAYLAND_DISPLAY="$sock"
+        return 0
+    fi
+    return 1
+}
+
+_is_kde_session() {
+    case ":${XDG_CURRENT_DESKTOP:-}:" in
+    *:KDE:*) return 0 ;;
+    esac
+    [ -n "${KDE_FULL_SESSION:-}" ]
+}
+
+# Ordered list of Wayland backends to try. kscreen-doctor is only tried on KDE:
+# on other compositors its fallback backend reports meaningless data.
+_wayland_backends() {
+    if _is_kde_session; then
+        echo "kscreen wlr-randr"
+    else
+        echo "wlr-randr"
+    fi
+}
+
+# ---------------------------------------------------------------------------
+# kscreen-doctor (KDE Plasma)
+# ---------------------------------------------------------------------------
+
+# Parse `kscreen-doctor -o` line by line (no multi-character RS trick, which
+# is not portable across awk implementations) and print the "Modes: ..." line
+# of the output with priority=1 (the primary one according to KDE). If no
+# output has priority 1, fall back to the first enabled+connected output.
 _kscreen_primary_modesline() {
     local raw
-    # kscreen-doctor a veces emite códigos de color ANSI incluso con stdout
-    # no interactivo, lo que rompe los matches anclados (^...$) del awk de
-    # abajo. Los limpiamos aquí antes de tocar nada más.
-    raw=$(kscreen-doctor -o 2>/dev/null | sed 's/\x1b\[[0-9;]*m//g')
+    # kscreen-doctor sometimes emits ANSI color codes even when stdout is not a
+    # terminal, which breaks the anchored (^...$) matches in the awk below.
+    # Strip them before doing anything else.
+    raw=$(_run kscreen-doctor -o 2>/dev/null | sed 's/\x1b\[[0-9;]*m//g')
     if [ -z "$raw" ]; then
-        _debug "kscreen-doctor -o no devolvió nada"
+        _debug "kscreen-doctor -o returned nothing"
         return 1
     fi
-    _debug "kscreen-doctor -o output crudo (sin ANSI):"
-    [ -n "$BATOCERA_RES_DEBUG" ] && echo "$raw" >&2
+    _debug "raw kscreen-doctor -o output (ANSI stripped):"
+    if [ -n "${BATOCERA_RES_DEBUG:-}" ]; then
+        echo "$raw" >&2
+    fi
 
     echo "$raw" | awk '
+        function consider() {
+            if (!(enabled && connected && modesline != "")) return 0
+            if (priority == "1") { print modesline; return 1 }
+            if (fallback == "") fallback = modesline
+            return 0
+        }
         /^Output:/ {
-            if (enabled && connected && priority=="1") { print modesline; found=1; exit }
-            priority=""; enabled=0; connected=0; modesline=""
+            if (started && consider()) { found = 1; exit }
+            started = 1; priority = ""; enabled = 0; connected = 0; modesline = ""
             next
         }
-        /^[ \t]*priority[ \t]+[0-9]+/ { split($0,a); priority=a[2] }
-        /^[ \t]*enabled[ \t]*$/       { enabled=1 }
-        /^[ \t]*connected[ \t]*$/     { connected=1 }
-        /Modes:/                      { modesline=$0 }
+        /^[ \t]*priority[ \t]+[0-9]+/ { split($0, a); priority = a[2] }
+        /^[ \t]*enabled[ \t]*$/       { enabled = 1 }
+        /^[ \t]*connected[ \t]*$/     { connected = 1 }
+        /Modes:/                      { modesline = $0 }
         END {
-            if (!found && enabled && connected && priority=="1") print modesline
+            if (found) exit
+            if (started && consider()) exit
+            if (fallback != "") print fallback
         }
     '
 }
 
-# Recibe por stdin una línea "Modes:  1:1920x1080@60.06*!  2:..." y
-# devuelve solo la resolución (WxH) del modo marcado con "*".
+# Read a "Modes:  1:1920x1080@60.06*!  2:..." line on stdin and print only the
+# resolution (WxH) of the mode flagged with "*" (the current one).
 _extract_current_mode() {
     awk '{
-        for (i=1;i<=NF;i++) {
+        for (i = 1; i <= NF; i++) {
             if ($i ~ /\*/) {
-                mode=$i
-                gsub(/^[0-9]+:/, "", mode)
+                mode = $i
+                sub(/^[^:]*:/, "", mode)
                 sub(/@.*/, "", mode)
                 print mode
                 exit
@@ -56,72 +144,173 @@ _extract_current_mode() {
     }'
 }
 
+# Print every unique WxH found on stdin, biggest first.
 _extract_all_modes() {
-    grep -oE "[0-9]+x[0-9]+" | sort -u
+    grep -oE '[0-9]+x[0-9]+' | sort -u -t x -k1,1nr -k2,2nr
 }
 
-case "$1" in
-    currentMode|currentResolution)
-        if [ -n "$WAYLAND_DISPLAY" ]; then
-            if command -v kscreen-doctor &>/dev/null; then
-                MODESLINE=$(_kscreen_primary_modesline)
-                _debug "MODESLINE=[$MODESLINE]"
-                if [ -n "$MODESLINE" ]; then
-                    MODE=$(echo "$MODESLINE" | _extract_current_mode)
-                    [ -n "$MODE" ] && { echo "$MODE"; exit 0; }
+# ---------------------------------------------------------------------------
+# wlr-randr (labwc and other wlroots compositors)
+# ---------------------------------------------------------------------------
+
+# Parse the text output of wlr-randr and print, for the FIRST ENABLED output:
+#   current -> its current WxH
+#   all     -> every WxH it offers (one line per refresh rate, duplicates kept)
+_wlr_randr_modes() {
+    _run wlr-randr 2>/dev/null | awk -v want="$1" '
+        function emit(   i) {
+            if (!enabled) return 0
+            if (want == "current") {
+                if (cur == "") return 0
+                print cur
+                return 1
+            }
+            if (n == 0) return 0
+            for (i = 1; i <= n; i++) print modes[i]
+            return 1
+        }
+        # A line that is not indented starts a new output
+        /^[^ \t]/ {
+            if (started && emit()) { found = 1; exit }
+            started = 1; enabled = 1; cur = ""; n = 0
+            next
+        }
+        /^[ \t]+Enabled:[ \t]*no/ { enabled = 0 }
+        /^[ \t]+[0-9]+x[0-9]+[ \t]+px/ {
+            n++; modes[n] = $1
+            if ($0 ~ /current/) cur = $1
+        }
+        END { if (!found && started) emit() }
+    '
+}
+
+# ---------------------------------------------------------------------------
+# Wayland front-end: tries every backend in order, never touches xrandr
+# ---------------------------------------------------------------------------
+
+# $1 = current | all
+_wayland_query() {
+    local want="$1" backend out line
+    for backend in $(_wayland_backends); do
+        out=""
+        case "$backend" in
+        kscreen)
+            have kscreen-doctor || continue
+            line=$(_kscreen_primary_modesline)
+            _debug "kscreen modes line=[$line]"
+            if [ -n "$line" ]; then
+                if [ "$want" = "current" ]; then
+                    out=$(echo "$line" | _extract_current_mode)
+                else
+                    out=$(echo "$line" | _extract_all_modes)
                 fi
             fi
-            if command -v wlr-randr &>/dev/null; then
-                MODE=$(wlr-randr 2>/dev/null \
-                    | grep -E "^\s+[0-9]+x[0-9]+" \
-                    | grep "current" \
-                    | awk '{print $1}' \
-                    | head -1)
-                [ -n "$MODE" ] && { echo "$MODE"; exit 0; }
+            ;;
+        wlr-randr)
+            have wlr-randr || continue
+            out=$(_wlr_randr_modes "$want")
+            if [ "$want" = "all" ] && [ -n "$out" ]; then
+                out=$(echo "$out" | _extract_all_modes)
             fi
-            echo "Error: no se pudo determinar la resolución actual (kscreen-doctor/wlr-randr)" >&2
-            exit 1
+            ;;
+        esac
+        if [ -n "$out" ]; then
+            _debug "backend '$backend' answered"
+            echo "$out"
+            return 0
         fi
-        # Solo X11 puro llega aquí (sin WAYLAND_DISPLAY)
-        if command -v xrandr &>/dev/null && [ -n "$DISPLAY" ]; then
-            MODE=$(xrandr 2>/dev/null | grep '\*' | awk '{print $1}' | head -1)
-            [ -n "$MODE" ] && { echo "$MODE"; exit 0; }
+        _debug "backend '$backend' gave no result"
+    done
+    return 1
+}
+
+# ---------------------------------------------------------------------------
+# Last-resort fallback (not xrandr): first mode of a connected DRM connector
+# ---------------------------------------------------------------------------
+
+_drm_first_mode() {
+    local c mode
+    for c in /sys/class/drm/card*-*; do
+        [ "$(cat "$c/status" 2>/dev/null)" = "connected" ] || continue
+        mode=$(head -n1 "$c/modes" 2>/dev/null)
+        if [ -n "$mode" ]; then
+            echo "$mode"
+            return 0
         fi
-        for i in /sys/class/drm/card*; do
-            [ -f "$i/modes" ] && { head -1 "$i/modes" 2>/dev/null; exit 0; }
-        done
-        echo "1920x1080"
-        ;;
-    listModes)
-        if [ -n "$WAYLAND_DISPLAY" ]; then
-            if command -v kscreen-doctor &>/dev/null; then
-                MODESLINE=$(_kscreen_primary_modesline)
-                if [ -n "$MODESLINE" ]; then
-                    MODES=$(echo "$MODESLINE" | _extract_all_modes)
-                    [ -n "$MODES" ] && { echo "$MODES"; exit 0; }
-                fi
-            fi
-            if command -v wlr-randr &>/dev/null; then
-                MODES=$(wlr-randr 2>/dev/null | _extract_all_modes)
-                [ -n "$MODES" ] && { echo "$MODES"; exit 0; }
-            fi
-            echo "Error: no se pudieron listar los modos (kscreen-doctor/wlr-randr)" >&2
-            exit 1
+    done
+    return 1
+}
+
+# ---------------------------------------------------------------------------
+# Subcommands
+# ---------------------------------------------------------------------------
+
+cmd_current() {
+    local mode
+    if _is_wayland; then
+        # No xrandr fallback here: under Wayland it only sees XWayland outputs.
+        if mode=$(_wayland_query current) && [ -n "$mode" ]; then
+            echo "$mode"
+            return 0
         fi
-        if command -v xrandr &>/dev/null && [ -n "$DISPLAY" ]; then
-            xrandr 2>/dev/null | _extract_all_modes
-            exit 0
+        echo "Error: could not determine the current resolution (kscreen-doctor/wlr-randr)" >&2
+        return 1
+    fi
+
+    # Only pure X11 (no Wayland session) reaches this point
+    if have xrandr && [ -n "${DISPLAY:-}" ]; then
+        mode=$(xrandr --current 2>/dev/null | awk '/\*/ { print $1; exit }')
+        if [ -n "$mode" ]; then
+            echo "$mode"
+            return 0
         fi
-        "$0" currentMode
-        ;;
-    minTomaxResolution)
-        "$0" currentMode
-        ;;
-    setMode)
-        exit 0
-        ;;
-    *)
-        echo "Uso: $0 {currentMode|listModes}"
-        exit 0
-        ;;
+    fi
+    _drm_first_mode && return 0
+    echo "1920x1080"
+}
+
+cmd_list() {
+    local modes
+    if _is_wayland; then
+        if modes=$(_wayland_query all) && [ -n "$modes" ]; then
+            echo "$modes"
+            return 0
+        fi
+        echo "Error: could not list the available modes (kscreen-doctor/wlr-randr)" >&2
+        return 1
+    fi
+
+    if have xrandr && [ -n "${DISPLAY:-}" ]; then
+        modes=$(xrandr --current 2>/dev/null | _extract_all_modes)
+        if [ -n "$modes" ]; then
+            echo "$modes"
+            return 0
+        fi
+    fi
+    cmd_current
+}
+
+case "${1:-}" in
+currentMode | currentResolution)
+    cmd_current
+    exit $?
+    ;;
+listModes)
+    cmd_list
+    exit $?
+    ;;
+minTomaxResolution)
+    cmd_current
+    exit $?
+    ;;
+setMode)
+    # Intentionally a no-op: the compositor keeps its current mode
+    exit 0
+    ;;
+*)
+    # Exit 0 on purpose so unknown subcommands never break configgen;
+    # usage goes to stderr so it is never parsed as a resolution.
+    echo "Usage: $0 {currentMode|currentResolution|listModes|minTomaxResolution|setMode}" >&2
+    exit 0
+    ;;
 esac

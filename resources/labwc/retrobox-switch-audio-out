@@ -1,21 +1,24 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-HDMI_SINK="alsa_output.pci-0000_01_00.1.hdmi-stereo"
-LAPTOP_SINK="alsa_output.pci-0000_05_00.6.analog-stereo"
+readonly HDMI_SINK="alsa_output.pci-0000_01_00.1.hdmi-stereo"
+readonly LAPTOP_SINK="alsa_output.pci-0000_05_00.6.analog-stereo"
 
-error_exit(){
-	echo "[ERROR] Invalid argument"
-	exit 1
+error_exit() {
+  echo "[ERROR] Invalid argument" >&2
+  exit 1
 }
 
-[ $# -gt 1 ] && error_exit
+(($# > 1)) && error_exit
 
-case "$1" in
-    hdmi)   target="$HDMI_SINK" ;;
-    laptop) target="$LAPTOP_SINK" ;;
-    toggle|"")     [ "$(pactl get-default-sink)" = "$HDMI_SINK" ] \
-                && target="$LAPTOP_SINK" || target="$HDMI_SINK" ;;
-    *)      error_exit ;;
+case "${1:-}" in
+  hdmi) target="${HDMI_SINK}" ;;
+  laptop) target="${LAPTOP_SINK}" ;;
+  toggle | "")
+    [[ "$(pactl get-default-sink)" == "${HDMI_SINK}" ]] &&
+      target="${LAPTOP_SINK}" || target="${HDMI_SINK}"
+    ;;
+  *) error_exit ;;
 esac
 
-pactl set-default-sink "$target"
+pactl set-default-sink "${target}"

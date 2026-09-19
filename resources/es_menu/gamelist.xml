@@ -1047,22 +1047,6 @@
 		<region>wr</region>
 	</game>
 	<game>
-		<path>./libretro.menu</path>
-		<name>RetroArch (Multi Cores Emulator)</name>
-		<desc>Run RetroArch (Multi Cores Emulator).</desc>
-		<genre>Emulator</genre>
-		<image>./media/retroarch-logo.png</image>
-		<marquee>./media/retroarch-logo.png</marquee>
-		<rating>0</rating>
-		<developer>Libretro Team</developer>
-		<publisher>Libretro Team</publisher>
-		<playcount>5</playcount>
-		<lastplayed>20260811T165020</lastplayed>
-		<gametime>227</gametime>
-		<lang>en</lang>
-		<region>wr</region>
-	</game>
-	<game>
 		<path>./rpcs3.menu</path>
 		<name>RPCS3 (PlayStation 3)</name>
 		<desc>Run RPCS3 (PlayStation 3).</desc>
@@ -1122,6 +1106,22 @@
 		<playcount>7</playcount>
 		<lastplayed>20260915T213152</lastplayed>
 		<gametime>234</gametime>
+		<lang>en</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./libretro.menu</path>
+		<name>RetroArch (Multi Cores Emulator)</name>
+		<desc>Run RetroArch (Multi Cores Emulator).</desc>
+		<genre>Emulator</genre>
+		<image>./media/retroarch-logo.png</image>
+		<marquee>./media/retroarch-logo.png</marquee>
+		<rating>0</rating>
+		<developer>Libretro Team</developer>
+		<publisher>Libretro Team</publisher>
+		<playcount>9</playcount>
+		<lastplayed>20260919T152441</lastplayed>
+		<gametime>309</gametime>
 		<lang>en</lang>
 		<region>wr</region>
 	</game>

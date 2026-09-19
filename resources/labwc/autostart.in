@@ -1,0 +1,3 @@
+# Pick the active display output for the gaming session.
+# Generated from autostart.in by setup/utils/labwc-config.sh — do not edit.
+@RETROBOX_ROOT@/resources/labwc/retrobox-switch-display &
