@@ -20,7 +20,11 @@ if TYPE_CHECKING:
 
 _logger = logging.getLogger(__name__)
 
-NINTENDO_PRO_NAMES = {"Nintendo Switch Pro Controller", "Pro Controller"}
+NINTENDO_PRO_NAMES = {
+    "Nintendo Switch Pro Controller",
+    "Pro Controller",
+    "Nintendo.Co.Ltd. Pro Controller"
+}
 
 # Roles canónicos que controllers.py::_DEFAULT_SDL_MAPPING ya asigna a
 # 'start', 'pageup'/'pagedown' (shoulders) y 'l2'/'r2' (triggers) al generar

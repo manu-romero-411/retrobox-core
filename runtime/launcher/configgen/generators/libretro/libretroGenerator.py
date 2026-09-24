@@ -200,7 +200,7 @@ def gfx_backend_get(system: Emulator) -> str:
     if not set_manually:
         core = system.config.core
         if backend in ["gl", "glcore"]:
-            if backend == "gl" and core in ['kronos', 'mupen64plus-next', 'melonds', 'beetle-psx-hw']:
+            if backend == "gl" and core in ['kronos', 'mupen64plus_next', 'melonds', 'beetle-psx-hw']:
                 backend = "glcore"
             if backend == "glcore" and core in ['parallel_n64', 'yabasanshiro', 'boom3']:
                 backend = "gl"

@@ -324,6 +324,7 @@ def start_rom(args: argparse.Namespace, maxnbplayers: int, rom: Path, original_r
                         monitor_thread.start()
                         exit_code = run_command(cmd)
 
+
                 # run a script after emulator shuts down
                 call_retrohook(
                     "_global",
@@ -346,6 +347,7 @@ def start_rom(args: argparse.Namespace, maxnbplayers: int, rom: Path, original_r
 
             finally:
                 restore_power_profile(previous_power_profile)
+                Path("/tmp/game.xml").unlink(missing_ok=True)
     # exit
     return exit_code
 

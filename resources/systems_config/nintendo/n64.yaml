@@ -15,7 +15,7 @@ n64:
   emulators:
     libretro:
       cores:
-        mupen64plus-next: {}
+        mupen64plus_next: {}
         parallel_n64: {}
     mupen64plus:
       cores:

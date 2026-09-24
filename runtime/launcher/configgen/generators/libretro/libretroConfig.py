@@ -304,10 +304,10 @@ def createLibretroConfig(
         if system.config.core == 'beetle-saturn' and system.config.use_wheels:
             retroarch_config['input_libretro_device_p1'] = '517'
 
-    if system.config.core in ('mupen64plus-next', 'parallel_n64'):
+    if system.config.core in ('mupen64plus_next', 'parallel_n64'):
         valid_n64_guids = ["050000007e0500001920000001800000", "05000000c82d00006928000000010000", "030000007e0500001920000011810000", "05000000c82d00001930000001000000", "03000000c82d00001930000011010000"]
         valid_n64_names = ["N64 Controller", "Nintendo Co., Ltd. N64 Controller", "8BitDo N64 Modkit", "8BitDo 64 BT", "8BitDo 8BitDo 64 Bluetooth Controller"]
-        option = 'mupen64plus' if system.config.core == 'mupen64plus-next' else 'parallel-n64'
+        option = 'mupen64plus' if system.config.core == 'mupen64plus_next' else 'parallel-n64'
         for i in range(1, min(5, len(controllers) + 1)):
             pad = controllers[i - 1]
             if (pad.guid in valid_n64_guids and pad.name in valid_n64_names) or system.config.get(f'{option}-controller{i}', 'retropad') != 'retropad':

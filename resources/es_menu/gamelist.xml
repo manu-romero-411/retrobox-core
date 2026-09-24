@@ -1015,22 +1015,6 @@
 		<region>wr</region>
 	</game>
 	<game>
-		<path>./dolphin-emu.menu</path>
-		<name>Dolphin (GameCube,Wii,WAD)</name>
-		<desc>Run Dolphin Emulator (GameCube, Wii, WAD).</desc>
-		<genre>Emulator</genre>
-		<image>./media/dolphin-logo.png</image>
-		<marquee>./media/dolphin-logo.png</marquee>
-		<rating>0</rating>
-		<developer>Dolphin Team</developer>
-		<publisher>Dolphin Team</publisher>
-		<playcount>11</playcount>
-		<lastplayed>20260807T114142</lastplayed>
-		<gametime>2573</gametime>
-		<lang>en</lang>
-		<region>wr</region>
-	</game>
-	<game>
 		<path>./ares.menu</path>
 		<name>Ares (Multi Cores Emulator)</name>
 		<desc>Run Ares (Multi Cores Emulator).</desc>
@@ -1063,22 +1047,6 @@
 		<region>wr</region>
 	</game>
 	<game>
-		<path>./pcsx2.menu</path>
-		<name>PCSX2 (PlayStation 2)</name>
-		<desc>Run PCSX2 Emulator (PlayStation 2).</desc>
-		<genre>Emulator</genre>
-		<image>./media/pcsx2-logo.png</image>
-		<marquee>./media/pcsx2-logo.png</marquee>
-		<rating>0</rating>
-		<developer>PCSX2 Team</developer>
-		<publisher>PCSX2 Team</publisher>
-		<playcount>3</playcount>
-		<lastplayed>20260906T012133</lastplayed>
-		<gametime>230</gametime>
-		<lang>en</lang>
-		<region>wr</region>
-	</game>
-	<game>
 		<path>./ryujinx.menu</path>
 		<name>Ryujinx (Switch)</name>
 		<desc>Run Ryujinx (Switch). This software is not provided by RetroBat. You can download it here: https://ryujinx.org/download</desc>
@@ -1095,22 +1063,6 @@
 		<region>wr</region>
 	</game>
 	<game>
-		<path>./libretro.menu</path>
-		<name>RetroArch (Multi Cores Emulator)</name>
-		<desc>Run RetroArch (Multi Cores Emulator).</desc>
-		<genre>Emulator</genre>
-		<image>./media/retroarch-logo.png</image>
-		<marquee>./media/retroarch-logo.png</marquee>
-		<rating>0</rating>
-		<developer>Libretro Team</developer>
-		<publisher>Libretro Team</publisher>
-		<playcount>9</playcount>
-		<lastplayed>20260919T152441</lastplayed>
-		<gametime>309</gametime>
-		<lang>en</lang>
-		<region>wr</region>
-	</game>
-	<game>
 		<path>./eden.menu</path>
 		<name>Eden (Switch)</name>
 		<desc>Run Eden (Switch). This software is not provided by RetroBat.</desc>
@@ -1122,6 +1074,54 @@
 		<playcount>9</playcount>
 		<lastplayed>20260919T234225</lastplayed>
 		<gametime>244</gametime>
+		<lang>en</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./dolphin-emu.menu</path>
+		<name>Dolphin (GameCube,Wii,WAD)</name>
+		<desc>Run Dolphin Emulator (GameCube, Wii, WAD).</desc>
+		<genre>Emulator</genre>
+		<image>./media/dolphin-logo.png</image>
+		<marquee>./media/dolphin-logo.png</marquee>
+		<rating>0</rating>
+		<developer>Dolphin Team</developer>
+		<publisher>Dolphin Team</publisher>
+		<playcount>15</playcount>
+		<lastplayed>20260920T135320</lastplayed>
+		<gametime>2834</gametime>
+		<lang>en</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./pcsx2.menu</path>
+		<name>PCSX2 (PlayStation 2)</name>
+		<desc>Run PCSX2 Emulator (PlayStation 2).</desc>
+		<genre>Emulator</genre>
+		<image>./media/pcsx2-logo.png</image>
+		<marquee>./media/pcsx2-logo.png</marquee>
+		<rating>0</rating>
+		<developer>PCSX2 Team</developer>
+		<publisher>PCSX2 Team</publisher>
+		<playcount>4</playcount>
+		<lastplayed>20260920T215512</lastplayed>
+		<gametime>293</gametime>
+		<lang>en</lang>
+		<region>wr</region>
+	</game>
+	<game>
+		<path>./libretro.menu</path>
+		<name>RetroArch (Multi Cores Emulator)</name>
+		<desc>Run RetroArch (Multi Cores Emulator).</desc>
+		<genre>Emulator</genre>
+		<image>./media/retroarch-logo.png</image>
+		<marquee>./media/retroarch-logo.png</marquee>
+		<rating>0</rating>
+		<developer>Libretro Team</developer>
+		<publisher>Libretro Team</publisher>
+		<playcount>10</playcount>
+		<lastplayed>20260924T000354</lastplayed>
+		<gametime>368</gametime>
 		<lang>en</lang>
 		<region>wr</region>
 	</game>

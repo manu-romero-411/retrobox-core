@@ -1,5 +1,5 @@
 emulator_name: libretro
-core_name: "mupen64plus-next"
+core_name: "mupen64plus_next"
 features:
   - cheevos
 sharedFeatures:
@@ -141,7 +141,7 @@ groups:
           - name: 7680x4320
             value: 7680x4320
       - name: AUTO WIDESCREEN
-        value: "mupen64plus-next-autowidescreen"
+        value: "mupen64plus_next-autowidescreen"
         description: Automatically sets aspect ratio to 16/9 for games that natively support it. 2D elements like HUD/UI may be stretched.
         choices:
           - name: Off

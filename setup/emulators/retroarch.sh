@@ -106,7 +106,7 @@ function compile_mupen64_next_from_source() {
   jobbs="$(nproc)"
   [[ "${ARCH}" != "x86_64" && "${ARCH}" != "amd64" ]] && jobbs=2
 
-  local m64p_flags=(platform=unix CORE_NAME=mupen64plus-next HAVE_THR_AL=1 LLE=1 HAVE_PARALLEL_RSP=1 HAVE_PARALLEL_RDP=1)
+  local m64p_flags=(platform=unix CORE_NAME=mupen64plus_next HAVE_THR_AL=1 LLE=1 HAVE_PARALLEL_RSP=1 HAVE_PARALLEL_RDP=1)
 
   (
     cd "${core_src}" || exit 1
