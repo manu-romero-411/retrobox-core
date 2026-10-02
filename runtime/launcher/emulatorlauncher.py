@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # ruff: noqa: E402
+"""Retrobox emulator launcher: prepares the environment and runs an emulator for a ROM."""
 
 from __future__ import annotations
 
@@ -17,9 +18,10 @@ import sys
 import threading
 import time
 from copy import deepcopy
+from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import pyudev
 import sdl2
@@ -42,7 +44,7 @@ from configgen.exceptions import (
 )
 from configgen.generators import get_generator
 from configgen.gun import Gun
-from configgen.utils import bezels as bezelsUtil, metadata, videoMode, wheelsUtils
+from configgen.utils import bezels as bezels_util, metadata, videoMode, wheelsUtils
 from configgen.utils.logger import setup_logging
 from configgen.utils.overlayfs import mount_overlayfs
 from configgen.utils.squashfs import mount_squashfs
@@ -51,7 +53,6 @@ from runtime.paths import (
     _GAMEPADLY_PROFILES,
     _GAMEPADLY_USER_PROFILES,
     MANGOHUD_BIN,
-    MANGOHUD_VULKAN_LAYER_DIR,
     NVIDIA_POWERD_SCRIPT,
     ES_GAMES_METADATA,
     ES_INPUT_CFG,
@@ -71,20 +72,112 @@ if TYPE_CHECKING:
     from runtime.launcher.configgen.Command import Command
     from runtime.launcher.configgen.batoceraTypes import Resolution
     from runtime.launcher.configgen.generators.Generator import Generator
+    from runtime.launcher.configgen.gun import Guns
 
 _logger = logging.getLogger(__name__)
-
-# A lock to safely modify the active controller list from multiple threads
-_player_controllers_lock = threading.Lock()
-# A global variable to hold the current, up-to-date list of player controllers
-_active_player_controllers = []
 
 _POWER_PROFILES_BIN = "powerprofilesctl"
 _VALID_POWER_PROFILES = {"power-saver", "balanced", "performance"}
 
+# Bezels must ALWAYS cover the whole target resolution. If the bezel aspect
+# ratio does not match the screen one, it is stretched instead of being
+# rejected or padded with black.
+_BEZEL_STRETCH = True
+# max cover proportion and ratio distortion (only used when not stretching)
+_MAX_COVER = 0.05  # 5%
+_MAX_RATIO_DELTA = 0.01
+
+_HUD_POSITIONS = {"NW": "top-left", "NE": "top-right", "SE": "bottom-right"}
+_HUD_PERF_LINES = (
+    "background_alpha=0.4", "legacy_layout=false", "custom_text=%GAMENAME%",
+    "custom_text=%SYSTEMNAME%", "custom_text=%EMULATORCORE%", "fps", "gpu_name",
+    "engine_version", "vulkan_driver", "resolution", "ram", "gpu_stats", "gpu_temp",
+    "cpu_stats", "cpu_temp", "core_load",
+)
+_HUD_GAME_LINES = (
+    "background_alpha=0", "legacy_layout=false", "font_size=32", "image_max_width=200",
+    "image=%THUMBNAIL%", "custom_text=%GAMENAME%", "custom_text=%SYSTEMNAME%",
+    "custom_text=%EMULATORCORE%",
+)
+
+# per-player command-line options: (suffix, help text, type)
+_PLAYER_ARGUMENTS = (
+    ("index", "controller index", int),
+    ("guid", "controller SDL2 guid", str),
+    ("name", "controller name", str),
+    ("devicepath", "controller device", str),
+    ("nbbuttons", "controller number of buttons", int),
+    ("nbhats", "controller number of hats", int),
+    ("nbaxes", "controller number of axes", int),
+)
+# plain string command-line options: (name, help text)
+_STRING_ARGUMENTS = (
+    ("-emulator", "force emulator"),
+    ("-core", "force emulator core"),
+    ("-netplaymode", "host/client"),
+    ("-netplaypass", "enable spectator mode"),
+    ("-netplayip", "remote ip"),
+    ("-netplayport", "remote port"),
+    ("-netplaysession", "netplay session"),
+    ("-state_slot", "state slot"),
+    ("-state_filename", "state filename"),
+    ("-autosave", "autosave"),
+    ("-systemname", "system fancy name"),
+)
+_FLAG_ARGUMENTS = (
+    ("-lightgun", "configure lightguns"),
+    ("-wheel", "configure wheel"),
+    ("-trackball", "configure trackball"),
+    ("-spinner", "configure spinner"),
+)
+
+
+@dataclass
+class _ControllerState:
+    """Up-to-date list of player controllers, shared between threads."""
+
+    # a lock to safely modify the active controller list from multiple threads
+    lock: threading.Lock = field(default_factory=threading.Lock)
+    controllers: list[Controller | None] = field(default_factory=list)
+
+
+@dataclass
+class _RunningProcess:
+    """The emulator process currently running, so signals can kill it."""
+
+    proc: subprocess.Popen[bytes] | None = None
+
+
+@dataclass
+class _GameSession:
+    """Everything needed to run one game, shared by the launch helpers."""
+
+    args: argparse.Namespace
+    system: Emulator
+    generator: Generator
+    rom: Path
+    guns: Guns
+    resolution: Resolution
+    controllers: list[Controller]
+    wheels: Any
+    metadata: dict[str, str]
+
+
+@dataclass
+class _Overlay:
+    """A bezel image with its info file and the parsed info."""
+
+    png: Path
+    info_file: Path
+    infos: dict[str, Any]
+
+
+_controller_state = _ControllerState()
+_running = _RunningProcess()
+
 
 def main(args: argparse.Namespace, maxnbplayers: int) -> int:
-    """Entry point that wraps start_rom, squashing the rom first if needed.
+    """Entry point that wraps start_rom, mounting the rom first if it is squashed.
 
     Args:
         args: Parsed command-line arguments.
@@ -99,8 +192,21 @@ def main(args: argparse.Namespace, maxnbplayers: int) -> int:
     if original_rom.suffix == ".squashfs":
         with mount_squashfs(original_rom) as squash_rom:
             return start_rom(args, maxnbplayers, squash_rom, original_rom)
-    else:
-        return start_rom(args, maxnbplayers, original_rom, original_rom)
+    return start_rom(args, maxnbplayers, original_rom, original_rom)
+
+
+def _log_system_settings(system: Emulator) -> None:
+    """Log the system settings (hiding passwords) and the selected emulator/core."""
+    _logger.debug(
+        "Settings: %s",
+        {key: "***" if "password" in key else value for key, value in system.config.items()},
+    )
+
+    if "emulator" in system.config and "core" in system.config:
+        _logger.debug("emulator: %s, core: %s", system.config.emulator, system.config.core)
+    elif "emulator" in system.config:
+        _logger.debug("emulator: %s", system.config.emulator)
+
 
 def start_rom(args: argparse.Namespace, maxnbplayers: int, rom: Path, original_rom: Path) -> int:
     """Run the main ROM start sequence, calling into the rest of the module.
@@ -116,43 +222,27 @@ def start_rom(args: argparse.Namespace, maxnbplayers: int, rom: Path, original_r
     """
     mkdir_if_not_exists(RUNTIME_DIR)
 
-    global _active_player_controllers
-
     player_controllers = Controller.load_for_players(maxnbplayers, args)
 
-    # Initialize the global state with the initial controller list
-    with _player_controllers_lock:
-        _active_player_controllers = list(player_controllers)
-
-    # Start the background monitor thread.
-    monitor_thread = threading.Thread(target=_controller_monitor_thread, daemon=True)
+    # initialize the shared state with the initial controller list
+    with _controller_state.lock:
+        _controller_state.controllers = list(player_controllers)
 
     # find the system to run
-    system_name: str = args.system
-    _logger.debug("Running system: %s", system_name)
+    _logger.debug("Running system: %s", args.system)
     system = Emulator(args, original_rom)
-
-    _logger.debug("Settings: %s", {
-        key: '***' if 'password' in key else value for key, value in system.config.items()
-    })
-
-    if "emulator" in system.config and "core" in system.config:
-        _logger.debug('emulator: %s, core: %s', system.config.emulator, system.config.core)
-    else:
-        if "emulator" in system.config:
-            _logger.debug('emulator: %s', system.config.emulator)
+    _log_system_settings(system)
 
     # power profiles
-    power_prof = system.config.get("power_profile", "balanced")
-    previous_power_profile = apply_power_profile(power_prof)
+    previous_power_profile = apply_power_profile(system.config.get("power_profile", "balanced"))
 
-    # metadata
-    md = metadata.get_games_meta_data(ES_GAMES_METADATA, system_name, rom)
-
+    game_metadata = metadata.get_games_meta_data(ES_GAMES_METADATA, args.system, rom)
     guns = Gun.get_and_precalibrate_all(system, rom)
 
-    with wheelsUtils.configure_wheels(player_controllers, system, md) \
-    as (player_controllers, wheels):
+    exit_code = 0
+    with wheelsUtils.configure_wheels(
+        player_controllers, system, game_metadata
+    ) as (controllers, wheels):
         # find the generator
         generator = get_generator(system.config.emulator, system.config.core)
 
@@ -160,381 +250,451 @@ def start_rom(args: argparse.Namespace, maxnbplayers: int, rom: Path, original_r
             mount_overlayfs(rom, Path(f"{SAVES}/{original_rom.parent.name}/{original_rom.stem}"))
             if original_rom.suffix == ".squashfs" and generator.writesToRom(system.config)
             else contextlib.nullcontext(rom)
-        ) as rom:
-            game_resolution = videoMode.getCurrentResolution()
-            exit_code = 0
-
-            try:
-                # savedir: create the save directory if not already done
-                dirname = Path(f"{SAVES}/{system.name}")
-                if not dirname.exists():
-                    dirname.mkdir(parents=True)
-
-                # core
-                effective_core = ""
-                if "core" in system.config and system.config.core is not None:
-                    effective_core = system.config.core
-
-                # SDL VSync is a big deal on OGA and RPi4
-                if not system.config.get_bool('sdlvsync', True):
-                    system.config["sdlvsync"] = '0'
-                else:
-                    system.config["sdlvsync"] = '1'
-                os.environ.update({'SDL_RENDER_VSYNC': system.config["sdlvsync"]})
-
-                # run a script before emulator starts
-                call_retrohook(
-                    "_global",
-                    "_platform",
-                    "on-start-game",
-                    [system.config.emulator, effective_core]
-                )
-                call_retrohook(
-                    system_name,
-                    "_platform",
-                    "on-start-game",
-                    [system.config.emulator,
-                     effective_core]
-                )
-                call_retrohook(
-                    system_name,
-                    rom,
-                    "on-start-game",
-                    [system.config.emulator,
-                     effective_core]
-                )
-
-                # run the emulator
-                with (
-                    GamepadManager(
-                        system            = system_name,
-                        emulator          = system.config.emulator,
-                        core              = effective_core,
-                        rom               = rom,
-                        controllers       = player_controllers,
-                        mapper_script     = GAMEPADLY_MAPPER,
-                        profiles_dir      = _GAMEPADLY_PROFILES,
-                        user_profiles_dir = _GAMEPADLY_USER_PROFILES,
-                        es_input          = ES_INPUT_CFG,
-                    )
-                ):
-
-                    # change directory if wanted
-                    execution_directory = generator.executionDirectory(system.config, rom)
-                    if execution_directory is not None:
-                        os.chdir(execution_directory)
-
-                    cmd = generator.generate(
-                        system,
-                        rom,
-                        player_controllers,
-                        md,
-                        guns,
-                        wheels,
-                        game_resolution
-                    )
-
-                    if system.config.get_bool('hud_support'):
-                        hud_bezel = getHudBezel(
-                            system, generator, rom, game_resolution,
-                            system.guns_borders_size_name(guns),
-                            system.guns_border_ratio_type(guns)
-                        )
-
-                        if ((hud := system.config.get('hud')) and hud.lower() != 'none') or hud_bezel is not None:
-                            mangohud_bin = _resolve_mangohud_binary()
-
-                            if mangohud_bin is None:
-                                _logger.info(
-                                    "Skipping the HUD overlay: no usable MangoHud "
-                                    "installation found (bundled or system)."
-                                )
-                            else:
-                                _configure_mangohud_env(cmd, mangohud_bin)
-
-                                hudconfig = getHudConfig(
-                                    system, args.systemname, system.config.emulator,
-                                    effective_core, rom, hud_bezel
-                                )
-
-                                with HUD_CONFIG_FILE.open('w') as f:
-                                    f.write(hudconfig)
-
-                                if generator.usesOpenGLDirectPreload(system.config):
-                                    # OpenGL: run through the mangohud wrapper in
-                                    # dlsym-hook mode. The installed wrapper now
-                                    # hardcodes the real lib64 path instead of
-                                    # relying on ld.so to expand "$LIB" (several
-                                    # launchers, including sharun-wrapped
-                                    # emulators, never expand it), so
-                                    # "mangohud --dlsym" is safe to use again
-                                    # instead of setting LD_PRELOAD by hand here.
-                                    cmd.array = [str(mangohud_bin), "--dlsym", *cmd.array]
-
-                                # Vulkan: MANGOHUD=1 is enough to trigger the
-                                # Vulkan Implicit Layer on its own. We
-                                # deliberately do NOT prepend the mangohud
-                                # binary to cmd.array here, since doing so
-                                # triggers a fatal
-                                # "eglStreamPostD3DTextureANGLE" error on
-                                # Asahi.
-
-                    # generate the gun help
-                    try:
-                        default_gun_help_dir = GUN_OVERLAYS_DIR
-                        bezelsUtil.generate_gun_help(
-                            system_name,
-                            rom,
-                            system.config.use_guns,
-                            guns,
-                            default_gun_help_dir,
-                            "gun_help.png",
-                            game_resolution
-                        )
-                    except Exception as e:
-                        _logger.error("Failed to generate the gun help image")
-                        _logger.error(e)
-
-                    # gun borders
-                    try:
-                        if system.config.use_guns and guns:
-                            if generator.supportsInternalBezels() \
-                            or system.config.get_bool('hud_support'):
-                                _logger.debug(
-                                    "skipping configgen internal gun borders for emulator %s",
-                                    system.config.emulator)
-                            else:
-                                gun_border_size_name = system.guns_borders_size_name(guns)
-                                if gun_border_size_name is not None:
-                                    _logger.debug(
-                                        "using configgen internal gun borders for emulator %s",
-                                        system.config.emulator)
-
-                                    from .configgen.utils.gun_borders import draw_gun_borders
-                                    draw_gun_borders(
-                                        gun_border_size_name,
-                                        bezelsUtil.gunsBordersColorFomConfig(system.config),
-                                        system.guns_border_ratio_type(guns)
-                                    )
-                    except Exception as e:
-                        _logger.error("Failed to draw_gun_borders for gun_borders")
-                        _logger.error(e)
-
-                    with profiler.pause():
-                        monitor_thread.start()
-                        exit_code = run_command(cmd)
-
-
-                # run a script after emulator shuts down
-                call_retrohook(
-                    "_global",
-                    "_platform",
-                    "on-close-game",
-                    [system.config.emulator, effective_core]
-                )
-                call_retrohook(
-                    system_name,
-                    "_platform",
-                    "on-close-game",
-                    [system.config.emulator, effective_core]
-                )
-                call_retrohook(
-                    system_name,
-                    rom,
-                    "on-close-game",
-                    [system.config.emulator, effective_core]
-                )
-
-            finally:
-                restore_power_profile(previous_power_profile)
-                Path("/tmp/game.xml").unlink(missing_ok=True)
-    # exit
+        ) as game_rom:
+            exit_code = _run_game(
+                _GameSession(
+                    args=args,
+                    system=system,
+                    generator=generator,
+                    rom=game_rom,
+                    guns=guns,
+                    resolution=videoMode.getCurrentResolution(),
+                    controllers=controllers,
+                    wheels=wheels,
+                    metadata=game_metadata,
+                ),
+                previous_power_profile,
+            )
     return exit_code
 
-def getHudBezel(system: Emulator, generator: Generator, rom: Path, gameResolution: Resolution, bordersSize: str | None, bordersRatio: str | None):
+
+def _effective_core(system: Emulator) -> str:
+    """Return the configured core, or an empty string if there is none."""
+    if "core" in system.config and system.config.core is not None:
+        return system.config.core
+    return ""
+
+
+def _prepare_game_environment(system: Emulator) -> None:
+    """Create the save directory and set the SDL VSync environment."""
+    Path(f"{SAVES}/{system.name}").mkdir(parents=True, exist_ok=True)
+
+    # SDL VSync is a big deal on OGA and RPi4
+    system.config["sdlvsync"] = "1" if system.config.get_bool("sdlvsync", True) else "0"
+    os.environ.update({"SDL_RENDER_VSYNC": system.config["sdlvsync"]})
+
+
+def _call_game_hooks(session: _GameSession, state: str) -> None:
+    """Run the global, system and game hooks for a game state."""
+    extra_args = [session.system.config.emulator, _effective_core(session.system)]
+    call_retrohook("_global", "_platform", state, extra_args)
+    call_retrohook(session.args.system, "_platform", state, extra_args)
+    call_retrohook(session.args.system, session.rom, state, extra_args)
+
+
+def _run_game(session: _GameSession, previous_power_profile: str | None) -> int:
+    """Run hooks and the emulator for a game, restoring the power profile at the end."""
+    try:
+        _prepare_game_environment(session.system)
+
+        # run a script before emulator starts
+        _call_game_hooks(session, "on-start-game")
+
+        exit_code = _run_emulator(session)
+
+        # run a script after emulator shuts down
+        _call_game_hooks(session, "on-close-game")
+        return exit_code
+    finally:
+        restore_power_profile(previous_power_profile)
+        Path("/tmp/game.xml").unlink(missing_ok=True)
+
+
+def _run_emulator(session: _GameSession) -> int:
+    """Generate the emulator command, set up HUD and gun helpers, and run it."""
+    system = session.system
+    monitor_thread = threading.Thread(target=_controller_monitor_thread, daemon=True)
+
+    with GamepadManager(
+        system=session.args.system,
+        emulator=system.config.emulator,
+        core=_effective_core(system),
+        rom=session.rom,
+        controllers=session.controllers,
+        mapper_script=GAMEPADLY_MAPPER,
+        profiles_dir=_GAMEPADLY_PROFILES,
+        user_profiles_dir=_GAMEPADLY_USER_PROFILES,
+        es_input=ES_INPUT_CFG,
+    ):
+        # change directory if wanted
+        execution_directory = session.generator.executionDirectory(system.config, session.rom)
+        if execution_directory is not None:
+            os.chdir(execution_directory)
+
+        cmd = session.generator.generate(
+            system,
+            session.rom,
+            session.controllers,
+            session.metadata,
+            session.guns,
+            session.wheels,
+            session.resolution,
+        )
+
+        _setup_hud(session, cmd)
+        _generate_gun_help(session)
+        _draw_internal_gun_borders(session)
+
+        with profiler.pause():
+            monitor_thread.start()
+            return run_command(cmd)
+
+
+def _setup_hud(session: _GameSession, cmd: Command) -> None:
+    """Configure the MangoHud overlay (HUD and bezel) for the command, if enabled."""
+    system = session.system
+    if not system.config.get_bool("hud_support"):
+        return
+
+    hud_bezel = get_hud_bezel(
+        system, session.generator, session.rom, session.resolution, session.guns
+    )
+
+    hud = system.config.get("hud")
+    hud_enabled = bool(hud) and hud.lower() != "none"
+    if not hud_enabled and hud_bezel is None:
+        return
+
+    mangohud_bin = _resolve_mangohud_binary()
+    if mangohud_bin is None:
+        _logger.info(
+            "Skipping the HUD overlay: no usable MangoHud installation found (bundled or system)."
+        )
+        return
+
+    _configure_mangohud_env(cmd, mangohud_bin)
+
+    hud_config = get_hud_config(
+        system,
+        session.args.systemname,
+        system.config.emulator,
+        _effective_core(system),
+        hud_bezel,
+    )
+    HUD_CONFIG_FILE.write_text(hud_config, encoding="utf-8")
+
+    if session.generator.usesOpenGLDirectPreload(system.config):
+        # OpenGL: run through the mangohud wrapper in dlsym-hook mode. The
+        # installed wrapper now hardcodes the real lib64 path instead of
+        # relying on ld.so to expand "$LIB" (several launchers, including
+        # sharun-wrapped emulators, never expand it), so "mangohud --dlsym"
+        # is safe to use again instead of setting LD_PRELOAD by hand here.
+        cmd.array = [str(mangohud_bin), "--dlsym", *cmd.array]
+
+    # Vulkan: MANGOHUD=1 is enough to trigger the Vulkan Implicit Layer on
+    # its own. We deliberately do NOT prepend the mangohud binary to
+    # cmd.array here, since doing so triggers a fatal
+    # "eglStreamPostD3DTextureANGLE" error on Asahi.
+
+
+def _generate_gun_help(session: _GameSession) -> None:
+    """Generate the gun help image, never failing the launch."""
+    system = session.system
+    try:
+        bezels_util.generate_gun_help(
+            session.args.system,
+            session.rom,
+            system.config.use_guns,
+            session.guns,
+            GUN_OVERLAYS_DIR,
+            "gun_help.png",
+            session.resolution,
+        )
+    except Exception as err:  # pylint: disable=broad-exception-caught
+        # best effort: a missing gun help must never prevent the game from starting
+        _logger.error("Failed to generate the gun help image")
+        _logger.error(err)
+
+
+def _draw_internal_gun_borders(session: _GameSession) -> None:
+    """Draw the configgen internal gun borders if needed, never failing the launch."""
+    system = session.system
+    try:
+        if not (system.config.use_guns and session.guns):
+            return
+
+        if session.generator.supportsInternalBezels() or system.config.get_bool("hud_support"):
+            _logger.debug(
+                "skipping configgen internal gun borders for emulator %s", system.config.emulator
+            )
+            return
+
+        gun_border_size_name = system.guns_borders_size_name(session.guns)
+        if gun_border_size_name is None:
+            return
+
+        _logger.debug(
+            "using configgen internal gun borders for emulator %s", system.config.emulator
+        )
+        # pylint: disable-next=import-outside-toplevel
+        from configgen.utils.gun_borders import draw_gun_borders
+
+        draw_gun_borders(
+            gun_border_size_name,
+            bezels_util.guns_borders_color_from_config(system.config),
+            system.guns_border_ratio_type(session.guns),
+        )
+    except Exception as err:  # pylint: disable=broad-exception-caught
+        # best effort: missing gun borders must never prevent the game from starting
+        _logger.error("Failed to draw_gun_borders for gun_borders")
+        _logger.error(err)
+
+
+def _bezel_settings(system: Emulator) -> tuple[str, str, str]:
+    """Return the (bezel, tattoo, qrcode) settings, all unset if force_no_bezel is on."""
+    if bezels_util.bezel_is_disabled(system.config):
+        _logger.debug("bezel disabled by force_no_bezel")
+        return "none", "0", "0"
+    return (
+        system.config.get_str("bezel", "none"),
+        system.config.get_str("bezel.tattoo", "0"),
+        system.config.get_str("bezel.qrcode", "0"),
+    )
+
+
+def _nothing_to_draw(bezel: str, tattoo: str, qrcode: str) -> bool:
+    """Return True when there is no bezel, tattoo or QR code to draw."""
+    return (
+        (not bezel or bezel == "none")
+        and (not tattoo or tattoo == "0")
+        and (not qrcode or qrcode == "0")
+    )
+
+
+def _load_overlay(
+    system: Emulator, rom: Path, resolution: Resolution, bezel: str
+) -> _Overlay | None:
+    """Find the bezel to use (or generate a transparent one) and read its info."""
+    if not bezel or bezel == "none":
+        # no bezel: generate a transparent one for the tattoo/gun borders and so on
+        png_file = Path("/tmp/bezel_transhud_black.png")
+        info_file = Path("/tmp/bezel_transhud_black.info")
+        width = resolution["width"]
+        height = resolution["height"]
+        bezels_util.create_transparent_bezel(png_file, width, height)
+        info_file.write_text(
+            f'{{ "width":{width}, "height":{height}, "opacity":1.0000000, '
+            '"messagex":0.220000, "messagey":0.120000 }',
+            encoding="utf-8",
+        )
+    else:
+        _logger.debug("hud enabled. trying to apply the bezel %s", bezel)
+
+        bezel_infos = bezels_util.get_bezel_infos(rom, bezel, system.name, system.config.emulator)
+        if bezel_infos is None:
+            _logger.debug("no bezel info file found")
+            return None
+
+        info_file = bezel_infos["info"]
+        png_file = bezel_infos["png"]
+
+    return _Overlay(png_file, info_file, _read_bezel_infos(info_file))
+
+
+def _read_bezel_infos(info_file: Path) -> dict[str, Any]:
+    """Read a bezel info file, returning an empty dict if missing or unreadable."""
+    if not info_file.exists():
+        return {}
+    try:
+        with info_file.open(encoding="utf-8") as file:
+            return json.load(file)
+    except (OSError, ValueError):
+        _logger.warning("unable to read %s", info_file)
+        return {}
+
+
+def _bezel_size(overlay: _Overlay) -> tuple[int, int]:
+    """Return the bezel size, from its info file if possible, else from the PNG."""
+    if "width" in overlay.infos and "height" in overlay.infos:
+        _logger.info("bezel size read from %s", overlay.info_file)
+        return overlay.infos["width"], overlay.infos["height"]
+    _logger.info("bezel size read from %s", overlay.png)
+    return bezels_util.fast_image_size(overlay.png)
+
+
+def _bezel_fits(
+    infos: dict[str, Any],
+    bezel_size: tuple[int, int],
+    resolution: Resolution,
+    ingame_ratio: float,
+) -> bool:
+    """Check that the bezel is compatible with the screen and the in-game image.
+
+    Only used when the bezel is not stretched: the screen and bezel ratios must
+    be approximately the same, and bottom, top, left and right must not cover
+    too much of the game image.
+    """
+    bezel_width, bezel_height = bezel_size
+    screen_ratio = resolution["width"] / resolution["height"]
+    bezel_ratio = bezel_width / bezel_height
+
+    if abs(screen_ratio - bezel_ratio) > _MAX_RATIO_DELTA:
+        _logger.debug(
+            "screen ratio (%s) is too far from the bezel one (%s) : delta > %s",
+            screen_ratio, bezel_ratio, _MAX_RATIO_DELTA,
+        )
+        return False
+
+    # the bezel top and bottom cover must be minimum
+    # (if there is no information about top/bottom, assume default is 0)
+    for side in ("top", "bottom"):
+        if side in infos and infos[side] / bezel_height > _MAX_COVER:
+            _logger.debug(
+                "bezel %s covers too much the game image : %s / %s > %s",
+                side, infos[side], bezel_height, _MAX_COVER,
+            )
+            return False
+
+    # the bezel left and right cover must be maximum
+    img_width = bezel_height * ingame_ratio
+    margin = (bezel_width - img_width) / 2.0
+    # assume default is 4/3 over 16/9
+    default_side = (bezel_width - (bezel_height / 3 * 4)) / 2
+    for side in ("left", "right"):
+        delta = infos.get(side, default_side) - margin
+        if abs(delta / img_width) > _MAX_COVER:
+            _logger.debug(
+                "bezel %s covers too much the game image : %s / %s > %s",
+                side, delta, img_width, _MAX_COVER,
+            )
+            return False
+    return True
+
+
+def _resize_bezel(
+    overlay: _Overlay, bezel_size: tuple[int, int], resolution: Resolution
+) -> Path | None:
+    """Resize the bezel (and its info file) to the screen resolution."""
+    _logger.debug("bezel needs to be resized")
+    width = resolution["width"]
+    height = resolution["height"]
+    output_png = Path("/tmp/bezel.png")
+    try:
+        bezels_util.resize_image(overlay.png, output_png, width, height, _BEZEL_STRETCH)
+
+        # The PNG has been stretched independently in X/Y. The sidecar .info
+        # must receive the same transformation so the game's opening stays
+        # aligned with the transparent opening in the bezel.
+        if overlay.info_file.exists():
+            bezels_util.resize_info(
+                overlay.info_file,
+                Path("/tmp/bezel.info"),
+                bezel_size[0],
+                bezel_size[1],
+                width,
+                height,
+                keep_aspect_ratio=not _BEZEL_STRETCH,
+            )
+    except (OSError, ValueError, RetroboxException) as err:
+        _logger.error("failed to resize the image %s", err)
+        return None
+    return output_png
+
+
+def _add_tattoo_and_qrcode(system: Emulator, overlay_png: Path, tattoo: str, qrcode: str) -> Path:
+    """Add the tattoo and the RetroAchievements QR code to the bezel, if enabled."""
+    if tattoo != "0":
+        output_png = Path("/tmp/bezel_tattooed.png")
+        bezels_util.tattoo_image(overlay_png, output_png, system)
+        overlay_png = output_png
+
+    if qrcode != "0" and (cheevos_id := system.es_game_info.get("cheevosId", "0")) != "0":
+        output_png = Path("/tmp/bezel_qrcode.png")
+        bezels_util.add_qr_code(overlay_png, output_png, cheevos_id, system)
+        overlay_png = output_png
+
+    return overlay_png
+
+
+def _add_gun_borders(
+    system: Emulator, overlay_png: Path, borders_size: str, guns: Guns
+) -> Path:
+    """Draw the gun borders on the bezel."""
+    _logger.debug("Draw gun borders")
+    output_png = Path("/tmp/bezel_gunborders.png")
+    inner_size, outer_size = bezels_util.gun_borders_size(borders_size)
+    borders_ratio = system.guns_border_ratio_type(guns)
+    _logger.debug("Gun border ratio = %s", borders_ratio)
+    bezels_util.gun_border_image(
+        overlay_png,
+        output_png,
+        borders_ratio,
+        inner_size,
+        outer_size,
+        bezels_util.guns_borders_color_from_config(system.config),
+    )
+    return output_png
+
+
+def get_hud_bezel(
+    system: Emulator,
+    generator: Generator,
+    rom: Path,
+    game_resolution: Resolution,
+    guns: Guns,
+) -> Path | None:
+    """Build the bezel image used as MangoHud background.
+
+    Returns:
+        The path of the final bezel image, or None if no bezel must be drawn.
+    """
     if generator.supportsInternalBezels():
         _logger.debug("skipping bezels for emulator %s", system.config.emulator)
         return None
 
+    bezel, tattoo, qrcode = _bezel_settings(system)
+    borders_size = system.guns_borders_size_name(guns)
+
     # no good reason for a bezel
-    bezel = system.config.get_str('bezel', 'none')
-    bezel_tattoo = system.config.get_str('bezel.tattoo', '0')
-    bezel_qrcode = system.config.get_str('bezel.qrcode', '0')
-
-    if (not bezel or bezel == 'none') and (not bezel_tattoo or bezel_tattoo == '0') and (not bezel_qrcode or bezel_qrcode == '0') and bordersSize is None:
+    if _nothing_to_draw(bezel, tattoo, qrcode) and borders_size is None:
         return None
 
-    # no bezel, generate a transparent one for the tatoo/gun borders ... and so on
-    if not bezel or bezel == 'none':
-        overlay_png_file  = Path("/tmp/bezel_transhud_black.png")
-        overlay_info_file = Path("/tmp/bezel_transhud_black.info")
-        bezelsUtil.createTransparentBezel(overlay_png_file, gameResolution["width"], gameResolution["height"])
-
-        w = gameResolution["width"]
-        h = gameResolution["height"]
-        with overlay_info_file.open("w") as fd:
-            fd.write(f'{{ "width":{w}, "height":{h}, "opacity":1.0000000, "messagex":0.220000, "messagey":0.120000 }}')
-    else:
-        _logger.debug("hud enabled. trying to apply the bezel %s", bezel)
-
-        bz_infos = bezelsUtil.get_bezel_infos(rom, bezel, system.name, system.config.emulator)
-        if bz_infos is None:
-            _logger.debug("no bezel info file found")
-            return None
-
-        overlay_info_file = bz_infos["info"]
-        overlay_png_file  = bz_infos["png"]
-
-    # check the info file
-    # bottom, top, left and right must not cover too much the image to be considered as compatible
-    if overlay_info_file.exists():
-        try:
-            with overlay_info_file.open() as f:
-                infos = json.load(f)
-        except Exception:
-            _logger.warning("unable to read %s", overlay_info_file)
-            infos = {}
-    else:
-        infos = {}
-
-    if "width" in infos and "height" in infos:
-        bezel_width  = infos["width"]
-        bezel_height = infos["height"]
-        _logger.info("bezel size read from %s", overlay_info_file)
-    else:
-        bezel_width, bezel_height = bezelsUtil.fast_image_size(overlay_png_file)
-        _logger.info("bezel size read from %s", overlay_png_file)
-
-    # max cover proportion and ratio distortion
-    max_cover = 0.05 # 5%
-    max_ratio_delta = 0.01
-
-    screen_ratio = gameResolution["width"] / gameResolution["height"]
-    bezel_ratio  = bezel_width / bezel_height
-
-    # Los bezels deben ocupar SIEMPRE toda la resolución objetivo.
-    # Si el aspect ratio del bezel no coincide con el de la pantalla,
-    # se estira en lugar de rechazarlo o rellenarlo con negro.
-    bezel_stretch = True
-
-    # the screen and bezel ratio must be approximatly the same, UNLESS stretch is enabled
-    if not bezel_stretch and bordersSize is None and abs(screen_ratio - bezel_ratio) > max_ratio_delta:
-        _logger.debug(
-            "screen ratio (%(screen_ratio)s) is too far from the bezel one (%(bezel_ratio)s) : %(screen_ratio)s - %(bezel_ratio)s > %(max_ratio_delta)s",
-            {
-                'screen_ratio': screen_ratio,
-                'bezel_ratio': bezel_ratio,
-                'max_ratio_delta': max_ratio_delta
-            }
-        )
+    overlay = _load_overlay(system, rom, game_resolution, bezel)
+    if overlay is None:
         return None
 
-    # the ingame image and the bezel free space must feet
-    ## the bezel top and bottom cover must be minimum
-    # in case there is a border, force it
-    if not bezel_stretch and bordersSize is None:
-        if "top" in infos and infos["top"] / bezel_height > max_cover:
-            _logger.debug('bezel top covers too much the game image : %s / %s > %s', infos["top"], bezel_height, max_cover)
-            return None
-        if "bottom" in infos and infos["bottom"] / bezel_height > max_cover:
-            _logger.debug('bezel bottom covers too much the game image : %s / %s > %s', infos["bottom"], bezel_height, max_cover)
+    bezel_size = _bezel_size(overlay)
+
+    # in case there are gun borders, skip the compatibility checks
+    if not _BEZEL_STRETCH and borders_size is None:
+        ingame_ratio = generator.getInGameRatio(system.config, game_resolution, rom)
+        if not _bezel_fits(overlay.infos, bezel_size, game_resolution, ingame_ratio):
             return None
 
-    # if there is no information about top/bottom, assume default is 0
-
-    ## the bezel left and right cover must be maximum
-    if not bezel_stretch and bordersSize is None:
-        ingame_ratio = generator.getInGameRatio(system.config, gameResolution, rom)
-        img_height = bezel_height
-        img_width  = img_height * ingame_ratio
-
-        if "left" not in infos:
-            _logger.debug("bezel has no left info in %s", overlay_info_file)
-            # assume default is 4/3 over 16/9
-            infos_left = (bezel_width - (bezel_height / 3 * 4)) / 2
-            if abs((infos_left  - ((bezel_width-img_width)/2.0)) / img_width) > max_cover:
-                _logger.debug("bezel left covers too much the game image : %s / %s > %s", infos_left  - ((bezel_width-img_width)/2.0), img_width, max_cover)
-                return None
-
-        if "right" not in infos:
-            _logger.debug("bezel has no right info in %s", overlay_info_file)
-            # assume default is 4/3 over 16/9
-            infos_right = (bezel_width - (bezel_height / 3 * 4)) / 2
-            if abs((infos_right - ((bezel_width-img_width)/2.0)) / img_width) > max_cover:
-                _logger.debug("bezel right covers too much the game image : %s / %s > %s", infos_right  - ((bezel_width-img_width)/2.0), img_width, max_cover)
-                return None
-
-        if "left"  in infos and abs((infos["left"]  - ((bezel_width-img_width)/2.0)) / img_width) > max_cover:
-            _logger.debug("bezel left covers too much the game image : %s / %s > %s", infos["left"]  - ((bezel_width-img_width)/2.0), img_width, max_cover)
-            return None
-        if "right" in infos and abs((infos["right"] - ((bezel_width-img_width)/2.0)) / img_width) > max_cover:
-            _logger.debug("bezel right covers too much the game image : %s / %s > %s", infos["right"]  - ((bezel_width-img_width)/2.0), img_width, max_cover)
+    overlay_png = overlay.png
+    # if screen and bezel sizes don't match, resize
+    if bezel_size != (game_resolution["width"], game_resolution["height"]):
+        overlay_png = _resize_bezel(overlay, bezel_size, game_resolution)
+        if overlay_png is None:
             return None
 
-    # if screen and bezel sizes doesn't match, resize
-    if (bezel_width != gameResolution["width"] or bezel_height != gameResolution["height"]):
-        _logger.debug("bezel needs to be resized")
-        output_png_file = Path("/tmp/bezel.png")
-        try:
-            bezelsUtil.resizeImage(
-                overlay_png_file,
-                output_png_file,
-                gameResolution["width"],
-                gameResolution["height"],
-                bezel_stretch,
-            )
+    overlay_png = _add_tattoo_and_qrcode(system, overlay_png, tattoo, qrcode)
+    if borders_size is not None:
+        overlay_png = _add_gun_borders(system, overlay_png, borders_size, guns)
 
-            # The PNG has been stretched independently in X/Y. The sidecar .info
-            # must receive the same transformation so the game's opening stays
-            # aligned with the transparent opening in the bezel.
-            if overlay_info_file.exists():
-                output_info_file = Path("/tmp/bezel.info")
-                bezelsUtil.resizeInfo(
-                    overlay_info_file,
-                    output_info_file,
-                    bezel_width,
-                    bezel_height,
-                    gameResolution["width"],
-                    gameResolution["height"],
-                    keep_aspect_ratio=not bezel_stretch,
-                )
-                if output_info_file.exists():
-                    overlay_info_file = output_info_file
-        except Exception as e:
-            _logger.error("failed to resize the image %s", e)
-            return None
-        overlay_png_file = output_png_file
+    _logger.debug("applying bezel %s", overlay_png)
+    return overlay_png
 
-    if bezel_tattoo != "0":
-        output_png_file = Path("/tmp/bezel_tattooed.png")
-        bezelsUtil.tatooImage(overlay_png_file, output_png_file, system)
-        overlay_png_file = output_png_file
-
-    if bezel_qrcode != "0" and (cheevos_id := system.es_game_info.get("cheevosId", "0")) != "0":
-        output_png_file = Path("/tmp/bezel_qrcode.png")
-        bezelsUtil.addQRCode(overlay_png_file, output_png_file, cheevos_id, system)
-        overlay_png_file = output_png_file
-
-    # borders
-    if bordersSize is not None:
-        _logger.debug("Draw gun borders")
-        output_png_file = Path("/tmp/bezel_gunborders.png")
-        inner_size, outer_size = bezelsUtil.gunBordersSize(bordersSize)
-        _logger.debug("Gun border ratio = %s", bordersRatio)
-        bezelsUtil.gunBorderImage(overlay_png_file, output_png_file, bordersRatio, inner_size, outer_size, bezelsUtil.gunsBordersColorFomConfig(system.config))
-        overlay_png_file = output_png_file
-
-    _logger.debug("applying bezel %s", overlay_png_file)
-    return overlay_png_file
 
 def _sanitize_hook_name(name: str) -> str:
-    """
-    Sanitize a name for use as a path component under retrohook.d/.
+    """Sanitize a name for use as a path component under retrohook.d/.
+
     Only affects the hook directory lookup, not the args passed to the script.
     """
-    name = name.replace("/", "_")          # the only truly illegal char on Linux
+    name = name.replace("/", "_")  # the only truly illegal char on Linux
     name = re.sub(r"[\x00-\x1f\x7f]", "", name)  # control chars
-    return name[:255]                      # filename limit on ext4/btrfs
+    return name[:255]  # filename limit on ext4/btrfs
+
 
 def call_retrohook(
     platform: str,
@@ -542,17 +702,15 @@ def call_retrohook(
     state: str,  # "on-start-game" | "on-close-game"
     extra_args: Iterable[str | Path] = (),
 ) -> None:
-    """
-    Invoke retrobox's hook system.
+    """Invoke retrobox's hook system.
+
     Delegates all hierarchy and execution logic to the retrohook bash script.
     """
-
     if not HOOKS.is_file() or not os.access(HOOKS, os.X_OK):
         _logger.debug("retrohook not found or not executable: %s", HOOKS)
         return
 
-    game_stem = Path(game).stem
-    game_hook_name = _sanitize_hook_name(game_stem)  # for the path
+    game_hook_name = _sanitize_hook_name(Path(game).stem)  # for the path
 
     cmd = [str(HOOKS), platform, game_hook_name, state, str(game), *map(str, extra_args)]
 
@@ -561,49 +719,56 @@ def call_retrohook(
     if result.returncode != 0:
         _logger.warning("[retrohook] exited with code %s", result.returncode)
 
-def hudConfig_protectStr(string: str | Path | None) -> str:
+
+def _protect_str(string: str | Path | None) -> str:
+    """Convert a value to a string, mapping None to an empty string."""
     if string is None:
         return ""
     return str(string)
 
-def getHudConfig(system: Emulator, systemName: str, emulator: str, core: str, rom: Path, bezel: Path | None) -> str:
+
+def get_hud_config(
+    system: Emulator,
+    system_name: str | None,
+    emulator: str,
+    core: str | None,
+    bezel: Path | None,
+) -> str:
+    """Build the MangoHud configuration text for the current game."""
     configstr = ""
 
-    if bezel != "" and bezel != "none" and bezel is not None:
-        configstr = f"background_image={hudConfig_protectStr(bezel)}\nlegacy_layout=false\n"
-    if (mode := system.config.get('hud', 'none')) == 'none':
-        return configstr + "background_alpha=0\n" # hide the background
+    if bezel is not None:
+        configstr = f"background_image={_protect_str(bezel)}\nlegacy_layout=false\n"
 
-    hud_position = "bottom-left"
-    if (hud_corner := system.config.get('hud_corner', '')) != '':
-        if hud_corner == "NW":
-            hud_position = "top-left"
-        elif hud_corner == "NE":
-            hud_position = "top-right"
-        elif hud_corner == "SE":
-            hud_position = "bottom-right"
+    mode = system.config.get("hud", "none")
+    if mode == "none":
+        return configstr + "background_alpha=0\n"  # hide the background
 
-    emulatorstr = emulator
-    if emulator != core and core is not None:
-        emulatorstr += f"/{core}"
+    hud_position = _HUD_POSITIONS.get(system.config.get("hud_corner", ""), "bottom-left")
 
-    game_name = system.es_game_info.get("name", "")
-    game_thumbnail = system.es_game_info.get("thumbnail", "")
+    emulator_str = emulator
+    if core and core != emulator:
+        emulator_str += f"/{core}"
 
     # predefined values
     if mode == "perf":
-        configstr += f"position={hud_position}\nbackground_alpha=0.4\nlegacy_layout=false\ncustom_text=%GAMENAME%\ncustom_text=%SYSTEMNAME%\ncustom_text=%EMULATORCORE%\nfps\ngpu_name\nengine_version\nvulkan_driver\nresolution\nram\ngpu_stats\ngpu_temp\ncpu_stats\ncpu_temp\ncore_load\n"
+        configstr += f"position={hud_position}\n" + "\n".join(_HUD_PERF_LINES) + "\n"
     elif mode == "game":
-        configstr += f"position={hud_position}\nbackground_alpha=0\nlegacy_layout=false\nfont_size=32\nimage_max_width=200\nimage=%THUMBNAIL%\ncustom_text=%GAMENAME%\ncustom_text=%SYSTEMNAME%\ncustom_text=%EMULATORCORE%"
-    elif mode == "custom" and (hud_custom := system.config.get_str('hud_custom')):
+        configstr += f"position={hud_position}\n" + "\n".join(_HUD_GAME_LINES)
+    elif mode == "custom" and (hud_custom := system.config.get_str("hud_custom")):
         configstr += hud_custom.replace("\\n", "\n")
     else:
-        configstr = configstr + "background_alpha=0\n" # hide the background
+        configstr += "background_alpha=0\n"  # hide the background
 
-    configstr = configstr.replace("%SYSTEMNAME%", hudConfig_protectStr(systemName))
-    configstr = configstr.replace("%GAMENAME%", hudConfig_protectStr(game_name))
-    configstr = configstr.replace("%EMULATORCORE%", hudConfig_protectStr(emulatorstr))
-    return configstr.replace("%THUMBNAIL%", hudConfig_protectStr(game_thumbnail))
+    replacements = {
+        "%SYSTEMNAME%": system_name,
+        "%GAMENAME%": system.es_game_info.get("name", ""),
+        "%EMULATORCORE%": emulator_str,
+        "%THUMBNAIL%": system.es_game_info.get("thumbnail", ""),
+    }
+    for placeholder, value in replacements.items():
+        configstr = configstr.replace(placeholder, _protect_str(value))
+    return configstr
 
 
 def _resolve_mangohud_binary() -> Path | None:
@@ -626,7 +791,8 @@ def _resolve_mangohud_binary() -> Path | None:
     if system_mangohud := shutil.which("mangohud"):
         _logger.warning(
             "Bundled MangoHud not found at %s, falling back to the system "
-            "'mangohud' (bezel support may not be available).", MANGOHUD_BIN
+            "'mangohud' (bezel support may not be available).",
+            MANGOHUD_BIN,
         )
         return Path(system_mangohud)
 
@@ -665,9 +831,7 @@ def _configure_mangohud_env(cmd: Command, mangohud_bin: Path) -> None:
             _resolve_mangohud_binary(), used to tell which of the two
             installs is actually going to run.
     """
-    is_retrobox_build = mangohud_bin == MANGOHUD_BIN
-
-    if is_retrobox_build:
+    if mangohud_bin == MANGOHUD_BIN:
         # Bundled retrobox build: drive it via its own layer, and force
         # the system layer off.
         cmd.env["RETROBOX_MANGOHUD"] = "1"
@@ -692,8 +856,8 @@ def _configure_mangohud_env(cmd: Command, mangohud_bin: Path) -> None:
 
 
 def _set_nvidia_powerd(enable: bool) -> None:
-    """
-    Start or stop nvidia-powerd.service via the nvidia-powerd-service script.
+    """Start or stop nvidia-powerd.service via the nvidia-powerd-service script.
+
     Never raises: only logs warnings if something fails.
 
     Makes sure the 'nvidia-powerd' binary actually exists on the system
@@ -703,13 +867,18 @@ def _set_nvidia_powerd(enable: bool) -> None:
     """
     # 1. Check that our helper script exists and is executable
     if not os.path.isfile(NVIDIA_POWERD_SCRIPT) or not os.access(NVIDIA_POWERD_SCRIPT, os.X_OK):
-        _logger.debug("%s not found or not executable, skipping nvidia-powerd management", NVIDIA_POWERD_SCRIPT)
+        _logger.debug(
+            "%s not found or not executable, skipping nvidia-powerd management",
+            NVIDIA_POWERD_SCRIPT,
+        )
         return
 
     # 2. Check that the real system binary exists in PATH.
     # If it doesn't, abort silently. This protects systems without nvidia-powerd.
     if shutil.which("nvidia-powerd") is None:
-        _logger.debug("nvidia-powerd binary not found in system PATH, skipping nvidia-powerd management")
+        _logger.debug(
+            "nvidia-powerd binary not found in system PATH, skipping nvidia-powerd management"
+        )
         return
 
     action = "start" if enable else "stop"
@@ -719,20 +888,32 @@ def _set_nvidia_powerd(enable: bool) -> None:
             check=True, capture_output=True, text=True, timeout=15,
         )
         _logger.info("nvidia-powerd %s", "started" if enable else "stopped")
-    except subprocess.CalledProcessError as e:
+    except subprocess.CalledProcessError as err:
         _logger.warning(
             "failed to %s nvidia-powerd: %s",
-            action, e.stderr.strip() if e.stderr else e,
+            action, err.stderr.strip() if err.stderr else err,
         )
-    except Exception as e:
-        _logger.warning("failed to %s nvidia-powerd: %s", action, e)
+    except (OSError, subprocess.SubprocessError) as err:
+        _logger.warning("failed to %s nvidia-powerd: %s", action, err)
+
+
+def _powerprofilesctl(*args: str) -> subprocess.CompletedProcess[str]:
+    """Run powerprofilesctl with the given arguments, raising on failure."""
+    return subprocess.run(
+        [_POWER_PROFILES_BIN, *args],
+        check=True, capture_output=True, text=True,
+    )
+
 
 def apply_power_profile(desired_profile: str) -> str | None:
-    """
-    Apply the requested power profile. Returns the profile that was active
-    before (or None if it couldn't be read / powerprofilesctl isn't
-    available). Also starts nvidia-powerd if the profile is 'performance',
-    and stops it in any other case.
+    """Apply the requested power profile.
+
+    Also starts nvidia-powerd if the profile is 'performance', and stops it in
+    any other case.
+
+    Returns:
+        The profile that was active before, or None if it couldn't be read or
+        powerprofilesctl isn't available.
     """
     desired_profile = (desired_profile or "balanced").strip().lower()
     if desired_profile not in _VALID_POWER_PROFILES:
@@ -748,30 +929,26 @@ def apply_power_profile(desired_profile: str) -> str | None:
 
     previous_profile = None
     try:
-        result = subprocess.run(
-            [_POWER_PROFILES_BIN, "get"],
-            check=True, capture_output=True, text=True,
-        )
-        previous_profile = result.stdout.strip()
+        previous_profile = _powerprofilesctl("get").stdout.strip()
         _logger.debug("current power profile before launch: %s", previous_profile)
-    except Exception as e:
-        _logger.warning("could not read current power profile: %s", e)
+    except (OSError, subprocess.SubprocessError) as err:
+        _logger.warning("could not read current power profile: %s", err)
 
-    if previous_profile != desired_profile:
-        try:
-            subprocess.run(
-                [_POWER_PROFILES_BIN, "set", desired_profile],
-                check=True, capture_output=True, text=True,
-            )
-            _logger.info("power profile set to '%s'", desired_profile)
-        except Exception as e:
-            _logger.warning("failed to set power profile to '%s': %s", desired_profile, e)
-    else:
+    if previous_profile == desired_profile:
         _logger.debug("power profile already '%s', nothing to do", desired_profile)
+        return previous_profile
+
+    try:
+        _powerprofilesctl("set", desired_profile)
+        _logger.info("power profile set to '%s'", desired_profile)
+    except (OSError, subprocess.SubprocessError) as err:
+        _logger.warning("failed to set power profile to '%s': %s", desired_profile, err)
 
     return previous_profile
 
+
 def restore_power_profile(previous_profile: str | None) -> None:
+    """Restore the power profile that was active before the game started."""
     # nvidia-powerd should only stay active if we're going back to
     # 'performance'; for 'balanced', 'power-saver', or no valid previous
     # profile, it gets stopped.
@@ -780,105 +957,133 @@ def restore_power_profile(previous_profile: str | None) -> None:
     if not previous_profile or previous_profile not in _VALID_POWER_PROFILES:
         return
     try:
-        subprocess.run(
-            [_POWER_PROFILES_BIN, "set", previous_profile],
-            check=True, capture_output=True, text=True
-        )
+        _powerprofilesctl("set", previous_profile)
         _logger.info("power profile restored to '%s'", previous_profile)
-    except Exception as e:
-        _logger.warning("failed to restore power profile to '%s': %s", previous_profile, e)
+    except (OSError, subprocess.SubprocessError) as err:
+        _logger.warning("failed to restore power profile to '%s': %s", previous_profile, err)
 
-def _controller_monitor_thread():
-    """
-    Runs in the background, watching for controller add/remove events.
-    Uses pysdl2 to reliably get controller GUIDs and paths, then intelligently "revives"
-    the original controller object to preserve player order without disrupting the emulator.
-    """
-    global _active_player_controllers
 
-    initial_controllers_snapshot = []
-    with _player_controllers_lock:
-        initial_controllers_snapshot = deepcopy(_active_player_controllers)
-        for i, p_controller in enumerate(initial_controllers_snapshot):
-            if p_controller and p_controller.guid:
+def _init_sdl_joystick() -> bool:
+    """Initialize the SDL2 joystick subsystem if needed.
+
+    Returns:
+        True if this call initialized it, False if the host had already done it.
+    """
+    if sdl2.SDL_WasInit(sdl2.SDL_INIT_JOYSTICK) != 0:
+        _logger.info(
+            ">>> SDL2 joystick subsystem already initialized by host (emulator). "
+            "Will not re-initialize."
+        )
+        return False
+
+    _logger.info(">>> SDL2 joystick subsystem not initialized. Initializing it now.")
+    sdl2.SDL_Init(sdl2.SDL_INIT_JOYSTICK)
+    return True
+
+
+def _scan_online_controllers() -> dict[str, str]:
+    """Return a GUID -> device path map of the joysticks currently seen by SDL2."""
+    sdl2.SDL_JoystickUpdate()
+    online_controllers: dict[str, str] = {}
+    for index in range(sdl2.SDL_NumJoysticks()):
+        try:
+            guid_struct = sdl2.SDL_JoystickGetDeviceGUID(index)
+            guid_buffer = (ctypes.c_char * 33)()
+            sdl2.SDL_JoystickGetGUIDString(guid_struct, guid_buffer, 33)
+            guid = guid_buffer.value.decode("utf-8")
+
+            path_bytes = sdl2.SDL_JoystickPathForIndex(index)
+            path = path_bytes.decode("utf-8") if path_bytes else None
+
+            if guid and path:
+                online_controllers[guid] = path
+        except Exception as err:  # pylint: disable=broad-exception-caught
+            # one misbehaving device must not stop the monitoring of the others
+            _logger.warning("Error while querying joystick index %s with pysdl2: %s", index, err)
+    return online_controllers
+
+
+def _sync_active_controllers(
+    snapshot: list[Controller | None], online_controllers: dict[str, str]
+) -> None:
+    """Revive the original controller objects and update the shared active list.
+
+    Reusing the original objects preserves the player order without disrupting
+    the emulator.
+    """
+    with _controller_state.lock:
+        new_active: list[Controller | None] = [None] * len(snapshot)
+
+        for index, controller in enumerate(snapshot):
+            if controller and controller.guid in online_controllers:
+                new_path = online_controllers[controller.guid]
+                if controller.device_path != new_path:
+                    _logger.info(
+                        ">>> [Revival] Player %s (GUID: %s) path has changed.",
+                        controller.player_number, controller.guid,
+                    )
+                    controller.device_path = new_path
+                new_active[index] = controller
+
+        current_paths = [c.device_path if c else None for c in _controller_state.controllers]
+        new_paths = [c.device_path if c else None for c in new_active]
+
+        if current_paths != new_paths:
+            _logger.info(
+                ">>> [Check 2] Controller state changed. Old Paths: %s. New Paths: %s",
+                current_paths, new_paths,
+            )
+            _controller_state.controllers = new_active
+        else:
+            _logger.info(">>> [Check 2] No change in assigned controller paths detected.")
+
+
+def _controller_monitor_thread() -> None:
+    """Watch for controller add/remove events in the background.
+
+    Uses pysdl2 to reliably get controller GUIDs and paths, then intelligently
+    "revives" the original controller object to preserve player order without
+    disrupting the emulator.
+    """
+    with _controller_state.lock:
+        snapshot = deepcopy(_controller_state.controllers)
+        for index, controller in enumerate(snapshot):
+            if controller and controller.guid:
                 _logger.info(
                     ">>>   [P%s] Stored GUID: %s, Initial Path: %s",
-                    i+1,
-                    p_controller.guid,
-                    p_controller.device_path
+                    index + 1, controller.guid, controller.device_path,
                 )
 
-    we_initialized_sdl = False
     try:
-        if sdl2.SDL_WasInit(sdl2.SDL_INIT_JOYSTICK) == 0:
-            _logger.info(">>> SDL2 joystick subsystem not initialized. Initializing it now.")
-            sdl2.SDL_Init(sdl2.SDL_INIT_JOYSTICK)
-            we_initialized_sdl = True
-        else:
-            _logger.info(">>> SDL2 joystick subsystem already initialized by host (emulator). Will not re-initialize.")
-    except Exception as e:
-        _logger.error("FATAL: Could not initialize pysdl2 for controller monitoring: %s", e)
+        we_initialized_sdl = _init_sdl_joystick()
+    except Exception as err:  # pylint: disable=broad-exception-caught
+        # a background thread must log and stop instead of dying with a traceback
+        _logger.error("FATAL: Could not initialize pysdl2 for controller monitoring: %s", err)
         return
 
-    context = pyudev.Context()
-    monitor = pyudev.Monitor.from_netlink(context)
-    monitor.filter_by(subsystem='input')
+    monitor = pyudev.Monitor.from_netlink(pyudev.Context())
+    monitor.filter_by(subsystem="input")
 
     _logger.info(">>> Starting background controller monitor.")
     for device in iter(monitor.poll, None):
-        if device.properties.get('ID_INPUT_JOYSTICK') != '1':
+        if device.properties.get("ID_INPUT_JOYSTICK") != "1":
             continue
 
         _logger.info("--- Joystick Event Detected: %s on %s ---", device.action, device.sys_path)
 
-        sdl2.SDL_JoystickUpdate()
-        online_controllers_map = {}
-        for i in range(sdl2.SDL_NumJoysticks()):
-            try:
-                guid_struct = sdl2.SDL_JoystickGetDeviceGUID(i)
-                guid_str_buffer = (ctypes.c_char * 33)()
-                sdl2.SDL_JoystickGetGUIDString(guid_struct, guid_str_buffer, 33)
-                guid = guid_str_buffer.value.decode('utf-8')
-
-                path_bytes = sdl2.SDL_JoystickPathForIndex(i)
-                path = path_bytes.decode('utf-8') if path_bytes else None
-
-                if guid and path:
-                    online_controllers_map[guid] = path
-            except Exception as e:
-                _logger.warning("Error while querying joystick index %s with pysdl2: %s", i, e)
-
-        _logger.info(">>> [Check 1] Pysdl2 scan found online controllers: %s", online_controllers_map)
-
-        with _player_controllers_lock:
-            new_active_controllers: list[Controller | None] = [None] * len(initial_controllers_snapshot)
-
-            for i, initial_controller in enumerate(initial_controllers_snapshot):
-                if initial_controller and initial_controller.guid in online_controllers_map:
-                    new_path = online_controllers_map[initial_controller.guid]
-                    if initial_controller.device_path != new_path:
-                        _logger.info(">>> [Revival] Player %s (GUID: %s) path has changed.", initial_controller.player_number, initial_controller.guid)
-                        initial_controller.device_path = new_path
-                    new_active_controllers[i] = initial_controller
-
-            current_paths = [c.device_path if c else None for c in _active_player_controllers]
-            new_paths = [c.device_path if c else None for c in new_active_controllers]
-
-            if current_paths != new_paths:
-                _logger.info(">>> [Check 2] Controller state changed. Old Paths: %s. New Paths: %s", current_paths, new_paths)
-                _active_player_controllers = new_active_controllers
-            else:
-                _logger.info(">>> [Check 2] No change in assigned controller paths detected.")
+        online_controllers = _scan_online_controllers()
+        _logger.info(">>> [Check 1] Pysdl2 scan found online controllers: %s", online_controllers)
+        _sync_active_controllers(snapshot, online_controllers)
 
     if we_initialized_sdl:
         sdl2.SDL_QuitSubSystem(sdl2.SDL_INIT_JOYSTICK)
 
+
 def run_command(command: Command) -> int:
-    """Catches the generated command and runs it with subprocess.Popen.
+    """Run the generated command with subprocess.Popen.
+
     Also handles error codes and exceptions to send them to main() and launch().
     """
-    global proc
-
     # Compute the environment: current os.environ overridden by
     # generator-level values. A None value in command.env means "unset
     # this variable, even if it's currently inherited from the parent
@@ -899,9 +1104,9 @@ def run_command(command: Command) -> int:
     if not command.array:
         raise BadCommandLineArguments
 
-    with open("/tmp/env-launcher.txt", "w", encoding="utf-8") as f:
-        for k, v in sorted(envvars.items()):
-            print(f"{k}={v}", file=f)
+    with Path("/tmp/env-launcher.txt").open("w", encoding="utf-8") as env_file:
+        for key, value in sorted(envvars.items()):
+            print(f"{key}={value}", file=env_file)
 
     exitcode = 0
 
@@ -910,134 +1115,136 @@ def run_command(command: Command) -> int:
             command.array,
             env=envvars,
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
-        ) as proc:
-            out, err = proc.communicate()
-            exitcode = proc.returncode
+            stderr=subprocess.PIPE,
+        ) as process:
+            _running.proc = process
+            out, err = process.communicate()
+            exitcode = process.returncode
 
             if err is not None:
-                _logger.error(err.decode(errors='backslashreplace'))
+                _logger.error(err.decode(errors="backslashreplace"))
 
             if out is not None:
-                _logger.debug(out.decode(errors='backslashreplace'))
+                _logger.debug(out.decode(errors="backslashreplace"))
 
     except BrokenPipeError:
         pass
-    except BaseException as e:
-        _logger.error("emulator exited: %s: %s", type(e).__name__, e)
-        raise UnexpectedEmulatorExit from e
+    except BaseException as err:
+        _logger.error("emulator exited: %s: %s", type(err).__name__, err)
+        raise UnexpectedEmulatorExit from err
 
     return exitcode
 
-def signal_handler(sig: int, frame: FrameType | None):
-    global proc
-    _logger.debug('Exiting (signal %s)', sig)
-    if proc:
-        _logger.debug('killing proc')
-        proc.kill()
+
+def signal_handler(sig: int, _frame: FrameType | None) -> None:
+    """Kill the running emulator process when the launcher is interrupted."""
+    _logger.debug("Exiting (signal %s)", sig)
+    if _running.proc:
+        _logger.debug("killing proc")
+        _running.proc.kill()
+
 
 def _resolve_rom_path(path_str: str) -> Path:
+    """Resolve the rom path, leaving the special "config" value untouched."""
     if path_str == "config":
         return Path(path_str)
     return Path(path_str).resolve()
 
 
+def _build_argument_parser(maxnbplayers: int) -> argparse.ArgumentParser:
+    """Build the command-line parser of the launcher."""
+    parser = argparse.ArgumentParser(description="emulator-launcher script")
+
+    for player in range(1, maxnbplayers + 1):
+        for suffix, description, arg_type in _PLAYER_ARGUMENTS:
+            parser.add_argument(
+                f"-p{player}{suffix}",
+                help=f"player{player} {description}",
+                type=arg_type,
+                required=False,
+            )
+
+    parser.add_argument(
+        "-system", help="select the system to launch", type=str, required=True
+    )
+    parser.add_argument(
+        "-rom", help="rom absolute path", type=_resolve_rom_path, required=True
+    )
+
+    for name, description in _STRING_ARGUMENTS:
+        parser.add_argument(name, help=description, type=str, required=False)
+
+    parser.add_argument(
+        "-gameinfoxml", help="game info xml", type=str, nargs="?", default="/dev/null",
+        required=False,
+    )
+
+    for name, description in _FLAG_ARGUMENTS:
+        parser.add_argument(name, help=description, action="store_true")
+
+    return parser
+
+
+def _normalize_exit_code(exitcode: int) -> int:
+    """Map an exit code caused by a signal (negative value) to a clean exit."""
+    if exitcode >= 0:
+        return exitcode
+
+    signal_number = -exitcode
+    if signal_number >= signal.NSIG:
+        return exitcode
+
+    signal_description = signal.strsignal(signal_number)
+    if signal_description and ":" not in signal_description:
+        signal_description = f"{signal_description}: {signal_number}"
+
+    _logger.debug("Emulator terminated by signal (%s)", signal_description)
+    return 0
+
 
 def launch() -> None:
-    """Handles program arguments and exception handling to EmulationStation and logs.
-    """
+    """Handle program arguments and exception handling to EmulationStation and logs."""
     with setup_logging():
-        global proc
-        proc = None
+        _running.proc = None
         signal.signal(signal.SIGINT, signal_handler)
 
-        launch_timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        _logger.info('=' * 20 + ' Retrobox ' + '=' * 20)
-        _logger.info('emulatorlauncher started at: %s', launch_timestamp)
-
-        parser = argparse.ArgumentParser(description='emulator-launcher script')
+        _logger.info("%s Retrobox %s", "=" * 20, "=" * 20)
+        _logger.info(
+            "emulatorlauncher started at: %s", datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        )
 
         maxnbplayers = 8
-        for p in range(1, maxnbplayers+1):
-            parser.add_argument(f"-p{p}index"     , help=f"player{p} controller index"            , type=int, required=False)
-            parser.add_argument(f"-p{p}guid"      , help=f"player{p} controller SDL2 guid"        , type=str, required=False)
-            parser.add_argument(f"-p{p}name"      , help=f"player{p} controller name"             , type=str, required=False)
-            parser.add_argument(f"-p{p}devicepath", help=f"player{p} controller device"           , type=str, required=False)
-            parser.add_argument(f"-p{p}nbbuttons" , help=f"player{p} controller number of buttons", type=int, required=False)
-            parser.add_argument(f"-p{p}nbhats"    , help=f"player{p} controller number of hats"   , type=int, required=False)
-            parser.add_argument(f"-p{p}nbaxes"    , help=f"player{p} controller number of axes"   , type=int, required=False)
-
-        parser.add_argument(
-            "-system",
-            help="select the system to launch",
-            type=str,
-            required=True)
-
-        parser.add_argument(
-            "-rom",
-            help="rom absolute path",
-            type=_resolve_rom_path,
-            required=True,
+        args = _build_argument_parser(maxnbplayers).parse_args()
+        _logger.debug(
+            "args: %s", {k: v for k, v in vars(args).items() if v is not None and v is not False}
         )
-
-        parser.add_argument(
-            "-emulator",
-            help="force emulator",
-            type=str, required=False
-        )
-
-        parser.add_argument("-core",           help="force emulator core",         type=str, required=False)
-        parser.add_argument("-netplaymode",    help="host/client",                 type=str, required=False)
-        parser.add_argument("-netplaypass",    help="enable spectator mode",       type=str, required=False)
-        parser.add_argument("-netplayip",      help="remote ip",                   type=str, required=False)
-        parser.add_argument("-netplayport",    help="remote port",                 type=str, required=False)
-        parser.add_argument("-netplaysession", help="netplay session",             type=str, required=False)
-        parser.add_argument("-state_slot",     help="state slot",                  type=str, required=False)
-        parser.add_argument("-state_filename", help="state filename",              type=str, required=False)
-        parser.add_argument("-autosave",       help="autosave",                    type=str, required=False)
-        parser.add_argument("-systemname",     help="system fancy name",           type=str, required=False)
-        parser.add_argument("-gameinfoxml",    help="game info xml",               type=str, nargs='?', default='/dev/null', required=False)
-        parser.add_argument("-lightgun",       help="configure lightguns",         action="store_true")
-        parser.add_argument("-wheel",          help="configure wheel",             action="store_true")
-        parser.add_argument("-trackball",      help="configure trackball",         action="store_true")
-        parser.add_argument("-spinner",        help="configure spinner",           action="store_true")
-
-        args = parser.parse_args()
-        _logger.debug('args: %s', {k: v for k, v in vars(args).items() if v is not None and v is not False})
 
         exitcode = 0
         try:
             exitcode = main(args, maxnbplayers)
-        except BaseRetroboxException as e:
+        except BaseRetroboxException as err:
             _logger.exception("configgen exception: ")
-            exitcode = e.exit_code
+            exitcode = err.exit_code
 
-            if isinstance(e, RetroboxException):
-                Path('/tmp/launch_error.log').write_text(e.args[0])
-        except Exception:
+            if isinstance(err, RetroboxException):
+                Path("/tmp/launch_error.log").write_text(err.args[0], encoding="utf-8")
+        except Exception:  # pylint: disable=broad-exception-caught
+            # last-resort handler: log everything and exit cleanly for EmulationStation
             _logger.exception("configgen exception: ")
 
         profiler.stop()
 
-        time.sleep(1) # this seems to be required so that the gpu memory is restituated and available for es
+        # this seems to be required so that the gpu memory is restituated and available for es
+        time.sleep(1)
 
-        if exitcode < 0:
-            signal_number = exitcode * -1
-
-            if signal_number < signal.NSIG:
-                signal_description = signal.strsignal(signal_number)
-
-                if signal_description and ':' not in signal_description:
-                    signal_description = f'{signal_description}: {signal_number}'
-
-                _logger.debug("Emulator terminated by signal (%s)", signal_description)
-                exitcode = 0
+        exitcode = _normalize_exit_code(exitcode)
 
         _logger.debug("Exiting configgen with status %s", exitcode)
 
         sys.exit(exitcode)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     launch()
 
 # Local Variables:

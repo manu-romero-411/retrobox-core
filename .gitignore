@@ -126,6 +126,7 @@ __marimo__/
 /frontend/emulationstation*
 /frontend/.emulationstation/music/
 /frontend/.emulationstation/tmp/
+/frontend/.emulationstation/themesettings/
 /frontend/.emulationstation/resources/
 /frontend/.emulationstation/recovery/
 /frontend/.emulationstation/es_log.*

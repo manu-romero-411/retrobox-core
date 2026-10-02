@@ -1,3 +1,5 @@
+"""Bezel helpers: lookup, resizing, QR codes, tattoos, gun borders and gun help images."""
+
 from __future__ import annotations
 
 import json
@@ -19,7 +21,7 @@ from .videoMode import get_alt_decoration
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
-    from PIL.ImageFile import ImageFile
+    from PIL.ImageFont import FreeTypeFont
     from qrcode.image.pil import PilImage
 
     from runtime.launcher.configgen.gun import Guns
@@ -30,84 +32,101 @@ if TYPE_CHECKING:
 
 _logger = logging.getLogger(__name__)
 
+_GUN_OVERLAYS_DIR = Path("/usr/share/batocera/guns-overlays")
+_GUN_HELP_FONT = Path("/usr/share/fonts/dejavu/DejaVuSans.ttf")
+_GUN_BORDER_COLORS = {
+    "red": "#ff0000",
+    "green": "#00ff00",
+    "blue": "#0000ff",
+    "white": "#ffffff",
+}
+
+
 class BezelInfos(TypedDict):
+    """Paths describing one bezel candidate."""
+
     png: Path
     info: Path
     layout: Path
     mamezip: Path
     specific_to_game: bool
 
+
+def _build(
+    directory: Path, basename: str, specific_to_game: bool, locale: str = ""
+) -> BezelInfos:
+    """Build the file set of a bezel candidate."""
+    return {
+        "png": directory / f"{basename}{locale}.png",
+        "info": directory / f"{basename}.info",
+        "layout": directory / f"{basename}.lay",
+        "mamezip": directory / f"{basename}.zip",
+        "specific_to_game": specific_to_game,
+    }
+
+
+def _candidates_for_root(
+    root: Path, rom_base: str, system_name: str, alt_decoration: str, localized: bool
+) -> list[BezelInfos]:
+    """List bezel candidates under one decorations root, in priority order."""
+    games_dir = root / "games"
+    systems_dir = root / "systems"
+    result = [
+        _build(games_dir / system_name, rom_base, True),
+        _build(games_dir, rom_base, True),
+    ]
+    if alt_decoration != "0":
+        result.append(_build(systems_dir, f"{system_name}-{alt_decoration}", False))
+    if localized:
+        result.append(_build(systems_dir, system_name, False, f"_{_detect_language()}"))
+    result.append(_build(systems_dir, system_name, False))
+    if alt_decoration != "0":
+        result.append(_build(root, f"default-{alt_decoration}", True))
+    result.append(_build(root, "default", True))
+    return result
+
+
+def bezel_is_disabled(config: SystemConfig) -> bool:
+    """Return True when the bezel must not be drawn at all (force_no_bezel)."""
+    return config.get_bool("force_no_bezel")
+
+
 def get_bezel_infos(
     rom: str | Path,
     bezel: str,
     system_name: str,
-    emulator: str
+    emulator: str,
+    config: SystemConfig | None = None,
 ) -> BezelInfos | None:
-    """Obtains bezel info based on this search order for decoration files:
+    """Obtain bezel info based on this search order for decoration files.
+
+    Within each root (user decorations first, then the default ones):
     #1. rom name inside games/<systemName>/          -> specific to this game
     #2. rom name inside games/                        -> specific to this game
-    #3. systemName + alt decoration inside systems/    -> only if altDecoration != "0"
-    #4. systemName inside systems/ (localized)
+    #3. systemName + alt decoration inside systems/   -> only if altDecoration != "0"
+    #4. systemName inside systems/ (localized)        -> user decorations only
     #5. systemName inside systems/
-    #6. "default" + alt decoration                     -> only if altDecoration != "0"
+    #6. "default" + alt decoration                    -> only if altDecoration != "0"
     #7. "default"
-    The first one to be found wins.
-    If none of the above exist, return None.
+    The first one to be found wins. If none exist, or if ``config`` is given and
+    force_no_bezel is set, return None.
     mamezip files are for MAME-specific advanced artwork
     (bezels with overlays and backdrops, animated LEDs, etc.)
     """
-    alt_decoration = get_alt_decoration(system_name, rom, emulator)
+    if config is not None and bezel_is_disabled(config):
+        _logger.debug("Bezel disabled by force_no_bezel")
+        return None
+
+    alt_decoration = str(get_alt_decoration(system_name, rom, emulator))
     rom_base = Path(rom).stem  # filename without extension
 
-    def build(directory: Path, basename: str, bezel_game: bool, locale: str = "") -> BezelInfos:
-        return {
-            "png": directory / f"{basename}{locale}.png",
-            "info": directory / f"{basename}.info",
-            "layout": directory / f"{basename}.lay",
-            "mamezip": directory / f"{basename}.zip",
-            "specific_to_game": bezel_game,
-        }
-
-    bez_games_dir = Path(f"{_DECORATIONS_DIR}/{bezel}/games")
-    bez_systems_dir = Path(f"{_DECORATIONS_DIR}/{bezel}/systems")
-    bez_root_dir = Path(f"{_DECORATIONS_DIR}/{bezel}")
-
-    default_bez_games_dir = Path(f"{_DECORATIONS_DEF_DIR}/{bezel}/games")
-    default_bez_systems_dir = Path(f"{_DECORATIONS_DEF_DIR}/{bezel}/systems")
-    default_bez_root_dir = Path(f"{_DECORATIONS_DEF_DIR}/{bezel}")
-
-
-    candidates: list[BezelInfos] = [
-        build(bez_games_dir / system_name, rom_base, True),
-        build(bez_games_dir, rom_base, True),
-    ]
-
-    # user-provided bezels in $RETROBOX_ROOTDIR/decorations
-    if alt_decoration != "0":
-        candidates.append(
-            build(bez_systems_dir, f"{system_name}-{alt_decoration!s}", False))
-
-    candidates.append(
-        build(bez_systems_dir, system_name, False, f"_{_detect_language()}" ))
-    candidates.append(
-        build(bez_systems_dir, system_name, False))
-    if alt_decoration != "0":
-        candidates.append(build(bez_root_dir, f"default-{alt_decoration!s}", True))
-    candidates.append(build(bez_root_dir, "default", True))
-
-    # default bezels from RetroBat ($RETROBOX_ROOTDIR/resources/decorations)
-    candidates.append(build(default_bez_games_dir / system_name, rom_base, True))
-    candidates.append(build(default_bez_games_dir, rom_base, True))
-
-    if alt_decoration != "0":
-        candidates.append(
-            build(default_bez_systems_dir, f"{system_name}-{alt_decoration!s}", False))
-    candidates.append(
-        build(default_bez_systems_dir, system_name, False))
-
-    if alt_decoration != "0":
-        candidates.append(build(default_bez_root_dir, f"default-{alt_decoration!s}", True))
-    candidates.append(build(default_bez_root_dir, "default", True))
+    # user-provided bezels in $RETROBOX_ROOTDIR/decorations, then the defaults
+    # from RetroBat ($RETROBOX_ROOTDIR/resources/decorations)
+    candidates = _candidates_for_root(
+        Path(_DECORATIONS_DIR) / bezel, rom_base, system_name, alt_decoration, True
+    ) + _candidates_for_root(
+        Path(_DECORATIONS_DEF_DIR) / bezel, rom_base, system_name, alt_decoration, False
+    )
 
     for candidate in candidates:
         if candidate["png"].exists():
@@ -116,59 +135,80 @@ def get_bezel_infos(
 
     return None
 
-# Much faster than PIL Image.size
+
 def fast_image_size(image_file: str | Path) -> tuple[int, int]:
-    image_file = Path(image_file)
-    if not image_file.exists():
+    """Read the size of a PNG from its header (much faster than PIL Image.size)."""
+    image_path = Path(image_file)
+    if not image_path.exists():
         return -1, -1
-    with image_file.open('rb') as fhandle:
-        head = fhandle.read(32)
-        if len(head) != 32:
-            # corrupted header, or not a PNG
-            return -1, -1
-        check = struct.unpack('>i', head[4:8])[0]
-        if check != 0x0d0a1a0a:
-            # Not a PNG
-            return -1, -1
-        return struct.unpack('>ii', head[16:24]) #image width, height
+    with image_path.open("rb") as handle:
+        head = handle.read(32)
+    if len(head) != 32:
+        # corrupted header, or not a PNG
+        return -1, -1
+    check = struct.unpack(">i", head[4:8])[0]
+    if check != 0x0D0A1A0A:
+        # not a PNG
+        return -1, -1
+    return struct.unpack(">ii", head[16:24])  # image width, height
 
-def resizeImage(input_png: str | Path, output_png: str | Path, screen_width: int, screen_height: int, bezel_stretch: bool = False) -> None:
-    imgin = Image.open(input_png)
-    _logger.debug("Resizing bezel: image mode %s, stretch=%s", imgin.mode, bezel_stretch)
-    
-    if bezel_stretch:
-        # ESTIRAR la imagen a las dimensiones exactas de la pantalla.
-        # Esto distorsiona el aspect ratio si es necesario, pero garantiza que 
-        # el bezel (con su hueco) ocupe toda la pantalla sin relleno negro ni recortes.
-        imgout = imgin.resize((screen_width, screen_height), Image.Resampling.BICUBIC)
-        if imgout.mode != "RGBA":
-            imgout = imgout.convert("RGBA")
-        imgout.save(output_png, mode="RGBA", format="PNG")
-    else:
-        fillcolor = 'black'
-        if imgin.mode != "RGBA":
-            alphaPaste(input_png, output_png, imgin, fillcolor, (screen_width, screen_height), bezel_stretch)
-        else:
-            # Comportamiento original para RGBA sin estirar
-            imgout = imgin.resize((screen_width, screen_height), Image.Resampling.BICUBIC)
-            imgout.save(output_png, mode="RGBA", format="PNG")
 
-def padImage(input_png: str | Path, output_png: str | Path, screen_width: int, screen_height: int, bezel_width: int, bezel_height: int, bezel_stretch: bool = False) -> None:
-    imgin = Image.open(input_png)
-    fillcolor = 'black'
-    _logger.debug("Padding bezel: image mode %s", imgin.mode)
-    
-    if imgin.mode != "RGBA":
-        alphaPaste(input_png, output_png, imgin, fillcolor, (screen_width, screen_height), bezel_stretch)
-    else:
+def resize_image(
+    input_png: str | Path,
+    output_png: str | Path,
+    screen_width: int,
+    screen_height: int,
+    bezel_stretch: bool = False,
+) -> None:
+    """Resize a bezel to the screen size, stretching it if requested.
+
+    Stretching distorts the aspect ratio if needed, but guarantees that the
+    bezel (and its transparent hole) fills the whole screen with no black
+    padding and no cropping.
+    """
+    screen_size = (screen_width, screen_height)
+    with Image.open(input_png) as imgin:
+        _logger.debug("Resizing bezel: image mode %s, stretch=%s", imgin.mode, bezel_stretch)
+        if not bezel_stretch and imgin.mode != "RGBA":
+            alpha_paste(input_png, output_png, "black", screen_size, bezel_stretch)
+            return
+        imgout = imgin.resize(screen_size, Image.Resampling.BICUBIC)
         if bezel_stretch:
-            # ESTIRAR en lugar de usar fit (que recorta) o pad (que rellena)
-            imgout = imgin.resize((screen_width, screen_height), Image.Resampling.BICUBIC)
-        else:
-            imgout = ImageOps.pad(imgin, (screen_width, screen_height), color=fillcolor, centering=(0.5, 0.5))
-        imgout.save(output_png, mode="RGBA", format="PNG")
+            imgout = imgout.convert("RGBA")
+        imgout.save(output_png, format="PNG")
 
-def resizeInfo(
+
+# pylint: disable-next=too-many-arguments,too-many-positional-arguments,unused-argument
+def pad_image(
+    input_png: str | Path,
+    output_png: str | Path,
+    screen_width: int,
+    screen_height: int,
+    bezel_width: int,
+    bezel_height: int,
+    bezel_stretch: bool = False,
+) -> None:
+    """Pad (or stretch) a bezel to the screen size.
+
+    ``bezel_width`` and ``bezel_height`` are unused and only kept so the
+    signature stays compatible with existing callers.
+    """
+    screen_size = (screen_width, screen_height)
+    with Image.open(input_png) as imgin:
+        _logger.debug("Padding bezel: image mode %s", imgin.mode)
+        if imgin.mode != "RGBA":
+            alpha_paste(input_png, output_png, "black", screen_size, bezel_stretch)
+            return
+        if bezel_stretch:
+            # stretch instead of fit (crops) or pad (fills with black)
+            imgout = imgin.resize(screen_size, Image.Resampling.BICUBIC)
+        else:
+            imgout = ImageOps.pad(imgin, screen_size, color="black", centering=(0.5, 0.5))
+        imgout.save(output_png, format="PNG")
+
+
+# pylint: disable-next=too-many-arguments,too-many-positional-arguments
+def resize_info(
     input_info: str | Path,
     output_info: str | Path,
     orig_width: int,
@@ -177,39 +217,36 @@ def resizeInfo(
     new_height: int,
     keep_aspect_ratio: bool = True,
 ) -> None:
-    """Rescala los campos de geometría de un .info de bezel (width, height,
-    top, left, bottom, right) para que el "hueco" transparente siga
-    alineado con el PNG correspondiente tras pasar de
-    (orig_width, orig_height) a (new_width, new_height).
+    """Rescale the geometry fields of a bezel .info file.
 
-    keep_aspect_ratio debe reflejar la transformación real aplicada al PNG:
-    - True: el PNG se estiró de forma independiente en cada eje (el caso de
-      resizeImage(..., bezel_stretch=True)/padImage con bezel_stretch=True),
-      así que top/bottom escalan con la ratio vertical y left/right/width
-      con la horizontal, cada una por separado.
-    - False: el PNG conservó su proporción y quedó centrado en el lienzo
-      destino (resizeImage/padImage con bezel_stretch=False, vía
-      ImageOps.pad centering=(0.5, 0.5)), así que se usa una única ratio
-      uniforme y se suma el margen de centrado resultante a left/top (y por
-      tanto a right/bottom, que se calculan igual) para que el hueco quede
-      centrado igual que la imagen.
+    The fields (width, height, top, left, bottom, right) are rescaled so the
+    transparent hole stays aligned with the PNG after going from
+    (orig_width, orig_height) to (new_width, new_height).
 
-    Si el .info no existe, no se puede leer, o falta el tamaño de origen,
-    no hace nada (no es un caso fatal: el llamante ya comprueba
-    overlay_info_file.exists() antes de invocar esta función).
+    ``keep_aspect_ratio`` must reflect the transformation applied to the PNG:
+
+    - True: the PNG was stretched independently on each axis (resize_image or
+      pad_image with bezel_stretch=True), so top/bottom use the vertical ratio
+      and left/right/width use the horizontal one.
+    - False: the PNG kept its proportions and was centered on the target
+      canvas (bezel_stretch=False, via ImageOps.pad), so a single uniform
+      ratio is used and the centering margin is added to left/right/top/bottom.
+
+    If the .info cannot be read, or the original size is invalid, nothing is
+    done. This is not fatal: the caller already checks that the file exists.
     """
-    input_info = Path(input_info)
-    output_info = Path(output_info)
+    input_path = Path(input_info)
+    output_path = Path(output_info)
 
     try:
-        with input_info.open(encoding="utf-8") as f:
-            infos: dict[str, Any] = json.load(f)
-    except Exception as e:
-        _logger.warning("resizeInfo: no se pudo leer %s (%s)", input_info, e)
+        with input_path.open(encoding="utf-8") as file:
+            infos: dict[str, Any] = json.load(file)
+    except (OSError, ValueError) as err:
+        _logger.warning("resize_info: could not read %s (%s)", input_path, err)
         return
 
     if not orig_width or not orig_height:
-        _logger.warning("resizeInfo: tamaño de origen inválido %sx%s", orig_width, orig_height)
+        _logger.warning("resize_info: invalid source size %sx%s", orig_width, orig_height)
         return
 
     wratio = new_width / float(orig_width)
@@ -223,270 +260,360 @@ def resizeInfo(
         xoffset = (new_width - orig_width * xratio) / 2.0
         yoffset = (new_height - orig_height * yratio) / 2.0
 
-    if "width" in infos:
-        infos["width"] = int(round(infos["width"] * xratio))
-    if "height" in infos:
-        infos["height"] = int(round(infos["height"] * yratio))
-    if "left" in infos:
-        infos["left"] = int(round(infos["left"] * xratio + xoffset))
-    if "right" in infos:
-        infos["right"] = int(round(infos["right"] * xratio + xoffset))
-    if "top" in infos:
-        infos["top"] = int(round(infos["top"] * yratio + yoffset))
-    if "bottom" in infos:
-        infos["bottom"] = int(round(infos["bottom"] * yratio + yoffset))
+    # field -> (ratio, offset)
+    transforms = {
+        "width": (xratio, 0.0),
+        "height": (yratio, 0.0),
+        "left": (xratio, xoffset),
+        "right": (xratio, xoffset),
+        "top": (yratio, yoffset),
+        "bottom": (yratio, yoffset),
+    }
+    for key, (ratio, offset) in transforms.items():
+        if key in infos:
+            infos[key] = round(infos[key] * ratio + offset)
 
     try:
-        with output_info.open("w", encoding="utf-8") as f:
-            json.dump(infos, f)
-    except Exception as e:
-        _logger.warning("resizeInfo: no se pudo escribir %s (%s)", output_info, e)
+        with output_path.open("w", encoding="utf-8") as file:
+            json.dump(infos, file)
+    except OSError as err:
+        _logger.warning("resize_info: could not write %s (%s)", output_path, err)
 
 
-def addQRCode(input_png: str | Path, output_png: str | Path, code: str, system: Emulator):
-    url = f"https://retroachievements.org/game/{code}"
+def add_qr_code(
+    input_png: str | Path, output_png: str | Path, code: str, system: Emulator
+) -> None:
+    """Paste a RetroAchievements QR code in a corner of the bezel."""
+    box_size = 3
+    border = 2
+    qr_code = qrcode.QRCode(version=1, box_size=box_size, border=border)
+    qr_code.add_data(f"https://retroachievements.org/game/{code}")
+    qr_code.make()
+    qr_image = cast("PilImage", qr_code.make_image(back_color=(120, 120, 120)))
+    qr_image = cast("Image.Image", qr_image.convert("RGBA"))
 
-    bxsize = 3
-    bdsize = 2
-    qr = qrcode.QRCode(version=1, box_size=bxsize, border=bdsize)
-    qr.add_data(url)
-    qr.make()
-    qrimg = cast('PilImage', qr.make_image(back_color = (120, 120, 120)))
+    side = 29 * box_size + border * box_size * 2
 
-    x = 29 * bxsize + bdsize * bxsize * 2
+    with Image.open(input_png) as bezel_file:
+        new_bezel = bezel_file.convert("RGBA")
+    width, height = new_bezel.size
 
-    w,h = fast_image_size(input_png)
-    newBezel = Image.open(input_png)
-    qrimg    = cast('Image.Image', qrimg.convert("RGBA"))
-    newBezel = newBezel.convert("RGBA")
+    corner = system.config.get("bezel.qrcode_corner", "NE").upper()
+    positions = {
+        "NW": (0, 0),
+        "SE": (width - side, height - side),
+        "SW": (0, height - side),
+    }
+    left, top = positions.get(corner, (width - side, 0))  # default = NE
+    new_bezel.paste(qr_image, (left, top, left + side, top + side))
+    new_bezel.save(output_png)
 
-    corner = system.config.get('bezel.qrcode_corner', 'NE')
-    if (corner.upper() == 'NW'):
-        newBezel.paste(qrimg, (0, 0, x, x))
-    elif (corner.upper() == 'SE'):
-        newBezel.paste(qrimg, (w-x, h-x, w, h))
-    elif (corner.upper() == 'SW'):
-        newBezel.paste(qrimg, (0, h-x, x, h))
-    else: # default = NE
-        newBezel.paste(qrimg, (w-x, 0, w, x))
-    newBezel.save(output_png)
 
-def tatooImage(input_png: Path, output_png: Path, system: Emulator) -> None:
-    tattoo_file: ImageFile | None = None
+def _tattoo_path(system: Emulator) -> Path:
+    """Choose which tattoo file to use for this system."""
+    overlays = RESOURCES_DIR / "controller-overlays"
+    mode = system.config["bezel.tattoo"]
+    if mode == "system":
+        path = overlays / f"{system.name}.png"
+        return path if path.exists() else overlays / "generic.png"
+    if mode == "custom":
+        custom = Path(system.config["bezel.tattoo_file"])
+        if custom.exists():
+            return custom
+    return overlays / "generic.png"
 
-    if system.config['bezel.tattoo'] == 'system':
-        tattoo_path = RESOURCES_DIR / 'controller-overlays' / f'{system.name}.png'
-        try:
-            if not tattoo_path.exists():
-                tattoo_path = RESOURCES_DIR / 'controller-overlays' / 'generic.png'
-            tattoo_file = Image.open(tattoo_path)
-        except Exception:
-            _logger.error("Error opening controller overlay: %s", tattoo_path)
-    elif system.config['bezel.tattoo'] == 'custom' and (tattoo_path := Path(system.config['bezel.tattoo_file'])).exists():
-        try:
-            tattoo_file = Image.open(tattoo_path)
-        except Exception:
-            _logger.error("Error opening custom file: %s", tattoo_path)
+
+def _open_tattoo(path: Path) -> Image.Image:
+    """Open a tattoo image as RGBA, raising RetroboxException on failure."""
+    try:
+        with Image.open(path) as tattoo_file:
+            return tattoo_file.convert("RGBA")
+    except (OSError, ValueError) as err:
+        _logger.error("Error opening tattoo image: %s", path)
+        raise RetroboxException(f"Tattoo image could not be opened: {path}") from err
+
+
+def _scale_tattoo(
+    tattoo: Image.Image, bezel_size: tuple[int, int], resize: bool
+) -> Image.Image:
+    """Scale the tattoo to fit the bezel."""
+    bezel_width, bezel_height = bezel_size
+    tattoo_width, tattoo_height = tattoo.size
+    if resize:
+        # slightly smaller than the bezel's column
+        new_width = int((225 / 1920) * bezel_width)
+    elif tattoo_width > bezel_width or tattoo_height > bezel_height:
+        # too large: limit the width to that of the bezel
+        new_width = bezel_width
     else:
-        tattoo_path = RESOURCES_DIR / 'controller-overlays' / 'generic.png'
-        try:
-            tattoo_file = Image.open(tattoo_path)
-        except Exception:
-            _logger.error("Error opening custom file: %s", tattoo_path)
-
-    if tattoo_file is None:
-        raise RetroboxException(f'Tattoo image could not be opened: {tattoo_path}')
-
-    # Open the existing bezel...
-    back = Image.open(input_png)
-    # Convert it otherwise it implodes later on...
-    back = back.convert("RGBA")
-    tattoo = tattoo_file.convert("RGBA")
-    # Quickly grab the sizes.
-    w,h = fast_image_size(input_png)
-    tw,th = fast_image_size(tattoo_path)
-    if not system.config.get_bool("bezel.resize_tattoo", True):
-        # Maintain the image's original size.
-        # Failsafe for if the image is too large.
-        if tw > w or th > h:
-            # Limit width to that of the bezel and crop the rest.
-            pcent = float(w / tw)
-            th = int(float(th) * pcent)
-            # Resize the tattoo to the calculated size.
-            tattoo = tattoo.resize((w,th), Image.Resampling.BICUBIC)
-    else:
-        # Resize to be slightly smaller than the bezel's column.
-        twtemp = int((225/1920) * w)
-        pcent = float(twtemp / tw)
-        th = int(float(th) * pcent)
-        tattoo = tattoo.resize((twtemp,th), Image.Resampling.BICUBIC)
-        tw = twtemp
-    # Create a new blank canvas that is the same size as the bezel for later compositing (they are required to be the same size).
-    tattooCanvas = Image.new("RGBA", back.size)
-    # Margin for the tattoo
-    margin = int((20 / 1080) * h)
-    corner = system.config.get('bezel.tattoo_corner', 'NW')
-    if (corner.upper() == 'NE'):
-        tattooCanvas.paste(tattoo, (w-tw,margin)) # 20 pixels vertical margins (on 1080p)
-    elif (corner.upper() == 'SE'):
-        tattooCanvas.paste(tattoo, (w-tw,h-th-margin))
-    elif (corner.upper() == 'SW'):
-        tattooCanvas.paste(tattoo, (0,h-th-margin))
-    else: # default = NW
-        tattooCanvas.paste(tattoo, (0,margin))
-    back = Image.alpha_composite(back, tattooCanvas)
-
-    imgnew = Image.new("RGBA", (w,h), (0,0,0,255))
-    imgnew.paste(back, (0,0,w,h))
-    imgnew.save(output_png, mode="RGBA", format="PNG")
+        return tattoo
+    new_height = int(tattoo_height * new_width / tattoo_width)
+    return tattoo.resize((new_width, new_height), Image.Resampling.BICUBIC)
 
 
+def tattoo_image(input_png: Path, output_png: Path, system: Emulator) -> None:
+    """Overlay a tattoo (controller image) in a corner of the bezel."""
+    tattoo = _open_tattoo(_tattoo_path(system))
+    with Image.open(input_png) as bezel_file:
+        back = bezel_file.convert("RGBA")
+    width, height = back.size
+    tattoo = _scale_tattoo(tattoo, back.size, system.config.get_bool("bezel.resize_tattoo", True))
+    tattoo_width, tattoo_height = tattoo.size
 
-def alphaPaste(input_png: str | Path, output_png: str | Path, imgin: ImageFile, fillcolor: str, screensize: tuple[int, int], bezel_stretch: bool) -> None:
-    # screensize=(screen_width, screen_height)
-    imgin = Image.open(input_png)
-    # TheBezelProject have Palette + alpha, not RGBA. PIL can't convert from P+A to RGBA.
-    # Even if it can load P+A, it can't save P+A as PNG. So we have to recreate a new image to adapt it.
-    if 'transparency' not in imgin.info:
-        raise RetroboxException("No transparent pixels in the bezel image")
-    
-    alpha = imgin.split()[-1]  # alpha from original palette + alpha
-    ix, iy = fast_image_size(input_png)
-    sx, sy = screensize
-    
+    # margin for the tattoo (20 pixels vertical on 1080p)
+    margin = int((20 / 1080) * height)
+    corner = system.config.get("bezel.tattoo_corner", "NW").upper()
+    positions = {
+        "NE": (width - tattoo_width, margin),
+        "SE": (width - tattoo_width, height - tattoo_height - margin),
+        "SW": (0, height - tattoo_height - margin),
+    }
+    # the canvas must be the same size as the bezel for compositing
+    canvas = Image.new("RGBA", back.size)
+    canvas.paste(tattoo, positions.get(corner, (0, margin)))  # default = NW
+    Image.alpha_composite(back, canvas).save(output_png, format="PNG")
+
+
+def _pad_alpha(alpha: Image.Image, screensize: tuple[int, int], fillcolor: str) -> Image.Image:
+    """Pad an alpha channel to the screen size, cropping the sides if needed."""
+    img_width, img_height = alpha.size
+    screen_width, screen_height = screensize
+    img_ratio = img_width / img_height
+    screen_ratio = screen_width / screen_height
+
+    if img_ratio - screen_ratio > 0.01:
+        # cut off bezel sides for 16:10 screens
+        new_width = int(img_width * screen_ratio / img_ratio)
+        border = (img_width - new_width) // 2
+        alpha = alpha.crop((border, 0, new_width + border, img_height))
+        img_width = new_width
+
+    base = Image.new("RGBA", (img_width, img_height), (0, 0, 0, 255))
+    base.paste(alpha, (0, 0, img_width, img_height))
+    return ImageOps.pad(base, screensize, color=fillcolor, centering=(0.5, 0.5))
+
+
+def alpha_paste(
+    input_png: str | Path,
+    output_png: str | Path,
+    fillcolor: str,
+    screensize: tuple[int, int],
+    bezel_stretch: bool,
+) -> None:
+    """Rebuild a palette+alpha bezel as RGBA at the screen size.
+
+    TheBezelProject bezels are Palette + alpha, not RGBA. PIL cannot convert
+    from P+A to RGBA, and cannot save P+A as PNG, so a new image is created.
+    """
+    with Image.open(input_png) as imgin:
+        if "transparency" not in imgin.info:
+            raise RetroboxException("No transparent pixels in the bezel image")
+        alpha = imgin.split()[-1]  # alpha from the original palette + alpha
+
     if bezel_stretch:
-        # ESTIRAR el canal alfa a las dimensiones exactas de la pantalla.
-        # Evitamos ImageOps.fit (que recorta) e ImageOps.pad (que rellena de negro).
-        alpha_resized = alpha.resize(screensize, Image.Resampling.BICUBIC)
+        # stretch the alpha channel to the exact screen size
+        # (avoid ImageOps.fit, which crops, and ImageOps.pad, which fills with black)
         imgout = Image.new("RGBA", screensize, (0, 0, 0, 255))
-        imgout.putalpha(alpha_resized)
+        imgout.putalpha(alpha.resize(screensize, Image.Resampling.BICUBIC))
     else:
-        i_ratio = (float(ix) / float(iy))
-        s_ratio = (float(sx) / float(sy))
+        imgout = _pad_alpha(alpha, screensize, fillcolor)
 
-        if (i_ratio - s_ratio > 0.01):
-            # cut off bezel sides for 16:10 screens
-            new_x = int(ix * s_ratio / i_ratio)
-            delta = int(ix - new_x)
-            borderx = delta // 2
-            ix = new_x
-            alpha_new = alpha.crop((borderx, 0, new_x + borderx, iy))
-            alpha = alpha_new
+    imgout.save(output_png, format="PNG")
 
-        imgnew = Image.new("RGBA", (ix, iy), (0, 0, 0, 255))
-        imgnew.paste(alpha, (0, 0, ix, iy))
-        imgout = ImageOps.pad(imgnew, screensize, color=fillcolor, centering=(0.5, 0.5))
-        
-    imgout.save(output_png, mode="RGBA", format="PNG")
 
-def gunBordersSize(bordersSize: str | None) -> tuple[int, int]:
-    if bordersSize == "thin":
-        return 1, 0
-    if bordersSize == "medium":
-        return 2, 0
-    if bordersSize == "big":
-        return 2, 1
-    return 0, 0
+def gun_borders_size(borders_size: str | None) -> tuple[int, int]:
+    """Return the (inner, outer) border size selector for a size name."""
+    sizes = {"thin": (1, 0), "medium": (2, 0), "big": (2, 1)}
+    return sizes.get(borders_size or "", (0, 0))
 
-def gunBorderImage(input_png: str | Path, output_png: str | Path, aspect_ratio: str | None, innerBorderSizePer: int = 2, outerBorderSizePer: int = 3, innerBorderColor: str = "#ffffff", outerBorderColor: str = "#000000") -> int:
-    # good default border that works in most circumstances is:
-    #
-    # 2% of the screen width in white.  Surrounded by 3% screen width of
-    # black.  I have attached an example.  The black helps the lightgun detect
-    # the border against a bright background behind the tv.
-    #
-    # The ideal solution is to draw the games inside the border rather than
-    # overlap.  Then you can see the whole game.  The lightgun thinks that the
-    # outer edge of the border is the edge of the game screen.  So you have to
-    # make some adjustments in the lightgun settings to keep it aligned.  This
-    # is why normally the border overlaps as it means that people do not need
-    # to calculate an adjustment and is therefore easier.
-    #
-    # If all the games are drawn with the border this way then the settings
-    # are static and the adjustment only needs to be calculated once.
 
-    from PIL import ImageDraw
-    w,h = fast_image_size(input_png)
-
-    # Calculate new width for 4:3 aspect ratio if a widescreen resolution
-    if abs(w / h - 4 / 3) < 0.01:
-        new_w = w
-    elif aspect_ratio == "4:3":
-        new_w = int((4 / 3) * h)
-    else:
-        new_w = w
-
-    # Calculate offset for centering the border image
-    offset_x = (w - new_w) // 2
-
-    # outer border
-    outerBorderSize = w * outerBorderSizePer // 100 # use only h to have homogen border size
-    if outerBorderSize < 1: # minimal size
-        outerBorderSize = 0
-    outerShapes = [
-        [(offset_x, 0), (offset_x + new_w, outerBorderSize)],
-        [(offset_x + new_w - outerBorderSize, 0), (offset_x + new_w, h)],
-        [(offset_x, h - outerBorderSize), (offset_x + new_w, h)],
-        [(offset_x, 0), (offset_x + outerBorderSize, h)]
+def _border_rectangles(
+    left: int, top: int, right: int, bottom: int, thickness: int
+) -> list[list[tuple[int, int]]]:
+    """Return the four rectangles (top, right, bottom, left) of a frame."""
+    return [
+        [(left, top), (right, top + thickness)],
+        [(right - thickness, top), (right, bottom)],
+        [(left, bottom - thickness), (right, bottom)],
+        [(left, top), (left + thickness, bottom)],
     ]
 
-    # inner border
-    innerBorderSize = w * innerBorderSizePer // 100 # use only h to have homogen border size
-    if innerBorderSize < 1: # minimal size
-        innerBorderSize = 1
-    innerShapes = [
-        [(offset_x + outerBorderSize, outerBorderSize), (offset_x + new_w - outerBorderSize, outerBorderSize + innerBorderSize)],
-        [(offset_x + new_w - outerBorderSize - innerBorderSize, outerBorderSize), (offset_x + new_w - outerBorderSize, h - outerBorderSize)],
-        [(offset_x + outerBorderSize, h - outerBorderSize - innerBorderSize), (offset_x + new_w - outerBorderSize, h - outerBorderSize)],
-        [(offset_x + outerBorderSize, outerBorderSize), (offset_x + outerBorderSize + innerBorderSize, h - outerBorderSize)]
-    ]
 
-    back = Image.open(input_png)
-    imgnew = Image.new("RGBA", (w,h), (0,0,0,255))
-    imgnew.paste(back, (0,0,w,h))
-    imgnewdraw = ImageDraw.Draw(imgnew)
-    for shape in outerShapes:
-        imgnewdraw.rectangle(shape, fill=outerBorderColor)
-    for shape in innerShapes:
-        imgnewdraw.rectangle(shape, fill=innerBorderColor)
-    imgnew.save(output_png, mode="RGBA", format="PNG")
+# pylint: disable-next=too-many-arguments,too-many-positional-arguments
+def gun_border_image(
+    input_png: str | Path,
+    output_png: str | Path,
+    aspect_ratio: str | None,
+    inner_border_size_pct: int = 2,
+    outer_border_size_pct: int = 3,
+    inner_border_color: str = "#ffffff",
+    outer_border_color: str = "#000000",
+) -> int:
+    """Draw a lightgun border on an image and return its total thickness.
 
-    return outerBorderSize + innerBorderSize
+    A good default border that works in most circumstances is 2% of the screen
+    width in white, surrounded by 3% of the screen width in black. The black
+    helps the lightgun detect the border against a bright background behind
+    the TV.
 
-def gunsBorderSize(w: int, h: int, innerBorderSizePer: int = 2, outerBorderSizePer: int = 3) -> int:
-    return (w * (innerBorderSizePer + outerBorderSizePer)) // 100
+    The ideal solution is to draw the games inside the border rather than
+    overlap it. The lightgun thinks the outer edge of the border is the edge
+    of the game screen, so adjustments are needed in the lightgun settings to
+    keep it aligned. This is why the border normally overlaps: people then do
+    not need to calculate an adjustment. If all the games are drawn with the
+    border this way, the settings are static and the adjustment only needs to
+    be calculated once.
+    """
+    width, height = fast_image_size(input_png)
 
-def gunsBordersColorFomConfig(config: SystemConfig) -> str:
-    if "controllers.guns.borderscolor" in config:
-        if config["controllers.guns.borderscolor"] == "red":
-            return "#ff0000"
-        if config["controllers.guns.borderscolor"] == "green":
-            return "#00ff00"
-        if config["controllers.guns.borderscolor"] == "blue":
-            return "#0000ff"
-        if config["controllers.guns.borderscolor"] == "white":
-            return "#ffffff"
+    # use a 4:3 area if the aspect ratio asks for it and the image is not already 4:3
+    is_four_thirds = abs(width / height - 4 / 3) < 0.01
+    if aspect_ratio == "4:3" and not is_four_thirds:
+        area_width = int((4 / 3) * height)
+    else:
+        area_width = width
+
+    # offset to center the border area
+    offset_x = (width - area_width) // 2
+    left = offset_x
+    right = offset_x + area_width
+
+    outer_size = width * outer_border_size_pct // 100
+    inner_size = max(1, width * inner_border_size_pct // 100)
+
+    outer_shapes = _border_rectangles(left, 0, right, height, outer_size)
+    inner_shapes = _border_rectangles(
+        left + outer_size,
+        outer_size,
+        right - outer_size,
+        height - outer_size,
+        inner_size,
+    )
+
+    with Image.open(input_png) as back:
+        imgnew = Image.new("RGBA", (width, height), (0, 0, 0, 255))
+        imgnew.paste(back, (0, 0, width, height))
+    draw = ImageDraw.Draw(imgnew)
+    for shape in outer_shapes:
+        draw.rectangle(shape, fill=outer_border_color)
+    for shape in inner_shapes:
+        draw.rectangle(shape, fill=inner_border_color)
+    imgnew.save(output_png, format="PNG")
+
+    return outer_size + inner_size
+
+
+# pylint: disable-next=unused-argument
+def guns_border_size(
+    width: int, height: int, inner_border_size_pct: int = 2, outer_border_size_pct: int = 3
+) -> int:
+    """Return the total border thickness for a screen width.
+
+    ``height`` is unused and only kept for signature compatibility.
+    """
+    return (width * (inner_border_size_pct + outer_border_size_pct)) // 100
+
+
+def guns_borders_color_from_config(config: SystemConfig) -> str:
+    """Return the border color (hex) selected in the configuration."""
+    key = "controllers.guns.borderscolor"
+    if key in config:
+        return _GUN_BORDER_COLORS.get(config[key], "#ffffff")
     return "#ffffff"
 
-def createTransparentBezel(output_png: Path, width: int, height: int) -> None:
-    from PIL import ImageDraw
-    imgnew = Image.new("RGBA", (width,height), (0,0,0,0))
-    ImageDraw.Draw(imgnew)
-    imgnew.save(output_png, mode="RGBA", format="PNG")
+
+def create_transparent_bezel(output_png: Path, width: int, height: int) -> None:
+    """Create a fully transparent bezel image."""
+    Image.new("RGBA", (width, height), (0, 0, 0, 0)).save(output_png, format="PNG")
+
 
 class _GunInfosTextDict(TypedDict):
     value: str
     x: float
     y: float
-    line_color: str
-    line: list[str]
+    line_color: NotRequired[str]
+    line_size: NotRequired[int]
+    line: NotRequired[list[float]]
+    color: NotRequired[str]
     align: NotRequired[str]
     font_size_per_height: NotRequired[float]
+
 
 class _GunInfosDict(TypedDict):
     texts: NotRequired[list[_GunInfosTextDict]]
     font_size_per_height: NotRequired[float]
     color: NotRequired[str]
+
+
+def _target_size(
+    ratio: float, width: int | None, height: int | None
+) -> tuple[int, int]:
+    """Compute the output size from a width and/or height, keeping the ratio."""
+    if width is not None and height is not None:
+        return width, height
+    if height is not None:
+        return int(height * ratio), height
+    if width is not None:
+        return width, int(width / ratio)
+    raise ValueError("width or height must be provided")
+
+
+def _get_font(cache: dict[int, FreeTypeFont], font_path: Path, size: int) -> FreeTypeFont:
+    """Return a font of the given size, loading it only once."""
+    if size not in cache:
+        cache[size] = ImageFont.truetype(font_path, size)
+    return cache[size]
+
+
+def _draw_lines(draw: ImageDraw.ImageDraw, texts: list[_GunInfosTextDict], size: tuple[int, int]) -> None:
+    """Draw the indicator lines attached to each text."""
+    img_width, img_height = size
+    for text in texts:
+        if not text.get("value") or "line" not in text:
+            continue
+        coords = text["line"]
+        points = [
+            (x_rel * img_width, y_rel * img_height)
+            for x_rel, y_rel in zip(coords[0::2], coords[1::2])
+        ]
+        draw.line(
+            points,
+            fill=text.get("line_color", "black"),
+            width=text.get("line_size", 2),
+        )
+
+
+def _draw_texts(
+    draw: ImageDraw.ImageDraw,
+    data: _GunInfosDict,
+    size: tuple[int, int],
+    font_path: Path,
+) -> None:
+    """Draw the texts of the gun help image."""
+    img_width, img_height = size
+    fonts: dict[int, FreeTypeFont] = {}
+    base_font_size = int(data["font_size_per_height"] * img_height)
+    default_color = data.get("color", "black")
+
+    for text in data.get("texts", []):
+        if "x" not in text or "y" not in text or "value" not in text:
+            continue
+        pos_x = round(text["x"] * img_width)
+        pos_y = round(text["y"] * img_height)
+
+        font_size = base_font_size
+        if "font_size_per_height" in text:
+            font_size = int(text["font_size_per_height"] * img_height)
+        font = _get_font(fonts, font_path, font_size)
+
+        text_width = draw.textlength(text["value"], font)
+        align = text.get("align", "left")
+        if align == "center":
+            pos_x -= int(text_width / 2)
+        elif align == "right":
+            pos_x -= int(text_width)
+        draw.text((pos_x, pos_y), text["value"], fill=text.get("color", default_color), font=font)
+
 
 def png_to_png_with_texts(
     input_png_path: Path,
@@ -498,91 +625,59 @@ def png_to_png_with_texts(
     width: int | None = None,
     height: int | None = None,
 ) -> None:
-    img_big = Image.open(input_png_path)
-    ratio = img_big.width / img_big.height
-
-    if width is None and height is None:
-        raise ValueError("width or height must be provided")
-
-    img_width: int = 0
-    img_height: int = 0
-
-    if width is None and height is not None:
-        img_height = height
-        img_width = int(height * ratio)
-
-    if width is not None and height is None:
-        img_width = width
-        img_height = int(width * ratio)
-
-    img = img_big.resize((img_width, img_height))
+    """Resize a PNG and draw the texts and lines described in ``data`` on it."""
+    with Image.open(input_png_path) as img_big:
+        size = _target_size(img_big.width / img_big.height, width, height)
+        img = img_big.resize(size)
     draw = ImageDraw.Draw(img)
 
-    # font
-    font = {}
+    _draw_lines(draw, data.get("texts", []), size)
     if "font_size_per_height" in data:
-        font_size = int(data["font_size_per_height"]*img_height)
-        font[font_size] = ImageFont.truetype(font_path, font_size)
+        _draw_texts(draw, data, size, font_path)
 
-    # lines
-    if "texts" in data:
-        for text in data["texts"]:
-            if "value" in text and text["value"] != "":
-                line_color = "black"
-                line_size  = 2
-                if "line_color" in text:
-                    line_color = text["line_color"]
-                if "line_size" in text:
-                    line_size = text["line_size"]
-                if "line" in text:
-                    points = []
-                    for i, v in enumerate(text["line"]):
-                        if i % 2 == 1:
-                            points.append((text["line"][i-1] * img_width, v * img_height))
-                    draw.line(points, fill=line_color, width=line_size)
-
-    # texts
-    if "texts" in data and "font_size_per_height" in data:
-        for text in data["texts"]:
-            if "x" in text and "y" in text and "value" in text:
-                # x, y
-                x = round(text["x"]*img_width)
-                y = round(text["y"]*img_height)
-
-                # color
-                color = "black"
-                if "color" in data:
-                    color = data["color"]
-                if "color" in text:
-                    color = text["color"]
-
-                # font
-                font_size = int(data["font_size_per_height"]*img_height)
-                if "font_size_per_height" in text:
-                    font_size = int(text["font_size_per_height"]*img_height)
-                    if font_size not in font:
-                        font[font_size] = ImageFont.truetype(font_path, font_size)
-
-                # alignment
-                text_width = draw.textlength(text["value"], font[font_size])
-                align = "left"
-                if "align" in text:
-                    align = text["align"]
-                if align == "center":
-                    x = x-int(text_width/2)
-                if align == "right":
-                    x = x-text_width
-                draw.text((x, y), text["value"], fill=color, font=font[font_size])
-
-    # save
     img.save(output_png_path, "PNG")
 
-def gun_help_replace(text: str, replacements: Mapping[str, str]) -> str:
-    res = text
-    for r in replacements:
-        res = res.replace(r, replacements[r])
-    return res
 
+def gun_help_replace(text: str, replacements: Mapping[str, str]) -> str:
+    """Replace every placeholder of ``replacements`` in ``text``."""
+    result = text
+    for placeholder, value in replacements.items():
+        result = result.replace(placeholder, value)
+    return result
+
+
+def _gun_text_replacements(system: str, rom: Path) -> tuple[dict[str, str], bool]:
+    """Return the button label replacements and whether they are customized."""
+    replacements = {
+        "<TRIGGER>": "TRIGGER",
+        "<ACTION>": "ACTION",
+        "<START>": "START",
+        "<SELECT>": "SELECT",
+        "<SUB1>": "SUB1",
+        "<SUB2>": "SUB2",
+        "<SUB3>": "SUB3",
+        "<UP>": "UP",
+        "<DOWN>": "DOWN",
+        "<LEFT>": "LEFT",
+        "<RIGHT>": "RIGHT",
+    }
+
+    # use a gamesgunsbuttonsdb.xml to customize the gun help of each game
+    if not ES_GUNS_ART_METADATA.exists():
+        _logger.info("gun help: metadata file not found : %s", ES_GUNS_ART_METADATA)
+        return replacements, False
+
+    game_metadata = metadata.get_games_meta_data(ES_GUNS_ART_METADATA, system, rom)
+    customize_texts = any(key.startswith("gun_") for key in game_metadata)
+    if customize_texts:
+        # keep only the replacements found in the metadata, blank the others
+        replacements = {
+            key: game_metadata.get(f"gun_{key[1:-1].lower()}", "") for key in replacements
+        }
+    return replacements, customize_texts
+
+
+# pylint: disable-next=too-many-arguments,too-many-positional-arguments
 def generate_gun_help(
     system: str,
     rom: Path,
@@ -590,67 +685,28 @@ def generate_gun_help(
     guns: Guns,
     gun_help_dir: Path,
     gun_help_filename: str,
-    gameResolution: Resolution,
+    game_resolution: Resolution,
     /,
 ) -> None:
-    ttf = Path("/usr/share/fonts/dejavu/DejaVuSans.ttf")
-    img_ratio = 0.5 # ratio of the screen height
-    default_gun_help_path = gun_help_dir / "gun_help_default.png" # cache file for next game run
+    """Generate (or reuse from cache) the gun help image of a game."""
+    default_gun_help_path = gun_help_dir / "gun_help_default.png"  # cache for next game run
     target_path = gun_help_dir / gun_help_filename
 
-    # default replacements
-    replacements = {
-        "<TRIGGER>": "TRIGGER",
-        "<ACTION>":  "ACTION",
-        "<START>":   "START",
-        "<SELECT>":  "SELECT",
-        "<SUB1>":    "SUB1",
-        "<SUB2>":    "SUB2",
-        "<SUB3>":    "SUB3",
-        "<UP>":      "UP",
-        "<DOWN>":    "DOWN",
-        "<LEFT>":    "LEFT",
-        "<RIGHT>":   "RIGHT",
-    }
+    gun_help_dir.mkdir(parents=True, exist_ok=True)
 
-    if not gun_help_dir.exists():
-        gun_help_dir.mkdir(parents=True)
+    replacements, customize_texts = _gun_text_replacements(system, rom)
 
-    # customize texts ?
-    # use a gamesgunsbuttonsdb.xml to customize gun helps for each game
-    customize_texts = False
-
-    # search specific metadata
-    md = {}
-    if ES_GUNS_ART_METADATA.exists():
-        md = metadata.get_games_meta_data(ES_GUNS_ART_METADATA, system, rom)
-        for key in md:
-            if key.startswith("gun_"):
-                customize_texts = True
-        # if we customize text, we reset replacements by only the one in metadata
-        if customize_texts:
-            for key in replacements:
-                rkey = key[1:-1].lower() # remove the first, last char and lowercase
-                if "gun_"+rkey in md:
-                    replacements[key] = md["gun_"+rkey]
-                else:
-                    replacements[key] = "" # we replace by an empty string
-    else:
-        _logger.info("gun help: metadata file not found : %s", ES_GUNS_ART_METADATA)
-
-    # if we use the image without any customization, copy the backup
-    # we did of it to the destination
+    # without any customization, copy the cached image to the destination
     if (use_guns or guns) and not customize_texts and default_gun_help_path.exists():
         shutil.copyfile(default_gun_help_path, target_path)
         _logger.info("gun help: using cache image : %s", default_gun_help_path)
         return
 
     # remove any existing file
-    if target_path.exists():
-        target_path.unlink()
+    target_path.unlink(missing_ok=True)
 
-    # don't enable if not a gun game or no gun
-    if not(use_guns and guns):
+    # do not enable if not a gun game or no gun
+    if not (use_guns and guns):
         _logger.info("gun help: not generating gun help image")
         return
 
@@ -658,28 +714,26 @@ def generate_gun_help(
 
     # take the first gun
     gun_name = guns[0].name
-    GUN_HELP_DIR = Path("/usr/share/batocera/guns-overlays")
-    GUN_HELP_PNG = GUN_HELP_DIR / Path(gun_name + ".png")
-    GUN_HELP_INFO = GUN_HELP_DIR / Path(gun_name + ".infos")
+    help_png = _GUN_OVERLAYS_DIR / f"{gun_name}.png"
+    help_info = _GUN_OVERLAYS_DIR / f"{gun_name}.infos"
 
-    if not GUN_HELP_PNG.exists():
-        _logger.info("gun help: image doesn't exist : %s", GUN_HELP_PNG)
+    if not help_png.exists():
+        _logger.info("gun help: image doesn't exist : %s", help_png)
         return
 
     # try to open the help texts
     data: _GunInfosDict = {}
-    if GUN_HELP_INFO.exists():
-        with GUN_HELP_INFO.open(encoding="utf-8") as file:
-            data = cast('_GunInfosDict', json.load(file))
+    if help_info.exists():
+        with help_info.open(encoding="utf-8") as file:
+            data = cast("_GunInfosDict", json.load(file))
 
     # replace data in texts
-    if "texts" in data:
-        for n, _ in enumerate(data["texts"]):
-            data["texts"][n]["value"] = gun_help_replace(data["texts"][n]["value"], replacements)
+    for text in data.get("texts", []):
+        text["value"] = gun_help_replace(text["value"], replacements)
 
-    img_height = int(gameResolution["height"] * img_ratio)
+    img_height = int(game_resolution["height"] * 0.5)  # half of the screen height
     _logger.info("gun help: generating image %s", target_path)
-    png_to_png_with_texts(GUN_HELP_PNG, target_path, data, font_path=ttf, height=img_height)
+    png_to_png_with_texts(help_png, target_path, data, font_path=_GUN_HELP_FONT, height=img_height)
 
     # save the default help as a cache
     if not customize_texts:
