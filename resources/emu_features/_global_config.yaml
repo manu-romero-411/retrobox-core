@@ -1,8 +1,16 @@
 emulator_name: _global_config
+vocabulary:
+  groups: [GENERAL, CONTROLS, ADVANCED OPTIONS]
+  submenus:
+    GENERAL: [SCREEN, DECORATIONS, SHADERS, AUDIO, EMULATION, AI GAME TRANSLATION]
+    CONTROLS: [CONTROLLERS, PORT 1, PORT 2, PORT 3, PORT 4, LIGHT GUNS, WHEELS]
+    ADVANCED OPTIONS: [PERFORMANCE]
+  # only these emulators are checked: add one when its YAML follows the vocabulary
+  enforce: [libretro]
 groups:
   GENERAL:
     submenus:
-      GAME RENDERING & SHADERS:
+      SHADERS:
         - name: SHADER SET
           value: shaderset
           description: ""
@@ -15,6 +23,7 @@ groups:
               value: 1
             - name: Off
               value: 0
+      SCREEN:
         - name: INTEGER SCALING (PIXEL PERFECT)
           value: integerscale
           description: Only increase the image size in integer multiples.
@@ -94,6 +103,37 @@ groups:
           value: bezel.resize_tattoo
           description: Shrink/expand tattoo to fit within the bezel's border.
           preset: switchauto
+      AUDIO:
+        - name: AUDIO VOLUME GAIN
+          value: audio_volume
+          description: Set game audio level gain in dB.
+          choices:
+            - name: "-12"
+              value: "-12.0"
+            - name: "-10"
+              value: "-10.0"
+            - name: "-8"
+              value: "-8.0"
+            - name: "-6"
+              value: "-6.0"
+            - name: "-4"
+              value: "-4.0"
+            - name: "-2"
+              value: "-2.0"
+            - name: 0 (No gain)
+              value: 0
+            - name: +2
+              value: 2.0
+            - name: +4
+              value: 4.0
+            - name: +6
+              value: 6.0
+            - name: +8
+              value: 8.0
+            - name: +10
+              value: 10.0
+            - name: +12
+              value: 12.0
       AI GAME TRANSLATION:
         - name: ENABLE AI TRANSLATION SERVICE
           value: ai_service_enabled
@@ -178,36 +218,6 @@ groups:
             value: 1
           - name: Off
             value: 0
-      - name: AUDIO VOLUME GAIN
-        value: audio_volume
-        description: Set game audio level gain in dB.
-        choices:
-          - name: "-12"
-            value: "-12.0"
-          - name: "-10"
-            value: "-10.0"
-          - name: "-8"
-            value: "-8.0"
-          - name: "-6"
-            value: "-6.0"
-          - name: "-4"
-            value: "-4.0"
-          - name: "-2"
-            value: "-2.0"
-          - name: 0 (No gain)
-            value: 0
-          - name: +2
-            value: 2.0
-          - name: +4
-            value: 4.0
-          - name: +6
-            value: 6.0
-          - name: +8
-            value: 8.0
-          - name: +10
-            value: 10.0
-          - name: +12
-            value: 12.0
       - name: POWER PROFILE
         value: power_profile
         description: Scalates performance as needed. May not work properly on battery.
@@ -231,6 +241,14 @@ groups:
               value: 1
             - name: Off
               value: 0
+        - name: BORDER MODE
+          value: bordersmode
+          description: Show/Hide guns borders for specific systems
+          choices:
+            - name: normal
+              value: normal
+            - name: hidden
+              value: hidden
       WHEELS:
         - name: USE WHEELS
           order: 100
@@ -314,17 +332,6 @@ groups:
               value: 9
             - name: 10
               value: 10
-  LIGHT GUN:
-    items:
-      - name: BORDER MODE
-        value: bordersmode
-        description: Show/Hide guns borders for specific systems
-        choices:
-          - name: normal
-            value: normal
-          - name: hidden
-            value: hidden
-
 sharedFeatures:
   - use_vsync
   - display_fps

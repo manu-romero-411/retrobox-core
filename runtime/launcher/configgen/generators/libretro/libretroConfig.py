@@ -543,7 +543,10 @@ def _apply_gun_settings(
 
 
 def _apply_shader_settings(config: dict[str, object], system: Emulator) -> None:
-    """Enable or disable the video shader, and the smoothing that goes with it."""
+    """Enable or disable the video shader and the integer scaling, and the smoothing."""
+    config["video_scale_integer"] = system.config.get_bool(
+        "integerscale", return_values=("true", "false")
+    )
     config["video_smooth"] = system.config.get_bool("smooth", return_values=("true", "false"))
     if system.renderconfig.get("shader") not in (None, "none") and "shader" in system.renderconfig:
         config["video_shader_enable"] = "true"

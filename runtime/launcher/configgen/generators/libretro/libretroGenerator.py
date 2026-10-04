@@ -40,6 +40,7 @@ _GLCORE_VENDORS = ("nvidia", "amd")
 _FORCE_GLCORE_CORES = ("kronos", "mupen64plus_next", "melonds", "beetle-psx-hw")
 _FORCE_GL_CORES = ("parallel_n64", "yabasanshiro", "boom3")
 _AUTO_STATE_SUFFIX = ".auto"
+_AUTO_BACKEND = "auto"
 
 
 def _resolve_shader(system: Emulator, rom: Path, gfx_backend: str) -> tuple[Path | None, bool]:
@@ -103,9 +104,24 @@ def _configured_backend() -> str | None:
     return None
 
 
+def _requested_backend(system: Emulator) -> str | None:
+    """Return the video backend that was asked for, if any.
+
+    The "gfxbackend" option of the game wins over the one of retroarch.cfg.
+    """
+    chosen = system.config.get_str("gfxbackend")
+    if chosen and chosen != _AUTO_BACKEND:
+        return chosen
+    return _configured_backend()
+
+
 def gfx_backend_get(system: Emulator) -> str:
-    """Return the video backend to use: "gl", "glcore" or "vulkan"."""
-    configured = _configured_backend()
+    """Return the video backend to use: "gl", "glcore" or "vulkan".
+
+    A backend that was asked for is used as it is (when the system supports it,
+    else "gl"); otherwise "glcore" is the default, adjusted for some cores.
+    """
+    configured = _requested_backend(system)
     backend = _gfx_backend_check(configured or "glcore")
     if backend == "opengl":
         backend = "gl"
