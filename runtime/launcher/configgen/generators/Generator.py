@@ -1,3 +1,8 @@
+"""Base class of the emulator generators."""
+
+# The method and argument names are the interface every generator implements.
+# pylint: disable=invalid-name
+
 from __future__ import annotations
 
 from abc import ABCMeta, abstractmethod
@@ -9,16 +14,21 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
     from pathlib import Path
 
+    from ..batoceraTypes import DeviceInfoMapping, Resolution
     from ..Command import Command
     from ..config import SystemConfig
     from ..controller import Controllers
     from ..Emulator import Emulator
     from ..gun import Guns
-    from ..batoceraTypes import DeviceInfoMapping, HotkeysContext, Resolution
+
+# pylint: disable=unused-argument  # the defaults ignore what the overrides use
+
 
 class Generator(metaclass=ABCMeta):
+    """What the launcher needs from the generator of an emulator."""
+
     @abstractmethod
-    def generate(
+    def generate(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         self,
         system: Emulator,
         rom: Path,
@@ -28,38 +38,56 @@ class Generator(metaclass=ABCMeta):
         wheels: DeviceInfoMapping,
         gameResolution: Resolution,
     ) -> Command:
-        ...
+        """Write the emulator configuration and return the command to run it."""
 
     def check_if_exists(self, what: Path, emuname: str) -> None:
+        """Raise a RetroboxException if a path the emulator needs does not exist."""
         if not what.exists():
             raise RetroboxException(f"Path for {emuname} does not exist: {what}")
-        return
 
     def getResolutionMode(self, config: SystemConfig) -> str:
-        return config['videomode']
+        """Return the video mode the emulator runs in."""
+        return config["videomode"]
 
     def getMouseMode(self, config: SystemConfig, rom: Path) -> bool:
+        """Tell whether the emulator needs the mouse."""
         return False
 
     def executionDirectory(self, config: SystemConfig, rom: Path) -> Path | None:
+        """Return the folder to run the emulator from, or None to keep the current one."""
         return None
 
-    # Some systems expect to write into the ROM area, for example: DOS, Amiga, and Wine
     def writesToRom(self, config: SystemConfig) -> bool:
+        """Tell whether the emulator writes into the ROM area (DOS, Amiga and Wine do)."""
         return False
 
-    # mame or libretro have internal bezels, don't display the one of mangohud
     def supportsInternalBezels(self) -> bool:
+        """Tell whether the emulator draws its own bezels (MAME, libretro).
+
+        When it does, the one of MangoHud is not displayed.
+        """
         return False
 
-    # mangohud must be called by the generator itself (wine based emulator for example)
+    def allows_bezel(self, config: SystemConfig) -> bool:
+        """Tell whether a bezel image can be drawn over this emulator.
+
+        Override it when the emulator forces a ratio or a stretch the bezel
+        does not fit. Only the bezel image is dropped: ``force_no_bezel`` is
+        for the user, to drop everything.
+        """
+        return True
+
     def hasInternalMangoHUDCall(self) -> bool:
+        """Tell whether the generator handles MangoHud itself (cemu, openmsx).
+
+        The launcher then draws neither the HUD nor the bezel.
+        """
         return False
 
     def getInGameRatio(self, config: SystemConfig, gameResolution: Resolution, rom: Path) -> float:
-        # put a default value, but it should be overriden by generators
-        return 4/3
+        """Return the aspect ratio of the game image (generators should override it)."""
+        return 4 / 3
 
     def usesOpenGLDirectPreload(self, config) -> bool:
+        """Tell whether MangoHud must be preloaded for an OpenGL emulator."""
         return False
-

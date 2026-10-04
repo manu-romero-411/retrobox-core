@@ -7,13 +7,18 @@ import logging
 import shutil
 import struct
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, NotRequired, TypedDict, cast
+from typing import TYPE_CHECKING, Any, NamedTuple, NotRequired, TypedDict, cast
 
 import qrcode
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 
 from configgen.utils.language import _detect_language
-from runtime.paths import _DECORATIONS_DEF_DIR, RESOURCES_DIR, ES_GUNS_ART_METADATA, _DECORATIONS_DIR
+from runtime.paths import (
+    _DECORATIONS_DEF_DIR,
+    _DECORATIONS_DIR,
+    ES_GUNS_ART_METADATA,
+    RESOURCES_DIR,
+)
 from ..exceptions import RetroboxException
 from . import metadata
 from .videoMode import get_alt_decoration
@@ -29,17 +34,29 @@ if TYPE_CHECKING:
 
     from ..config import SystemConfig
     from ..Emulator import Emulator
+    from ..gun import Guns
+    from .bezel_policy import BezelSettings
 
 _logger = logging.getLogger(__name__)
 
 _GUN_OVERLAYS_DIR = Path("/usr/share/batocera/guns-overlays")
 _GUN_HELP_FONT = Path("/usr/share/fonts/dejavu/DejaVuSans.ttf")
+_TATTOOED_BEZEL_PNG = Path("/tmp/bezel_tattooed.png")
+_QRCODE_BEZEL_PNG = Path("/tmp/bezel_qrcode.png")
+_GUN_BORDERS_BEZEL_PNG = Path("/tmp/bezel_gunborders.png")
 _GUN_BORDER_COLORS = {
     "red": "#ff0000",
     "green": "#00ff00",
     "blue": "#0000ff",
     "white": "#ffffff",
 }
+
+
+class GunBorders(NamedTuple):
+    """The lightgun borders to draw around the game image."""
+
+    size: str
+    ratio: str | None
 
 
 class BezelInfos(TypedDict):
@@ -86,17 +103,11 @@ def _candidates_for_root(
     return result
 
 
-def bezel_is_disabled(config: SystemConfig) -> bool:
-    """Return True when the bezel must not be drawn at all (force_no_bezel)."""
-    return config.get_bool("force_no_bezel")
-
-
 def get_bezel_infos(
     rom: str | Path,
     bezel: str,
     system_name: str,
     emulator: str,
-    config: SystemConfig | None = None,
 ) -> BezelInfos | None:
     """Obtain bezel info based on this search order for decoration files.
 
@@ -108,15 +119,12 @@ def get_bezel_infos(
     #5. systemName inside systems/
     #6. "default" + alt decoration                    -> only if altDecoration != "0"
     #7. "default"
-    The first one to be found wins. If none exist, or if ``config`` is given and
-    force_no_bezel is set, return None.
+    The first one to be found wins; if none exist, return None. Whether a bezel
+    may be drawn at all (``force_no_bezel``) is decided by the caller through
+    ``configgen.utils.bezel_policy``.
     mamezip files are for MAME-specific advanced artwork
     (bezels with overlays and backdrops, animated LEDs, etc.)
     """
-    if config is not None and bezel_is_disabled(config):
-        _logger.debug("Bezel disabled by force_no_bezel")
-        return None
-
     alt_decoration = str(get_alt_decoration(system_name, rom, emulator))
     rom_base = Path(rom).stem  # filename without extension
 
@@ -134,6 +142,18 @@ def get_bezel_infos(
             return candidate
 
     return None
+
+
+def read_bezel_infos(info_file: Path) -> dict[str, Any]:
+    """Read a bezel info file, returning an empty dict if missing or unreadable."""
+    if not info_file.exists():
+        return {}
+    try:
+        with info_file.open(encoding="utf-8") as file:
+            return json.load(file)
+    except (OSError, ValueError):
+        _logger.warning("unable to read the bezel info file %s", info_file)
+        return {}
 
 
 def fast_image_size(image_file: str | Path) -> tuple[int, int]:
@@ -178,14 +198,14 @@ def resize_image(
         imgout.save(output_png, format="PNG")
 
 
-# pylint: disable-next=too-many-arguments,too-many-positional-arguments,unused-argument
+# pylint: disable-next=too-many-arguments,too-many-positional-arguments
 def pad_image(
     input_png: str | Path,
     output_png: str | Path,
     screen_width: int,
     screen_height: int,
-    bezel_width: int,
-    bezel_height: int,
+    bezel_width: int,  # pylint: disable=unused-argument
+    bezel_height: int,  # pylint: disable=unused-argument
     bezel_stretch: bool = False,
 ) -> None:
     """Pad (or stretch) a bezel to the screen size.
@@ -207,7 +227,7 @@ def pad_image(
         imgout.save(output_png, format="PNG")
 
 
-# pylint: disable-next=too-many-arguments,too-many-positional-arguments
+# pylint: disable-next=too-many-arguments,too-many-positional-arguments,too-many-locals
 def resize_info(
     input_info: str | Path,
     output_info: str | Path,
@@ -280,6 +300,7 @@ def resize_info(
         _logger.warning("resize_info: could not write %s (%s)", output_path, err)
 
 
+# pylint: disable-next=too-many-locals
 def add_qr_code(
     input_png: str | Path, output_png: str | Path, code: str, system: Emulator
 ) -> None:
@@ -439,7 +460,7 @@ def _border_rectangles(
     ]
 
 
-# pylint: disable-next=too-many-arguments,too-many-positional-arguments
+# pylint: disable-next=too-many-arguments,too-many-positional-arguments,too-many-locals
 def gun_border_image(
     input_png: str | Path,
     output_png: str | Path,
@@ -503,9 +524,11 @@ def gun_border_image(
     return outer_size + inner_size
 
 
-# pylint: disable-next=unused-argument
 def guns_border_size(
-    width: int, height: int, inner_border_size_pct: int = 2, outer_border_size_pct: int = 3
+    width: int,
+    height: int,  # pylint: disable=unused-argument
+    inner_border_size_pct: int = 2,
+    outer_border_size_pct: int = 3,
 ) -> int:
     """Return the total border thickness for a screen width.
 
@@ -565,7 +588,9 @@ def _get_font(cache: dict[int, FreeTypeFont], font_path: Path, size: int) -> Fre
     return cache[size]
 
 
-def _draw_lines(draw: ImageDraw.ImageDraw, texts: list[_GunInfosTextDict], size: tuple[int, int]) -> None:
+def _draw_lines(
+    draw: ImageDraw.ImageDraw, texts: list[_GunInfosTextDict], size: tuple[int, int]
+) -> None:
     """Draw the indicator lines attached to each text."""
     img_width, img_height = size
     for text in texts:
@@ -583,6 +608,7 @@ def _draw_lines(draw: ImageDraw.ImageDraw, texts: list[_GunInfosTextDict], size:
         )
 
 
+# pylint: disable-next=too-many-locals
 def _draw_texts(
     draw: ImageDraw.ImageDraw,
     data: _GunInfosDict,
@@ -615,6 +641,7 @@ def _draw_texts(
         draw.text((pos_x, pos_y), text["value"], fill=text.get("color", default_color), font=font)
 
 
+# pylint: disable-next=too-many-arguments
 def png_to_png_with_texts(
     input_png_path: Path,
     output_png_path: Path,
@@ -677,7 +704,7 @@ def _gun_text_replacements(system: str, rom: Path) -> tuple[dict[str, str], bool
     return replacements, customize_texts
 
 
-# pylint: disable-next=too-many-arguments,too-many-positional-arguments
+# pylint: disable-next=too-many-arguments,too-many-positional-arguments,too-many-locals
 def generate_gun_help(
     system: str,
     rom: Path,
@@ -739,3 +766,61 @@ def generate_gun_help(
     if not customize_texts:
         shutil.copyfile(target_path, default_gun_help_path)
         _logger.info("gun help: caching file to : %s", default_gun_help_path)
+
+
+def add_decorations(system: Emulator, input_png: Path, settings: BezelSettings) -> Path:
+    """Add the tattoo and the RetroAchievements QR code to a bezel, if enabled.
+
+    Args:
+        system: The running system.
+        input_png: The bezel image to decorate.
+        settings: The effective bezel options (see ``bezel_policy``).
+
+    Returns:
+        The decorated image, or ``input_png`` itself when nothing was added.
+    """
+    output_png = input_png
+    if settings.has_tattoo:
+        tattoo_image(output_png, _TATTOOED_BEZEL_PNG, system)
+        output_png = _TATTOOED_BEZEL_PNG
+
+    if (
+        settings.has_qrcode
+        and (cheevos_id := system.es_game_info.get("cheevosId", "0")) != "0"
+    ):
+        add_qr_code(output_png, _QRCODE_BEZEL_PNG, cheevos_id, system)
+        output_png = _QRCODE_BEZEL_PNG
+
+    return output_png
+
+
+def gun_borders_for(system: Emulator, guns: Guns) -> GunBorders | None:
+    """Return the gun borders the game needs, or None when it needs none."""
+    size = system.guns_borders_size_name(guns)
+    if size is None:
+        return None
+    return GunBorders(size, system.guns_border_ratio_type(guns))
+
+
+def add_gun_borders(system: Emulator, input_png: Path, borders: GunBorders) -> Path:
+    """Draw the lightgun borders on a bezel image.
+
+    Args:
+        system: The running system, used for the border color.
+        input_png: The bezel image to draw on.
+        borders: The size and aspect ratio of the borders.
+
+    Returns:
+        The image with the borders.
+    """
+    _logger.debug("Draw gun borders (ratio = %s)", borders.ratio)
+    inner_size, outer_size = gun_borders_size(borders.size)
+    gun_border_image(
+        input_png,
+        _GUN_BORDERS_BEZEL_PNG,
+        borders.ratio,
+        inner_size,
+        outer_size,
+        guns_borders_color_from_config(system.config),
+    )
+    return _GUN_BORDERS_BEZEL_PNG

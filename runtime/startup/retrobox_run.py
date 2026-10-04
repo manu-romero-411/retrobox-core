@@ -37,7 +37,8 @@ sys.path.insert(0, str(_RETROBOX_ROOTDIR))
 sys.path.insert(0, str(_RETROBOX_ROOTDIR / "runtime"))
 sys.path.insert(0, str(_RETROBOX_ROOTDIR / "runtime" / "launcher"))
 
-# pylint: disable=wrong-import-position
+# the paths are added to sys.path above, so pylint cannot tell first party imports
+# pylint: disable=wrong-import-position,wrong-import-order
 # The bootstrap of retrobox.ini (including its auto-generation/repair on
 # first boot) is already handled by runtime.paths._base at import time,
 # BEFORE its Final constants are computed. No separate call is needed
@@ -58,12 +59,12 @@ from runtime.paths import (
     DirectoryCreationError,
     mkdir_if_not_exists,
 )
-from runtime.launcher.emulatorlauncher import call_retrohook
+from runtime.launcher.launcher_lib.hooks import call_retrohook
 from frontend_conf.es_ini_generator import generate_emulationstation_ini
 from frontend_conf.features_list_generator import generate_es_features
 from frontend_conf.system_list_generator import generate_es_systems
 from frontend_conf.pcgames_utils import heroic_es_sync, lutris_es_sync, steam_es_sync
-# pylint: enable=wrong-import-position
+# pylint: enable=wrong-import-position,wrong-import-order
 
 
 def is_emulationstation_running(es_binary: Path) -> bool:
