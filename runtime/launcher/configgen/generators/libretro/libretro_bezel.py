@@ -258,7 +258,9 @@ def _write_overlay_cfg(overlay_png: Path) -> None:
     RETROARCH_OVERLAY_CONFIG.write_text(
         "overlays = 1\n"
         f'overlay0_overlay = "{overlay_png}"\n'
-        "overlay0_full_screen = true\n",
+        "overlay0_full_screen = true\n"
+        # RetroArch needs the (empty) list of descriptors, or it ignores the overlay
+        "overlay0_descs = 0\n",
         encoding="utf-8",
     )
 
