@@ -1,0 +1,25 @@
+emulator_name: libretro
+core_name: snes9x
+groups:
+  CONTROLS:
+    submenus:
+      PORT 1:
+        - name: CONTROLLER TYPE
+          value: controller1_snes9x
+          description: Device plugged into port 1.
+          choices:
+            - name: Gamepad (Default)
+              value: auto
+            - name: Mouse
+              value: '2'
+      PORT 2:
+        - name: CONTROLLER TYPE
+          value: controller2_snes9x
+          description: Device plugged into port 2 (light guns are set in LIGHT GUNS).
+          choices:
+            - name: Gamepad (Default)
+              value: auto
+            - name: Mouse
+              value: '2'
+            - name: Multitap
+              value: '257'

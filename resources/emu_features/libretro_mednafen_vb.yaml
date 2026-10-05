@@ -1,0 +1,29 @@
+emulator_name: libretro
+core_name: mednafen_vb
+groups:
+  GENERAL:
+    submenus:
+      SCREEN:
+        - name: COLOR
+          value: vb_color_mode
+          description: Color of the picture. The Virtual Boy drew everything in shades of one color.
+          core_option: vb_color_mode
+          choices:
+            - name: Auto (Default)
+              value: auto
+            - name: Original (red)
+              value: black & red
+            - name: White
+              value: black & white
+            - name: Blue
+              value: black & blue
+            - name: Cyan
+              value: black & cyan
+            - name: Electric cyan
+              value: black & electric cyan
+            - name: Green
+              value: black & green
+            - name: Magenta
+              value: black & magenta
+            - name: Yellow
+              value: black & yellow

@@ -5,6 +5,5 @@ sharedFeatures:
   - power_profile
   - tdp
   - videomode
-  - ratio
   - bezel
   - bezel_stretch

@@ -1,0 +1,118 @@
+emulator_name: libretro
+core_name: melondsds
+groups:
+  GENERAL:
+    submenus:
+      SCREEN:
+        - name: SCREEN LAYOUT 1
+          value: melonds_screen_layout1
+          description: First layout, the one the game starts with.
+          core_option: melonds_screen_layout1
+          choices:
+            - name: Auto (Default)
+              value: auto
+            - name: Top/Bottom
+              value: top-bottom
+            - name: Bottom/Top
+              value: bottom-top
+            - name: Left/Right
+              value: left-right
+            - name: Right/Left
+              value: right-left
+            - name: Top only
+              value: top
+            - name: Bottom only
+              value: bottom
+            - name: Hybrid (focus top)
+              value: hybrid-top
+            - name: Hybrid (focus bottom)
+              value: hybrid-bottom
+            - name: Large screen (focus top)
+              value: largescreen-top
+            - name: Large screen (focus bottom)
+              value: largescreen-bottom
+        - name: SCREEN LAYOUT 2
+          value: melonds_screen_layout2
+          description: Second layout, to switch to with the layout button. Only one layout turns switching off.
+          core_options:
+            top-bottom: {melonds_number_of_screen_layouts: '2', melonds_screen_layout2: top-bottom}
+            bottom-top: {melonds_number_of_screen_layouts: '2', melonds_screen_layout2: bottom-top}
+            left-right: {melonds_number_of_screen_layouts: '2', melonds_screen_layout2: left-right}
+            right-left: {melonds_number_of_screen_layouts: '2', melonds_screen_layout2: right-left}
+            top: {melonds_number_of_screen_layouts: '2', melonds_screen_layout2: top}
+            bottom: {melonds_number_of_screen_layouts: '2', melonds_screen_layout2: bottom}
+            hybrid-top: {melonds_number_of_screen_layouts: '2', melonds_screen_layout2: hybrid-top}
+            hybrid-bottom: {melonds_number_of_screen_layouts: '2', melonds_screen_layout2: hybrid-bottom}
+            largescreen-top: {melonds_number_of_screen_layouts: '2', melonds_screen_layout2: largescreen-top}
+            largescreen-bottom: {melonds_number_of_screen_layouts: '2', melonds_screen_layout2: largescreen-bottom}
+            single: {melonds_number_of_screen_layouts: '1'}
+          choices:
+            - name: Auto (Default)
+              value: auto
+            - name: Only one layout
+              value: single
+            - name: Top/Bottom
+              value: top-bottom
+            - name: Bottom/Top
+              value: bottom-top
+            - name: Left/Right
+              value: left-right
+            - name: Right/Left
+              value: right-left
+            - name: Top only
+              value: top
+            - name: Bottom only
+              value: bottom
+            - name: Hybrid (focus top)
+              value: hybrid-top
+            - name: Hybrid (focus bottom)
+              value: hybrid-bottom
+            - name: Large screen (focus top)
+              value: largescreen-top
+            - name: Large screen (focus bottom)
+              value: largescreen-bottom
+        - name: INTERNAL RESOLUTION
+          value: melondsds_resolution
+          description: Scales the 3D rendering (above 1x it uses OpenGL).
+          core_options:
+            1x: {melonds_render_mode: software, melonds_opengl_resolution: '1'}
+            2x: {melonds_render_mode: opengl, melonds_opengl_resolution: '2'}
+            3x: {melonds_render_mode: opengl, melonds_opengl_resolution: '3'}
+            4x: {melonds_render_mode: opengl, melonds_opengl_resolution: '4'}
+            5x: {melonds_render_mode: opengl, melonds_opengl_resolution: '5'}
+            6x: {melonds_render_mode: opengl, melonds_opengl_resolution: '6'}
+            7x: {melonds_render_mode: opengl, melonds_opengl_resolution: '7'}
+            8x: {melonds_render_mode: opengl, melonds_opengl_resolution: '8'}
+          choices:
+            - name: Auto (Default)
+              value: auto
+            - name: 1x (256x192)
+              value: 1x
+            - name: 2x (512x384)
+              value: 2x
+            - name: 3x (768x576)
+              value: 3x
+            - name: 4x (1024x768)
+              value: 4x
+            - name: 5x (1280x960)
+              value: 5x
+            - name: 6x (1536x1152)
+              value: 6x
+            - name: 7x (1792x1344)
+              value: 7x
+            - name: 8x (2048x1536)
+              value: 8x
+  CONTROLS:
+    submenus:
+      CONTROLLERS:
+        - name: TOUCH SCREEN CONTROL
+          value: melonds_touch_mode
+          description: How the touch screen is controlled.
+          core_option: melonds_touch_mode
+          choices:
+            - name: Mouse and right stick (Default)
+              value: auto
+            - name: Mouse only
+              value: touch
+            - name: Right stick only
+              value: joystick

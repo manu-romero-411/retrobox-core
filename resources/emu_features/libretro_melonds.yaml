@@ -1,0 +1,78 @@
+emulator_name: libretro
+core_name: melonds
+groups:
+  GENERAL:
+    submenus:
+      SCREEN:
+        - name: SCREEN LAYOUT
+          value: melonds_screen_layout
+          description: Where the two screens go.
+          core_option: melonds_screen_layout
+          choices:
+            - name: Auto (Default)
+              value: auto
+            - name: Top/Bottom
+              value: Top/Bottom
+            - name: Bottom/Top
+              value: Bottom/Top
+            - name: Left/Right
+              value: Left/Right
+            - name: Right/Left
+              value: Right/Left
+            - name: Top Only
+              value: Top Only
+            - name: Bottom Only
+              value: Bottom Only
+            - name: Hybrid Top
+              value: Hybrid Top
+            - name: Hybrid Bottom
+              value: Hybrid Bottom
+        - name: INTERNAL RESOLUTION
+          value: melonds_resolution
+          description: Scales the 3D rendering (above 1x it uses OpenGL).
+          core_options:
+            1x: {melonds_opengl_renderer: disabled, melonds_opengl_resolution: 1x native (256x192)}
+            2x: {melonds_opengl_renderer: enabled, melonds_opengl_resolution: 2x native (512x384)}
+            3x: {melonds_opengl_renderer: enabled, melonds_opengl_resolution: 3x native (768x576)}
+            4x: {melonds_opengl_renderer: enabled, melonds_opengl_resolution: 4x native (1024x768)}
+            5x: {melonds_opengl_renderer: enabled, melonds_opengl_resolution: 5x native (1280x960)}
+            6x: {melonds_opengl_renderer: enabled, melonds_opengl_resolution: 6x native (1536x1152)}
+            7x: {melonds_opengl_renderer: enabled, melonds_opengl_resolution: 7x native (1792x1344)}
+            8x: {melonds_opengl_renderer: enabled, melonds_opengl_resolution: 8x native (2048x1536)}
+          choices:
+            - name: Auto (Default)
+              value: auto
+            - name: 1x (256x192)
+              value: 1x
+            - name: 2x (512x384)
+              value: 2x
+            - name: 3x (768x576)
+              value: 3x
+            - name: 4x (1024x768)
+              value: 4x
+            - name: 5x (1280x960)
+              value: 5x
+            - name: 6x (1536x1152)
+              value: 6x
+            - name: 7x (1792x1344)
+              value: 7x
+            - name: 8x (2048x1536)
+              value: 8x
+  CONTROLS:
+    submenus:
+      CONTROLLERS:
+        - name: TOUCH SCREEN CONTROL
+          value: melonds_touch_mode
+          description: How the touch screen is controlled.
+          core_option: melonds_touch_mode
+          choices:
+            - name: Mouse (Default)
+              value: auto
+            - name: Mouse
+              value: Mouse
+            - name: Touch
+              value: Touch
+            - name: Right stick
+              value: Joystick
+            - name: None
+              value: disabled

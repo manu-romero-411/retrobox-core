@@ -25,6 +25,7 @@ from ...settings.unixSettings import UnixSettings
 from ...utils import bezels as bezels_util
 from ...utils import metadata as metadata_utils
 from .libretro_bezel import BezelRequest, write_bezel_config
+from .libretro_core_options import apply_core_features, load_core_features
 from .libretro_ratio import CORE_RATIO_INDEX, RATIO_INDEXES
 from .libretroControllers import clearGunInputsForPlayer, configureGunInputsForPlayer
 from .libretroPaths import (
@@ -40,6 +41,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
     from ...batoceraTypes import DeviceInfoMapping, Resolution
+    from ...config import SystemConfig
     from ...controller import Controller, Controllers
     from ...Emulator import Emulator
     from ...gun import Guns
@@ -322,6 +324,12 @@ def _set_device(
         config[f"input_player{player}_analog_dpad_mode"] = analog_dpad
 
 
+def _chosen(config: SystemConfig, key: str, default: str) -> str:
+    """Return a device option, or the default when it is unset or left on "auto"."""
+    value = config.get(key, default)
+    return default if value in ("", "auto") else value
+
+
 def _apply_simple_core_inputs(
     config: dict[str, object], system: Emulator, controllers: Controllers
 ) -> None:
@@ -337,11 +345,11 @@ def _apply_simple_core_inputs(
         config["input_libretro_device_p2"] = CORE_TO_P2_DEVICE[core]
 
     if core in ("snes9x", "snes9x_next"):
-        config["input_libretro_device_p1"] = system.config.get(f"controller1_{core}", "1")
-        config["input_libretro_device_p2"] = system.config.get(
-            f"controller2_{core}", "257" if len(controllers) > 2 else "1"
+        config["input_libretro_device_p1"] = _chosen(system.config, f"controller1_{core}", "1")
+        config["input_libretro_device_p2"] = _chosen(
+            system.config, f"controller2_{core}", "257" if len(controllers) > 2 else "1"
         )
-        config["input_libretro_device_p3"] = system.config.get("controller3_snes9x", "1")
+        config["input_libretro_device_p3"] = _chosen(system.config, "controller3_snes9x", "1")
 
     if core == "fceumm":
         config["input_libretro_device_p1"] = system.config.get("controller1_nes", "1")
@@ -711,6 +719,7 @@ def create_libretro_config(launch: LibretroLaunch, /) -> dict[str, object]:
     _apply_base_settings(config, system, launch.display.gfx_backend)
     _apply_input_settings(config, launch)
     _apply_gun_settings(config, launch, core_settings)
+    apply_core_features(core_settings, system.config, load_core_features(system.config.core))
     core_settings.write()
 
     drop_bezel = _apply_video_and_misc_settings(config, launch)

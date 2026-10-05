@@ -1,0 +1,78 @@
+emulator_name: libretro
+core_name: desmume
+groups:
+  GENERAL:
+    submenus:
+      SCREEN:
+        - name: SCREEN LAYOUT
+          value: desmume_screens_layout
+          description: Where the two screens go.
+          core_option: desmume_screens_layout
+          choices:
+            - name: Auto (Default)
+              value: auto
+            - name: Top/Bottom
+              value: top/bottom
+            - name: Bottom/Top
+              value: bottom/top
+            - name: Left/Right
+              value: left/right
+            - name: Right/Left
+              value: right/left
+            - name: Top Only
+              value: top only
+            - name: Bottom Only
+              value: bottom only
+            - name: Hybrid/Top
+              value: hybrid/top
+            - name: Hybrid/Bottom
+              value: hybrid/bottom
+        - name: RENDERING RESOLUTION
+          value: desmume_internal_resolution
+          description: Scales the 3D rendering.
+          core_option: desmume_internal_resolution
+          choices:
+            - name: Auto (Default)
+              value: auto
+            - name: 1x (256x192)
+              value: 256x192
+            - name: 2x (512x384)
+              value: 512x384
+            - name: 3x (768x576)
+              value: 768x576
+            - name: 4x (1024x768)
+              value: 1024x768
+            - name: 5x (1280x960)
+              value: 1280x960
+            - name: 6x (1536x1152)
+              value: 1536x1152
+            - name: 7x (1792x1344)
+              value: 1792x1344
+            - name: 8x (2048x1536)
+              value: 2048x1536
+            - name: 9x (2304x1728)
+              value: 2304x1728
+            - name: 10x (2560x1920)
+              value: 2560x1920
+  CONTROLS:
+    submenus:
+      CONTROLLERS:
+        - name: TOUCH SCREEN CONTROL
+          value: desmume_touch_control
+          description: Which devices move the touch screen pointer.
+          core_options:
+            none: {desmume_pointer_mouse: disabled, desmume_pointer_device_r: none}
+            mouse: {desmume_pointer_mouse: enabled, desmume_pointer_device_r: none}
+            stick: {desmume_pointer_mouse: disabled, desmume_pointer_device_r: emulated}
+            both: {desmume_pointer_mouse: enabled, desmume_pointer_device_r: emulated}
+          choices:
+            - name: Auto (Default)
+              value: auto
+            - name: None
+              value: none
+            - name: Mouse
+              value: mouse
+            - name: Right stick
+              value: stick
+            - name: Mouse and right stick
+              value: both

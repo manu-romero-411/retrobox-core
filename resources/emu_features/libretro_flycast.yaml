@@ -1,0 +1,27 @@
+emulator_name: libretro
+core_name: flycast
+groups:
+  GENERAL:
+    submenus:
+      SCREEN:
+        - name: INTERNAL RESOLUTION
+          value: reicast_internal_resolution
+          description: Rendering resolution. Bigger is sharper and slower.
+          core_option: reicast_internal_resolution
+          choices:
+            - name: Auto (Default)
+              value: auto
+            - name: 1x (640x480)
+              value: 640x480
+            - name: 2x (1280x960)
+              value: 1280x960
+            - name: 3x (1920x1440)
+              value: 1920x1440
+            - name: 4x (2560x1920)
+              value: 2560x1920
+            - name: 5x (3200x2400)
+              value: 3200x2400
+            - name: 6x (3840x2880)
+              value: 3840x2880
+            - name: 8x (5120x3840)
+              value: 5120x3840

@@ -41,6 +41,7 @@ _GLOBAL_CONFIG_NAME = "_global_config"
 _GENERAL_GROUP = "GENERAL"  # the features of this group have no "group" attribute
 _NO_SUBMENU = "NONE"
 # keys of the YAML that are not attributes of the element they describe
+_LAUNCHER_KEYS = ("core_option", "core_options")  # read by the launcher only
 _STRUCTURE_KEYS = ("emulator_name", "core_name", "features", "sharedFeatures", "systems", "groups")
 
 
@@ -131,7 +132,7 @@ def _append_feature(
         feature.set("group", str(group))
     if submenu not in (None, _NO_SUBMENU):
         feature.set("submenu", str(submenu))
-    _set_attributes(feature, item, skip=("choices",))
+    _set_attributes(feature, item, skip=("choices", *_LAUNCHER_KEYS))
 
     choices = item.get("choices")
     if choices and isinstance(choices, list):
