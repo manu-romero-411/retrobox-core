@@ -1,11 +1,21 @@
 """Core options of the libretro cores, driven by the feature YAML files.
 
-A feature of ``libretro_<core>.yaml`` controls RetroArch core options when it
-has one of these keys (the generator of es_features.cfg ignores them)::
+Every feature of a ``libretro_<core>.yaml`` file sets a core option, and the
+choice picked in EmulationStation is written as it is, so the choice values must
+be what the core expects. The option is looked up in this order (the generator of
+es_features.cfg ignores these keys)::
 
-    core_option: melonds_screen_layout       # the choice is written as it is
-    core_options:                            # or each choice sets some options
+    core_options:          # the choice sets several options (the value is a free name)
       2x: {melonds_render_mode: opengl, melonds_opengl_resolution: "2"}
+    core_option: name      # the option has this name
+    value: name            # otherwise the option is named like the feature
+
+``value`` is the key EmulationStation stores for the game, so it must be unique
+among the cores of a system: write ``core_option`` only when the two names
+differ (two cores share an option name with other values, or the name has
+characters the settings file cannot keep). An empty ``core_option`` is the same
+as none. ``core_option: false`` says it is not a core option: other launcher
+code reads that feature.
 
 A game that leaves the feature unset (or on ``auto``) gets the core default:
 the options the feature manages are removed from the core options file, so a
@@ -42,21 +52,21 @@ class CoreFeature:
 
     Attributes:
         feature: The name of the feature (its key in the game configuration).
-        option: The option that takes the chosen value as it is, if any.
-        choices: The options each choice sets, when a choice sets several.
+        option: The core option that takes the chosen value as it is.
+        choices: The options each choice sets, when a choice sets several; the
+            ``option`` is not used then.
     """
 
     feature: str
-    option: str | None = None
+    option: str = ""
     choices: Mapping[str, Mapping[str, str]] = field(default_factory=dict)
 
     @property
     def managed_options(self) -> set[str]:
         """Every option this feature may write."""
-        options = {self.option} if self.option else set()
-        for choice_options in self.choices.values():
-            options.update(choice_options)
-        return options
+        if not self.choices:
+            return {self.option}
+        return {option for choice in self.choices.values() for option in choice}
 
     def options_for(self, selected: str | None) -> dict[str, str]:
         """Return the options to write for the selected choice.
@@ -69,7 +79,7 @@ class CoreFeature:
         """
         if selected is None or selected in _DEFAULT_VALUES:
             return {}
-        if self.option:
+        if not self.choices:
             return {self.option: selected}
         return dict(self.choices.get(selected, {}))
 
@@ -82,24 +92,31 @@ def _iter_items(data: Mapping[str, Any]) -> Iterator[Mapping[str, Any]]:
         yield from group.get("items") or []
 
 
+def _feature_of(item: Mapping[str, Any]) -> CoreFeature | None:
+    """Return the core option feature an item describes, or None if it is not one."""
+    name = str(item.get("value") or "").strip()
+    if not name:
+        return None
+
+    if choices := item.get(_CORE_OPTIONS_KEY):
+        return CoreFeature(
+            name,
+            choices={
+                str(choice): {str(key): str(value) for key, value in options.items()}
+                for choice, options in choices.items()
+            },
+        )
+
+    declared = item.get(_CORE_OPTION_KEY)
+    if declared is False:
+        return None
+    return CoreFeature(name, option=str(declared or "").strip() or name)
+
+
 def parse_core_features(data: Mapping[str, Any]) -> list[CoreFeature]:
     """Collect the features of a YAML file that set core options."""
-    features = []
-    for item in _iter_items(data):
-        name = str(item["value"])
-        if option := item.get(_CORE_OPTION_KEY):
-            features.append(CoreFeature(name, option=str(option)))
-        elif choices := item.get(_CORE_OPTIONS_KEY):
-            features.append(
-                CoreFeature(
-                    name,
-                    choices={
-                        str(choice): {str(key): str(value) for key, value in options.items()}
-                        for choice, options in choices.items()
-                    },
-                )
-            )
-    return features
+    features = (_feature_of(item) for item in _iter_items(data))
+    return [feature for feature in features if feature is not None]
 
 
 def _core_yaml_path(core: str, features_dir: Path) -> Path | None:

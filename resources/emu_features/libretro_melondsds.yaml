@@ -7,7 +7,6 @@ groups:
         - name: SCREEN LAYOUT 1
           value: melonds_screen_layout1
           description: First layout, the one the game starts with.
-          core_option: melonds_screen_layout1
           choices:
             - name: Auto (Default)
               value: auto
@@ -106,7 +105,7 @@ groups:
     submenus:
       CONTROLLERS:
         - name: TOUCH SCREEN CONTROL
-          value: melonds_touch_mode
+          value: melondsds_touch_mode
           description: How the touch screen is controlled.
           core_option: melonds_touch_mode
           choices:

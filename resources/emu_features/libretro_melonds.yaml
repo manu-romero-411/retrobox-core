@@ -7,7 +7,6 @@ groups:
         - name: SCREEN LAYOUT
           value: melonds_screen_layout
           description: Where the two screens go.
-          core_option: melonds_screen_layout
           choices:
             - name: Auto (Default)
               value: auto
@@ -64,7 +63,6 @@ groups:
         - name: TOUCH SCREEN CONTROL
           value: melonds_touch_mode
           description: How the touch screen is controlled.
-          core_option: melonds_touch_mode
           choices:
             - name: Mouse (Default)
               value: auto

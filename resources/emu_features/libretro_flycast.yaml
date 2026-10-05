@@ -7,7 +7,6 @@ groups:
         - name: INTERNAL RESOLUTION
           value: reicast_internal_resolution
           description: Rendering resolution. Bigger is sharper and slower.
-          core_option: reicast_internal_resolution
           choices:
             - name: Auto (Default)
               value: auto

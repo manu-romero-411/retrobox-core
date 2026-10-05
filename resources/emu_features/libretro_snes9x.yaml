@@ -7,6 +7,7 @@ groups:
         - name: CONTROLLER TYPE
           value: controller1_snes9x
           description: Device plugged into port 1.
+          core_option: false
           choices:
             - name: Gamepad (Default)
               value: auto
@@ -16,6 +17,7 @@ groups:
         - name: CONTROLLER TYPE
           value: controller2_snes9x
           description: Device plugged into port 2 (light guns are set in LIGHT GUNS).
+          core_option: false
           choices:
             - name: Gamepad (Default)
               value: auto

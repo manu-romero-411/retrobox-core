@@ -7,7 +7,6 @@ groups:
         - name: SCREEN LAYOUT
           value: desmume_screens_layout
           description: Where the two screens go.
-          core_option: desmume_screens_layout
           choices:
             - name: Auto (Default)
               value: auto
@@ -30,7 +29,6 @@ groups:
         - name: RENDERING RESOLUTION
           value: desmume_internal_resolution
           description: Scales the 3D rendering.
-          core_option: desmume_internal_resolution
           choices:
             - name: Auto (Default)
               value: auto
