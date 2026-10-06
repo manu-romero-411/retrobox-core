@@ -19,6 +19,7 @@ from typing import TYPE_CHECKING, BinaryIO
 from runtime.paths import BIOS, ROMS, SAVES, mkdir_if_not_exists
 
 from ...utils import vulkan
+from ...utils.audio_gain import gain_to_percent
 from ...utils.configparser import CaseSensitiveConfigParser
 from .dolphin_paths import (
     _DOLPHIN_CFGDIR,
@@ -153,22 +154,10 @@ def configure_gfx_backend(settings: CaseSensitiveConfigParser, system: Emulator)
     settings.set("Core", "GFXBackend", resolve_gfx_backend(system.config))
 
 
-def gain_to_volume(gain_db: object) -> int:
-    """Convert an audio gain in dB to a Dolphin volume (0 to 100 %).
-
-    Dolphin cannot amplify, so 0 dB is the loudest: a positive gain is the same
-    as 0 dB. An invalid gain is taken as 0 dB.
-    """
-    try:
-        gain = float(gain_db)  # type: ignore[arg-type]
-    except (TypeError, ValueError):
-        return _MAX_VOLUME
-    return max(0, min(_MAX_VOLUME, round(_MAX_VOLUME * 10 ** (gain / 20))))
-
-
 def _configure_audio(settings: CaseSensitiveConfigParser, config: SystemConfig) -> None:
     """Write the volume that corresponds to the audio gain of the game."""
-    volume = gain_to_volume(config.get("dolphin_audio_gain", "0"))
+    # Dolphin cannot amplify, so 0 dB is the loudest: a positive gain is the same as 0 dB
+    volume = gain_to_percent(config.get("dolphin_audio_gain", "0"), _MAX_VOLUME)
     settings.set("DSP", "Volume", str(volume))
 
 

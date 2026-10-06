@@ -10,17 +10,19 @@ sharedFeatures:
 groups:
   GENERAL:
     submenus:
-      RENDERING:
+      SCREEN:
         - name: GRAPHICS API
           value: pcsx2_gfxbackend
-          description: Choose which graphics API library to use.
+          description: Graphics API. Auto uses Vulkan, or the renderer PCSX2 picks when Vulkan is not available on this system.
           choices:
+            - name: Auto (Default)
+              value: auto
+            - name: Vulkan
+              value: 14
             - name: OpenGL
               value: 12
             - name: Software
               value: 13
-            - name: Vulkan
-              value: 14
         - name: RENDERING RESOLUTION
           value: pcsx2_resolution
           description: Enhancement. Increase the rendering resolution. Makes 3D objects clearer.
@@ -55,7 +57,6 @@ groups:
               value: 7
             - name: 8x Native (~2880p/5K)
               value: 8
-      DISPLAY:
         - name: GAME ASPECT RATIO
           value: pcsx2_ratio
           description: Force the game to render in this aspect ratio. Not all systems support all ratios.
@@ -73,7 +74,7 @@ groups:
           description: Adjusts Full Motion Video movies aspect ratio.
           choices:
             - name: Off (Default)
-              value: off
+              value: "Off"
             - name: "Auto Standard (4:3 interlaced / 3:2 progressive)"
               value: "Auto 4:3/3:2"
             - name: "Standard (4:3)"
@@ -88,26 +89,84 @@ groups:
               value: false
             - name: Enabled
               value: true
-    items:
-      - name: SHOW BIOS BOOTLOGO
-        value: pcsx2_fastboot
-        description: "Some games have issues when the animation is shown, others require it."
-        choices:
-          - name: Skip (safer)
-            value: 0
-          - name: Show (specific games)
-            value: 1
-      - name: MULTITAP
-        value: pcsx2_multitap
-        description: Allows up to 8 controllers in supported games.
-        choices:
-          - name: Maximum 2 Players (Default)
-            value: 2
-          - name: Maximum 4 Players
-            value: 4
-          - name: Maximum 8 Players
-            value: 8
-  ADVANCED SETTINGS:
+      AUDIO:
+        - name: AUDIO VOLUME GAIN
+          value: pcsx2_audio_gain
+          description: Set game audio level in dB. PCSX2 can amplify up to +6 dB (twice the volume).
+          choices:
+            - name: '-12'
+              value: "-12.0"
+            - name: '-10'
+              value: "-10.0"
+            - name: '-8'
+              value: "-8.0"
+            - name: '-6'
+              value: "-6.0"
+            - name: '-4'
+              value: "-4.0"
+            - name: '-2'
+              value: "-2.0"
+            - name: 0 (No gain)
+              value: 0
+            - name: '+2'
+              value: '2.0'
+            - name: '+4'
+              value: '4.0'
+            - name: '+6'
+              value: '6.0'
+      EMULATION:
+        - name: SHOW BIOS BOOTLOGO
+          value: pcsx2_fastboot
+          description: "Some games have issues when the animation is shown, others require it."
+          choices:
+            - name: Skip (safer)
+              value: 0
+            - name: Show (specific games)
+              value: 1
+  CONTROLS:
+    submenus:
+      CONTROLLERS:
+        - name: MULTITAP
+          value: pcsx2_multitap
+          description: Allows up to 8 controllers in supported games.
+          choices:
+            - name: Maximum 2 Players (Default)
+              value: 2
+            - name: Maximum 4 Players
+              value: 4
+            - name: Maximum 8 Players
+              value: 8
+      WHEELS:
+        - name: WHEEL MODEL
+          value: pcsx2_wheel_type
+          description: Playstation 2 wheel type
+          choices:
+            - name: Driving Force
+              value: DrivingForce
+            - name: Driving Force Pro
+              value: DrivingForcePro
+            - name: GT Force
+              value: GTForce
+            - name: Virtual
+              value: Virtual
+      LIGHT GUNS:
+        - name: SHOW LIGHT GUN CROSSHAIRS
+          value: pcsx2_crosshairs
+          description: None
+          choices:
+            - name: "Off"
+              value: 0
+            - name: "On"
+              value: 1
+        - name: TIME CRISIS FOG HACK
+          value: pcsx2_crisis_fog
+          description: "Necessary for some guns to replace fog textures as a workaround in Time Crisis - Crisis Zone."
+          choices:
+            - name: "Off"
+              value: false
+            - name: "On"
+              value: true
+  ADVANCED OPTIONS:
     items:
       - name: FORCE BIOS
         value: pcsx2_forcebios
@@ -128,37 +187,3 @@ groups:
             value: "ps2-0210j-20040917.bin"
           - name: PS3 PS2 FIRMWARE
             value: ps3_ps2_emu_bios.bin
-  ADVANCED OPTIONS:
-    items:
-      - name: TIME CRISIS FOG HACK
-        value: pcsx2_crisis_fog
-        description: "Necessary for some guns to replace fog textures as a workaround in Time Crisis - Crisis Zone."
-        choices:
-          - name: Off
-            value: false
-          - name: On
-            value: true
-  WHEELS:
-    items:
-      - name: WHEEL MODEL
-        value: pcsx2_wheel_type
-        description: Playstation 2 wheel type
-        choices:
-          - name: Driving Force
-            value: DrivingForce
-          - name: Driving Force Pro
-            value: DrivingForcePro
-          - name: GT Force
-            value: GTForce
-          - name: Virtual
-            value: Virtual
-  LIGHT GUN:
-    items:
-      - name: SHOW LIGHT GUN CROSSHAIRS
-        value: pcsx2_crosshairs
-        description: None
-        choices:
-          - name: Off
-            value: 0
-          - name: On
-            value: 1

@@ -1,313 +1,267 @@
+"""PCSX2 configuration: PCSX2.ini.
+
+Only the options that must work with this setup (folders, BIOS, input) or that
+map to settings of the menu (graphics API, resolution, aspect ratio, audio
+gain, fast boot, Discord) are written. The rest is left untouched, so the
+choices made from PCSX2's own UI persist.
+
+An option the menu manages is written on every launch, with its default when
+the game does not set it, so a value picked for one game never leaks into the
+next.
+"""
+
+from __future__ import annotations
+
 import logging
-import shutil
 from pathlib import Path
-from typing import Mapping
+from typing import TYPE_CHECKING
 
-from configgen.generators.pcsx2.pcsx2_controllers import _pcsx2_gen_controllers_config
+from runtime.paths import CACHE, CHEATS, LOGS, ROMS, SAVES, SCREENSHOTS, mkdir_if_not_exists
 
-from ...Emulator import Emulator
-from ...batoceraTypes import DeviceInfoMapping, Resolution
-from ...config import SystemConfig
-from ...controller import Controllers
 from ...exceptions import RetroboxException
-from .pcsx2_paths import _PCSX2_BIOS, _PCSX2_CFGDIR, PCSX2_CFG, _PCSX2_TEXTURES
-from ...gun import Guns
-from ...input import Input
 from ...utils import vulkan
+from ...utils.audio_gain import gain_to_percent
 from ...utils.configparser import CaseSensitiveConfigParser
-from runtime.paths import CACHE, CHEATS, LOGS, ROMS, SAVES, SCREENSHOTS, ensure_parents_and_open, mkdir_if_not_exists
+from .pcsx2_controllers import _pcsx2_gen_controllers_config
+from .pcsx2_guns import configure_fog_hack, configure_guns
+from .pcsx2_paths import _PCSX2_BIOS, _PCSX2_CFGDIR, PCSX2_CFG
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping
+
+    from ...batoceraTypes import DeviceInfoMapping, Resolution
+    from ...config import SystemConfig
+    from ...controller import Controllers
+    from ...Emulator import Emulator
+    from ...gun import Guns
 
 _logger = logging.getLogger(__name__)
 
+# values of the Renderer option
+RENDERER_AUTOMATIC = "-1"
+RENDERER_OPENGL = "12"
+RENDERER_SOFTWARE = "13"
+RENDERER_VULKAN = "14"
+_AUTO_VALUES = ("", "auto")
 
-def getGfxRatioFromConfig(config: SystemConfig, gameResolution: Resolution):
-    # 2: 4:3 ; 1: 16:9
-    ratio = config.get("pcsx2_ratio")
-    if ratio == "16:9":
-        return "16:9"
-    if ratio == "full":
-        return "Stretch"
-    return "4:3"
+# values of the AspectRatio option
+_RATIO_AUTO = "Auto 4:3/3:2"
+_RATIO_STRETCH = "Stretch"
+_RATIO_WIDE = "16:9"
+_RATIO_STANDARD = "4:3"
+_FMV_RATIO_OFF = "Off"
+# what the menu stored for "Off" before its value was written as PCSX2 spells it
+_FMV_RATIO_OFF_ALIASES = ("false", "off", "0")
 
-def configureReg(config_directory: Path) -> None:
-    with ensure_parents_and_open(config_directory / "PCSX2-reg.ini", "w") as f:
-        f.write("DocumentsFolderMode=User\n")
-        f.write(f"CustomDocumentsFolder={_PCSX2_CFGDIR}\n")
-        f.write("UseDefaultSettingsFolder=enabled\n")
-        f.write(f"SettingsFolder={config_directory / 'inis'}\n")
-        f.write(f"Install_Dir={_PCSX2_CFGDIR}\n")
-        f.write("RunWizard=0\n")
+_DEFAULT_BIOS = "ps2-0230e-20080220.bin"
+_MAX_VOLUME = 200  # PCSX2 can amplify up to twice the volume (+6 dB)
 
-def configureAudio(config_directory: Path) -> None:
-    configFileName = config_directory / 'inis' / "spu2-x.ini"
-    mkdir_if_not_exists(configFileName.parent)
+_HOTKEYS = (
+    ("ToggleFullscreen", "Keyboard/Alt & Keyboard/Return"),
+    ("CycleAspectRatio", "Keyboard/F6"),
+    ("CycleInterlaceMode", "Keyboard/F5"),
+    ("CycleMipmapMode", "Keyboard/Insert"),
+    ("GSDumpMultiFrame", "Keyboard/Control & Keyboard/Shift & Keyboard/F8"),
+    ("Screenshot", "Keyboard/F8"),
+    ("GSDumpSingleFrame", "Keyboard/Shift & Keyboard/F8"),
+    ("ToggleSoftwareRendering", "Keyboard/F9"),
+    ("ZoomIn", "Keyboard/Control & Keyboard/Plus"),
+    ("ZoomOut", "Keyboard/Control & Keyboard/Minus"),
+    ("InputRecToggleMode", "Keyboard/Shift & Keyboard/R"),
+    ("LoadStateFromSlot", "Keyboard/F3"),
+    ("SaveStateToSlot", "Keyboard/F1"),
+    ("NextSaveStateSlot", "Keyboard/F2"),
+    ("PreviousSaveStateSlot", "Keyboard/Shift & Keyboard/F2"),
+    ("OpenPauseMenu", "Keyboard/Escape"),
+    ("ToggleFrameLimit", "Keyboard/F4"),
+    ("TogglePause", "Keyboard/Space"),
+    ("ToggleSlowMotion", "Keyboard/Shift & Keyboard/Backtab"),
+    ("ToggleTurbo", "Keyboard/Tab"),
+    ("HoldTurbo", "Keyboard/Period"),
+)
 
-    # Keep the custom files
-    if configFileName.exists():
-        return
 
-    f = configFileName.open("w")
-    f.write("[MIXING]\n")
-    f.write("Interpolation=1\n")
-    f.write("Disable_Effects=0\n")
-    f.write("[OUTPUT]\n")
-    f.write("Output_Module=SDLAudio\n")
-    f.write("[PORTAUDIO]\n")
-    f.write("HostApi=ALSA\n")
-    f.write("Device=default\n")
-    f.write("[SDL]\n")
-    f.write("HostApi=alsa\n")
-    f.close()
+def _ensure_sections(settings: CaseSensitiveConfigParser, *sections: str) -> None:
+    """Create the sections that are missing."""
+    for section in sections:
+        if not settings.has_section(section):
+            settings.add_section(section)
 
-def configureINI(
-        system: Emulator,
-        controllers: Controllers,
-        metadata: Mapping[str, str],
-        guns: Guns,
-        wheels: DeviceInfoMapping,
-        playingWithWheel: bool
-    ) -> None:
 
-    mkdir_if_not_exists(PCSX2_CFG.parent)
+def resolve_renderer(config: SystemConfig) -> str:
+    """Return the Renderer value PCSX2 will use.
 
-    if not PCSX2_CFG.is_file():
-        with PCSX2_CFG.open("w") as f:
-            f.write("[UI]\n")
+    Vulkan is the default. If it is not available on the system, PCSX2 picks the
+    renderer itself (Automatic), which gives OpenGL there. OpenGL and Software
+    are used as they are when the game asks for them.
+    """
+    requested = str(config.get("pcsx2_gfxbackend", RENDERER_VULKAN))
+    if requested in _AUTO_VALUES:
+        requested = RENDERER_VULKAN
+    if requested == RENDERER_VULKAN and not vulkan.is_available():
+        _logger.debug("Vulkan driver is not available on the system. Falling back to Automatic")
+        return RENDERER_AUTOMATIC
+    return requested
 
-    pcsx2_iniconfig = CaseSensitiveConfigParser(interpolation=None)
 
-    if PCSX2_CFG.is_file():
-        pcsx2_iniconfig.read(PCSX2_CFG)
+def uses_opengl(config: SystemConfig) -> bool:
+    """Tell whether PCSX2 will render with OpenGL, which MangoHud has to be preloaded for."""
+    return resolve_renderer(config) in (RENDERER_OPENGL, RENDERER_AUTOMATIC)
 
-    ## [Folders]
-    if not pcsx2_iniconfig.has_section("Folders"):
-        pcsx2_iniconfig.add_section("Folders")
 
+def _configure_folders(settings: CaseSensitiveConfigParser) -> None:
+    """Point PCSX2 to the folders of this setup."""
     # remove inconsistent SaveStates casing if it exists
-    pcsx2_iniconfig.remove_option("Folders", "SaveStates")
+    settings.remove_option("Folders", "SaveStates")
 
-    # set the folders we want
-    pcsx2_iniconfig.set("Folders", "Bios",          str(_PCSX2_BIOS))
-    pcsx2_iniconfig.set("Folders", "Snapshots",     str(SCREENSHOTS))
-    pcsx2_iniconfig.set("Folders", "Savestates",    str(SAVES / "ps2" / "sstates"))
-    pcsx2_iniconfig.set("Folders", "MemoryCards",   str(SAVES / "ps2" / "memcards"))
-    pcsx2_iniconfig.set("Folders", "Logs",          str(LOGS))
-    pcsx2_iniconfig.set("Folders", "Cheats",        str(CHEATS / "ps2"))
-    pcsx2_iniconfig.set("Folders", "Cache",         str(CACHE / "ps2"))
-    pcsx2_iniconfig.set("Folders", "Textures",      str(_PCSX2_CFGDIR / "textures"))
-    pcsx2_iniconfig.set("Folders", "InputProfiles", str(_PCSX2_CFGDIR / "inputprofiles"))
-    pcsx2_iniconfig.set("Folders", "Videos",        str(SAVES / "ps2" / "videos"))
-    # create cache folder
+    folders = {
+        "Bios": _PCSX2_BIOS,
+        "Snapshots": SCREENSHOTS,
+        "Savestates": SAVES / "ps2" / "sstates",
+        "MemoryCards": SAVES / "ps2" / "memcards",
+        "Logs": LOGS,
+        "Cheats": CHEATS / "ps2",
+        "Cache": CACHE / "ps2",
+        "Textures": _PCSX2_CFGDIR / "textures",
+        "InputProfiles": _PCSX2_CFGDIR / "inputprofiles",
+        "Videos": SAVES / "ps2" / "videos",
+    }
+    for option, folder in folders.items():
+        settings.set("Folders", option, str(folder))
     mkdir_if_not_exists(CACHE / "ps2")
 
-    ## [Filenames] - BIOS selection
-    if not pcsx2_iniconfig.has_section("Filenames"):
-        pcsx2_iniconfig.add_section("Filenames")
 
-    # abort execution if bios file is not found
-    bios_file = system.config.get("pcsx2_forcebios", "ps2-0230e-20080220.bin")
+def _configure_bios(settings: CaseSensitiveConfigParser, config: SystemConfig) -> None:
+    """Select the BIOS.
+
+    Raises:
+        RetroboxException: If the BIOS file is not found.
+    """
+    bios_file = str(config.get("pcsx2_forcebios", _DEFAULT_BIOS))
     if not Path(f"{_PCSX2_BIOS}/{bios_file}").is_file():
-        raise RetroboxException(
-            f'PS2 BIOS not found: {system.config.get("pcsx2_forcebios")}')
+        raise RetroboxException(f"PS2 BIOS not found: {bios_file}")
+    settings.set("Filenames", "BIOS", bios_file)
 
-    # set bios file
-    pcsx2_iniconfig.set("Filenames", "BIOS", bios_file)
 
-    ## [EmuCore]
-    if not pcsx2_iniconfig.has_section("EmuCore"):
-        pcsx2_iniconfig.add_section("EmuCore")
+def _configure_emu_core(settings: CaseSensitiveConfigParser, config: SystemConfig) -> None:
+    """Write the Discord presence and the fast boot."""
+    settings.set(
+        "EmuCore",
+        "EnableDiscordPresence",
+        config.get_bool("discordrpc", False, return_values=("true", "false")),
+    )
+    # the menu says whether to SHOW the BIOS logo, which is not fast booting
+    settings.set(
+        "EmuCore",
+        "EnableFastBoot",
+        config.get_bool("pcsx2_fastboot", True, return_values=("false", "true")),
+    )
 
-    # Discord rich presence
-    pcsx2_iniconfig.set("EmuCore", "EnableDiscordPresence", system.config.get_bool('discordrpc', False, return_values=("true", "false")))
 
-    # Fastboot
-    pcsx2_iniconfig.set("EmuCore", "EnableFastBoot", system.config.get_bool('pcsx2_fastboot', True, return_values=("false", "true")))
+def _configure_renderer(settings: CaseSensitiveConfigParser, config: SystemConfig) -> None:
+    """Write the renderer and, for Vulkan, the GPU it runs on."""
+    renderer = resolve_renderer(config)
+    settings.set("EmuCore/GS", "Renderer", renderer)
+    if renderer != RENDERER_VULKAN:
+        return
 
-    ## [EmuCore/GS] - renderer, aspect ratio and scaling
-    if not pcsx2_iniconfig.has_section("EmuCore/GS"):
-        pcsx2_iniconfig.add_section("EmuCore/GS")
-
-    # Renderer
-    # Check Vulkan first to be sure
-    if vulkan.is_available():
-        _logger.debug("Vulkan driver is available on the system.")
-        renderer = "-1"
-
-        if gfxbackend := system.config.get("pcsx2_gfxbackend", "14"):
-            if gfxbackend == "12":
-                _logger.debug("User selected OpenGL")
-            if gfxbackend == "13":
-                _logger.debug("User selected Software! Man you must have a fast CPU!")
-            elif gfxbackend == "14":
-                _logger.debug("User selected Vulkan")
-                if vulkan.has_discrete_gpu():
-                    _logger.debug("A discrete GPU is available on the system. We will use that for performance")
-                    discrete_name = vulkan.get_discrete_gpu_name()
-                    if discrete_name:
-                        _logger.debug("Using Discrete GPU Name: %s for PCSX2", discrete_name)
-                        pcsx2_iniconfig.set("EmuCore/GS", "Adapter", discrete_name)
-                    else:
-                        _logger.debug("Couldn't get discrete GPU Name")
-                        pcsx2_iniconfig.set("EmuCore/GS", "Adapter", "(Default)")
-                else:
-                    _logger.debug("Discrete GPU is not available on the system. Using default.")
-                    pcsx2_iniconfig.set("EmuCore/GS", "Adapter", "(Default)")
-            renderer = gfxbackend
+    _logger.debug("Vulkan driver is available on the system.")
+    adapter = "(Default)"
+    if vulkan.has_discrete_gpu():
+        _logger.debug("A discrete GPU is available on the system. We will use that for performance")
+        if discrete_name := vulkan.get_discrete_gpu_name():
+            _logger.debug("Using Discrete GPU Name: %s for PCSX2", discrete_name)
+            adapter = discrete_name
         else:
-            _logger.debug("User selected to Automatic")
-
-        pcsx2_iniconfig.set("EmuCore/GS", "Renderer", renderer)
+            _logger.debug("Couldn't get discrete GPU Name")
     else:
-        _logger.debug("Vulkan driver is not available on the system. Falling back to Automatic")
-        pcsx2_iniconfig.set("EmuCore/GS", "Renderer", "-1")
-
-    # Aspect ratio
-    pcsx2_iniconfig.set("EmuCore/GS", "AspectRatio", system.config.get("pcsx2_ratio", "Auto 4:3/3:2"))
-    pcsx2_iniconfig.set("EmuCore/GS", "FMVAspectRatioSwitch", system.config.get("pcsx2_fmv_ratio", "Auto 4:3/3:2"))
-
-    # Scaling
-    pcsx2_iniconfig.set("EmuCore/GS", "upscale_multiplier", system.config.get("pcsx2_resolution", "1"))
-    pcsx2_iniconfig.set("EmuCore/GS", "IntegerScaling", system.config.get("pcsx2_scaling", "false"))
-
-    ## [InputSources]
-    if not pcsx2_iniconfig.has_section("InputSources"):
-        pcsx2_iniconfig.add_section("InputSources")
-
-    pcsx2_iniconfig.set("InputSources", "Keyboard", "true")
-    pcsx2_iniconfig.set("InputSources", "Mouse", "true")
-    pcsx2_iniconfig.set("InputSources", "SDL", "true")
-
-    ## [Hotkeys]
-    if not pcsx2_iniconfig.has_section("Hotkeys"):
-        pcsx2_iniconfig.add_section("Hotkeys")
-
-    pcsx2_iniconfig.set("Hotkeys", "ToggleFullscreen", "Keyboard/Alt & Keyboard/Return")
-    pcsx2_iniconfig.set("Hotkeys", "CycleAspectRatio", "Keyboard/F6")
-    pcsx2_iniconfig.set("Hotkeys", "CycleInterlaceMode", "Keyboard/F5")
-    pcsx2_iniconfig.set("Hotkeys", "CycleMipmapMode", "Keyboard/Insert")
-    pcsx2_iniconfig.set("Hotkeys", "GSDumpMultiFrame", "Keyboard/Control & Keyboard/Shift & Keyboard/F8")
-    pcsx2_iniconfig.set("Hotkeys", "Screenshot", "Keyboard/F8")
-    pcsx2_iniconfig.set("Hotkeys", "GSDumpSingleFrame", "Keyboard/Shift & Keyboard/F8")
-    pcsx2_iniconfig.set("Hotkeys", "ToggleSoftwareRendering", "Keyboard/F9")
-    pcsx2_iniconfig.set("Hotkeys", "ZoomIn", "Keyboard/Control & Keyboard/Plus")
-    pcsx2_iniconfig.set("Hotkeys", "ZoomOut", "Keyboard/Control & Keyboard/Minus")
-    pcsx2_iniconfig.set("Hotkeys", "InputRecToggleMode", "Keyboard/Shift & Keyboard/R")
-    pcsx2_iniconfig.set("Hotkeys", "LoadStateFromSlot", "Keyboard/F3")
-    pcsx2_iniconfig.set("Hotkeys", "SaveStateToSlot", "Keyboard/F1")
-    pcsx2_iniconfig.set("Hotkeys", "NextSaveStateSlot", "Keyboard/F2")
-    pcsx2_iniconfig.set("Hotkeys", "PreviousSaveStateSlot", "Keyboard/Shift & Keyboard/F2")
-    pcsx2_iniconfig.set("Hotkeys", "OpenPauseMenu", "Keyboard/Escape")
-    pcsx2_iniconfig.set("Hotkeys", "ToggleFrameLimit", "Keyboard/F4")
-    pcsx2_iniconfig.set("Hotkeys", "TogglePause", "Keyboard/Space")
-    pcsx2_iniconfig.set("Hotkeys", "ToggleSlowMotion", "Keyboard/Shift & Keyboard/Backtab")
-    pcsx2_iniconfig.set("Hotkeys", "ToggleTurbo", "Keyboard/Tab")
-    pcsx2_iniconfig.set("Hotkeys", "HoldTurbo", "Keyboard/Period")
-
-    # clean gun sections
-    if pcsx2_iniconfig.has_section("USB1") and pcsx2_iniconfig.has_option("USB1", "Type") and pcsx2_iniconfig.get("USB1", "Type") == "guncon2":
-        pcsx2_iniconfig.remove_option("USB1", "Type")
-    if pcsx2_iniconfig.has_section("USB2") and pcsx2_iniconfig.has_option("USB2", "Type") and pcsx2_iniconfig.get("USB2", "Type") == "guncon2":
-        pcsx2_iniconfig.remove_option("USB2", "Type")
-    if pcsx2_iniconfig.has_section("USB1") and pcsx2_iniconfig.has_option("USB1", "guncon2_Start"):
-        pcsx2_iniconfig.remove_option("USB1", "guncon2_Start")
-    if pcsx2_iniconfig.has_section("USB2") and pcsx2_iniconfig.has_option("USB2", "guncon2_Start"):
-        pcsx2_iniconfig.remove_option("USB2", "guncon2_Start")
-    if pcsx2_iniconfig.has_section("USB1") and pcsx2_iniconfig.has_option("USB1", "guncon2_C"):
-        pcsx2_iniconfig.remove_option("USB1", "guncon2_C")
-    if pcsx2_iniconfig.has_section("USB2") and pcsx2_iniconfig.has_option("USB2", "guncon2_C"):
-        pcsx2_iniconfig.remove_option("USB2", "guncon2_C")
-    if pcsx2_iniconfig.has_section("USB1") and pcsx2_iniconfig.has_option("USB1", "guncon2_numdevice"):
-        pcsx2_iniconfig.remove_option("USB1", "guncon2_numdevice")
-    if pcsx2_iniconfig.has_section("USB2") and pcsx2_iniconfig.has_option("USB2", "guncon2_numdevice"):
-        pcsx2_iniconfig.remove_option("USB2", "guncon2_numdevice")
-
-    # clean wheel sections
-    if pcsx2_iniconfig.has_section("USB1") and pcsx2_iniconfig.has_option("USB1", "Type") and pcsx2_iniconfig.get("USB1", "Type") == "Pad" and pcsx2_iniconfig.has_option("USB1", "Pad_subtype") and pcsx2_iniconfig.get("USB1", "Pad_subtype") == "1":
-        pcsx2_iniconfig.remove_option("USB1", "Type")
-    if pcsx2_iniconfig.has_section("USB2") and pcsx2_iniconfig.has_option("USB2", "Type") and pcsx2_iniconfig.get("USB2", "Type") == "Pad" and pcsx2_iniconfig.has_option("USB2", "Pad_subtype") and pcsx2_iniconfig.get("USB2", "Pad_subtype") == "1":
-        pcsx2_iniconfig.remove_option("USB2", "Type")
-
-    # guns
-    if system.config.use_guns and guns:
-        gun1onport2 = len(guns) == 1 and "gun_gun1port" in metadata and metadata["gun_gun1port"] == "2"
-        pedalsKeys = {1: "c", 2: "v", 3: "b", 4: "n"}
-
-        if guns and not gun1onport2:
-            if not pcsx2_iniconfig.has_section("USB1"):
-                pcsx2_iniconfig.add_section("USB1")
-            pcsx2_iniconfig.set("USB1", "Type", "guncon2")
-            for nc, pad in enumerate(controllers, start=1):
-                if nc == 1 and not gun1onport2 and "start" in pad.inputs:
-                    pcsx2_iniconfig.set("USB1", "guncon2_Start", f"SDL-{pad.index}/Start")
-
-            # find a keyboard key to simulate the action of the player (always like button 2); search in batocera.conf, else default config
-            pedalkey = system.config.get("controllers.pedals1", pedalsKeys[1])
-            pcsx2_iniconfig.set("USB1", "guncon2_C", f"Keyboard/{pedalkey.upper()}")
-
-        if len(guns) >= 2 or gun1onport2:
-            if not pcsx2_iniconfig.has_section("USB2"):
-                pcsx2_iniconfig.add_section("USB2")
-            pcsx2_iniconfig.set("USB2", "Type", "guncon2")
-            for nc, pad in enumerate(controllers, start=1):
-                if (nc == 2 or gun1onport2) and "start" in pad.inputs:
-                    pcsx2_iniconfig.set("USB2", "guncon2_Start", f"SDL-{pad.index}/Start")
-
-            # find a keyboard key to simulate the action of the player (always like button 2); search in batocera.conf, else default config
-            pedalkey = system.config.get("controllers.pedals2", pedalsKeys[2])
-            pcsx2_iniconfig.set("USB2", "guncon2_C", f"Keyboard/{pedalkey.upper()}")
-
-            if gun1onport2:
-                pcsx2_iniconfig.set("USB2", "guncon2_numdevice", "0")
-
-    # gun crosshairs
-    if pcsx2_iniconfig.has_section("USB1"):
-        if system.config.get("pcsx2_crosshairs") == "1":
-            pcsx2_iniconfig.set("USB1", "guncon2_cursor_path", str(_PCSX2_CFGDIR / "crosshairs" / "default.png"))
-            pcsx2_iniconfig.set("USB1", "guncon2_cursor_color", "#0000ff")  # blue
-        else:
-            pcsx2_iniconfig.set("USB1", "guncon2_cursor_path", "")
-    if pcsx2_iniconfig.has_section("USB2"):
-        if system.config.get("pcsx2_crosshairs") == "1":
-            pcsx2_iniconfig.set("USB2", "guncon2_cursor_path", str(_PCSX2_CFGDIR / "crosshairs" / "default.png"))
-            pcsx2_iniconfig.set("USB2", "guncon2_cursor_color", "#ff0000")  # red
-        else:
-            pcsx2_iniconfig.set("USB2", "guncon2_cursor_path", "")
-
-    # hack for the fog bug for guns (Time Crisis - Crisis Zone)
-    fog_files = [
-        _PCSX2_CFGDIR / "textures" / "SCES-52530" / "replacements" / "c321d53987f3986d-eadd4df7c9d76527-00005dd4.png",
-        _PCSX2_CFGDIR / "textures" / "SLUS-20927" / "replacements" / "c321d53987f3986d-eadd4df7c9d76527-00005dd4.png",
-    ]
-    if system.config.get("pcsx2_crisis_fog") == "true":
-        for file_path in fog_files:
-            texture_directory_path = _PCSX2_TEXTURES / file_path.parent.parent.name / "replacements"
-            texture_directory_path.mkdir(parents=True, exist_ok=True)
-            shutil.copyfile(file_path, texture_directory_path / file_path.name)
-        # texture replacements must be enabled for the fog fix to take effect
-        pcsx2_iniconfig.set("EmuCore/GS", "LoadTextureReplacements", "true")
-    else:
-        for file_path in fog_files:
-            texture_directory_path = _PCSX2_TEXTURES / file_path.parent.parent.name / "replacements"
-            target_file_path = texture_directory_path / file_path.name
-            if target_file_path.is_file():
-                target_file_path.unlink()
-
-    ## [Input]
-    pcsx2_iniconfig = _pcsx2_gen_controllers_config(
-        pcsx2_iniconfig, system, controllers, metadata, guns, wheels, playingWithWheel)
-
-    ## [GameList]
-    if not pcsx2_iniconfig.has_section("GameList"):
-        pcsx2_iniconfig.add_section("GameList")
-
-    pcsx2_iniconfig.set("GameList", "RecursivePaths", str(ROMS / "ps2"))
-
-    with PCSX2_CFG.open('w') as configfile:
-        pcsx2_iniconfig.write(configfile)
+        _logger.debug("Discrete GPU is not available on the system. Using default.")
+    settings.set("EmuCore/GS", "Adapter", adapter)
 
 
-def getInGameRatio(self, config, gameResolution, rom):
-    config_ratio = getGfxRatioFromConfig(config, gameResolution)
-    if config_ratio == "16:9" or (config_ratio == "Stretch" and gameResolution["width"] / float(gameResolution["height"]) > ((16.0 / 9.0) - 0.1)):
-        return 16/9
-    return 4/3
+def _configure_display(settings: CaseSensitiveConfigParser, config: SystemConfig) -> None:
+    """Write the aspect ratios, the resolution and the integer scaling."""
+    settings.set("EmuCore/GS", "AspectRatio", str(config.get("pcsx2_ratio", _RATIO_AUTO)))
+    fmv_ratio = str(config.get("pcsx2_fmv_ratio", _FMV_RATIO_OFF))
+    if fmv_ratio.lower() in _FMV_RATIO_OFF_ALIASES:
+        fmv_ratio = _FMV_RATIO_OFF
+    settings.set("EmuCore/GS", "FMVAspectRatioSwitch", fmv_ratio)
+    settings.set("EmuCore/GS", "upscale_multiplier", str(config.get("pcsx2_resolution", "1")))
+    settings.set(
+        "EmuCore/GS",
+        "IntegerScaling",
+        config.get_bool("pcsx2_scaling", False, return_values=("true", "false")),
+    )
+
+
+def _configure_audio(settings: CaseSensitiveConfigParser, config: SystemConfig) -> None:
+    """Write the volume that corresponds to the audio gain of the game."""
+    volume = gain_to_percent(config.get("pcsx2_audio_gain", "0"), _MAX_VOLUME)
+    settings.set("SPU2/Output", "StandardVolume", str(volume))
+
+
+# the arguments are the ones the controllers code needs
+# pylint: disable-next=too-many-arguments,too-many-positional-arguments
+def configure_ini(
+    system: Emulator,
+    controllers: Controllers,
+    metadata: Mapping[str, str],
+    guns: Guns,
+    wheels: DeviceInfoMapping,
+    playing_with_wheel: bool,
+) -> None:
+    """Update PCSX2.ini for the game."""
+    mkdir_if_not_exists(PCSX2_CFG.parent)
+    if not PCSX2_CFG.is_file():
+        PCSX2_CFG.write_text("[UI]\n", encoding="utf-8")
+
+    settings = CaseSensitiveConfigParser(interpolation=None)
+    settings.read(PCSX2_CFG)
+    _ensure_sections(
+        settings, "Folders", "Filenames", "EmuCore", "EmuCore/GS", "SPU2/Output", "InputSources",
+        "Hotkeys",
+    )  # fmt: skip
+
+    config = system.config
+    _configure_folders(settings)
+    _configure_bios(settings, config)
+    _configure_emu_core(settings, config)
+    _configure_renderer(settings, config)
+    _configure_display(settings, config)
+    _configure_audio(settings, config)
+
+    settings.set("InputSources", "Keyboard", "true")
+    settings.set("InputSources", "Mouse", "true")
+    settings.set("InputSources", "SDL", "true")
+
+    for option, value in _HOTKEYS:
+        settings.set("Hotkeys", option, value)
+
+    configure_guns(settings, config, controllers, guns, metadata)
+    configure_fog_hack(settings, config)
+
+    settings = _pcsx2_gen_controllers_config(
+        settings, system, controllers, metadata, guns, wheels, playing_with_wheel
+    )
+
+    _ensure_sections(settings, "GameList")
+    settings.set("GameList", "RecursivePaths", str(ROMS / "ps2"))
+
+    with PCSX2_CFG.open("w", encoding="utf-8") as config_file:
+        settings.write(config_file)
+
+
+def bezel_fits(config: SystemConfig) -> bool:
+    """Tell whether the picture is 4:3, the only shape a bezel is made for."""
+    return str(config.get("pcsx2_ratio", _RATIO_AUTO)) in (_RATIO_AUTO, _RATIO_STANDARD)
+
+
+def get_in_game_ratio(config: SystemConfig, resolution: Resolution) -> float:
+    """Return the aspect ratio of the picture PCSX2 shows."""
+    ratio = str(config.get("pcsx2_ratio", _RATIO_AUTO))
+    if ratio == _RATIO_WIDE:
+        return 16 / 9
+    if ratio == _RATIO_STRETCH:
+        # fills the window, so it depends on the physical screen
+        return resolution["width"] / resolution["height"]
+    return 4 / 3

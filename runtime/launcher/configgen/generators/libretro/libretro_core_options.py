@@ -31,6 +31,7 @@ from typing import TYPE_CHECKING, Any
 
 import yaml
 from runtime.paths import EMU_FEATURES_DIR
+from runtime.utils.features_yaml import load_feature_yaml
 
 if TYPE_CHECKING:
     from collections.abc import Iterator, Mapping
@@ -135,7 +136,7 @@ def load_core_features(core: str, features_dir: Path = EMU_FEATURES_DIR) -> list
         return []
     try:
         with path.open(encoding="utf-8") as file:
-            data = yaml.safe_load(file) or {}
+            data = load_feature_yaml(file) or {}
         return parse_core_features(data)
     except (OSError, yaml.YAMLError, KeyError, AttributeError, TypeError) as err:
         # best effort: a broken feature file must never prevent the game from starting

@@ -20,7 +20,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 from xml.dom import minidom
 
-import yaml
 from yaml.parser import ParserError
 from yaml.scanner import ScannerError
 
@@ -29,6 +28,7 @@ sys.path.append(str(ROOTDIR))
 
 # pylint: disable=wrong-import-position
 from runtime.paths import EMU_FEATURES_DIR, ES_FEATURES_CFG, ES_FEATURES_TMP
+from runtime.utils.features_yaml import load_feature_yaml
 
 # pylint: enable=wrong-import-position
 
@@ -253,7 +253,7 @@ def _load_sources(yaml_dir: Path) -> _Sources:
     for yaml_file in sorted(yaml_dir.glob("*.yaml")):
         try:
             with yaml_file.open(encoding="utf-8") as file:
-                data = yaml.safe_load(file)
+                data = load_feature_yaml(file)
         except (ScannerError, ParserError) as err:
             _logger.error("Error parsing YAML file %s: %s", yaml_file.name, err)
             continue

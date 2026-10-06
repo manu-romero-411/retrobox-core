@@ -2,7 +2,6 @@ emulator_name: pcsx2
 sharedFeatures:
   - power_profile
   - bezel
-  - bezel_stretch
   - hud
   - hud_corner
   - hud_custom
