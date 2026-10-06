@@ -2,7 +2,6 @@ emulator_name: dolphin
 sharedFeatures:
   - power_profile
   - bezel
-  - bezel_stretch
   - hud
   - hud_corner
   - hud_custom

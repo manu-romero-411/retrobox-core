@@ -6,7 +6,7 @@ vocabulary:
     CONTROLS: [CONTROLLERS, PORT 1, PORT 2, PORT 3, PORT 4, LIGHT GUNS, WHEELS]
     ADVANCED OPTIONS: [PERFORMANCE]
   # only these emulators are checked: add one when its YAML follows the vocabulary
-  enforce: [libretro]
+  enforce: [libretro, dolphin]
 groups:
   GENERAL:
     submenus:

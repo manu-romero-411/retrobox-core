@@ -8,7 +8,7 @@ sharedFeatures:
 groups:
   GENERAL:
     submenus:
-      DISPLAY:
+      SCREEN:
         - name: GAME ASPECT RATIO
           value: dolphin_aspect_ratio
           description: "The final output image, unrelated to the Wii's emulated NAND setting."
@@ -21,15 +21,16 @@ groups:
               value: 2
             - name: Stretch to window
               value: 3
-      RENDERING:
         - name: GRAPHICS API
           value: gfxbackend
-          description: Choose which graphics API library to use.
+          description: Graphics API. Auto uses Vulkan, or OpenGL when Vulkan is not available on this system.
           choices:
-            - name: OpenGL
-              value: OGL
+            - name: Auto (Default)
+              value: auto
             - name: Vulkan
               value: Vulkan
+            - name: OpenGL
+              value: OGL
         - name: RENDERING RESOLUTION
           value: internal_resolution
           description: Enhancement. Increase the rendering resolution. Makes 3D objects clearer.
@@ -50,9 +51,37 @@ groups:
               value: 7
             - name: 8x 5K (5120x4224)
               value: 8
+      AUDIO:
+        - name: AUDIO VOLUME GAIN
+          value: dolphin_audio_gain
+          description: Set game audio level in dB. Dolphin cannot amplify, so 0 is the loudest.
+          choices:
+            - name: 0 (No gain)
+              value: 0
+            - name: '-2'
+              value: '-2.0'
+            - name: '-4'
+              value: '-4.0'
+            - name: '-6'
+              value: '-6.0'
+            - name: '-8'
+              value: '-8.0'
+            - name: '-10'
+              value: '-10.0'
+            - name: '-12'
+              value: '-12.0'
   CONTROLS:
     submenus:
-      GAMECUBE CONTROLLER 1:
+      CONTROLLERS:
+        - name: USE PAD PROFILES
+          value: use_pad_profiles
+          description: Search for custom configured joystick profiles.
+          preset: switchauto
+        - name: RUMBLE
+          value: rumble
+          description: Enable controller rumble capabilities if supported by the controller.
+          preset: switchauto
+      PORT 1:
         - name: GAMECUBE PORT 1 TYPE
           value: dolphin_port_1_type
           description: Change what's plugged into the virtual GameCube ports.
@@ -105,7 +134,7 @@ groups:
               value: normal
             - name: Larger
               value: larger
-      GAMECUBE CONTROLLER 2:
+      PORT 2:
         - name: GAMECUBE PORT 2 TYPE
           value: dolphin_port_2_type
           description: Change what's plugged into the virtual GameCube ports.
@@ -158,7 +187,7 @@ groups:
               value: normal
             - name: Larger
               value: larger
-      GAMECUBE CONTROLLER 3:
+      PORT 3:
         - name: GAMECUBE PORT 3 TYPE
           value: dolphin_port_3_type
           description: Change what's plugged into the virtual GameCube ports.
@@ -211,7 +240,7 @@ groups:
               value: normal
             - name: Larger
               value: larger
-      GAMECUBE CONTROLLER 4:
+      PORT 4:
         - name: GAMECUBE PORT 4 TYPE
           value: dolphin_port_4_type
           description: Change what's plugged into the virtual GameCube ports.
@@ -264,30 +293,21 @@ groups:
               value: normal
             - name: Larger
               value: larger
-    items:
-      - name: USE PAD PROFILES
-        value: use_pad_profiles
-        description: Search for custom configured joystick profiles.
-        preset: switchauto
-      - name: RUMBLE
-        value: rumble
-        description: Enable controller rumble capabilities if supported by the controller.
-        preset: switchauto
 systems:
   - name: gamecube
     groups:
       GENERAL:
         submenus:
-          DISPLAY:
+          SCREEN:
             - name: WIDESCREEN HACK (GLITCHY)
               value: widescreen_hack
-              description: Enhancement. Only works with a 16/9 ratio and bezels disabled.
+              description: Enhancement. Only works with a 16/9 ratio, and no bezel is drawn with it.
               preset: switchauto
   - name: wii
     groups:
       GENERAL:
         submenus:
-          DISPLAY:
+          SCREEN:
             - name: WII TV MODE
               value: tv_mode
               description: Wii NAND's aspect ratio setting. Most games support both ratios natively.
@@ -298,7 +318,7 @@ systems:
                   value: 1
       CONTROLS:
         submenus:
-          WII CONTROLLERS:
+          CONTROLLERS:
             - name: EMULATE WIIMOTE
               value: emulatedwiimotes
               description: Map your controller to an emulated Wiimote.
