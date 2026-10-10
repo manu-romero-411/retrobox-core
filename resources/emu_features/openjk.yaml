@@ -10,7 +10,7 @@ sharedFeatures:
 groups:
   GENERAL:
     submenus:
-      VIDEO:
+      SCREEN:
         - name: COLOUR DEPTH
           value: openjk_colour
           description: Choose the emulated colour depth.

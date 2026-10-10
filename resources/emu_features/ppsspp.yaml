@@ -5,18 +5,27 @@ sharedFeatures:
   - videomode
   - rewind
   - discordrpc
+  - hud
+  - hud_corner
+  - hud_custom
+  - bezel.tattoo
+  - bezel.tattoo_corner
+  - bezel.tattoo_file
+  - bezel.resize_tattoo
 groups:
   GENERAL:
     submenus:
-      RENDERING:
+      SCREEN:
         - name: GRAPHICS API
           value: gfxbackend
-          description: Choose which graphics API library to use.
+          description: Graphics API. Auto uses Vulkan, or OpenGL when Vulkan is not available on this system.
           choices:
-            - name: OpenGL
-              value: 0 (OPENGL)
+            - name: Auto (Default)
+              value: auto
             - name: Vulkan
               value: 3 (VULKAN)
+            - name: OpenGL
+              value: 0 (OPENGL)
         - name: RENDERING RESOLUTION
           value: internal_resolution
           description: Enhancement. Increase the rendering resolution. Makes 3D objects clearer.
@@ -49,7 +58,103 @@ groups:
               value: 0
             - name: Enable
               value: 1
-      FRAMESKIP CONTROL:
+        - name: TEXTURE UPSCALING TYPE
+          value: texture_scaling_type
+          description: "xBRZ - a sharpening upscale algorithm, Bicubic - a smooth look, Hybrid - uses bicubic for smooth areas."
+          choices:
+            - name: xBRZ (Default)
+              value: 0
+            - name: Hybrid
+              value: 1
+            - name: Bicubic
+              value: 2
+            - name: Hybrid + Bicubic
+              value: 3
+        - name: TEXTURE UPSCALING LEVEL
+          value: texture_scaling_level
+          description: There is generally no point in going beyond 4x texture scaling unless you are running at very high resolutions.
+          choices:
+            - name: Off (Default)
+              value: 1
+            - name: 2x
+              value: 2
+            - name: 3x
+              value: 3
+            - name: 4x
+              value: 4
+            - name: 5x
+              value: 5
+        - name: TEXTURE DEPOSTERIZE
+          value: texture_deposterize
+          description: Fix texture banding when upscaling.
+          choices:
+            - name: Off
+              value: false
+            - name: On
+              value: true
+        - name: ANISOTROPIC FILTERING
+          value: anisotropic_filtering
+          description: Improves clarity of distant textures.
+          choices:
+            - name: Off
+              value: 0
+            - name: 2x
+              value: 1
+            - name: 4x
+              value: 2
+            - name: 8x
+              value: 3
+            - name: 16x
+              value: 4
+        - name: TEXTURE FILTERING
+          value: texture_filtering
+          description: Smooth textures on 3D objects.
+          choices:
+            - name: Nearest
+              value: 2
+            - name: Linear
+              value: 3
+            - name: Auto Max Quality
+              value: 4
+        - name: SMART 2D TEXTURE FILTERING
+          value: smart_2d
+          description: "When enabled and upscaling, textures look better than linear filtering for a lot of 2D art."
+          choices:
+            - name: Off
+              value: false
+            - name: On
+              value: true
+      AUDIO:
+        - name: AUDIO VOLUME GAIN
+          value: ppsspp_audio_gain
+          description: Set game audio level in dB. PPSSPP cannot amplify, so 0 is the loudest.
+          choices:
+            - name: '-12'
+              value: "-12.0"
+            - name: '-10'
+              value: "-10.0"
+            - name: '-8'
+              value: "-8.0"
+            - name: '-6'
+              value: "-6.0"
+            - name: '-4'
+              value: "-4.0"
+            - name: '-2'
+              value: "-2.0"
+            - name: 0 (No gain)
+              value: 0
+      EMULATION:
+        - name: GAME CHEATS
+          value: enable_cheats
+          description: Enables Action Replay cheats.
+          choices:
+            - name: Off
+              value: false
+            - name: On
+              value: true
+  ADVANCED OPTIONS:
+    submenus:
+      PERFORMANCE:
         - name: FRAME SKIPPING
           value: frameskip
           description: "Skip frames to improve performance, at the cost of choppy motion."
@@ -80,15 +185,14 @@ groups:
               value: 0
             - name: On
               value: 1
-      SPEED HACKS:
         - name: SKIP BUFFER EFFECTS
           value: skip_buffer_effects
           description: "Skip buffer effects faster but may not render some games. Disables resolution, MSAA, auto frameskip and duplicate frames to 60Hz."
           choices:
             - name: Buffered rendering
-              value: False
+              value: false
             - name: Skip buffer effects
-              value: True
+              value: true
         - name: DISABLE CULLING
           value: disable_culling
           description: "The PSP will cull triangles that are outside a 4096x4096 clipping box, and also triangles crossing the Z=1 plane if clipping is enabled."
@@ -125,7 +229,6 @@ groups:
               value: 1
             - name: High
               value: 2
-      PERFORMANCE:
         - name: RENDER DUPLICATE FRAMES TO 60 HZ
           value: duplicate_frames
           description: "If a game runs at 30hz, PPSSPP wtill push 60 frames to the monitor."
@@ -160,81 +263,3 @@ groups:
               value: 0
             - name: On
               value: 1
-      TEXTURE SCALING:
-        - name: TEXTURE UPSCALING TYPE
-          value: texture_scaling_type
-          description: "xBRZ - a sharpening upscale algorithm, Bicubic - a smooth look, Hybrid - uses bicubic for smooth areas."
-          choices:
-            - name: xBRZ (Default)
-              value: 0
-            - name: Hybrid
-              value: 1
-            - name: Bicubic
-              value: 2
-            - name: Hybrid + Bicubic
-              value: 3
-        - name: TEXTURE UPSCALING LEVEL
-          value: texture_scaling_level
-          description: There is generally no point in going beyond 4x texture scaling unless you are running at very high resolutions.
-          choices:
-            - name: Off (Default)
-              value: 1
-            - name: 2x
-              value: 2
-            - name: 3x
-              value: 3
-            - name: 4x
-              value: 4
-            - name: 5x
-              value: 5
-        - name: TEXTURE DEPOSTERIZE
-          value: texture_deposterize
-          description: Fix texture banding when upscaling.
-          choices:
-            - name: Off
-              value: False
-            - name: On
-              value: True
-      TEXTURE FILTERING:
-        - name: ANISOTROPIC FILTERING
-          value: anisotropic_filtering
-          description: Improves clarity of distant textures.
-          choices:
-            - name: Off
-              value: 0
-            - name: 2x
-              value: 1
-            - name: 4x
-              value: 2
-            - name: 8x
-              value: 3
-            - name: 16x
-              value: 4
-        - name: TEXTURE FILTERING
-          value: texture_filtering
-          description: Smooth textures on 3D objects.
-          choices:
-            - name: Nearest
-              value: 2
-            - name: Linear
-              value: 3
-            - name: Auto Max Quality
-              value: 4
-        - name: SMART 2D TEXTURE FILTERING
-          value: smart_2d
-          description: "When enabled and upscaling, textures look better than linear filtering for a lot of 2D art."
-          choices:
-            - name: Off
-              value: False
-            - name: On
-              value: True
-  ADVANCED OPTIONS:
-    items:
-      - name: GAME CHEATS
-        value: enable_cheats
-        description: Enables Action Replay cheats.
-        choices:
-          - name: Off
-            value: False
-          - name: On
-            value: True

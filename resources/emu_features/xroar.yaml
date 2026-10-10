@@ -70,17 +70,17 @@ groups:
         description: ""
         choices:
           - name: Enabled
-            value: True
+            value: true
           - name: Disabled
-            value: False
+            value: false
       - name: VSYNC
         value: use_vsync
         description: ""
         choices:
           - name: Enabled
-            value: True
+            value: true
           - name: Disabled
-            value: False
+            value: false
       - name: TV Type
         value: xroar_tv_type
         description: Select the TV standard for video output.
@@ -91,21 +91,24 @@ groups:
             value: ntsc
           - name: "PAL-M"
             value: "pal-m"
-      - name: TV Input
-        value: xroar_tv_input
-        description: Select the video signal type.
-        choices:
-          - name: Composite (Colour)
-            value: svideo
-          - name: Composite (Mono)
-            value: mono
-          - name: RGB
-            value: rgb
-      - name: Keyboard Translation
-        value: xroar_kbd_translate
-        description: Enable host keyboard translation to map typed characters to the emulated machine.
-        choices:
-          - name: Enabled
-            value: True
-          - name: Disabled
-            value: False
+  CONTROLS:
+    submenus:
+      CONTROLLERS:
+        - name: TV Input
+          value: xroar_tv_input
+          description: Select the video signal type.
+          choices:
+            - name: Composite (Colour)
+              value: svideo
+            - name: Composite (Mono)
+              value: mono
+            - name: RGB
+              value: rgb
+        - name: Keyboard Translation
+          value: xroar_kbd_translate
+          description: Enable host keyboard translation to map typed characters to the emulated machine.
+          choices:
+            - name: Enabled
+              value: true
+            - name: Disabled
+              value: false

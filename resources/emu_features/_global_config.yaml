@@ -3,10 +3,11 @@ vocabulary:
   groups: [GENERAL, CONTROLS, ADVANCED OPTIONS]
   submenus:
     GENERAL: [SCREEN, DECORATIONS, SHADERS, AUDIO, EMULATION, AI GAME TRANSLATION]
-    CONTROLS: [CONTROLLERS, PORT 1, PORT 2, PORT 3, PORT 4, LIGHT GUNS, WHEELS]
+    CONTROLS: [CONTROLLERS, PORT 1, PORT 2, PORT 3, PORT 4, PORT 5, PORT 6, PORT 7, PORT 8, LIGHT GUNS, WHEELS]
     ADVANCED OPTIONS: [PERFORMANCE]
-  # only these emulators are checked: add one when its YAML follows the vocabulary
-  enforce: [libretro, dolphin, pcsx2]
+  # every emulator is checked, but the exempt ones (a name outside the vocabulary logs a warning)
+  enforce: all
+  exempt: [mupen64plus]
 groups:
   GENERAL:
     submenus:

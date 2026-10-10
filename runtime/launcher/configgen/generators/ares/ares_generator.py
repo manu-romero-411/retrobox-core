@@ -1,50 +1,80 @@
+"""Generator of the Ares command (a multi-system accuracy emulator)."""
+
 from __future__ import annotations
 
-import logging
+from typing import TYPE_CHECKING
 
-from configgen.exceptions import RetroboxException
 from runtime.launcher.configgen import Command
 from runtime.paths import SCREENSHOTS, configure_emulator, mkdir_if_not_exists
-from ..Generator import Generator
-from .ares_config import _ares_resolve_shader, write_ares_config
-from .ares_paths import _ARES_LIBDIR, _ARES_SHADERS_DIR, _ARES_SHARE, ARES_BIN, _ARES_CFGDIR, _ARES_SAVES, _ARES_XDG
 
-_logger = logging.getLogger(__name__)
+from ..Generator import Generator
+from . import ares_config
+from .ares_paths import (
+    _ARES_CFGDIR,
+    _ARES_LIBDIR,
+    _ARES_SAVES,
+    _ARES_SHADERS_DIR,
+    _ARES_SHARE,
+    _ARES_XDG,
+    ARES_BIN,
+)
+
+if TYPE_CHECKING:
+    from ...config import SystemConfig
 
 
 class AresGenerator(Generator):
-    def usesOpenGLDirectPreload(self, config) -> bool:
-        return True
+    """Generates the Ares command and its settings."""
 
-    def generate(self, system, rom, playersControllers, metadata, guns, wheels, gameResolution):
+    # the method names are fixed by the Generator interface
+    # pylint: disable=invalid-name
+
+    def usesOpenGLDirectPreload(self, config) -> bool:
+        """MangoHud is preloaded when Ares draws with OpenGL (its only driver on Linux)."""
+        return "OpenGL" in ares_config.video_driver(config)
+
+    def allows_bezel(self, config: SystemConfig) -> bool:
+        """A picture stretched to the window, or widened to 16:9, leaves no room for a bezel."""
+        return (
+            ares_config.output_mode(config) != ares_config.OUTPUT_STRETCH
+            and ares_config.aspect_correction(config) != ares_config.ASPECT_ANAMORPHIC
+        )
+
+    # the signature is fixed by the Generator interface
+    # pylint: disable-next=too-many-arguments,too-many-positional-arguments
+    def generate(
+        self,
+        system,
+        rom,
+        playersControllers,  # name fixed by the Generator interface
+        metadata,
+        guns,
+        wheels,
+        gameResolution,  # name fixed by the Generator interface
+    ):
+        """Write settings.bml and return the command that starts Ares."""
         self.check_if_exists(ARES_BIN, system.config.emulator)
         self.check_if_exists(_ARES_SHARE, system.config.emulator)
 
-        # Asegurar que la estructura de directorios de configuración y guardado existe
+        # make sure the config and save folders exist
         mkdir_if_not_exists(_ARES_CFGDIR)
         mkdir_if_not_exists(_ARES_SAVES / system.name)
         mkdir_if_not_exists(SCREENSHOTS)
 
-        # Generar o actualizar el fichero settings.bml antes de arrancar
-        write_ares_config(system, playersControllers)
-
+        # write settings.bml before starting
+        ares_config.write_ares_config(system, playersControllers)
 
         command_array = [str(ARES_BIN)]
-        args_array = []
+        args_array: list[str] = []
 
-        # shader must be loaded from cmdline.
-        shader_cfg = system.renderconfig.get('shader')
-        shader_final = _ares_resolve_shader(shader_cfg, _ARES_SHADERS_DIR)
-
-        if shader_final != "None":
+        # the shader must be loaded from the command line
+        shader_cfg = system.renderconfig.get("shader")
+        if ares_config.resolve_shader(shader_cfg, _ARES_SHADERS_DIR) != "None":
             args_array = ["--shader", shader_cfg]
 
-        # kiosk mode disables the bottom bar.
-        # pseudofullscreen allows for better window management on kde.
-        args_array.extend([
-            "--kiosk",
-            "--pseudofullscreen",  
-        ])
+        # kiosk mode disables the bottom bar;
+        # pseudofullscreen allows for better window management on KDE
+        args_array.extend(["--kiosk", "--pseudofullscreen"])
 
         if not configure_emulator(rom):
             args_array.append(str(rom))
@@ -55,5 +85,4 @@ class AresGenerator(Generator):
             "XDG_CONFIG_HOME": str(_ARES_XDG),
             "LD_LIBRARY_PATH": str(_ARES_LIBDIR),
         }
-
         return Command.Command(array=command_array, env=env)

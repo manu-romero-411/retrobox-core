@@ -1,0 +1,20 @@
+emulator_name: libretro
+core_name: parallel_n64
+groups:
+  GENERAL:
+    submenus:
+      SCREEN:
+        - name: UPSCALING FACTOR
+          value: parallel-n64-upscaling
+          description: Renders at a multiple of the N64 resolution. Used by the ParaLLEl-RDP and Angrylion plugins; the core needs a restart.
+          choices:
+            - name: Auto (Default)
+              value: auto
+            - name: 1x
+              value: 1x
+            - name: 2x
+              value: 2x
+            - name: 4x
+              value: 4x
+            - name: 8x
+              value: 8x

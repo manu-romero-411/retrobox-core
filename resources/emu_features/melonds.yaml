@@ -8,15 +8,224 @@ sharedFeatures:
 groups:
   GENERAL:
     submenus:
-      FIRMWARE SETTINGS:
+      SCREEN:
+        - name: GRAPHICS API
+          value: melonds_renderer
+          description: Choose which graphics API library to use.
+          choices:
+            - name: Software
+              value: 0
+            - name: OpenGL (Classic)
+              value: 1
+            - name: OpenGL (Compute shader)
+              value: 2
+        - name: VSYNC
+          value: use_vsync
+          description: Fix screen tearing. CPU heavy.
+          choices:
+            - name: Off
+              value: false
+            - name: On
+              value: true
+        - name: RENDERING RESOLUTION
+          value: melonds_resolution
+          description: Enhancement. Increase the rendering resolution. Makes 3D objects clearer.
+          choices:
+            - name: 1x (256x192)
+              value: 1
+            - name: 2x (512x384)
+              value: 2
+            - name: 3x (768x576)
+              value: 3
+            - name: 4x (1024x768)
+              value: 4
+            - name: 5x (1280x960)
+              value: 5
+            - name: 6x (1536x1152)
+              value: 6
+            - name: 7x (1792x1344)
+              value: 7
+            - name: 8x (2048x1536)
+              value: 8
+            - name: 9x (2304x1728)
+              value: 9
+            - name: 10x (2560x1920)
+              value: 10
+            - name: 11x (2816x2112)
+              value: 11
+            - name: 12x (3072x2304)
+              value: 12
+            - name: 13x (3328x2496)
+              value: 13
+            - name: 14x (3584x2688)
+              value: 14
+            - name: 15x (3840x2880)
+              value: 15
+            - name: 16x (4096x3072)
+              value: 16
+        - name: SCREEN ROTATION
+          value: melonds_rotation
+          description: "Rotates the screens, to simulate holding the DS sideways."
+          choices:
+            - name: 0 degrees
+              value: 0
+            - name: 90 degrees
+              value: 1
+            - name: 180 degrees
+              value: 2
+            - name: 270 degrees
+              value: 3
+        - name: SCREEN SWAP
+          value: melonds_screenswap
+          description: Swap the position of the dual displays.
+          choices:
+            - name: Off
+              value: false
+            - name: On
+              value: true
+        - name: SCREEN SIZE
+          value: melonds_screensize
+          description: Sets the window size to an integer size.
+          choices:
+            - name: 1x
+              value: 0
+            - name: 2x
+              value: 1
+            - name: 3x
+              value: 2
+            - name: 4x
+              value: 3
+        - name: SCREEN LAYOUT
+          value: melonds_layout
+          description: Adjusts the positions of the screens.
+          choices:
+            - name: Original screen positions
+              value: 0
+            - name: Always enforce vertical
+              value: 1
+            - name: Always enforce horizontal
+              value: 2
+            - name: Hybrid
+              value: 3
+        - name: SCREEN SIZING
+          value: melonds_screensizing
+          description: How the window space is distributed between the screens.
+          choices:
+            - name: Even
+              value: 0
+            - name: Emphasize top
+              value: 1
+            - name: Emphasize bottom
+              value: 2
+            - name: Automatic
+              value: 3
+            - name: Top only
+              value: 4
+            - name: Bottom only
+              value: 5
+        - name: INTEGER SCALING
+          value: melonds_scaling
+          description: ""
+          choices:
+            - name: Off
+              value: false
+            - name: On
+              value: true
+        - name: DUAL SCREEN
+          value: melonds_dual_screen
+          description: Enable MelonDS to display over two screens. Some related screen options will be ignored.
+          choices:
+            - name: Off
+              value: false
+            - name: On
+              value: true
+        - name: "SCREEN GAP (ONLY ON DUAL-SCREEN)"
+          value: melonds_screen_gap
+          description: Enable MelonDS to display over two screens. Some related screen options will be ignored.
+          choices:
+            - name: 0 (Default)
+              value: 0
+            - name: 1
+              value: 1
+            - name: 2
+              value: 2
+            - name: 3
+              value: 3
+            - name: 4
+              value: 4
+            - name: 5
+              value: 5
+            - name: 6
+              value: 6
+            - name: 7
+              value: 7
+            - name: 8
+              value: 8
+            - name: 9
+              value: 9
+            - name: 10
+              value: 10
+            - name: 11
+              value: 11
+            - name: 12
+              value: 12
+            - name: 13
+              value: 13
+            - name: 14
+              value: 14
+            - name: 15
+              value: 15
+            - name: 16
+              value: 16
+            - name: 17
+              value: 17
+            - name: 18
+              value: 18
+            - name: 19
+              value: 19
+            - name: 20
+              value: 20
+            - name: 21
+              value: 21
+            - name: 22
+              value: 22
+            - name: 23
+              value: 23
+            - name: 24
+              value: 24
+            - name: 25
+              value: 25
+            - name: 26
+              value: 26
+            - name: 27
+              value: 27
+            - name: 28
+              value: 28
+            - name: 29
+              value: 29
+            - name: 30
+              value: 30
+            - name: 31
+              value: 31
+            - name: 32
+              value: 32
+            - name: 33
+              value: 33
+            - name: 34
+              value: 34
+            - name: 35
+              value: 35
+            - name: 36
+              value: 36
+      EMULATION:
         - name: USE FIRMWARE SETTINGS
           value: melonds_use_fw_settings
           description: Use language and username from the NDS Firmware.
           choices:
             - name: on (Default)
-              value: False
+              value: false
             - name: off
-              value: True
+              value: true
         - name: LANGUAGE
           value: melonds_language
           description: Select language will be used if 'Use Firmware Settings' is disabled or if firmware file was not found.
@@ -131,239 +340,31 @@ groups:
               value: 31
             - name: Don't Override
               value: 1
+        - name: ENABLE CHEATS
+          value: melonds_cheats
+          description: ""
+          choices:
+            - name: Off (Default)
+              value: false
+            - name: On
+              value: true
+        - name: CONSOLE TYPE
+          value: melonds_console
+          description: ""
+          choices:
+            - name: DS
+              value: 0
+            - name: DSi (experiemental)
+              value: 1
     items:
-      - name: GRAPHICS API
-        value: melonds_renderer
-        description: Choose which graphics API library to use.
-        choices:
-          - name: Software
-            value: 0
-          - name: OpenGL (Classic)
-            value: 1
-          - name: OpenGL (Compute shader)
-            value: 2
-      - name: VSYNC
-        value: use_vsync
-        description: Fix screen tearing. CPU heavy.
-        choices:
-          - name: Off
-            value: False
-          - name: On
-            value: True
-      - name: RENDERING RESOLUTION
-        value: melonds_resolution
-        description: Enhancement. Increase the rendering resolution. Makes 3D objects clearer.
-        choices:
-          - name: 1x (256x192)
-            value: 1
-          - name: 2x (512x384)
-            value: 2
-          - name: 3x (768x576)
-            value: 3
-          - name: 4x (1024x768)
-            value: 4
-          - name: 5x (1280x960)
-            value: 5
-          - name: 6x (1536x1152)
-            value: 6
-          - name: 7x (1792x1344)
-            value: 7
-          - name: 8x (2048x1536)
-            value: 8
-          - name: 9x (2304x1728)
-            value: 9
-          - name: 10x (2560x1920)
-            value: 10
-          - name: 11x (2816x2112)
-            value: 11
-          - name: 12x (3072x2304)
-            value: 12
-          - name: 13x (3328x2496)
-            value: 13
-          - name: 14x (3584x2688)
-            value: 14
-          - name: 15x (3840x2880)
-            value: 15
-          - name: 16x (4096x3072)
-            value: 16
-      - name: SCREEN ROTATION
-        value: melonds_rotation
-        description: "Rotates the screens, to simulate holding the DS sideways."
-        choices:
-          - name: 0 degrees
-            value: 0
-          - name: 90 degrees
-            value: 1
-          - name: 180 degrees
-            value: 2
-          - name: 270 degrees
-            value: 3
-      - name: SCREEN SWAP
-        value: melonds_screenswap
-        description: Swap the position of the dual displays.
-        choices:
-          - name: Off
-            value: False
-          - name: On
-            value: True
-      - name: SCREEN SIZE
-        value: melonds_screensize
-        description: Sets the window size to an integer size.
-        choices:
-          - name: 1x
-            value: 0
-          - name: 2x
-            value: 1
-          - name: 3x
-            value: 2
-          - name: 4x
-            value: 3
-      - name: SCREEN LAYOUT
-        value: melonds_layout
-        description: Adjusts the positions of the screens.
-        choices:
-          - name: Original screen positions
-            value: 0
-          - name: Always enforce vertical
-            value: 1
-          - name: Always enforce horizontal
-            value: 2
-          - name: Hybrid
-            value: 3
-      - name: SCREEN SIZING
-        value: melonds_screensizing
-        description: How the window space is distributed between the screens.
-        choices:
-          - name: Even
-            value: 0
-          - name: Emphasize top
-            value: 1
-          - name: Emphasize bottom
-            value: 2
-          - name: Automatic
-            value: 3
-          - name: Top only
-            value: 4
-          - name: Bottom only
-            value: 5
-      - name: INTEGER SCALING
-        value: melonds_scaling
-        description: ""
-        choices:
-          - name: Off
-            value: False
-          - name: On
-            value: True
-      - name: DUAL SCREEN
-        value: melonds_dual_screen
-        description: Enable MelonDS to display over two screens. Some related screen options will be ignored.
-        choices:
-          - name: Off
-            value: False
-          - name: On
-            value: True
-      - name: "SCREEN GAP (ONLY ON DUAL-SCREEN)"
-        value: melonds_screen_gap
-        description: Enable MelonDS to display over two screens. Some related screen options will be ignored.
-        choices:
-          - name: 0 (Default)
-            value: 0
-          - name: 1
-            value: 1
-          - name: 2
-            value: 2
-          - name: 3
-            value: 3
-          - name: 4
-            value: 4
-          - name: 5
-            value: 5
-          - name: 6
-            value: 6
-          - name: 7
-            value: 7
-          - name: 8
-            value: 8
-          - name: 9
-            value: 9
-          - name: 10
-            value: 10
-          - name: 11
-            value: 11
-          - name: 12
-            value: 12
-          - name: 13
-            value: 13
-          - name: 14
-            value: 14
-          - name: 15
-            value: 15
-          - name: 16
-            value: 16
-          - name: 17
-            value: 17
-          - name: 18
-            value: 18
-          - name: 19
-            value: 19
-          - name: 20
-            value: 20
-          - name: 21
-            value: 21
-          - name: 22
-            value: 22
-          - name: 23
-            value: 23
-          - name: 24
-            value: 24
-          - name: 25
-            value: 25
-          - name: 26
-            value: 26
-          - name: 27
-            value: 27
-          - name: 28
-            value: 28
-          - name: 29
-            value: 29
-          - name: 30
-            value: 30
-          - name: 31
-            value: 31
-          - name: 32
-            value: 32
-          - name: 33
-            value: 33
-          - name: 34
-            value: 34
-          - name: 35
-            value: 35
-          - name: 36
-            value: 36
-      - name: ENABLE CHEATS
-        value: melonds_cheats
-        description: ""
-        choices:
-          - name: Off (Default)
-            value: False
-          - name: On
-            value: True
       - name: "SHOW ON-SCREEN DISPLAY MESSAGES"
         value: melonds_osd
         description: ""
         choices:
           - name: Off
-            value: False
+            value: false
           - name: On
-            value: True
-      - name: CONSOLE TYPE
-        value: melonds_console
-        description: ""
-        choices:
-          - name: DS
-            value: 0
-          - name: DSi (experiemental)
-            value: 1
+            value: true
   ADVANCED OPTIONS:
     items:
       - name: LIMIT FRAME RATE
@@ -371,14 +372,14 @@ groups:
         description: ""
         choices:
           - name: No Limit
-            value: False
+            value: false
           - name: As game specifies
-            value: True
+            value: true
       - name: ENABLE POLYGON SPLITTING
         value: melonds_polygons
         description: Enhancement. Enables improved polygon splitting.
         choices:
           - name: Off
-            value: False
+            value: false
           - name: On
-            value: True
+            value: true

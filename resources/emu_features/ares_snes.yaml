@@ -1,13 +1,36 @@
 emulator_name: ares
 core_name: snes
 groups:
-  ADVANCED OPTIONS:
-    items:
-      - name: SUPER FAMICOM DEEP BLACK BOOST
-        value: ares_sfc_deep_black_boost
-        description: Boost dark levels for Super Famicom / SNES.
-        choices:
-          - name: Disabled
-            value: false
-          - name: Enabled
-            value: true
+  GENERAL:
+    submenus:
+      SCREEN:
+        - name: DEEP BLACK BOOST
+          value: ares_sfc_deep_black_boost
+          description: Boost dark levels for Super Famicom / SNES.
+          choices:
+            - name: Disabled (Default)
+              value: false
+            - name: Enabled
+              value: true
+  CONTROLS:
+    submenus:
+      PORT 1:
+        - name: CONTROLLER TYPE
+          value: ares_snes_port1
+          description: Device plugged into port 1.
+          choices:
+            - name: Gamepad (Default)
+              value: auto
+            - name: Mouse
+              value: Mouse
+      PORT 2:
+        - name: CONTROLLER TYPE
+          value: ares_snes_port2
+          description: Device plugged into port 2.
+          choices:
+            - name: Gamepad (Default)
+              value: auto
+            - name: Mouse
+              value: Mouse
+            - name: Multitap
+              value: Super Multitap

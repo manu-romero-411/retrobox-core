@@ -25,7 +25,11 @@ from ...settings.unixSettings import UnixSettings
 from ...utils import bezels as bezels_util
 from ...utils import metadata as metadata_utils
 from .libretro_bezel import BezelRequest, write_bezel_config
-from .libretro_core_options import apply_core_features, load_core_features
+from .libretro_core_options import (
+    apply_core_features,
+    apply_retroarch_settings,
+    load_core_features,
+)
 from .libretro_ratio import CORE_RATIO_INDEX, RATIO_INDEXES
 from .libretroControllers import clearGunInputsForPlayer, configureGunInputsForPlayer
 from .libretroPaths import (
@@ -253,7 +257,7 @@ def rarch_custom_paths(system: Emulator) -> dict[str, str]:
     Pure function: the caller decides where and when to apply them (see
     LibretroGenerator.generate).
     """
-    mkdir_if_not_exists(BIOS / system.name)
+    #mkdir_if_not_exists(BIOS / system.name)
     mkdir_if_not_exists(SAVES / system.name)
 
     return {
@@ -717,9 +721,11 @@ def create_libretro_config(launch: LibretroLaunch, /) -> dict[str, object]:
     config: dict[str, object] = dict(_FIXED_RETROARCH_SETTINGS)
 
     _apply_base_settings(config, system, launch.display.gfx_backend)
+    features = load_core_features(system.config.core)
     _apply_input_settings(config, launch)
+    apply_retroarch_settings(config, system.config, features)
     _apply_gun_settings(config, launch, core_settings)
-    apply_core_features(core_settings, system.config, load_core_features(system.config.core))
+    apply_core_features(core_settings, system.config, features)
     core_settings.write()
 
     drop_bezel = _apply_video_and_misc_settings(config, launch)

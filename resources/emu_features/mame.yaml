@@ -2205,6 +2205,27 @@ groups:
             value: autoror
           - name: Rotate 270
             value: autorol
+  CONTROLS:
+    submenus:
+      LIGHT GUNS:
+        - name: "OFF-SCREEN RELOAD BUTTON"
+          value: offscreenreload
+          description: Set gun button 2 to reload.
+          choices:
+            - name: On
+              value: 1
+            - name: Off (Default)
+              value: 0
+        - name: CROSSHAIR
+          value: mame_crosshair
+          description: None
+          choices:
+            - name: Disabled (Default)
+              value: disabled
+            - name: Enabled
+              value: enabled
+            - name: When moving
+              value: onmove
   ADVANCED OPTIONS:
     items:
       - name: BGFX VIDEO FILTER
@@ -2273,23 +2294,3 @@ groups:
             value: 1
           - name: Disabled (Default)
             value: 0
-  LIGHT GUN:
-    items:
-      - name: "OFF-SCREEN RELOAD BUTTON"
-        value: offscreenreload
-        description: Set gun button 2 to reload.
-        choices:
-          - name: On
-            value: 1
-          - name: Off (Default)
-            value: 0
-      - name: CROSSHAIR
-        value: mame_crosshair
-        description: None
-        choices:
-          - name: Disabled (Default)
-            value: disabled
-          - name: Enabled
-            value: enabled
-          - name: When moving
-            value: onmove

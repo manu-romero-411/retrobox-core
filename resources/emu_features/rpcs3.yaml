@@ -13,96 +13,7 @@ sharedFeatures:
 groups:
   GENERAL:
     submenus:
-      CPU:
-        - name: PPU DECODER
-          value: rpcs3_ppudecoder
-          description: "LLVM is fastest, use the Interpreter settings if there are issues."
-          choices:
-            - name: LLVM Recompiler
-              value: Recompiler (LLVM)
-            - name: Dynamic Interpreter
-              value: Interpreter (dynamic)
-            - name: Static Interpreter
-              value: Interpreter (static)
-        - name: SPU DECODER
-          value: rpcs3_spudecoder
-          description: "If game crashes, try ASMJIT. If still crashing, try Fast Interpreter."
-          choices:
-            - name: LLVM Recompiler
-              value: Recompiler (LLVM)
-            - name: ASMJIT Recompiler
-              value: Recompiler (ASMJIT)
-            - name: Fast Interpreter
-              value: Interpreter (fast)
-            - name: Precise Interpreter
-              value: Interpreter (precise)
-        - name: SPU XFloat Accuracy
-          value: rpcs3_spuxfloataccuracy
-          description: Can fix bugs in some games. Only relevant for dynamic or LLVM SPU decoder.
-          choices:
-            - name: Accurate XFloat
-              value: accurate
-            - name: Approximate XFloat
-              value: approximate
-            - name: Relaxed XFloat
-              value: relaxed
-        - name: PREFERRED SPU THREADS
-          value: rpcs3_sputhreads
-          description: Limiting to 1 or 2 may fix audio stuttering on weaker CPUs in some games. Leave on automatic if slowdown occurs.
-          choices:
-            - name: 1 thread
-              value: 1
-            - name: 2 threads
-              value: 2
-            - name: 3 threads
-              value: 3
-            - name: 4 threads
-              value: 4
-            - name: 5 threads
-              value: 5
-            - name: 6 threads
-              value: 6
-        - name: SPU LOOP DETECTION
-          value: rpcs3_spuloopdetection
-          description: May provide performance gain on CPUs with low core/thread count at the expense of possible broken timings.
-          choices:
-            - name: Off (Default)
-              value: False
-            - name: On
-              value: True
-        - name: SPU BLOCK SIZE
-          value: rpcs3_spublocksize
-          description: Mega and Giga modes may improve performance. Use the Safe mode for maximum compatibility.
-          choices:
-            - name: Safe (Default)
-              value: Safe
-            - name: Mega
-              value: Mega
-            - name: Giga
-              value: Giga
-        - name: "MAX POWER SAVING CPU-PREEMPTIONS"
-          value: rpcs3_maxcpu_preemptcount
-          description: Helps reduce CPU power consumption by throttling the CPU when not needed. Useful for handhelds.
-          choices:
-            - name: Off (Default)
-              value: 0
-            - name: Minimum
-              value: 50
-            - name: Moderate
-              value: 100
-            - name: Maximum
-              value: 150
-        - name: SLEEP TIMERS ACCURACY
-          value: rpcs3_sleep_timers_accuracy
-          description: Changes the sleep period accuracy. Some games need this set to improve performance.
-          choices:
-            - name: As Host (Default)
-              value: As Host
-            - name: Usleep Only
-              value: Usleep Only
-            - name: All Timers
-              value: All Timers
-      VIDEO:
+      SCREEN:
         - name: ASPECT RATIO
           value: rpcs3_ratio
           description: PS3's internal ratio setting. Some games only support 16/9.
@@ -116,7 +27,7 @@ groups:
           description: Most games already have an internal framelimit. Minor performance cost.
           choices:
             - name: "Off (faster, unstable)"
-              value: False
+              value: false
             - name: 20
               value: 20
             - name: 25
@@ -168,18 +79,17 @@ groups:
           description: Can fix screen tearing on unorthodox displays (most LCDs don't need this).
           choices:
             - name: Off (Default)
-              value: False
+              value: false
             - name: On
-              value: True
+              value: true
         - name: STRETCH TO DISPLAY AREA
           value: rpcs3_stretchdisplay
           description: Distorts the output to fill the display fully Overrides aspect ratio.
           choices:
             - name: Off
-              value: False
+              value: false
             - name: On
-              value: True
-      RENDER:
+              value: true
         - name: GRAPHICS API
           value: rpcs3_gfxbackend
           description: Choose which graphics API library to use.
@@ -291,49 +201,49 @@ groups:
           description: May fix missing graphics and broken lighting at the cost of performance.
           choices:
             - name: Off (Default)
-              value: False
+              value: false
             - name: On
-              value: True
+              value: true
         - name: WRITE DEPTH BUFFERS
           value: rpcs3_write_depth_buffers
           description: Writes depth buffer values to VM memory. Some games need this to fix broken graphics.
           choices:
             - name: Off (Default)
-              value: False
+              value: false
             - name: On
-              value: True
+              value: true
         - name: STRICT RENDERING MODE
           value: rpcs3_strict
           description: Straict API specification. Can resolve rare cases of missing graphics and flickering.
           choices:
             - name: Off (Default)
-              value: False
+              value: false
             - name: On
-              value: True
+              value: true
         - name: DISABLE VERTEX CACHE
           value: rpcs3_vertexcache
           description: Disables the vertex cache. Might resolve missing or flickering graphics output but degrade performance.
           choices:
             - name: Off (Default)
-              value: False
+              value: false
             - name: On
-              value: True
+              value: true
         - name: MULTITHREADED RSX
           value: rpcs3_rsx
           description: "Offloads some RSX operations to a secondary thread. Improves performance in high-core processors."
           choices:
             - name: Off (Default)
-              value: False
+              value: false
             - name: On
-              value: True
+              value: true
         - name: ASYNCHRONOUS TEXTURE STREAMING
           value: rpcs3_async_texture
           description: Stream texture to GPU in parrallel. Can improve performance on more powerful GPU's that have spare headroom.
           choices:
             - name: Off (Default)
-              value: False
+              value: false
             - name: On (Vulkan Only)
-              value: True
+              value: true
       AUDIO:
         - name: AUDIO FORMAT
           value: rpcs3_audio_format
@@ -350,17 +260,17 @@ groups:
           description: Use 16 bit audio samples for audio drivers that don't support 32bit. Only use if you get no audio.
           choices:
             - name: Off (Default)
-              value: False
+              value: false
             - name: On
-              value: True
+              value: true
         - name: ENABLE AUDIO BUFFERING
           value: rpcs3_audiobuffer
           description: Can reduce crackle and stutter but increases audio latency.
           choices:
             - name: Off
-              value: False
+              value: false
             - name: On (Default)
-              value: True
+              value: true
         - name: AUDIO BUFFER DURATION
           value: rpcs3_audiobuffer_duration
           description: Duration of audio buffer in milliseconds. Higher numbers may cause audio latency.
@@ -396,9 +306,9 @@ groups:
           description: "Reduces crackle and stutter further, but may cause a very noticeable reduction in audio quality on slower CPUs."
           choices:
             - name: Off (Default)
-              value: False
+              value: false
             - name: On
-              value: True
+              value: true
         - name: TIME STRETCHING THRESHOLD
           value: rpcs3_timestretch_threshold
           description: Buffer fill level (in percentage) below which time stretching will start.
@@ -419,29 +329,9 @@ groups:
               value: 90
             - name: "100%"
               value: 100
-  ADVANCED OPTIONS:
-    items:
-      - name: GRAPHICAL USER INTERFACE
-        value: rpcs3_gui
-        description: "Allows Alt+Tab to RPCS3's menu. Useful for manual disc-swapping."
-        choices:
-          - name: Off
-            value: 0
-          - name: On
-            value: 1
   CONTROLS:
     submenus:
-      LIGHT GUNS:
-        - name: SHOW LIGHT GUN CROSSHAIRS
-          order: 99
-          value: rpcs3_crosshairs
-          description: ""
-          choices:
-            - name: Off
-              value: False
-            - name: On
-              value: True
-      CONTROLLER 1:
+      PORT 1:
         - name: PS3 CONTROLLER
           value: rpcs3_controller1
           description: "Default uses SDL2, otherwise enable controller specific capabilities. Sony DS won't work with clone controllers."
@@ -454,7 +344,7 @@ groups:
           value: rpcs3_rumble1
           description: Enable controller rumble capabilities if supported by the controller.
           preset: switchon
-      CONTROLLER 2:
+      PORT 2:
         - name: PS3 CONTROLLER
           value: rpcs3_controller2
           description: "Default uses SDL2, otherwise enable controller specific capabilities. Sony DS won't work with clone controllers."
@@ -467,7 +357,7 @@ groups:
           value: rpcs3_rumble2
           description: Enable controller rumble capabilities if supported by the controller.
           preset: switchon
-      CONTROLLER 3:
+      PORT 3:
         - name: PS3 CONTROLLER
           value: rpcs3_controller3
           description: "Default uses SDL2, otherwise enable controller specific capabilities. Sony DS won't work with clone controllers."
@@ -480,7 +370,7 @@ groups:
           value: rpcs3_rumble3
           description: Enable controller rumble capabilities if supported by the controller.
           preset: switchon
-      CONTROLLER 4:
+      PORT 4:
         - name: PS3 CONTROLLER
           value: rpcs3_controller4
           description: "Default uses SDL2, otherwise enable controller specific capabilities. Sony DS won't work with clone controllers."
@@ -493,7 +383,17 @@ groups:
           value: rpcs3_rumble4
           description: Enable controller rumble capabilities if supported by the controller.
           preset: switchon
-      CONTROLLER 5:
+      LIGHT GUNS:
+        - name: SHOW LIGHT GUN CROSSHAIRS
+          order: 99
+          value: rpcs3_crosshairs
+          description: ""
+          choices:
+            - name: Off
+              value: false
+            - name: On
+              value: true
+      PORT 5:
         - name: PS3 CONTROLLER
           value: rpcs3_controller5
           description: "Default uses SDL2, otherwise enable controller specific capabilities. Sony DS won't work with clone controllers."
@@ -506,7 +406,7 @@ groups:
           value: rpcs3_rumble5
           description: Enable controller rumble capabilities if supported by the controller.
           preset: switchon
-      CONTROLLER 6:
+      PORT 6:
         - name: PS3 CONTROLLER
           value: rpcs3_controller6
           description: "Default uses SDL2, otherwise enable controller specific capabilities. Sony DS won't work with clone controllers."
@@ -519,7 +419,7 @@ groups:
           value: rpcs3_rumble6
           description: Enable controller rumble capabilities if supported by the controller.
           preset: switchon
-      CONTROLLER 7:
+      PORT 7:
         - name: PS3 CONTROLLER
           value: rpcs3_controller7
           description: "Default uses SDL2, otherwise enable controller specific capabilities. Sony DS won't work with clone controllers."
@@ -532,3 +432,103 @@ groups:
           value: rpcs3_rumble7
           description: Enable controller rumble capabilities if supported by the controller.
           preset: switchon
+  ADVANCED OPTIONS:
+    submenus:
+      PERFORMANCE:
+        - name: PPU DECODER
+          value: rpcs3_ppudecoder
+          description: "LLVM is fastest, use the Interpreter settings if there are issues."
+          choices:
+            - name: LLVM Recompiler
+              value: Recompiler (LLVM)
+            - name: Dynamic Interpreter
+              value: Interpreter (dynamic)
+            - name: Static Interpreter
+              value: Interpreter (static)
+        - name: SPU DECODER
+          value: rpcs3_spudecoder
+          description: "If game crashes, try ASMJIT. If still crashing, try Fast Interpreter."
+          choices:
+            - name: LLVM Recompiler
+              value: Recompiler (LLVM)
+            - name: ASMJIT Recompiler
+              value: Recompiler (ASMJIT)
+            - name: Fast Interpreter
+              value: Interpreter (fast)
+            - name: Precise Interpreter
+              value: Interpreter (precise)
+        - name: SPU XFloat Accuracy
+          value: rpcs3_spuxfloataccuracy
+          description: Can fix bugs in some games. Only relevant for dynamic or LLVM SPU decoder.
+          choices:
+            - name: Accurate XFloat
+              value: accurate
+            - name: Approximate XFloat
+              value: approximate
+            - name: Relaxed XFloat
+              value: relaxed
+        - name: PREFERRED SPU THREADS
+          value: rpcs3_sputhreads
+          description: Limiting to 1 or 2 may fix audio stuttering on weaker CPUs in some games. Leave on automatic if slowdown occurs.
+          choices:
+            - name: 1 thread
+              value: 1
+            - name: 2 threads
+              value: 2
+            - name: 3 threads
+              value: 3
+            - name: 4 threads
+              value: 4
+            - name: 5 threads
+              value: 5
+            - name: 6 threads
+              value: 6
+        - name: SPU LOOP DETECTION
+          value: rpcs3_spuloopdetection
+          description: May provide performance gain on CPUs with low core/thread count at the expense of possible broken timings.
+          choices:
+            - name: Off (Default)
+              value: false
+            - name: On
+              value: true
+        - name: SPU BLOCK SIZE
+          value: rpcs3_spublocksize
+          description: Mega and Giga modes may improve performance. Use the Safe mode for maximum compatibility.
+          choices:
+            - name: Safe (Default)
+              value: Safe
+            - name: Mega
+              value: Mega
+            - name: Giga
+              value: Giga
+        - name: "MAX POWER SAVING CPU-PREEMPTIONS"
+          value: rpcs3_maxcpu_preemptcount
+          description: Helps reduce CPU power consumption by throttling the CPU when not needed. Useful for handhelds.
+          choices:
+            - name: Off (Default)
+              value: 0
+            - name: Minimum
+              value: 50
+            - name: Moderate
+              value: 100
+            - name: Maximum
+              value: 150
+        - name: SLEEP TIMERS ACCURACY
+          value: rpcs3_sleep_timers_accuracy
+          description: Changes the sleep period accuracy. Some games need this set to improve performance.
+          choices:
+            - name: As Host (Default)
+              value: As Host
+            - name: Usleep Only
+              value: Usleep Only
+            - name: All Timers
+              value: All Timers
+    items:
+      - name: GRAPHICAL USER INTERFACE
+        value: rpcs3_gui
+        description: "Allows Alt+Tab to RPCS3's menu. Useful for manual disc-swapping."
+        choices:
+          - name: Off
+            value: 0
+          - name: On
+            value: 1

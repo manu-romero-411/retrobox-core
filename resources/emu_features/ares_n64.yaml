@@ -1,13 +1,45 @@
 emulator_name: ares
 core_name: n64
 groups:
-  ADVANCED OPTIONS:
-    items:
-      - name: NINTENDO 64 EXPANSION PAK
-        value: ares_n64_expansion_pak
-        description: Enable the 4MB Expansion Pak for Nintendo 64.
-        choices:
-          - name: Disabled
-            value: false
-          - name: Enabled
-            value: true
+  GENERAL:
+    submenus:
+      SCREEN:
+        - name: RENDERING RESOLUTION
+          value: ares_n64_quality
+          description: Multiplies the native Nintendo 64 resolution. Needs the Vulkan renderer of Ares. Bigger is sharper and slower.
+          choices:
+            - name: 1x native (Default)
+              value: SD
+            - name: 2x
+              value: HD
+            - name: 4x
+              value: UHD
+        - name: SUPERSAMPLING
+          value: ares_n64_supersampling
+          description: Smooths the picture rendered at 2x or 4x. Needs one of them, and turns off weave deinterlacing.
+          choices:
+            - name: Disabled (Default)
+              value: false
+            - name: Enabled
+              value: true
+      EMULATION:
+        - name: EXPANSION PAK
+          value: ares_n64_expansion_pak
+          description: Enable the 4MB Expansion Pak for Nintendo 64.
+          choices:
+            - name: Disabled
+              value: false
+            - name: Enabled (Default)
+              value: true
+        - name: CONTROLLER PAK SIZE
+          value: ares_n64_cpak_size
+          description: Size of the memory card of the Controller Pak. The games choose their Paks by themselves.
+          choices:
+            - name: 32KiB (Default)
+              value: 32KiB (Default)
+            - name: 128KiB (Datel 1Meg)
+              value: 128KiB (Datel 1Meg)
+            - name: 512KiB (Datel 4Meg)
+              value: 512KiB (Datel 4Meg)
+            - name: 1984KiB (Maximum)
+              value: 1984KiB (Maximum)

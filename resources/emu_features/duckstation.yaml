@@ -15,108 +15,7 @@ sharedFeatures:
 groups:
   GENERAL:
     submenus:
-      EMULATION:
-        - name: EMULATION SPEED
-          value: duckstation_clocking
-          description: Determines the speed and the runahead behaviour of the system.
-          choices:
-            - name: Unlimited
-              value: 0
-            - name: "10%"
-              value: .1
-            - name: "20%"
-              value: .2
-            - name: "30%"
-              value: .3
-            - name: "40%"
-              value: .4
-            - name: "50%"
-              value: .5
-            - name: "60%"
-              value: .6
-            - name: "70%"
-              value: .7
-            - name: "80%"
-              value: .8
-            - name: "90%"
-              value: .9
-            - name: "100%"
-              value: 1
-            - name: "125%"
-              value: 1.25
-            - name: "150%"
-              value: 1.5
-            - name: "175%"
-              value: 1.75
-            - name: "200%"
-              value: 2
-            - name: "250%"
-              value: 2.5
-            - name: "300%"
-              value: 3
-            - name: "350%"
-              value: 3.5
-            - name: "400%"
-              value: 4
-            - name: "450%"
-              value: 4.5
-            - name: "500%"
-              value: 5
-            - name: "600%"
-              value: 6
-            - name: "700%"
-              value: 7
-            - name: "800%"
-              value: 8
-            - name: "900%"
-              value: 9
-            - name: "1000%"
-              value: 10
-        - name: SYNC TO HOST REFRESH RATE
-          value: duckstation_hrr
-          description: VSync and Audio Resampling need to be enabled.
-          choices:
-            - name: Disabled (Default)
-              value: false
-            - name: Enabled
-              value: true
-        - name: OPTIMAL FRAME PACING
-          value: duckstation_ofp
-          description: Ensure every frame the console renders is displayed to screen.
-          choices:
-            - name: Disabled (Default)
-              value: false
-            - name: Enabled
-              value: true
-        - name: CONSOLE REGION
-          value: duckstation_region
-          description: ""
-          choices:
-            - name: PAL
-              value: PAL
-            - name: "NTSC-U/C"
-              value: "NTSC-U"
-            - name: "NTSC-J"
-              value: "NTSC-J"
-        - name: FORCE BIOS
-          value: duckstation_bios
-          order: 102
-          choices:
-            - name: PSX ON PSP BIOS
-              value: psxonpsp660.bin
-            - name: PS1 JP (SCPH5500)
-              value: scph5500.bin
-            - name: PS1 US (SCPH5501)
-              value: scph5501.bin
-            - name: PS1 EU (SCPH5502)
-              value: scph5502.bin
-            - name: Version 2.0 (SCPH1001)
-              value: scph1001.bin
-            - name: Version 4.1 (SCPH7001)
-              value: scph7001.bin
-            - name: Version 4.5 (SCPH101)
-              value: scph101.bin
-      DISPLAY:
+      SCREEN:
         - name: GRAPHICS API
           value: duckstation_gfxbackend
           description: Choose which graphics API library to use.
@@ -209,7 +108,6 @@ groups:
               value: false
             - name: Enabled
               value: true
-      RENDERING:
         - name: RENDERING RESOLUTION
           value: duckstation_resolution_scale
           description: Enhancement. Increase the rendering resolution. Makes 3D objects clearer.
@@ -314,51 +212,118 @@ groups:
               value: "16-ssaa"
             - name: 32x SSAA
               value: "32-ssaa"
-      CONTROLLERS:
-        - name: JOYSTICK TO DPAD
-          value: duckstation_digitalmode
-          description: "Use Analog joysticks in addition to D-Pad for DualShock controllers."
+      AUDIO:
+        - name: STRETCH MODE
+          value: duckstation_audio_mode
+          description: "When running outside of 100%, adjusts the temp instead of dropping frames."
           choices:
-            - name: Off
+            - name: Off (Noisy)
+              value: None
+            - name: Resampling (Pirch Shift)
+              value: Resample
+            - name: "Time Stretch (Tempo Change, Best Sound)"
+              value: TimeStretch
+      EMULATION:
+        - name: EMULATION SPEED
+          value: duckstation_clocking
+          description: Determines the speed and the runahead behaviour of the system.
+          choices:
+            - name: Unlimited
+              value: 0
+            - name: "10%"
+              value: .1
+            - name: "20%"
+              value: .2
+            - name: "30%"
+              value: .3
+            - name: "40%"
+              value: .4
+            - name: "50%"
+              value: .5
+            - name: "60%"
+              value: .6
+            - name: "70%"
+              value: .7
+            - name: "80%"
+              value: .8
+            - name: "90%"
+              value: .9
+            - name: "100%"
+              value: 1
+            - name: "125%"
+              value: 1.25
+            - name: "150%"
+              value: 1.5
+            - name: "175%"
+              value: 1.75
+            - name: "200%"
+              value: 2
+            - name: "250%"
+              value: 2.5
+            - name: "300%"
+              value: 3
+            - name: "350%"
+              value: 3.5
+            - name: "400%"
+              value: 4
+            - name: "450%"
+              value: 4.5
+            - name: "500%"
+              value: 5
+            - name: "600%"
+              value: 6
+            - name: "700%"
+              value: 7
+            - name: "800%"
+              value: 8
+            - name: "900%"
+              value: 9
+            - name: "1000%"
+              value: 10
+        - name: SYNC TO HOST REFRESH RATE
+          value: duckstation_hrr
+          description: VSync and Audio Resampling need to be enabled.
+          choices:
+            - name: Disabled (Default)
               value: false
-            - name: On
+            - name: Enabled
               value: true
-        - name: CONTROLLER 1 TYPE
-          value: duckstation_Controller1
-          description: DualShock has rumble support. Not all games support DualShock.
+        - name: OPTIMAL FRAME PACING
+          value: duckstation_ofp
+          description: Ensure every frame the console renders is displayed to screen.
           choices:
-            - name: Not Connected
-              value: None
-            - name: PS1 Digital Controller
-              value: DigitalController
-            - name: PS1 Analog Joystick
-              value: AnalogJoystick
-            - name: DualShock / Xbox Type
-              value: AnalogController
-            - name: Namco GunCon
-              value: GunCon
-            - name: PlayStation Mouse
-              value: PlayStationMouse
-            - name: NeGcon (Rumble)
-              value: NeGcon
-        - name: CONTROLLER 2 TYPE
-          value: duckstation_Controller2
-          description: DualShock has rumble support. Not all games support DualShock.
+            - name: Disabled (Default)
+              value: false
+            - name: Enabled
+              value: true
+        - name: CONSOLE REGION
+          value: duckstation_region
+          description: ""
           choices:
-            - name: Not Connected
-              value: None
-            - name: PS1 Digital Controller
-              value: DigitalController
-            - name: PS1 Analog Joystick
-              value: AnalogJoystick
-            - name: DualShock / Xbox Type
-              value: AnalogController
-            - name: Namco GunCon
-              value: GunCon
-            - name: PlayStation Mouse
-              value: PlayStationMouse
-            - name: NeGcon (Rumble)
-              value: NeGcon
+            - name: PAL
+              value: PAL
+            - name: "NTSC-U/C"
+              value: "NTSC-U"
+            - name: "NTSC-J"
+              value: "NTSC-J"
+        - name: FORCE BIOS
+          value: duckstation_bios
+          order: 102
+          choices:
+            - name: PSX ON PSP BIOS
+              value: psxonpsp660.bin
+            - name: PS1 JP (SCPH5500)
+              value: scph5500.bin
+            - name: PS1 US (SCPH5501)
+              value: scph5501.bin
+            - name: PS1 EU (SCPH5502)
+              value: scph5502.bin
+            - name: Version 2.0 (SCPH1001)
+              value: scph1001.bin
+            - name: Version 4.1 (SCPH7001)
+              value: scph7001.bin
+            - name: Version 4.5 (SCPH101)
+              value: scph101.bin
     items:
       - name: ENABLE CHEATS
         value: duckstation_cheats
@@ -412,18 +377,62 @@ groups:
             value: false
           - name: Enabled
             value: true
-  AUDIO:
-    items:
-      - name: STRETCH MODE
-        value: duckstation_audio_mode
-        description: "When running outside of 100%, adjusts the temp instead of dropping frames."
-        choices:
-          - name: Off (Noisy)
-            value: None
-          - name: Resampling (Pirch Shift)
-            value: Resample
-          - name: "Time Stretch (Tempo Change, Best Sound)"
-            value: TimeStretch
+  CONTROLS:
+    submenus:
+      CONTROLLERS:
+        - name: JOYSTICK TO DPAD
+          value: duckstation_digitalmode
+          description: "Use Analog joysticks in addition to D-Pad for DualShock controllers."
+          choices:
+            - name: Off
+              value: false
+            - name: On
+              value: true
+        - name: CONTROLLER 1 TYPE
+          value: duckstation_Controller1
+          description: DualShock has rumble support. Not all games support DualShock.
+          choices:
+            - name: Not Connected
+              value: None
+            - name: PS1 Digital Controller
+              value: DigitalController
+            - name: PS1 Analog Joystick
+              value: AnalogJoystick
+            - name: DualShock / Xbox Type
+              value: AnalogController
+            - name: Namco GunCon
+              value: GunCon
+            - name: PlayStation Mouse
+              value: PlayStationMouse
+            - name: NeGcon (Rumble)
+              value: NeGcon
+        - name: CONTROLLER 2 TYPE
+          value: duckstation_Controller2
+          description: DualShock has rumble support. Not all games support DualShock.
+          choices:
+            - name: Not Connected
+              value: None
+            - name: PS1 Digital Controller
+              value: DigitalController
+            - name: PS1 Analog Joystick
+              value: AnalogJoystick
+            - name: DualShock / Xbox Type
+              value: AnalogController
+            - name: Namco GunCon
+              value: GunCon
+            - name: PlayStation Mouse
+              value: PlayStationMouse
+            - name: NeGcon (Rumble)
+              value: NeGcon
+      LIGHT GUNS:
+        - name: CROSSHAIR
+          value: duckstation_crosshair
+          description: None
+          choices:
+            - name: Disabled (Default)
+              value: 0
+            - name: Enabled
+              value: 1
   ADVANCED OPTIONS:
     items:
       - name: LOAD CUSTOM TEXTURES
@@ -462,13 +471,3 @@ groups:
             value: CachedInterpreter
           - name: Recompiler (Fastest)(Default)
             value: Recompiler
-  LIGHT GUN:
-    items:
-      - name: CROSSHAIR
-        value: duckstation_crosshair
-        description: None
-        choices:
-          - name: Disabled (Default)
-            value: 0
-          - name: Enabled
-            value: 1

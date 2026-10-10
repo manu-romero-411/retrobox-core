@@ -6,8 +6,9 @@ emulator can share (``emulator_name: _global_config``).
 
 The groups and submenus of the menu follow one vocabulary, declared in the
 ``vocabulary`` section of ``_global_config.yaml``. It is checked for the
-emulators it lists in ``enforce``, so the emulators can be moved to it one by
-one: a name outside the vocabulary only logs a warning.
+emulators it lists in ``enforce`` (or for all of them with ``enforce: all``,
+except the ones in ``exempt``): a name outside the vocabulary only logs a
+warning.
 """
 
 from __future__ import annotations
@@ -41,7 +42,7 @@ _GLOBAL_CONFIG_NAME = "_global_config"
 _GENERAL_GROUP = "GENERAL"  # the features of this group have no "group" attribute
 _NO_SUBMENU = "NONE"
 # keys of the YAML that are not attributes of the element they describe
-_LAUNCHER_KEYS = ("core_option", "core_options")  # read by the launcher only
+_LAUNCHER_KEYS = ("core_option", "core_options", "retroarch_option")  # read by the launcher only
 _STRUCTURE_KEYS = ("emulator_name", "core_name", "features", "sharedFeatures", "systems", "groups")
 
 
@@ -53,11 +54,15 @@ class Vocabulary:
         groups: The allowed group names.
         submenus: The allowed submenu names of each group.
         enforced: The emulators that must use the vocabulary.
+        enforce_all: Whether every emulator must use it, but the exempt ones.
+        exempt: The emulators that are not checked when ``enforce_all`` is on.
     """
 
     groups: frozenset[str]
     submenus: Mapping[str, frozenset[str]]
     enforced: frozenset[str]
+    enforce_all: bool = False
+    exempt: frozenset[str] = frozenset()
 
     @classmethod
     def from_config(cls, global_config: Mapping[str, Any] | None) -> Vocabulary | None:
@@ -71,8 +76,20 @@ class Vocabulary:
                 str(group): frozenset(map(str, names or []))
                 for group, names in (data.get("submenus") or {}).items()
             },
-            enforced=frozenset(map(str, data.get("enforce") or [])),
+            enforced=frozenset(
+                map(str, data["enforce"] if isinstance(data.get("enforce"), list) else [])
+            ),
+            enforce_all=data.get("enforce") == "all",
+            exempt=frozenset(map(str, data.get("exempt") or [])),
         )
+
+    def applies_to(self, emulator: str) -> bool:
+        """Tell whether the vocabulary is checked for an emulator."""
+        if emulator == _GLOBAL_CONFIG_NAME:
+            return True
+        if self.enforce_all:
+            return emulator not in self.exempt
+        return emulator in self.enforced
 
     def problem(self, group: str, submenu: str | None) -> str | None:
         """Describe what is outside the vocabulary, or return None if all is fine."""
@@ -105,7 +122,7 @@ class _Context:
         """Remember a warning if the placement is outside the vocabulary."""
         if self.vocabulary is None:
             return
-        if self.emulator != _GLOBAL_CONFIG_NAME and self.emulator not in self.vocabulary.enforced:
+        if not self.vocabulary.applies_to(self.emulator):
             return
         if (problem := self.vocabulary.problem(group, submenu)) is not None:
             self.warnings.add(f"{self.emulator}: {problem} is not in the vocabulary")

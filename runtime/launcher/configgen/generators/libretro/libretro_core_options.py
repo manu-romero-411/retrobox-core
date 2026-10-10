@@ -17,6 +17,11 @@ characters the settings file cannot keep). An empty ``core_option`` is the same
 as none. ``core_option: false`` says it is not a core option: other launcher
 code reads that feature.
 
+A feature can also set a setting of retroarch.cfg instead, the same way (the
+choice is written as it is)::
+
+    retroarch_option: input_libretro_device_p1    # a controller device, for example
+
 A game that leaves the feature unset (or on ``auto``) gets the core default:
 the options the feature manages are removed from the core options file, so a
 value picked for another game never leaks into this one.
@@ -45,6 +50,7 @@ _logger = logging.getLogger(__name__)
 _DEFAULT_VALUES = ("", "auto")
 _CORE_OPTION_KEY = "core_option"
 _CORE_OPTIONS_KEY = "core_options"
+_RETROARCH_OPTION_KEY = "retroarch_option"
 
 
 @dataclass(frozen=True)
@@ -56,11 +62,14 @@ class CoreFeature:
         option: The core option that takes the chosen value as it is.
         choices: The options each choice sets, when a choice sets several; the
             ``option`` is not used then.
+        in_retroarch_cfg: True when ``option`` is a setting of retroarch.cfg and
+            not a core option.
     """
 
     feature: str
     option: str = ""
     choices: Mapping[str, Mapping[str, str]] = field(default_factory=dict)
+    in_retroarch_cfg: bool = False
 
     @property
     def managed_options(self) -> set[str]:
@@ -107,6 +116,9 @@ def _feature_of(item: Mapping[str, Any]) -> CoreFeature | None:
                 for choice, options in choices.items()
             },
         )
+
+    if retroarch_option := str(item.get(_RETROARCH_OPTION_KEY) or "").strip():
+        return CoreFeature(name, option=retroarch_option, in_retroarch_cfg=True)
 
     declared = item.get(_CORE_OPTION_KEY)
     if declared is False:
@@ -155,9 +167,33 @@ def apply_core_features(
         features: The core option features of the core.
     """
     for feature in features:
+        if feature.in_retroarch_cfg:
+            continue
         selected = config.get(feature.feature)
         wanted = feature.options_for(None if selected is config.MISSING else str(selected))
         for option in feature.managed_options - wanted.keys():
             core_settings.remove(option)
         for option, value in wanted.items():
             core_settings.save(option, f'"{value}"')
+
+
+def apply_retroarch_settings(
+    retroarch_config: dict[str, object], config: SystemConfig, features: list[CoreFeature]
+) -> None:
+    """Set the retroarch.cfg settings of the features the game has a value for.
+
+    A game that leaves the feature unset (or on ``auto``) keeps the value the
+    launcher already chose for the setting.
+
+    Args:
+        retroarch_config: The retroarch.cfg settings, updated in place.
+        config: The configuration of the running game.
+        features: The features of the core.
+    """
+    for feature in features:
+        if not feature.in_retroarch_cfg:
+            continue
+        selected = config.get(feature.feature)
+        if selected is config.MISSING or str(selected) in _DEFAULT_VALUES:
+            continue
+        retroarch_config[feature.option] = str(selected)

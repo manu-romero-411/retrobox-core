@@ -9,6 +9,17 @@ sharedFeatures:
 systems:
   - name: singe
     groups:
+      CONTROLS:
+        submenus:
+          LIGHT GUNS:
+            - name: LIGHT GUN CROSSHAIRS
+              value: singe_crosshair
+              description: "Crosshairs in supported games e.g. ActionMax, Maddog II."
+              choices:
+                - name: Off
+                  value: 1
+                - name: On
+                  value: 0
       ADVANCED OPTIONS:
         items:
           - name: BLEND SPRITES (SINGE)
@@ -39,54 +50,46 @@ systems:
                 value: 0
               - name: On
                 value: 1
-      LIGHT GUN:
-        items:
-          - name: LIGHT GUN CROSSHAIRS
-            value: singe_crosshair
-            description: "Crosshairs in supported games e.g. ActionMax, Maddog II."
-            choices:
-              - name: Off
-                value: 1
-              - name: On
-                value: 0
 groups:
   GENERAL:
+    submenus:
+      SCREEN:
+        - name: GRAPHICS API
+          value: hypseus_api
+          description: Choose which graphics API library to use. Vulkan may not work on all hardware.
+          choices:
+            - name: OpenGL
+              value: OpenGL
+            - name: Vulkan
+              value: Vulkan
+        - name: ASPECT RATIO
+          value: hypseus_ratio
+          description: "Not all games support stretching, depending on their video files."
+          choices:
+            - name: Original
+              value: original
+            - name: Stretch
+              value: stretch
+            - name: "Force 4:3"
+              value: force_ratio
+        - name: SCREEN ROTATION
+          value: hypseus_rotate
+          description: ""
+          choices:
+            - name: 0 degrees
+              value: 0
+            - name: 90 degrees
+              value: 90
+            - name: 270 degrees
+              value: 270
+        - name: SMOOTH GAMES (BILINEAR FILTERING)
+          value: hypseus_filter
+          description: ""
+          preset: switchauto
     items:
-      - name: GRAPHICS API
-        value: hypseus_api
-        description: Choose which graphics API library to use. Vulkan may not work on all hardware.
-        choices:
-          - name: OpenGL
-            value: OpenGL
-          - name: Vulkan
-            value: Vulkan
-      - name: ASPECT RATIO
-        value: hypseus_ratio
-        description: "Not all games support stretching, depending on their video files."
-        choices:
-          - name: Original
-            value: original
-          - name: Stretch
-            value: stretch
-          - name: "Force 4:3"
-            value: force_ratio
-      - name: SCREEN ROTATION
-        value: hypseus_rotate
-        description: ""
-        choices:
-          - name: 0 degrees
-            value: 0
-          - name: 90 degrees
-            value: 90
-          - name: 270 degrees
-            value: 270
       - name: BEZELS
         value: hypseus_bezels
         description: "Enable or disable bezels being added when content is a 4:3 aspect with a widescreen display."
-        preset: switchauto
-      - name: SMOOTH GAMES (BILINEAR FILTERING)
-        value: hypseus_filter
-        description: ""
         preset: switchauto
       - name: INVERT AXIS
         value: hypseus_axis

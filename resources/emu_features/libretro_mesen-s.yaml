@@ -1,0 +1,27 @@
+emulator_name: libretro
+core_name: mesen-s
+groups:
+  CONTROLS:
+    submenus:
+      PORT 1:
+        - name: CONTROLLER TYPE
+          value: controller1_mesen-s
+          description: Device plugged into port 1.
+          retroarch_option: input_libretro_device_p1
+          choices:
+            - name: Gamepad (Default)
+              value: auto
+            - name: Mouse
+              value: '770'
+      PORT 2:
+        - name: CONTROLLER TYPE
+          value: controller2_mesen-s
+          description: Device plugged into port 2 (light guns are set in LIGHT GUNS).
+          retroarch_option: input_libretro_device_p2
+          choices:
+            - name: Gamepad (Default)
+              value: auto
+            - name: Mouse
+              value: '770'
+            - name: Multitap
+              value: '513'

@@ -1,205 +1,245 @@
+"""PPSSPP configuration: ppsspp.ini.
+
+Only the options that must work with this setup or that map to settings of the
+menu are written; the rest is left untouched, so the choices made from PPSSPP's
+own UI persist.
+
+An option the menu manages is written on every launch, with its default when the
+game does not set it, so a value picked for one game never leaks into the next.
+"""
+
+# the module name follows the <emulator>Config convention of the generators
+# pylint: disable=invalid-name
+
 from __future__ import annotations
 
+import configparser
+import getpass
 import logging
 from typing import TYPE_CHECKING, Final
 
 from runtime.paths import ensure_parents_and_open
+
 from ...utils import vulkan
+from ...utils.audio_gain import gain_to_percent
 from ...utils.configparser import CaseSensitiveConfigParser
 from .ppssppPaths import _PPSSPP_SYSDIR
-import getpass
-    
+
 if TYPE_CHECKING:
+    from ...config import SystemConfig
     from ...Emulator import Emulator
 
 _logger = logging.getLogger(__name__)
 
-ppssppConfig: Final   = _PPSSPP_SYSDIR / 'ppsspp.ini'
-ppssppControls: Final = _PPSSPP_SYSDIR / 'controls.ini'
-ppssppRetroach: Final = _PPSSPP_SYSDIR / 'ppsspp_retroachievements.dat'
+_PPSSPP_INI: Final = _PPSSPP_SYSDIR / "ppsspp.ini"
+_RETROACHIEVEMENTS_TOKEN: Final = _PPSSPP_SYSDIR / "ppsspp_retroachievements.dat"
 
-def writePPSSPPConfig(system: Emulator):
-    iniConfig = CaseSensitiveConfigParser(interpolation=None)
-    if ppssppConfig.exists():
+# values of the GraphicsBackend option
+BACKEND_OPENGL = "0 (OPENGL)"
+BACKEND_VULKAN = "3 (VULKAN)"
+_AUTO_VALUES = ("", "auto")
+
+_MAX_VOLUME = 100  # PPSSPP cannot amplify: 100 % is the loudest
+_FPS_COUNTER_BOTH = "3"  # 1 for Speed%, 2 for FPS, 3 for both
+_REWIND_EVERY_5_SECONDS = "300"
+
+
+def resolve_gfx_backend(config: SystemConfig) -> str:
+    """Return the graphics API PPSSPP will use.
+
+    Vulkan is the default. OpenGL is used when the game asks for it, or when
+    Vulkan is not available on the system.
+    """
+    requested = str(config.get("gfxbackend", BACKEND_VULKAN))
+    if requested in _AUTO_VALUES:
+        requested = BACKEND_VULKAN
+    if requested == BACKEND_VULKAN and not vulkan.is_available():
+        _logger.debug("Vulkan driver is not available on the system. Falling back to OpenGL")
+        return BACKEND_OPENGL
+    return requested
+
+
+def uses_opengl(config: SystemConfig) -> bool:
+    """Tell whether PPSSPP will render with OpenGL, which MangoHud has to be preloaded for."""
+    return resolve_gfx_backend(config) == BACKEND_OPENGL
+
+
+def _bool(config: SystemConfig, key: str, default: bool = False) -> str:
+    """Return a boolean option as the "True" or "False" text of PPSSPP's ini."""
+    return str(config.get_bool(key, default))
+
+
+def _ensure_sections(settings: CaseSensitiveConfigParser, *sections: str) -> None:
+    """Create the sections that are missing."""
+    for section in sections:
+        if not settings.has_section(section):
+            settings.add_section(section)
+
+
+def write_ppsspp_config(system: Emulator) -> None:
+    """Update ppsspp.ini for the game."""
+    settings = CaseSensitiveConfigParser(interpolation=None)
+    if _PPSSPP_INI.exists():
         try:
-            iniConfig.read(ppssppConfig, encoding='utf_8_sig')
-        except Exception:
-            pass
+            settings.read(_PPSSPP_INI, encoding="utf_8_sig")
+        except (OSError, UnicodeDecodeError, configparser.Error):
+            pass  # an unreadable file is rewritten from scratch
 
-    createPPSSPPConfig(iniConfig, system)
-    # Save the ini file
-    with ensure_parents_and_open(ppssppConfig, 'w') as configfile:
-        iniConfig.write(configfile)
+    create_ppsspp_config(settings, system)
+    with ensure_parents_and_open(_PPSSPP_INI, "w") as config_file:
+        settings.write(config_file)
 
-def writeRetroAchievements(token: str):
+
+def _write_retroachievements_token(token: str) -> None:
+    """Save the RetroAchievements token, if there is one."""
     if token:
-        with ensure_parents_and_open(ppssppRetroach, 'w') as retroach_file:
-            retroach_file.write(token)
+        with ensure_parents_and_open(_RETROACHIEVEMENTS_TOKEN, "w") as token_file:
+            token_file.write(token)
 
-def createPPSSPPConfig(iniConfig: CaseSensitiveConfigParser, system: Emulator):
 
-    ## [GRAPHICS]
-    if not iniConfig.has_section("Graphics"):
-        iniConfig.add_section("Graphics")
+def _configure_backend(settings: CaseSensitiveConfigParser, config: SystemConfig) -> None:
+    """Write the graphics API and, for Vulkan, the GPU it runs on."""
+    backend = resolve_gfx_backend(config)
+    settings.set("Graphics", "GraphicsBackend", backend)
+    if backend != BACKEND_VULKAN:
+        return
 
-    # Graphics Backend
-    gfxbackend = system.config.get("gfxbackend", "3 (VULKAN)")
-    iniConfig.set("Graphics", "GraphicsBackend", gfxbackend)
-    # If Vulkan
-    if gfxbackend == "3 (VULKAN)":
-        # Check if we have a discrete GPU & if so, set the Name
-        if vulkan.is_available():
-            _logger.debug("Vulkan driver is available on the system.")
-            if vulkan.has_discrete_gpu():
-                _logger.debug("A discrete GPU is available on the system. We will use that for performance")
-                discrete_name = vulkan.get_discrete_gpu_name()
-                if discrete_name:
-                    _logger.debug("Using Discrete GPU Name: %s for PPSSPP", discrete_name)
-                    iniConfig.set("Graphics", "VulkanDevice", discrete_name)
-                else:
-                    _logger.debug("Couldn't get discrete GPU Name")
-            else:
-                _logger.debug("Discrete GPU is not available on the system. Using default.")
-        else:
-            _logger.debug("Vulkan driver is not available on the system. Falling back to OpenGL")
-            iniConfig.set("Graphics", "GraphicsBackend", "0 (OPENGL)")
+    _logger.debug("Vulkan driver is available on the system.")
+    if not vulkan.has_discrete_gpu():
+        _logger.debug("Discrete GPU is not available on the system. Using default.")
+        return
 
-    # Resolution
-    iniConfig.set("Graphics", "InternalResolution", system.config.get_str("internal_resolution", "1"))
-
-    # Software rendering (always false)
-    iniConfig.set("Graphics", "SoftwareRenderer", "False")
-
-    # Always fullscreen
-    iniConfig.set("Graphics", "FullScreen", "True")
-
-    # VSync
-    iniConfig.set("Graphics", "VSync", str(system.config.get_bool('vsync', False)))
-
-    # Frame skipping
-    iniConfig.set("Graphics", "FrameSkip", system.config.get_str("frameskip", "0"))
-
-    # Frame skipping type - Use number and not percent
-    iniConfig.set("Graphics", "FrameSkipType", "0")
-
-    # Auto frameskip
-    iniConfig.set("Graphics", "AutoFrameSkip", str(system.config.get_bool("autoframeskip", False)))
-
-    # Skip Buffer Effects
-    iniConfig.set("Graphics", "SkipBufferEffects", str(system.config.get_bool('skip_buffer_effects', False)))
-
-    # Disable Culling
-    iniConfig.set("Graphics", "DisableRangeCulling", str(system.config.get_bool('disable_culling', False)))
-
-    # Skip GPU Readbacks
-    iniConfig.set("Graphics", "SkipGPUReadbackMode", system.config.get_str('skip_gpu_readbacks', "0"))
-
-    # Lazy texture caching
-    iniConfig.set("Graphics", "TextureBackoffCache", str(system.config.get_bool('lazy_texture_caching', False)))
-
-    # Spline / Bezier curves quality
-    iniConfig.set("Graphics", "SplineBezierQuality", system.config.get_str('curves_quality', "2"))
-
-    # Duplicate Frames
-    iniConfig.set("Graphics", "RenderDuplicateFrames", str(system.config.get_bool('duplicate_frames', False)))
-
-    # Buffer Graphics Commands
-    iniConfig.set("Graphics", "InflightFrames", system.config.get_str('buffer_graphics', "3"))
-
-    # Hardware transfom - always true
-    iniConfig.set("Graphics", "HardwareTransform", "True")
-
-    # Software skinning
-    iniConfig.set("Graphics", "SoftwareSkinning", str(system.config.get_bool('software_skinning', True)))
-
-    # Hardware Tessellation
-    iniConfig.set("Graphics", "HardwareTessellation", str(system.config.get_bool('hardware_tessellation', False)))
-
-    # Texture Scaling Type
-    iniConfig.set("Graphics", "TexScalingType", system.config.get_str("texture_scaling_type", "0"))
-
-    # Texture Scaling Level
-    iniConfig.set("Graphics", "TexScalingLevel", system.config.get_str("texture_scaling_level", "1"))
-
-    # Texture Deposterize
-    iniConfig.set("Graphics", "TexDeposterize", str(system.config.get_bool("texture_deposterize", False)))
-
-    # Anisotropic Filtering
-    iniConfig.set("Graphics", "AnisotropyLevel", system.config.get_str("anisotropic_filtering", "4"))
-
-    # Texture Filtering
-    iniConfig.set("Graphics", "TextureFiltering", system.config.get_str("texture_filtering", "1"))
-
-    # Smart 2D texture filtering
-    iniConfig.set("Graphics", "Smart2DTexFiltering", str(system.config.get_bool("smart_2d", False)))
-
-    # Display FPS
-    iniConfig.set("Graphics", "ShowFPSCounter", "3" if system.config.get_bool("show_fps", False) else "0") # 1 for Speed%, 2 for FPS, 3 for both
-
-    # Set other defaults
-    iniConfig.set("Graphics", "DisplayIntegerScale", "False")
-
-   ## [SYSTEM PARAM]
-    if not iniConfig.has_section("SystemParam"):
-        iniConfig.add_section("SystemParam")
-
-    # Forcing Nickname to Batocera or User name
-    username = getpass.getuser()
-    if system.config.get_bool('retroachievements') and (config_username := system.config.get('retroachievements.username')):
-        username = config_username
-    iniConfig.set("SystemParam", "NickName", username)
-    # Disable Encrypt Save (permit to exchange save with different machines)
-    iniConfig.set("SystemParam", "EncryptSave", "False")
-
-    # Set 32GB memstick size
-    iniConfig.set("SystemParam", "MemStickSize", "32")
-
-    ## [GENERAL]
-    if not iniConfig.has_section("General"):
-        iniConfig.add_section("General")
-
-    # First run, false
-    iniConfig.set("General", "FirstRun", "False")
-
-    # Rewinding
-    iniConfig.set("General", "RewindFlipFrequency", system.config.get_bool('rewind', return_values=("300", "0"))) # 300 = every 5 seconds
-    # Cheats
-    iniConfig.set("General", "EnableCheats", str(system.config.get_bool("enable_cheats", False)))
-    # Don't check for a new version
-    iniConfig.set("General", "CheckForNewVersion", "False")
-
-    # SaveState
-    iniConfig.set("General", "StateSlot", system.config.get_str("state_slot", "0"))
-    
-    # discord rich presence
-    iniConfig.set("General", "DiscordRichPresence", system.config.get_bool('discordrpc', False, return_values=("1", "0")))
-    
-    ## [UPGRADE] - don't upgrade
-    if not iniConfig.has_section("Upgrade"):
-        iniConfig.add_section("Upgrade")
-    iniConfig.set("Upgrade", "UpgradeMessage", "")
-    iniConfig.set("Upgrade", "UpgradeVersion", "")
-    iniConfig.set("Upgrade", "DismissedVersion", "")
-
-    ## [RetroAchievements]
-    if not iniConfig.has_section("Achievements"):
-        iniConfig.add_section("Achievements")
-
-    if system.config.get_bool('retroachievements'):
-        iniConfig.set("Achievements", "AchievementsUserName", system.config.get_str("retroachievements.username", ""))
-        iniConfig.set("Achievements", "AchievementsChallengeMode", str(system.config.get_bool("retroachievements.hardcore", False)))
-        iniConfig.set("Achievements", "AchievementsEncoreMode", str(system.config.get_bool("retroachievements.encore", False)))
-        iniConfig.set("Achievements", "AchievementsUnofficial", str(system.config.get_bool("retroachievements.unofficial", False)))
-        iniConfig.set("Achievements", "AchievementsSoundEffects", "True")
-        iniConfig.set("Achievements", "AchievementsEnable", "True")
-        writeRetroAchievements(system.config.get_str("retroachievements.token", ""))
+    _logger.debug("A discrete GPU is available on the system. We will use that for performance")
+    if discrete_name := vulkan.get_discrete_gpu_name():
+        _logger.debug("Using Discrete GPU Name: %s for PPSSPP", discrete_name)
+        settings.set("Graphics", "VulkanDevice", discrete_name)
     else:
-        iniConfig.set("Achievements", "AchievementsEnable", "False")
-        iniConfig.set("Achievements", "AchievementsChallengeMode", "False")
+        _logger.debug("Couldn't get discrete GPU Name")
 
-    # Custom : allow the user to configure directly PPSSPP via batocera.conf via lines like : ppsspp.section.option=value
-    for section_option, user_config_value in system.config.items(starts_with='ppsspp.'):
-        custom_section, _, custom_option = section_option.partition('.')
-        if not iniConfig.has_section(custom_section):
-            iniConfig.add_section(custom_section)
-        iniConfig.set(custom_section, custom_option, str(user_config_value))
+
+def _configure_graphics(settings: CaseSensitiveConfigParser, config: SystemConfig) -> None:
+    """Write the [Graphics] section."""
+    _configure_backend(settings, config)
+
+    options = {
+        "InternalResolution": config.get_str("internal_resolution", "1"),
+        "SoftwareRenderer": "False",  # always false
+        "FullScreen": "True",  # always fullscreen
+        "VSync": _bool(config, "vsync"),
+        "FrameSkip": config.get_str("frameskip", "0"),
+        "FrameSkipType": "0",  # a number of frames, not a percent
+        "AutoFrameSkip": _bool(config, "autoframeskip"),
+        "SkipBufferEffects": _bool(config, "skip_buffer_effects"),
+        "DisableRangeCulling": _bool(config, "disable_culling"),
+        "SkipGPUReadbackMode": config.get_str("skip_gpu_readbacks", "0"),
+        "TextureBackoffCache": _bool(config, "lazy_texture_caching"),
+        "SplineBezierQuality": config.get_str("curves_quality", "2"),
+        "RenderDuplicateFrames": _bool(config, "duplicate_frames"),
+        "InflightFrames": config.get_str("buffer_graphics", "3"),
+        "HardwareTransform": "True",  # always true
+        "SoftwareSkinning": _bool(config, "software_skinning", True),
+        "HardwareTessellation": _bool(config, "hardware_tessellation"),
+        "TexScalingType": config.get_str("texture_scaling_type", "0"),
+        "TexScalingLevel": config.get_str("texture_scaling_level", "1"),
+        "TexDeposterize": _bool(config, "texture_deposterize"),
+        "AnisotropyLevel": config.get_str("anisotropic_filtering", "4"),
+        "TextureFiltering": config.get_str("texture_filtering", "1"),
+        "Smart2DTexFiltering": _bool(config, "smart_2d"),
+        # the FPS counter is the global "display_fps" option of the menu
+        "ShowFPSCounter": (
+            _FPS_COUNTER_BOTH
+            if config.get_bool("display_fps") or config.get_bool("show_fps")
+            else "0"
+        ),
+        "DisplayIntegerScale": "False",
+    }
+    for option, value in options.items():
+        settings.set("Graphics", option, value)
+
+
+def _configure_sound(settings: CaseSensitiveConfigParser, config: SystemConfig) -> None:
+    """Write the game volume that corresponds to the audio gain of the game."""
+    # PPSSPP cannot amplify, so 0 dB is the loudest: a positive gain is the same as 0 dB
+    volume = gain_to_percent(config.get("ppsspp_audio_gain", "0"), _MAX_VOLUME)
+    settings.set("Sound", "GameVolume", str(volume))
+
+
+def _configure_system_param(settings: CaseSensitiveConfigParser, config: SystemConfig) -> None:
+    """Write [SystemParam]: the nickname and the save options."""
+    # Forcing the nickname to the user name, or to the RetroAchievements one
+    username = getpass.getuser()
+    if config.get_bool("retroachievements") and (
+        config_username := config.get("retroachievements.username")
+    ):
+        username = config_username
+    settings.set("SystemParam", "NickName", username)
+    # Do not encrypt saves, so they can be exchanged between machines
+    settings.set("SystemParam", "EncryptSave", "False")
+    settings.set("SystemParam", "MemStickSize", "32")  # 32 GB memory stick
+
+
+def _configure_general(settings: CaseSensitiveConfigParser, config: SystemConfig) -> None:
+    """Write [General]: first run, rewind, cheats, save state slot and Discord."""
+    settings.set("General", "FirstRun", "False")
+    settings.set(
+        "General",
+        "RewindFlipFrequency",
+        config.get_bool("rewind", return_values=(_REWIND_EVERY_5_SECONDS, "0")),
+    )
+    settings.set("General", "EnableCheats", _bool(config, "enable_cheats"))
+    settings.set("General", "CheckForNewVersion", "False")
+    settings.set("General", "StateSlot", config.get_str("state_slot", "0"))
+    settings.set(
+        "General",
+        "DiscordRichPresence",
+        config.get_bool("discordrpc", False, return_values=("1", "0")),
+    )
+
+
+def _configure_achievements(settings: CaseSensitiveConfigParser, config: SystemConfig) -> None:
+    """Write [Achievements]."""
+    if not config.get_bool("retroachievements"):
+        settings.set("Achievements", "AchievementsEnable", "False")
+        settings.set("Achievements", "AchievementsChallengeMode", "False")
+        return
+
+    settings.set(
+        "Achievements", "AchievementsUserName", config.get_str("retroachievements.username", "")
+    )
+    settings.set(
+        "Achievements", "AchievementsChallengeMode", _bool(config, "retroachievements.hardcore")
+    )
+    settings.set(
+        "Achievements", "AchievementsEncoreMode", _bool(config, "retroachievements.encore")
+    )
+    settings.set(
+        "Achievements", "AchievementsUnofficial", _bool(config, "retroachievements.unofficial")
+    )
+    settings.set("Achievements", "AchievementsSoundEffects", "True")
+    settings.set("Achievements", "AchievementsEnable", "True")
+    _write_retroachievements_token(config.get_str("retroachievements.token", ""))
+
+
+def create_ppsspp_config(settings: CaseSensitiveConfigParser, system: Emulator) -> None:
+    """Fill the settings of ppsspp.ini for the game."""
+    config = system.config
+    _ensure_sections(
+        settings, "Graphics", "Sound", "SystemParam", "General", "Upgrade", "Achievements"
+    )
+
+    _configure_graphics(settings, config)
+    _configure_sound(settings, config)
+    _configure_system_param(settings, config)
+    _configure_general(settings, config)
+
+    # don't upgrade
+    for option in ("UpgradeMessage", "UpgradeVersion", "DismissedVersion"):
+        settings.set("Upgrade", option, "")
+
+    _configure_achievements(settings, config)
+
+    # Custom: the user can configure PPSSPP directly with lines like ppsspp.section.option=value
+    for section_option, user_value in config.items(starts_with="ppsspp."):
+        section, _, option = section_option.partition(".")
+        _ensure_sections(settings, section)
+        settings.set(section, option, str(user_value))

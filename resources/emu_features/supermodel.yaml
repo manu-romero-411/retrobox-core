@@ -12,6 +12,51 @@ sharedFeatures:
   - wheel_deadzone
   - wheel_midzone
 groups:
+  GENERAL:
+    items:
+      - name: WIDESCREEN HACK (GLITCHY)
+        value: m3_wideScreen
+        description: Enhancement. Only works with a 16/9 ratio and bezels disabled.
+        choices:
+          - name: Off
+            value: 0
+          - name: On
+            value: 1
+      - name: UPSCALE MODE
+        value: upscale_mode
+        description: Upscale filter used for the 2D layers. Requires New 3D engine.
+        choices:
+          - name: None/Sharp Pixels
+            value: 0
+          - name: Biquintic
+            value: 1
+          - name: Bilinear (Default)
+            value: 2
+          - name: Bicubic
+            value: 3
+      - name: RUMBLE
+        value: forceFeedback
+        description: Only some games feature rumble. Not compatible with all controllers.
+        choices:
+          - name: Off
+            value: 0
+          - name: On
+            value: 1
+  CONTROLS:
+    submenus:
+      LIGHT GUNS:
+        - name: SHOW LIGHT GUN CROSSHAIRS
+          value: crosshairs
+          description: Enable crosshairs in shooting games for the selected players.
+          choices:
+            - name: None
+              value: 0
+            - name: P1 only
+              value: 1
+            - name: P2 only
+              value: 2
+            - name: "P1 & P2"
+              value: 3
   ADVANCED OPTIONS:
     items:
       - name: 3D ENGINE
@@ -80,47 +125,3 @@ groups:
             value: 140
           - name: 150
             value: 150
-  GENERAL:
-    items:
-      - name: WIDESCREEN HACK (GLITCHY)
-        value: m3_wideScreen
-        description: Enhancement. Only works with a 16/9 ratio and bezels disabled.
-        choices:
-          - name: Off
-            value: 0
-          - name: On
-            value: 1
-      - name: UPSCALE MODE
-        value: upscale_mode
-        description: Upscale filter used for the 2D layers. Requires New 3D engine.
-        choices:
-          - name: None/Sharp Pixels
-            value: 0
-          - name: Biquintic
-            value: 1
-          - name: Bilinear (Default)
-            value: 2
-          - name: Bicubic
-            value: 3
-      - name: RUMBLE
-        value: forceFeedback
-        description: Only some games feature rumble. Not compatible with all controllers.
-        choices:
-          - name: Off
-            value: 0
-          - name: On
-            value: 1
-  LIGHT GUN:
-    items:
-      - name: SHOW LIGHT GUN CROSSHAIRS
-        value: crosshairs
-        description: Enable crosshairs in shooting games for the selected players.
-        choices:
-          - name: None
-            value: 0
-          - name: P1 only
-            value: 1
-          - name: P2 only
-            value: 2
-          - name: "P1 & P2"
-            value: 3

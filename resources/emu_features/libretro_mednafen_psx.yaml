@@ -1,0 +1,22 @@
+emulator_name: libretro
+core_name: mednafen_psx
+groups:
+  GENERAL:
+    submenus:
+      SCREEN:
+        - name: INTERNAL RESOLUTION
+          value: beetle_psx_hw_internal_resolution
+          description: Multiplies the native PlayStation resolution. Needs a hardware renderer. Bigger is sharper and slower.
+          choices:
+            - name: Auto (Default)
+              value: auto
+            - name: 1x (native)
+              value: 1x(native)
+            - name: 2x
+              value: 2x
+            - name: 4x
+              value: 4x
+            - name: 8x
+              value: 8x
+            - name: 16x
+              value: 16x

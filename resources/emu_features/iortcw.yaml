@@ -10,7 +10,7 @@ sharedFeatures:
 groups:
   GENERAL:
     submenus:
-      GRAPHICS:
+      SCREEN:
         - name: RENDERER
           value: iortcw_api
           description: Choose your preferred renderer.

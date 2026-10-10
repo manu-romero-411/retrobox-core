@@ -8,7 +8,7 @@ sharedFeatures:
 groups:
   GENERAL:
     submenus:
-      GRAPHICS:
+      SCREEN:
         - name: RENDERING RESOLUTION
           value: azahar_resolution_factor
           description: Enhancement. Increase the rendering resolution. Makes 3D objects clearer.

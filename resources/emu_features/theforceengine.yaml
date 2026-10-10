@@ -10,7 +10,7 @@ sharedFeatures:
 groups:
   GENERAL:
     submenus:
-      GRAPHICS:
+      SCREEN:
         - name: RENDERING RESOLUTION
           value: force_render_res
           description: Enhancement. Increase the rendering resolution. Makes 3D objects clearer.
@@ -137,23 +137,24 @@ groups:
               value: 0
             - name: Enabled
               value: 1
+      AUDIO:
+        - name: MENU SOUNDS
+          value: force_menu_sound
+          description: Enable / Disable sound in menus.
+          choices:
+            - name: Disabled
+              value: 0
+            - name: Enabled (Default)
+              value: 1
+        - name: DIGITAL AUDIO
+          value: force_digital_audio
+          description: "Enable 16-channel iMuse Digital Audio."
+          choices:
+            - name: Disabled (Default)
+              value: 0
+            - name: Enabled
+              value: 1
     items:
-      - name: MENU SOUNDS
-        value: force_menu_sound
-        description: Enable / Disable sound in menus.
-        choices:
-          - name: Disabled
-            value: 0
-          - name: Enabled (Default)
-            value: 1
-      - name: DIGITAL AUDIO
-        value: force_digital_audio
-        description: "Enable 16-channel iMuse Digital Audio."
-        choices:
-          - name: Disabled (Default)
-            value: 0
-          - name: Enabled
-            value: 1
       - name: FIGHT MUSIC
         value: force_fight_music
         description: Enable / Disable fight music.

@@ -13,29 +13,55 @@ sharedFeatures:
   - wheel_midzone
 groups:
   GENERAL:
+    submenus:
+      SCREEN:
+        - name: GRAPHICS API
+          value: play_api
+          description: Choose which graphics API library to use.
+          choices:
+            - name: OpenGL (Default)
+              value: 0
+            - name: Vulkan
+              value: 1
+        - name: OPENGL RENDERING RESOLUTION
+          value: play_scale
+          description: Enhancement. Increase the rendering resolution. Makes 3D objects clearer.
+          choices:
+            - name: 1x (~480)
+              value: 1
+            - name: 2x (~960)
+              value: 2
+            - name: 4x (~1920p)
+              value: 4
+            - name: 8x (~4320p / 8k)
+              value: 8
+            - name: 16x (~7680p / 16k)
+              value: 16
+        - name: ENABLE WIDESCREEN
+          value: play_widescreen
+          description: Enable widescreen support.
+          choices:
+            - name: Disabled
+              value: false
+            - name: Enabled
+              value: true
+        - name: VSYNC
+          value: use_vsync
+          description: Fix screen tearing.
+          choices:
+            - name: Disabled
+              value: false
+            - name: Enabled
+              value: true
+        - name: SMOOTH GAMES (BILINEAR FILTERING)
+          value: play_filter
+          description: Only applicable when using OpenGL.
+          choices:
+            - name: Disabled
+              value: false
+            - name: Enabled
+              value: true
     items:
-      - name: GRAPHICS API
-        value: play_api
-        description: Choose which graphics API library to use.
-        choices:
-          - name: OpenGL (Default)
-            value: 0
-          - name: Vulkan
-            value: 1
-      - name: OPENGL RENDERING RESOLUTION
-        value: play_scale
-        description: Enhancement. Increase the rendering resolution. Makes 3D objects clearer.
-        choices:
-          - name: 1x (~480)
-            value: 1
-          - name: 2x (~960)
-            value: 2
-          - name: 4x (~1920p)
-            value: 4
-          - name: 8x (~4320p / 8k)
-            value: 8
-          - name: 16x (~7680p / 16k)
-            value: 16
       - name: PRESENTATION MODE
         value: play_mode
         description: ""
@@ -46,30 +72,6 @@ groups:
             value: 1
           - name: Original Size
             value: 2
-      - name: ENABLE WIDESCREEN
-        value: play_widescreen
-        description: Enable widescreen support.
-        choices:
-          - name: Disabled
-            value: false
-          - name: Enabled
-            value: true
-      - name: VSYNC
-        value: use_vsync
-        description: Fix screen tearing.
-        choices:
-          - name: Disabled
-            value: false
-          - name: Enabled
-            value: true
-      - name: SMOOTH GAMES (BILINEAR FILTERING)
-        value: play_filter
-        description: Only applicable when using OpenGL.
-        choices:
-          - name: Disabled
-            value: false
-          - name: Enabled
-            value: true
       - name: LANGUAGE
         value: play_language
         description: Change the game's language.
