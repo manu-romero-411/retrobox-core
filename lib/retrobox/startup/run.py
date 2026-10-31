@@ -7,15 +7,15 @@ Installed PC games (Steam, Heroic, Lutris) are synced into their
 EmulationStation ROM directories before startup as retrobox.ini says
 ([core] steam_sync, heroic_sync, lutris_sync: none, on-base-dir or
 follow-roms-dir; none by default). If EmulationStation has no theme at all,
-the default one is downloaded first, and so are the default bezels on the
-very first start (see retrobox.startup.downloads), showing the progress on
-the setup screen.
+the default one is downloaded first, and so are the default bezels and
+shaders the first time they are on offer (see retrobox.startup.downloads),
+showing the progress on the setup screen.
 
-Accepts two flags of its own, "--update-default-theme" and
-"--update-default-bezels", which download that content again (updating or
-reinstalling it) before startup. Every other argument is forwarded to
-EmulationStation untouched, except the retired "--pcgames-sync" flag, which
-is dropped with a warning.
+Accepts three flags of its own, "--update-default-theme",
+"--update-default-bezels" and "--update-default-shaders", which download
+that content again (updating or reinstalling it) before startup. Every
+other argument is forwarded to EmulationStation untouched, except the
+retired "--pcgames-sync" flag, which is dropped with a warning.
 """
 
 from __future__ import annotations
@@ -61,7 +61,7 @@ from retrobox.startup.frontend_conf.system_list_generator import generate_es_sys
 from retrobox.startup.frontend_conf.pcgames_utils import sync_pcgames
 from retrobox.emusetup import EXIT_UNAVAILABLE
 from retrobox.emusetup.launch import run_screen
-from retrobox.startup.downloads import install_all, labels, mark_started, pending
+from retrobox.startup.downloads import install_all, labels, pending
 
 _logger = logging.getLogger(__name__)
 
@@ -154,16 +154,15 @@ def setup_emulationstation_config() -> None:
 
 
 def download_before_start(updates: frozenset[str]) -> None:
-    """Download the default theme / bezels if they are due (see downloads.pending).
+    """Download the default theme, bezels and shaders if due (see downloads.pending).
 
     The download runs on the setup screen, so its progress is visible (and
     it can be cancelled); without a screen it runs here, in the log.
 
     Args:
-        updates: Packages to download again anyway ("theme", "bezels").
+        updates: Packages to download again anyway ("theme", "bezels", "shaders").
     """
-    keys = pending("theme" in updates, "bezels" in updates)
-    mark_started()
+    keys = pending(updates)
     if not keys:
         return
     _logger.info("Downloading before starting: %s", labels(keys))
@@ -185,7 +184,7 @@ def run_emulationstation(args: list[str], updates: frozenset[str] = frozenset())
     Args:
         args: List of command-line arguments to pass to EmulationStation.
         updates: Default content to download again before starting
-            ("theme", "bezels").
+            ("theme", "bezels", "shaders").
 
     Returns:
         The return code of the EmulationStation process.
@@ -279,6 +278,7 @@ _RETIRED_PCGAMES_SYNC_FLAG = "--pcgames-sync"
 _UPDATE_FLAGS = {
     "--update-default-theme": "theme",
     "--update-default-bezels": "bezels",
+    "--update-default-shaders": "shaders",
 }
 
 

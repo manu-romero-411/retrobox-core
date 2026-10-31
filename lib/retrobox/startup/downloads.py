@@ -4,18 +4,24 @@ Content Retrobox downloads before EmulationStation starts.
 * ``theme``: the default theme, es-theme-iconic, into THEMES_DIR. Installed
   whenever EmulationStation has no theme at all (retrobox-core ships none).
 * ``bezels``: the RetroBat bezels, the default decorations, into
-  _DECORATIONS_DEF_DIR. Installed on the first start only (when that
-  directory is still empty).
+  _DECORATIONS_DEF_DIR.
+* ``shaders``: Retrobox's shaders and their sets (``configs/``), into
+  _SHADERS_DIR.
 
-``retrobox --update-default-theme`` / ``--update-default-bezels`` download
-them again, updating them or reinstalling them if they were removed.
+Bezels and shaders are installed once, the first time Retrobox starts with
+them on offer (the bezels only if their directory holds no files yet):
+deleting them later doesn't bring them back. ``retrobox --update-default-theme``,
+``--update-default-bezels`` and ``--update-default-shaders`` download them
+again, updating them or reinstalling them if they were removed.
 
 Each package is the latest commit of a GitHub repository, streamed as a
 tar.gz archive and unpacked on the fly (no archive is kept on disk, which
 matters for the bezels). Everything is unpacked into a hidden staging
-directory next to the target, and an installed copy is only replaced once
+directory next to the target, and an installed copy is only touched once
 the new one is complete and valid: a failed or cancelled download leaves it
-untouched. Nothing here stops the frontend from starting.
+untouched. The theme and the bezels replace their directory as a whole (it
+belongs to Retrobox); the shaders are merged into theirs, which may also
+hold the user's own shaders. Nothing here stops the frontend from starting.
 
 Run as ``python3 -m retrobox.startup.downloads PACKAGE...`` it downloads the
 given packages, printing its progress: this is what the setup screen
@@ -37,7 +43,13 @@ from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING, BinaryIO, Final
 
 from retrobox.configgen.utils.logger import OK, setup_logging
-from retrobox.paths import _DECORATIONS_DEF_DIR, FRONTEND_DIR, STATE_DIR, THEMES_DIR
+from retrobox.paths import (
+    _DECORATIONS_DEF_DIR,
+    _SHADERS_DIR,
+    FRONTEND_DIR,
+    STATE_DIR,
+    THEMES_DIR,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Sequence
@@ -48,8 +60,10 @@ _TIMEOUT_S: Final = 60
 _CHUNK: Final = 1 << 16
 _PROGRESS_EVERY_S: Final = 0.5
 _MIB: Final = 1 << 20
-# Present once Retrobox has started at least once (see is_first_start).
-_FIRST_START_DONE: Final = STATE_DIR / "first-start.done"
+# Keys of the "once" packages already offered, one per line (see pending).
+_OFFERED: Final = STATE_DIR / "downloads-offered"
+# Its predecessor (v0.0.29): present once the bezels had been offered.
+_LEGACY_FIRST_START: Final = STATE_DIR / "first-start.done"
 
 
 @dataclass(frozen=True, slots=True)
@@ -59,7 +73,9 @@ class Package:
     name: str  # shown to the user
     url: str  # .tar.gz of a branch
     target: Path  # directory it is installed as
-    marker: str = ""  # file that must be at the root of a valid copy
+    marker: str = ""  # file that must be in a valid copy (relative path)
+    once: bool = False  # offered once, else whenever the content is missing
+    merge: bool = False  # merged into the target instead of replacing it
 
 
 PACKAGES: Final[dict[str, Package]] = {
@@ -73,6 +89,15 @@ PACKAGES: Final[dict[str, Package]] = {
         name="RetroBat bezels",
         url="https://github.com/RetroBat-Official/retrobat-bezels/archive/refs/heads/master.tar.gz",
         target=_DECORATIONS_DEF_DIR,
+        once=True,
+    ),
+    "shaders": Package(
+        name="Retrobox shaders",
+        url="https://github.com/RetroboxProject/retrobox-shaders/archive/refs/heads/main.tar.gz",
+        target=_SHADERS_DIR,
+        marker="configs/rendering-defaults.yml",
+        once=True,
+        merge=True,
     ),
 }
 
@@ -94,34 +119,60 @@ def has_theme() -> bool:
     return False
 
 
-def _is_empty(directory: Path) -> bool:
+def _has_files(directory: Path) -> bool:
+    """Whether ``directory`` holds any file (empty subdirectories don't count:
+    the startup creates some of them, e.g. the shaders' ``configs``)."""
     try:
-        return not any(directory.iterdir())
+        return any(path.is_file() for path in directory.rglob("*"))
     except OSError:
-        return True
+        return False
 
 
-def is_first_start() -> bool:
-    """True until mark_started() has been called once."""
-    return not _FIRST_START_DONE.exists()
-
-
-def mark_started() -> None:
-    """Remember that Retrobox has started (see is_first_start)."""
+def _offered() -> set[str]:
+    """The "once" packages already offered."""
     try:
-        _FIRST_START_DONE.parent.mkdir(parents=True, exist_ok=True)
-        _FIRST_START_DONE.touch()
+        offered = set(_OFFERED.read_text(encoding="utf-8").split())
+    except OSError:
+        offered = set()
+    if _LEGACY_FIRST_START.exists():
+        offered.add("bezels")
+    return offered
+
+
+def _mark_offered(keys: Iterable[str]) -> None:
+    offered = _offered() | set(keys)
+    try:
+        _OFFERED.parent.mkdir(parents=True, exist_ok=True)
+        _OFFERED.write_text("".join(f"{key}\n" for key in sorted(offered)), encoding="utf-8")
+        _LEGACY_FIRST_START.unlink(missing_ok=True)
     except OSError as exc:
-        _logger.warning("Couldn't write %s: %s", _FIRST_START_DONE, exc)
+        _logger.warning("Couldn't write %s: %s", _OFFERED, exc)
 
 
-def pending(update_theme: bool = False, update_bezels: bool = False) -> list[str]:
-    """The packages to download before this start (keys of PACKAGES)."""
+def pending(updates: Iterable[str] = ()) -> list[str]:
+    """The packages to download before this start (keys of PACKAGES).
+
+    Every "once" package is recorded as offered right away, whatever happens
+    to its download (it can be cancelled): only the update flags bring it
+    back.
+
+    Args:
+        updates: Packages to download again anyway (the --update-* flags).
+    """
+    updates = set(updates)
+    offered = _offered()
     keys = []
-    if update_theme or not has_theme():
-        keys.append("theme")
-    if update_bezels or (is_first_start() and _is_empty(PACKAGES["bezels"].target)):
-        keys.append("bezels")
+    for key, package in PACKAGES.items():
+        if key in updates:
+            keys.append(key)
+        elif package.once:
+            # a merge never overwrites anything of the user's; a replacement
+            # only goes ahead over a folder without files
+            if key not in offered and (package.merge or not _has_files(package.target)):
+                keys.append(key)
+        elif key == "theme" and not has_theme():
+            keys.append(key)
+    _mark_offered(key for key, package in PACKAGES.items() if package.once)
     return keys
 
 
@@ -185,14 +236,29 @@ def _root_of(extracted: Path, package: Package) -> Path:
     entries = list(extracted.iterdir())
     root = entries[0] if len(entries) == 1 and entries[0].is_dir() else extracted
     if package.marker and not (root / package.marker).is_file():
-        raise ValueError(f"no {package.marker} at the root of the archive")
-    if _is_empty(root):
+        raise ValueError(f"no {package.marker} in the archive")
+    if not _has_files(root):
         raise ValueError("the archive is empty")
     return root
 
 
+def _merge(source: Path, target: Path) -> None:
+    """Move every file of ``source`` into ``target``, replacing same-named ones.
+
+    Files only ``target`` has (the user's own) are kept. Each move is a
+    rename within one filesystem.
+    """
+    for path in sorted(source.rglob("*")):
+        destination = target / path.relative_to(source)
+        if path.is_dir():
+            destination.mkdir(parents=True, exist_ok=True)
+        else:
+            path.replace(destination)
+
+
 def install(package: Package) -> bool:
-    """Download ``package`` and install it, replacing any previous copy.
+    """Download ``package`` and install it, replacing (or merging into) any
+    previous copy.
 
     Returns:
         True if it was installed.
@@ -218,10 +284,13 @@ def install(package: Package) -> bool:
                     progress.finish()
             root = _root_of(extracted, package)
 
-            # the previous copy goes into the staging directory, deleted on the way out
-            if target.exists():
-                target.rename(staging / "previous")
-            root.rename(target)
+            if package.merge and target.is_dir():
+                _merge(root, target)
+            else:
+                # the previous copy goes into the staging directory, deleted on the way out
+                if target.exists():
+                    target.rename(staging / "previous")
+                root.rename(target)
     except (OSError, tarfile.TarError, ValueError) as exc:
         _logger.error("Couldn't install %s: %s", package.name, exc)
         return False

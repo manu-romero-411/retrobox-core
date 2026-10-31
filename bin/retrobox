@@ -25,10 +25,10 @@
 # All of the above are maintenance operations: they run and then exit,
 # they don't start the frontend afterwards. Any other argument is passed
 # through to retrobox.startup (lib/retrobox/startup/run.py) untouched, which
-# hands it to EmulationStation, except --update-default-theme and
-# --update-default-bezels: retrobox.startup consumes them, downloads the
-# default theme (es-theme-iconic) / bezels (RetroBat's) again and then starts
-# the frontend. Syncing installed PC games (Steam, Heroic, Lutris)
+# hands it to EmulationStation, except the --update-default-{theme,bezels,
+# shaders} flags: retrobox.startup consumes them, downloads the default theme
+# (es-theme-iconic) / bezels (RetroBat's) / shaders (retrobox-shaders) again
+# and then starts the frontend. Syncing installed PC games (Steam, Heroic, Lutris)
 # before the frontend starts is set in retrobox.ini: steam_sync, heroic_sync
 # and lutris_sync under [core].
 set -eo pipefail
@@ -130,6 +130,10 @@ Usage: $(basename "${BASH_SOURCE[0]}") [OPTIONS] [-- ARGS...]
 --update-default-bezels     The same for the default bezels (RetroBat's).
                             Without it, they are only installed on the
                             first start.
+--update-default-shaders    The same for Retrobox's shaders, which are
+                            merged into the shaders folder (your own
+                            shaders there are kept). Without it, they are
+                            only installed on the first start.
 
 Anything else is forwarded as-is to retrobox.startup (lib/retrobox/startup/run.py),
 which in turn passes it to the frontend (EmulationStation).

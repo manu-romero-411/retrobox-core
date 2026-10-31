@@ -35,8 +35,10 @@ BIOS: Final = get_configured_path("bios_dir", DATA_DIR / "bios")
 OVERLAYS: Final = check_env_dirs("OVERLAYS_DIR", DATA_DIR / "overlay")
 CHEATS: Final = check_env_dirs("CHEATS_DIR", DATA_DIR / "cheats")
 
+# Shaders are not shipped either: retrobox.startup.downloads merges Retrobox's
+# into this directory on the first start (retrobox --update-default-shaders),
+# next to the user's own.
 _SHADERS_DIR: Final = check_env_dirs("SHADERS_DIR", DATA_DIR / "shaders")
-_SHADERS_DEF_DIR: Final = check_env_dirs("SHADERS_DEFAULT_DIR", SHARE_DIR / "shaders")
 
 _DECORATIONS_DIR: Final = check_env_dirs("BEZELS_DIR", DATA_DIR / "decorations")
 # Default (RetroBat) bezels are not shipped: retrobox.startup.downloads
