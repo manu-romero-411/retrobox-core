@@ -436,6 +436,13 @@ def _apply_input_settings(config: dict[str, object], launch: LibretroLaunch) -> 
 
     config["input_joypad_driver"] = "udev"
     config["input_driver"] = "udev"
+    # The configgen already writes every player's binds and joypad index
+    # (libretroControllers), so RetroArch's own autodetection only gets in the
+    # way: it looks for a profile of each pad in joypad_autoconfig_dir, which
+    # holds just the user's custom vid-pid profiles that the configgen itself
+    # reads, and shows "<pad> not configured" when there is none, even though
+    # the pad is fully mapped. Disabling it skips that lookup and its message.
+    config["input_autodetect_enable"] = '"false"'
     config["input_max_users"] = str(max(len(controllers), 1))
     config["input_libretro_device_p1"] = "1"
     config["input_libretro_device_p2"] = "1"
