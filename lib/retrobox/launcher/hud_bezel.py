@@ -25,9 +25,9 @@ if TYPE_CHECKING:
 _logger = logging.getLogger(__name__)
 
 # Bezels cover the whole target resolution. If the bezel aspect ratio does not
-# match the screen one, it is stretched by default, instead of being rejected or
-# padded with black; the "bezel_stretch" option of the game can turn that off.
-_DEFAULT_BEZEL_STRETCH = True
+# match the screen one, it is stretched by default (see DEFAULT_BEZEL_STRETCH in
+# configgen.utils.bezels) instead of being rejected; the "bezel_stretch" option
+# of the game can turn that off.
 # max cover proportion and ratio distortion (only used when not stretching)
 _MAX_COVER = 0.05  # 5%
 _MAX_RATIO_DELTA = 0.01
@@ -66,7 +66,10 @@ def _load_overlay(
     else:
         _logger.debug("hud enabled. trying to apply the bezel %s", bezel)
 
-        bezel_infos = bezels_util.get_bezel_infos(rom, bezel, system.name, system.config.emulator)
+        bezel_infos = bezels_util.get_bezel_infos(
+            rom, bezel, system.name, system.config.emulator,
+            screen=(resolution["width"], resolution["height"]),
+        )
         if bezel_infos is None:
             _logger.debug("no bezel info file found")
             return None
@@ -200,7 +203,7 @@ def get_hud_bezel(
         return None
 
     bezel_size = _bezel_size(overlay)
-    stretch = system.config.get_bool("bezel_stretch", _DEFAULT_BEZEL_STRETCH)
+    stretch = system.config.get_bool("bezel_stretch", bezels_util.DEFAULT_BEZEL_STRETCH)
 
     if not stretch:
         ingame_ratio = generator.getInGameRatio(system.config, game_resolution, rom)

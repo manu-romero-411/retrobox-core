@@ -67,8 +67,10 @@ def _find_overlay(request: BezelRequest) -> _Overlay | None:
     if request.bezel is None:
         return None
 
+    resolution = request.resolution
     found = bezels_util.get_bezel_infos(
-        request.rom, request.bezel, request.system.name, "retroarch"
+        request.rom, request.bezel, request.system.name, "retroarch",
+        screen=(resolution["width"], resolution["height"]),
     )
     if found is None:
         return None
@@ -264,7 +266,9 @@ def write_bezel_config(request: BezelRequest, config: dict[str, object]) -> None
     overlay_png = overlay.png
 
     if adaptation:
-        stretch = request.system.config.get_bool("bezel_stretch")
+        stretch = request.system.config.get_bool(
+            "bezel_stretch", bezels_util.DEFAULT_BEZEL_STRETCH
+        )
         if (
             request.resolution["width"] < infos["width"]
             or request.resolution["height"] < infos["height"]

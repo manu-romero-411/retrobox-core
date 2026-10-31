@@ -217,7 +217,11 @@ def _find_bezel_files(request: MameBezelRequest) -> Mapping[str, Any] | None:
     if request.bezel is None:
         return None
 
-    return bezels_util.get_bezel_infos(request.rom, request.bezel, request.system.name, "mame")
+    resolution = request.resolution
+    return bezels_util.get_bezel_infos(
+        request.rom, request.bezel, request.system.name, "mame",
+        screen=(resolution["width"], resolution["height"]),
+    )
 
 
 def _link_layout_bezel(files: Mapping[str, Any], art_dir: Path) -> tuple[Path, _Geometry]:
@@ -290,4 +294,3 @@ def write_bezel_config(request: MameBezelRequest) -> None:
     settings = resolve_bezel_settings(request.system.config)
     if settings.has_tattoo:
         _apply_tattoo(request.system, bezel_link, geometry, settings)
-

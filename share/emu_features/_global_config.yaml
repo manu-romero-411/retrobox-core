@@ -40,7 +40,8 @@ groups:
           preset: bezel
         - name: "STRETCH BEZELS (4K & ULTRAWIDE)"
           value: bezel_stretch
-          description: ""
+          description: >-
+            On by default: a bezel made for another aspect ratio is stretched or narrowed to the screen. Off: it is padded with black, or not shown. A bezel made for the screen's ratio (e.g. megadrive_16_10.png) is always preferred.
           choices:
             - name: On
               value: 1

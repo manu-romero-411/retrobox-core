@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+import math
 import struct
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, TypedDict, cast
@@ -31,6 +32,18 @@ _logger = logging.getLogger(__name__)
 
 _TATTOOED_BEZEL_PNG = RUNTIME_DIR / "bezel_tattooed.png"
 _QRCODE_BEZEL_PNG = RUNTIME_DIR / "bezel_qrcode.png"
+
+# Aspect ratios a bezel can be made for, named as in its file name suffix
+# (megadrive_16_10.png). A screen matches the ones within _RATIO_TOLERANCE
+# (relative), so e.g. 2560x1080 (64:27) still finds a 21_9 bezel.
+_NAMED_RATIOS: tuple[tuple[int, int], ...] = (
+    (1, 1), (5, 4), (4, 3), (3, 2), (16, 10), (16, 9), (21, 9), (32, 9),
+)
+_RATIO_TOLERANCE = 0.03
+
+# A bezel whose aspect ratio doesn't match the screen is stretched (or
+# narrowed) to it unless the "bezel_stretch" option of the game is off.
+DEFAULT_BEZEL_STRETCH = True
 
 
 class BezelInfos(TypedDict):
@@ -77,11 +90,52 @@ def _candidates_for_root(
     return result
 
 
+def ratio_suffixes(width: int, height: int) -> list[str]:
+    """File name suffixes of the bezels made for a ``width`` x ``height`` screen.
+
+    The named ratios close enough to the screen's, closest first, then the
+    screen's own reduced fraction if it is none of them (e.g. 1440x900 ->
+    ["16_10", "8_5"]).
+    """
+    if width <= 0 or height <= 0:
+        return []
+    actual = width / height
+    close = sorted(
+        (abs(w / h - actual) / actual, f"{w}_{h}")
+        for w, h in _NAMED_RATIOS
+        if abs(w / h - actual) / actual <= _RATIO_TOLERANCE
+    )
+    suffixes = [name for _, name in close]
+    divisor = math.gcd(width, height)
+    reduced = f"{width // divisor}_{height // divisor}"
+    if reduced not in suffixes:
+        suffixes.append(reduced)
+    return suffixes
+
+
+def _suffixed(path: Path, suffix: str) -> Path:
+    """systems/megadrive.png -> systems/megadrive_<suffix>.png"""
+    return path.with_name(f"{path.stem}_{suffix}{path.suffix}")
+
+
+def _with_ratio(candidate: BezelInfos, suffix: str) -> BezelInfos:
+    """The same candidate for the bezel made for an aspect ratio (its .png,
+    .info, .lay and .zip all carry the ratio suffix)."""
+    return {
+        "png": _suffixed(candidate["png"], suffix),
+        "info": _suffixed(candidate["info"], suffix),
+        "layout": _suffixed(candidate["layout"], suffix),
+        "mamezip": _suffixed(candidate["mamezip"], suffix),
+        "specific_to_game": candidate["specific_to_game"],
+    }
+
+
 def get_bezel_infos(
     rom: str | Path,
     bezel: str,
     system_name: str,
     emulator: str,
+    screen: tuple[int, int] | None = None,
 ) -> BezelInfos | None:
     """Obtain bezel info based on this search order for decoration files.
 
@@ -96,6 +150,13 @@ def get_bezel_infos(
     The first one to be found wins; if none exist, return None. Whether a bezel
     may be drawn at all (``force_no_bezel``) is decided by the caller through
     ``configgen.utils.bezel_policy``.
+
+    With the ``screen`` size (width, height), bezels made for its aspect ratio
+    come first: the whole order above is tried with the ratio suffix
+    (``<name>_<w>_<h>.png``, e.g. systems/megadrive_4_3.png or
+    games/fbneo/truxton2_16_10.png, see ratio_suffixes) before trying it
+    with the plain names, which are then stretched or narrowed to the screen.
+    A ratio bezel has its own .info / .lay / .zip, named the same way.
     mamezip files are for MAME-specific advanced artwork
     (bezels with overlays and backdrops, animated LEDs, etc.)
     """
@@ -110,6 +171,14 @@ def get_bezel_infos(
     ) + _candidates_for_root(
         Path(_DECORATIONS_DEF_DIR) / bezel, rom_base, system_name, alt_decoration, False
     )
+
+    suffixes = ratio_suffixes(*screen) if screen else []
+    for suffix in suffixes:
+        for candidate in candidates:
+            variant = _with_ratio(candidate, suffix)
+            if variant["png"].exists():
+                _logger.debug("Bezel made for the %s screen used: %s", suffix, variant["png"])
+                return variant
 
     for candidate in candidates:
         if candidate["png"].exists():
