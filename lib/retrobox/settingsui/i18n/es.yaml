@@ -76,8 +76,8 @@ environ.BEZELS_DEFAULT_DIR.help: Donde se descargan los bezels de RetroBat.
 environ.SHADERS_DIR: Shaders
 environ.CHEATS_DIR: Trucos
 environ.OVERLAYS_DIR: Superposiciones
-environ.STEAM_LIBRARY_DIR: Otras instalaciones de Steam
-environ.STEAM_LIBRARY_DIR.help: "Se buscan además de las habituales. Separa varias carpetas con \":\"."
+environ.STEAM_LIBRARY_DIR: "Librerías de Steam"
+environ.STEAM_LIBRARY_DIR.help: "Además de las instalaciones habituales de Steam (y de todas las librerías que tengan). Añade cada carpeta con juegos: una librería, una instalación de Steam o su carpeta steamapps."
 
 advanced.labwc_tty: Terminal virtual
 advanced.labwc_tty.help: La terminal (TTY) en la que se ejecuta la sesión de juego de labwc, si está instalada.

@@ -9,6 +9,7 @@ restricted to the allowed values, a folder field or the list of systems.
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from typing import TYPE_CHECKING, Callable
 
@@ -47,7 +48,8 @@ if TYPE_CHECKING:
 
     from .i18n import Translator
 
-_LIST_SEPARATOR = ":"
+_LIST_SEPARATOR = os.pathsep  # as Retrobox splits these variables
+_FOLDER_LIST_HEIGHT = 120
 _SYSTEMS_SEPARATOR = ","
 _SYSTEMS_LIST_HEIGHT = 260
 _ENVIRON_TABLE_HEIGHT = 200
@@ -99,13 +101,10 @@ def _icon_button(icon: str, fallback_text: str) -> QToolButton:
 
 # ---------------------------------------------------------------- editors
 class _FolderEditor(QWidget):  # pylint: disable=too-few-public-methods
-    """A folder (or ":"-separated folders) with a browse button."""
+    """One folder, typed or chosen with a browse button."""
 
-    def __init__(
-        self, translate: Translator, several: bool, on_edit: Callable[[str], None]
-    ) -> None:
+    def __init__(self, translate: Translator, on_edit: Callable[[str], None]) -> None:
         super().__init__()
-        self._several = several
         self._on_edit = on_edit
         layout = QHBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -119,16 +118,84 @@ class _FolderEditor(QWidget):  # pylint: disable=too-few-public-methods
         layout.addWidget(browse)
 
     def _browse(self) -> None:
-        current = self.line.text().split(_LIST_SEPARATOR)[-1] or self.line.placeholderText()
+        current = self.line.text().strip()
         start = str(Path(current).expanduser()) if current else str(Path.home())
         chosen = QFileDialog.getExistingDirectory(self, "", start)
-        if not chosen:
-            return
-        text = self.line.text().strip()
-        if self._several and text:
-            chosen = f"{text}{_LIST_SEPARATOR}{chosen}"
-        self.line.setText(chosen)
-        self._on_edit(chosen)
+        if chosen:
+            self.line.setText(chosen)
+            self._on_edit(chosen)
+
+
+class _FolderListEditor(QWidget):  # pylint: disable=too-few-public-methods
+    """Several folders, one per row (they are saved ":"-separated)."""
+
+    def __init__(self, translate: Translator, on_edit: Callable[[str], None]) -> None:
+        super().__init__()
+        self._on_edit = on_edit
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+
+        self.default = _secondary_label()
+        self._list = QListWidget()
+        self._list.setMinimumHeight(_FOLDER_LIST_HEIGHT)
+        self._list.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
+        self._list.itemChanged.connect(lambda _item: self._changed())
+
+        buttons = QHBoxLayout()
+        add = QPushButton(QIcon.fromTheme("list-add"), translate("button.add"))
+        remove = QPushButton(QIcon.fromTheme("list-remove"), translate("button.remove"))
+        for button in (add, remove):
+            button.setAutoDefault(False)
+        add.clicked.connect(self._add)
+        remove.clicked.connect(self._remove)
+        buttons.addWidget(add)
+        buttons.addWidget(remove)
+        buttons.addStretch(1)
+
+        layout.addWidget(self._list)
+        layout.addWidget(self.default)
+        layout.addLayout(buttons)
+
+    def _folders(self) -> list[str]:
+        return [
+            text for text in (self._list.item(i).text().strip() for i in range(self._list.count()))
+            if text
+        ]
+
+    def _changed(self) -> None:
+        self.default.setVisible(self._list.count() == 0)
+        self._on_edit(_LIST_SEPARATOR.join(dict.fromkeys(self._folders())))
+
+    def _add(self) -> None:
+        folders = self._folders()
+        start = str(Path(folders[-1]).expanduser()) if folders else str(Path.home())
+        chosen = QFileDialog.getExistingDirectory(self, "", start)
+        if chosen and chosen not in folders:
+            self._list.addItem(self._item(chosen))
+            self._changed()
+
+    def _remove(self) -> None:
+        for item in self._list.selectedItems():
+            self._list.takeItem(self._list.row(item))
+        self._changed()
+
+    @staticmethod
+    def _item(folder: str) -> QListWidgetItem:
+        item = QListWidgetItem(folder)
+        item.setFlags(item.flags() | Qt.ItemFlag.ItemIsEditable)  # double-click to edit
+        return item
+
+    def show_value(self, value: str, default: str) -> None:
+        """Show the folders of ``value`` (":"-separated), or ``default`` when none."""
+        folders = [folder.strip() for folder in value.split(_LIST_SEPARATOR) if folder.strip()]
+        if folders != self._folders():
+            self._list.blockSignals(True)
+            self._list.clear()
+            for folder in folders:
+                self._list.addItem(self._item(folder))
+            self._list.blockSignals(False)
+        self.default.setText(default)
+        self.default.setVisible(not folders)
 
 
 class _SystemsEditor(QWidget):  # pylint: disable=too-few-public-methods
@@ -236,7 +303,7 @@ class SettingRow:  # pylint: disable=too-many-instance-attributes
 
     def place(self, grid: QGridLayout, row: int) -> int:
         """Put the widgets on ``grid`` from ``row`` on; returns the next free row."""
-        if self.setting.kind is Kind.SYSTEMS:  # a tall editor: keep its label at the top
+        if self.setting.kind in (Kind.SYSTEMS, Kind.DIRECTORY_LIST):  # tall: label on top
             align = Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignRight
             grid.addWidget(self.label, row, 0, align)
             grid.addWidget(self.reset, row, 2, Qt.AlignmentFlag.AlignTop)
@@ -264,7 +331,9 @@ class SettingRow:  # pylint: disable=too-many-instance-attributes
             return combo
         if kind is Kind.SYSTEMS:
             return _SystemsEditor(self._tr, systems, self._edit)
-        return _FolderEditor(self._tr, kind is Kind.DIRECTORY_LIST, self._edit)
+        if kind is Kind.DIRECTORY_LIST:
+            return _FolderListEditor(self._tr, self._edit)
+        return _FolderEditor(self._tr, self._edit)
 
     # ------------------------------------------------------------ values
     def _choice_label(self, value: str) -> str:
@@ -325,6 +394,11 @@ class SettingRow:  # pylint: disable=too-many-instance-attributes
                 editor.setCurrentIndex(index)
             elif isinstance(editor, _SystemsEditor):
                 editor.show_value(value)
+            elif isinstance(editor, _FolderListEditor):
+                editor.show_value(
+                    self._model.user_value(self.setting) or "",
+                    self._tr("value.default", value=self._display(inherited)),
+                )
             elif isinstance(editor, _FolderEditor):
                 # never rewrite what is being typed (a path equal to the
                 # default is stored as "no value", for instance)

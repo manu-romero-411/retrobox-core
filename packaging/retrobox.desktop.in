@@ -16,12 +16,7 @@ StartupNotify=true
 StartupWMClass=retrobox-emulationstation
 PrefersNonDefaultGPU=true
 X-KDE-SubstituteUID=false
-Actions=DisableInternalDisplay;Settings;
-
-[Desktop Action DisableInternalDisplay]
-Name=Launch without internal display (10-foot mode)
-Name[es]=Iniciar sin pantalla interna (Modo TV)
-Exec=@BIN@ --disable-internal-display
+Actions=Settings;
 
 [Desktop Action Settings]
 Name=Settings

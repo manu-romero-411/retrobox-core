@@ -115,14 +115,6 @@ A replacement for evmapy, now a standalone project ([`gamepadly`](https://github
 
 ### Settings window
 
-`retrobox --settings` (also *Settings* in the application menu entry's actions) opens a window to change, for the current user, everything `retrobox.ini` holds: hidden systems, whether missing folders are fixed, every folder (data, state, games, saves, BIOS, screenshots, recordings, bezels, shaders, cheats, overlays), the Steam / Heroic / Lutris sync, extra Steam installations, the labwc session's TTY and free environment variables. Options with a fixed set of values are menus offering only those values.
-
-It edits `~/.config/retrobox/retrobox.ini` only, keeping its comments and order, and writes nothing but what differs from the inherited value (the system-wide `/etc/retrobox` files, or the built-in default): a setting put back to that value, or reset with its button, is removed from the file. A setting that one of your own `retrobox.ini.d/*.ini` drop-ins also sets is shown read-only, since the drop-in would win. *Apply* saves, *Accept and exit* saves and closes, *Accept and open Retrobox* saves, starts Retrobox and closes, *Close* closes without saving.
-
-The window follows EmulationStation's language (or the system locale), with the same languages as the setup screen (texts in `lib/retrobox/settingsui/i18n/<language>.yaml`, English as the fallback), and runs on PySide6 or PyQt6 (`python3-pyside6.qtwidgets` / `python3-pyqt6` on Debian and Ubuntu, `python3-pyside6` on Fedora; recommended by the packages). `retrobox.settings` holds the logic (the settings as data, the layered values, the ini editing) without any Qt; `retrobox.settingsui` only displays it.
-
-### Settings window
-
 `retrobox --settings` (also *Settings* in the application menu entry's actions) opens a window to change, for the current user, everything `retrobox.ini` holds: hidden systems, whether missing folders are fixed, every folder (data, state, games, saves, BIOS, screenshots, recordings, bezels, shaders, cheats, overlays), the Steam / Heroic / Lutris sync, any number of extra Steam libraries, the labwc session's TTY and free environment variables. Options with a fixed set of values are menus offering only those values.
 
 It edits `~/.config/retrobox/retrobox.ini` only, keeping its comments and order, and writes nothing but what differs from the inherited value (the system-wide `/etc/retrobox` files, or the built-in default): a setting put back to that value, or reset with its button, is removed from the file. A setting that one of your own `retrobox.ini.d/*.ini` drop-ins also sets is shown read-only, since the drop-in would win. *Apply* saves, *Accept and exit* saves and closes, *Accept and open Retrobox* saves, starts Retrobox and closes, *Close* closes without saving.

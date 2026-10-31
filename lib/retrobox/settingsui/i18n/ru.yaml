@@ -76,8 +76,8 @@ environ.BEZELS_DEFAULT_DIR.help: Куда загружаются рамки Retr
 environ.SHADERS_DIR: Шейдеры
 environ.CHEATS_DIR: Читы
 environ.OVERLAYS_DIR: Оверлеи
-environ.STEAM_LIBRARY_DIR: Другие установки Steam
-environ.STEAM_LIBRARY_DIR.help: "Просматриваются вместе с обычными. Несколько папок разделяйте символом \":\"."
+environ.STEAM_LIBRARY_DIR: "Библиотеки Steam"
+environ.STEAM_LIBRARY_DIR.help: "Помимо обычных установок Steam (и всех библиотек, которые в них указаны). Добавьте каждую папку с играми: библиотеку, установку Steam или её папку steamapps."
 
 advanced.labwc_tty: Виртуальный терминал
 advanced.labwc_tty.help: Терминал (TTY), на котором работает игровой сеанс labwc, если он установлен.
