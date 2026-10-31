@@ -1,0 +1,87 @@
+window.title: Impostazioni di Retrobox
+window.saved: Impostazioni salvate.
+window.save_failed: "Impossibile salvare {file}: {error}"
+window.open_failed: "Impossibile avviare Retrobox: {error}"
+
+button.close: Chiudi
+button.apply: Applica
+button.accept: Accetta ed esci
+button.accept_open: Accetta e apri Retrobox
+button.reset: "Ripristina il valore predefinito ({value})"
+button.browse: Sfoglia…
+button.add: Aggiungi
+button.remove: Rimuovi
+
+value.default: "Predefinito: {value}"
+value.automatic: automatico
+value.empty: nessuno
+value.on: Attivo
+value.off: Disattivo
+value.locked: "Impostato in {file}: modificalo lì."
+
+missing.created: Questa cartella non esiste ancora. Retrobox la creerà.
+missing.default: Questa cartella non esiste. Verrà usata quella predefinita.
+missing.as_written: Questa cartella non esiste. Verrà usata così com'è.
+
+systems.filter: Filtra i sistemi…
+systems.hidden: "Nascosti: {count}"
+
+environ.name: Variabile
+environ.value: Valore
+environ.invalid: "Nome di variabile non valido, non verrà salvata: {names}"
+
+page.general: Generale
+page.general.help: Cosa mostra EmulationStation e come si comporta Retrobox.
+page.folders: Cartelle
+page.folders.help: Dove Retrobox conserva i tuoi giochi e tutto il resto. Lascia vuota una cartella per usare quella predefinita.
+page.pcgames: Giochi per PC
+page.pcgames.help: I giochi di Steam, Heroic e Lutris in EmulationStation.
+page.advanced: Avanzate
+page.advanced.help: Opzioni per configurazioni particolari.
+
+group.frontend: Sistemi
+group.behaviour: Comportamento
+group.main_folders: Cartelle principali
+group.content_folders: Giochi, salvataggi e BIOS
+group.media_folders: Multimedia ed extra
+group.pcgames_sync: Sincronizzazione dei giochi
+group.pcgames_sync.help: Aggiunge i giochi installati di ogni launcher al suo sistema a ogni avvio di Retrobox.
+group.steam: Steam
+group.labwc: Sessione di gioco (labwc)
+group.environ: Variabili d'ambiente
+group.environ.help: Impostate per tutti i processi di Retrobox (chiavi API, opzioni degli emulatori…). Una variabile già presente nell'ambiente ha la precedenza.
+
+core.ignore_systems: Sistemi nascosti
+core.ignore_systems.help: I sistemi selezionati non vengono mostrati in EmulationStation.
+core.autocorrect_paths: Correggi le cartelle mancanti
+core.autocorrect_paths.help: Se la cartella configurata di giochi, salvataggi o BIOS non esiste, viene usata (e creata) quella predefinita.
+core.steam_sync: Steam
+core.heroic_sync: Heroic
+core.lutris_sync: Lutris
+
+paths.data_dir: Cartella dei dati
+paths.data_dir.help: "Tutto ciò che Retrobox conserva: giochi, salvataggi, BIOS, temi, bezel, emulatori…"
+paths.state_dir: Cartella di stato
+paths.state_dir.help: Log e informazioni sulle installazioni.
+paths.roms_dir: Giochi
+paths.roms_dir.help: Una cartella per sistema.
+paths.saves_dir: Salvataggi
+paths.bios_dir: BIOS
+
+environ.SCREENSHOTS_DIR: Screenshot
+environ.RECORDINGS_DIR: Registrazioni
+environ.BEZELS_DIR: I tuoi bezel
+environ.BEZELS_DEFAULT_DIR: Bezel predefiniti
+environ.BEZELS_DEFAULT_DIR.help: Dove vengono scaricati i bezel di RetroBat.
+environ.SHADERS_DIR: Shader
+environ.CHEATS_DIR: Trucchi
+environ.OVERLAYS_DIR: Overlay
+environ.STEAM_LIBRARY_DIR: Altre installazioni di Steam
+environ.STEAM_LIBRARY_DIR.help: "Cercate oltre a quelle abituali. Separa più cartelle con \":\"."
+
+advanced.labwc_tty: Terminale virtuale
+advanced.labwc_tty.help: Il terminale (TTY) su cui gira la sessione di gioco di labwc, se installata.
+
+choice.none: Non sincronizzare
+choice.on-base-dir: Nella cartella dei dati
+choice.follow-roms-dir: Nella cartella dei giochi

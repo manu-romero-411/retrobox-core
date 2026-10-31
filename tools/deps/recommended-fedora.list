@@ -7,3 +7,5 @@ dejavu-sans-fonts
 dejavu-sans-mono-fonts
 wl-clipboard
 xclip
+# settings window (retrobox --settings)
+python3-pyside6

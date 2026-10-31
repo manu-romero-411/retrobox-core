@@ -1,0 +1,87 @@
+window.title: Configuració de Retrobox
+window.saved: S'ha desat la configuració.
+window.save_failed: "No s'ha pogut desar {file}: {error}"
+window.open_failed: "No s'ha pogut iniciar Retrobox: {error}"
+
+button.close: Tanca
+button.apply: Aplica
+button.accept: Accepta i surt
+button.accept_open: Accepta i obre Retrobox
+button.reset: "Restableix el valor per defecte ({value})"
+button.browse: Navega…
+button.add: Afegeix
+button.remove: Elimina
+
+value.default: "Per defecte: {value}"
+value.automatic: automàtic
+value.empty: cap
+value.on: Activat
+value.off: Desactivat
+value.locked: "Definit a {file}: canvia-ho allà."
+
+missing.created: Aquesta carpeta encara no existeix. Retrobox la crearà.
+missing.default: Aquesta carpeta no existeix. S'utilitzarà la carpeta per defecte.
+missing.as_written: Aquesta carpeta no existeix. S'utilitzarà tal com està escrita.
+
+systems.filter: Filtra els sistemes…
+systems.hidden: "Amagats: {count}"
+
+environ.name: Variable
+environ.value: Valor
+environ.invalid: "Nom de variable no vàlid, no es desarà: {names}"
+
+page.general: General
+page.general.help: Què mostra EmulationStation i com es comporta Retrobox.
+page.folders: Carpetes
+page.folders.help: On desa Retrobox els teus jocs i tota la resta. Deixa una carpeta buida per utilitzar la de per defecte.
+page.pcgames: Jocs de PC
+page.pcgames.help: Jocs de Steam, Heroic i Lutris a EmulationStation.
+page.advanced: Avançat
+page.advanced.help: Opcions per a configuracions especials.
+
+group.frontend: Sistemes
+group.behaviour: Comportament
+group.main_folders: Carpetes principals
+group.content_folders: Jocs, partides desades i BIOS
+group.media_folders: Multimèdia i extres
+group.pcgames_sync: Sincronització de jocs
+group.pcgames_sync.help: Afegeix els jocs instal·lats de cada llançador al seu sistema cada vegada que s'inicia Retrobox.
+group.steam: Steam
+group.labwc: Sessió de joc (labwc)
+group.environ: Variables d'entorn
+group.environ.help: Es defineixen per a tots els processos de Retrobox (claus d'API, opcions d'emuladors…). Si la variable ja existeix a l'entorn, es manté aquella.
+
+core.ignore_systems: Sistemes amagats
+core.ignore_systems.help: Els sistemes marcats no es mostren a EmulationStation.
+core.autocorrect_paths: Corregeix les carpetes que no existeixen
+core.autocorrect_paths.help: Si la carpeta configurada de jocs, partides desades o BIOS no existeix, s'utilitza (i es crea) la de per defecte.
+core.steam_sync: Steam
+core.heroic_sync: Heroic
+core.lutris_sync: Lutris
+
+paths.data_dir: Carpeta de dades
+paths.data_dir.help: "Tot el que desa Retrobox: jocs, partides, BIOS, temes, bezels, emuladors…"
+paths.state_dir: Carpeta d'estat
+paths.state_dir.help: Registres i informació de les instal·lacions.
+paths.roms_dir: Jocs
+paths.roms_dir.help: Una carpeta per sistema.
+paths.saves_dir: Partides desades
+paths.bios_dir: BIOS
+
+environ.SCREENSHOTS_DIR: Captures de pantalla
+environ.RECORDINGS_DIR: Enregistraments
+environ.BEZELS_DIR: Els teus bezels
+environ.BEZELS_DEFAULT_DIR: Bezels per defecte
+environ.BEZELS_DEFAULT_DIR.help: On es baixen els bezels de RetroBat.
+environ.SHADERS_DIR: Shaders
+environ.CHEATS_DIR: Trucs
+environ.OVERLAYS_DIR: Superposicions
+environ.STEAM_LIBRARY_DIR: Altres instal·lacions de Steam
+environ.STEAM_LIBRARY_DIR.help: "Es busquen a més de les habituals. Separa diverses carpetes amb \":\"."
+
+advanced.labwc_tty: Terminal virtual
+advanced.labwc_tty.help: El terminal (TTY) on s'executa la sessió de joc de labwc, si està instal·lada.
+
+choice.none: No sincronitzis
+choice.on-base-dir: A la carpeta de dades
+choice.follow-roms-dir: A la carpeta de jocs

@@ -1,0 +1,87 @@
+window.title: Retrobox-Einstellungen
+window.saved: Einstellungen gespeichert.
+window.save_failed: "{file} konnte nicht gespeichert werden: {error}"
+window.open_failed: "Retrobox konnte nicht gestartet werden: {error}"
+
+button.close: Schließen
+button.apply: Übernehmen
+button.accept: OK und beenden
+button.accept_open: OK und Retrobox öffnen
+button.reset: "Standardwert wiederherstellen ({value})"
+button.browse: Durchsuchen…
+button.add: Hinzufügen
+button.remove: Entfernen
+
+value.default: "Standard: {value}"
+value.automatic: automatisch
+value.empty: keiner
+value.on: Ein
+value.off: Aus
+value.locked: "In {file} festgelegt: dort ändern."
+
+missing.created: Dieser Ordner existiert noch nicht. Retrobox legt ihn an.
+missing.default: Dieser Ordner existiert nicht. Der Standardordner wird verwendet.
+missing.as_written: Dieser Ordner existiert nicht. Er wird so verwendet, wie er angegeben ist.
+
+systems.filter: Systeme filtern…
+systems.hidden: "Ausgeblendet: {count}"
+
+environ.name: Variable
+environ.value: Wert
+environ.invalid: "Ungültiger Variablenname, wird nicht gespeichert: {names}"
+
+page.general: Allgemein
+page.general.help: Was EmulationStation anzeigt und wie sich Retrobox verhält.
+page.folders: Ordner
+page.folders.help: Wo Retrobox deine Spiele und alles andere ablegt. Lass einen Ordner leer, um den Standard zu verwenden.
+page.pcgames: PC-Spiele
+page.pcgames.help: Spiele aus Steam, Heroic und Lutris in EmulationStation.
+page.advanced: Erweitert
+page.advanced.help: Optionen für besondere Einrichtungen.
+
+group.frontend: Systeme
+group.behaviour: Verhalten
+group.main_folders: Hauptordner
+group.content_folders: Spiele, Spielstände und BIOS
+group.media_folders: Medien und Extras
+group.pcgames_sync: Spiele-Abgleich
+group.pcgames_sync.help: Fügt die installierten Spiele jedes Launchers bei jedem Start von Retrobox zu seinem System hinzu.
+group.steam: Steam
+group.labwc: Spielsitzung (labwc)
+group.environ: Umgebungsvariablen
+group.environ.help: Für alle Retrobox-Prozesse gesetzt (API-Schlüssel, Emulator-Optionen…). Eine bereits gesetzte Umgebungsvariable hat Vorrang.
+
+core.ignore_systems: Ausgeblendete Systeme
+core.ignore_systems.help: Markierte Systeme werden in EmulationStation nicht angezeigt.
+core.autocorrect_paths: Fehlende Ordner korrigieren
+core.autocorrect_paths.help: Existiert der eingestellte Ordner für Spiele, Spielstände oder BIOS nicht, wird der Standardordner verwendet (und angelegt).
+core.steam_sync: Steam
+core.heroic_sync: Heroic
+core.lutris_sync: Lutris
+
+paths.data_dir: Datenordner
+paths.data_dir.help: "Alles, was Retrobox ablegt: Spiele, Spielstände, BIOS, Themes, Bezels, Emulatoren…"
+paths.state_dir: Statusordner
+paths.state_dir.help: Protokolle und Installationsdaten.
+paths.roms_dir: Spiele
+paths.roms_dir.help: Ein Ordner pro System.
+paths.saves_dir: Spielstände
+paths.bios_dir: BIOS
+
+environ.SCREENSHOTS_DIR: Bildschirmfotos
+environ.RECORDINGS_DIR: Aufnahmen
+environ.BEZELS_DIR: Deine Bezels
+environ.BEZELS_DEFAULT_DIR: Standard-Bezels
+environ.BEZELS_DEFAULT_DIR.help: Wohin die RetroBat-Bezels heruntergeladen werden.
+environ.SHADERS_DIR: Shader
+environ.CHEATS_DIR: Cheats
+environ.OVERLAYS_DIR: Overlays
+environ.STEAM_LIBRARY_DIR: Weitere Steam-Installationen
+environ.STEAM_LIBRARY_DIR.help: "Werden zusätzlich zu den üblichen durchsucht. Mehrere Ordner mit \":\" trennen."
+
+advanced.labwc_tty: Virtuelles Terminal
+advanced.labwc_tty.help: Das Terminal (TTY), auf dem die labwc-Spielsitzung läuft, falls installiert.
+
+choice.none: Nicht abgleichen
+choice.on-base-dir: In den Datenordner
+choice.follow-roms-dir: In den Spieleordner

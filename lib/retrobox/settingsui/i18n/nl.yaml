@@ -1,0 +1,87 @@
+window.title: Retrobox-instellingen
+window.saved: Instellingen opgeslagen.
+window.save_failed: "Kan {file} niet opslaan: {error}"
+window.open_failed: "Kan Retrobox niet starten: {error}"
+
+button.close: Sluiten
+button.apply: Toepassen
+button.accept: OK en afsluiten
+button.accept_open: OK en Retrobox openen
+button.reset: "Standaardwaarde herstellen ({value})"
+button.browse: Bladeren…
+button.add: Toevoegen
+button.remove: Verwijderen
+
+value.default: "Standaard: {value}"
+value.automatic: automatisch
+value.empty: geen
+value.on: Aan
+value.off: Uit
+value.locked: "Ingesteld in {file}: wijzig het daar."
+
+missing.created: Deze map bestaat nog niet. Retrobox maakt hem aan.
+missing.default: Deze map bestaat niet. De standaardmap wordt gebruikt.
+missing.as_written: Deze map bestaat niet. Hij wordt gebruikt zoals opgegeven.
+
+systems.filter: Systemen filteren…
+systems.hidden: "Verborgen: {count}"
+
+environ.name: Variabele
+environ.value: Waarde
+environ.invalid: "Ongeldige variabelenaam, wordt niet opgeslagen: {names}"
+
+page.general: Algemeen
+page.general.help: Wat EmulationStation toont en hoe Retrobox zich gedraagt.
+page.folders: Mappen
+page.folders.help: Waar Retrobox je games en al het andere bewaart. Laat een map leeg om de standaardmap te gebruiken.
+page.pcgames: Pc-games
+page.pcgames.help: Games van Steam, Heroic en Lutris in EmulationStation.
+page.advanced: Geavanceerd
+page.advanced.help: Opties voor bijzondere opstellingen.
+
+group.frontend: Systemen
+group.behaviour: Gedrag
+group.main_folders: Hoofdmappen
+group.content_folders: Games, opgeslagen spellen en BIOS
+group.media_folders: Media en extra's
+group.pcgames_sync: Games synchroniseren
+group.pcgames_sync.help: Voegt de geïnstalleerde games van elke launcher bij elke start van Retrobox toe aan het bijbehorende systeem.
+group.steam: Steam
+group.labwc: Gamesessie (labwc)
+group.environ: Omgevingsvariabelen
+group.environ.help: Ingesteld voor alle processen van Retrobox (API-sleutels, emulatoropties…). Een variabele die al in de omgeving staat, heeft voorrang.
+
+core.ignore_systems: Verborgen systemen
+core.ignore_systems.help: Aangevinkte systemen worden niet getoond in EmulationStation.
+core.autocorrect_paths: Ontbrekende mappen corrigeren
+core.autocorrect_paths.help: Als de ingestelde map voor games, opgeslagen spellen of BIOS niet bestaat, wordt de standaardmap gebruikt (en aangemaakt).
+core.steam_sync: Steam
+core.heroic_sync: Heroic
+core.lutris_sync: Lutris
+
+paths.data_dir: Gegevensmap
+paths.data_dir.help: "Alles wat Retrobox bewaart: games, opgeslagen spellen, BIOS, thema's, bezels, emulators…"
+paths.state_dir: Statusmap
+paths.state_dir.help: Logboeken en installatiegegevens.
+paths.roms_dir: Games
+paths.roms_dir.help: Eén map per systeem.
+paths.saves_dir: Opgeslagen spellen
+paths.bios_dir: BIOS
+
+environ.SCREENSHOTS_DIR: Schermafbeeldingen
+environ.RECORDINGS_DIR: Opnames
+environ.BEZELS_DIR: Je bezels
+environ.BEZELS_DEFAULT_DIR: Standaardbezels
+environ.BEZELS_DEFAULT_DIR.help: Waar de bezels van RetroBat worden gedownload.
+environ.SHADERS_DIR: Shaders
+environ.CHEATS_DIR: Cheats
+environ.OVERLAYS_DIR: Overlays
+environ.STEAM_LIBRARY_DIR: Andere Steam-installaties
+environ.STEAM_LIBRARY_DIR.help: "Worden doorzocht naast de gebruikelijke. Scheid meerdere mappen met \":\"."
+
+advanced.labwc_tty: Virtuele terminal
+advanced.labwc_tty.help: De terminal (TTY) waarop de labwc-gamesessie draait, als die geïnstalleerd is.
+
+choice.none: Niet synchroniseren
+choice.on-base-dir: In de gegevensmap
+choice.follow-roms-dir: In de gamesmap

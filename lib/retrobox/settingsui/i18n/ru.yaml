@@ -1,0 +1,87 @@
+window.title: Настройки Retrobox
+window.saved: Настройки сохранены.
+window.save_failed: "Не удалось сохранить {file}: {error}"
+window.open_failed: "Не удалось запустить Retrobox: {error}"
+
+button.close: Закрыть
+button.apply: Применить
+button.accept: Сохранить и выйти
+button.accept_open: Сохранить и открыть Retrobox
+button.reset: "Вернуть значение по умолчанию ({value})"
+button.browse: Обзор…
+button.add: Добавить
+button.remove: Удалить
+
+value.default: "По умолчанию: {value}"
+value.automatic: автоматически
+value.empty: нет
+value.on: Вкл.
+value.off: Выкл.
+value.locked: "Задано в {file}: измените там."
+
+missing.created: Этой папки пока нет. Retrobox создаст её.
+missing.default: Этой папки нет. Будет использована папка по умолчанию.
+missing.as_written: Этой папки нет. Она будет использована как указано.
+
+systems.filter: Фильтр систем…
+systems.hidden: "Скрыто: {count}"
+
+environ.name: Переменная
+environ.value: Значение
+environ.invalid: "Недопустимое имя переменной, она не будет сохранена: {names}"
+
+page.general: Общие
+page.general.help: Что показывает EmulationStation и как ведёт себя Retrobox.
+page.folders: Папки
+page.folders.help: Где Retrobox хранит игры и всё остальное. Оставьте папку пустой, чтобы использовать папку по умолчанию.
+page.pcgames: Игры для ПК
+page.pcgames.help: Игры из Steam, Heroic и Lutris в EmulationStation.
+page.advanced: Дополнительно
+page.advanced.help: Параметры для особых конфигураций.
+
+group.frontend: Системы
+group.behaviour: Поведение
+group.main_folders: Основные папки
+group.content_folders: Игры, сохранения и BIOS
+group.media_folders: Медиа и дополнения
+group.pcgames_sync: Синхронизация игр
+group.pcgames_sync.help: При каждом запуске Retrobox добавляет установленные игры каждого лаунчера в его систему.
+group.steam: Steam
+group.labwc: Игровой сеанс (labwc)
+group.environ: Переменные окружения
+group.environ.help: Задаются для всех процессов Retrobox (ключи API, параметры эмуляторов…). Переменная, уже заданная в окружении, имеет приоритет.
+
+core.ignore_systems: Скрытые системы
+core.ignore_systems.help: Отмеченные системы не показываются в EmulationStation.
+core.autocorrect_paths: Исправлять отсутствующие папки
+core.autocorrect_paths.help: Если заданной папки игр, сохранений или BIOS нет, используется (и создаётся) папка по умолчанию.
+core.steam_sync: Steam
+core.heroic_sync: Heroic
+core.lutris_sync: Lutris
+
+paths.data_dir: Папка данных
+paths.data_dir.help: "Всё, что хранит Retrobox: игры, сохранения, BIOS, темы, рамки, эмуляторы…"
+paths.state_dir: Папка состояния
+paths.state_dir.help: Журналы и сведения об установках.
+paths.roms_dir: Игры
+paths.roms_dir.help: По одной папке на систему.
+paths.saves_dir: Сохранения
+paths.bios_dir: BIOS
+
+environ.SCREENSHOTS_DIR: Снимки экрана
+environ.RECORDINGS_DIR: Записи
+environ.BEZELS_DIR: Ваши рамки (bezels)
+environ.BEZELS_DEFAULT_DIR: Рамки по умолчанию
+environ.BEZELS_DEFAULT_DIR.help: Куда загружаются рамки RetroBat.
+environ.SHADERS_DIR: Шейдеры
+environ.CHEATS_DIR: Читы
+environ.OVERLAYS_DIR: Оверлеи
+environ.STEAM_LIBRARY_DIR: Другие установки Steam
+environ.STEAM_LIBRARY_DIR.help: "Просматриваются вместе с обычными. Несколько папок разделяйте символом \":\"."
+
+advanced.labwc_tty: Виртуальный терминал
+advanced.labwc_tty.help: Терминал (TTY), на котором работает игровой сеанс labwc, если он установлен.
+
+choice.none: Не синхронизировать
+choice.on-base-dir: В папку данных
+choice.follow-roms-dir: В папку игр

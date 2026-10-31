@@ -13,7 +13,7 @@ import os
 from typing import TYPE_CHECKING, Final, NamedTuple
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Mapping
+    from collections.abc import Collection, Iterable, Mapping
 
 
 class Texts(NamedTuple):
@@ -251,20 +251,26 @@ def _candidates(es_language: str, environ: Mapping[str, str]) -> Iterable[str]:
         yield from environ.get(variable, "").split(":")
 
 
-def pick_language(es_language: str = "", environ: Mapping[str, str] | None = None) -> str:
+def pick_language(
+    es_language: str = "",
+    environ: Mapping[str, str] | None = None,
+    supported: Collection[str] | None = None,
+) -> str:
     """The first supported language among ES's setting and the system locale.
 
     Args:
         es_language: ``Language`` of es_settings.cfg (e.g. ``es_ES``), if set.
         environ: The environment to read the locale from (default: os.environ).
+        supported: Language codes to choose from (default: those of TEXTS).
 
     Returns:
-        A key of TEXTS; DEFAULT_LANGUAGE when nothing better matches.
+        A supported code; DEFAULT_LANGUAGE when nothing better matches.
     """
     environ = os.environ if environ is None else environ
+    supported = TEXTS.keys() if supported is None else supported
     for candidate in _candidates(es_language, environ):
         code = _code(candidate)
-        if code in TEXTS:
+        if code in supported:
             return code
     return DEFAULT_LANGUAGE
 

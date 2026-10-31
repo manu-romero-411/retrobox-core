@@ -1,0 +1,87 @@
+window.title: Axustes de Retrobox
+window.saved: Gardáronse os axustes.
+window.save_failed: "Non se puido gardar {file}: {error}"
+window.open_failed: "Non se puido iniciar Retrobox: {error}"
+
+button.close: Pechar
+button.apply: Aplicar
+button.accept: Aceptar e saír
+button.accept_open: Aceptar e abrir Retrobox
+button.reset: "Restablecer o valor predeterminado ({value})"
+button.browse: Examinar…
+button.add: Engadir
+button.remove: Quitar
+
+value.default: "Predeterminado: {value}"
+value.automatic: automático
+value.empty: ningún
+value.on: Activado
+value.off: Desactivado
+value.locked: "Definido en {file}: cámbiao alí."
+
+missing.created: Este cartafol aínda non existe. Retrobox crearao.
+missing.default: Este cartafol non existe. Usarase o cartafol predeterminado.
+missing.as_written: Este cartafol non existe. Usarase tal cal.
+
+systems.filter: Filtrar sistemas…
+systems.hidden: "Agochados: {count}"
+
+environ.name: Variable
+environ.value: Valor
+environ.invalid: "Nome de variable non válido, non se gardará: {names}"
+
+page.general: Xeral
+page.general.help: Que amosa EmulationStation e como se comporta Retrobox.
+page.folders: Cartafoles
+page.folders.help: Onde garda Retrobox os teus xogos e todo o demais. Deixa un cartafol baleiro para usar o predeterminado.
+page.pcgames: Xogos de PC
+page.pcgames.help: Xogos de Steam, Heroic e Lutris en EmulationStation.
+page.advanced: Avanzado
+page.advanced.help: Opcións para configuracións especiais.
+
+group.frontend: Sistemas
+group.behaviour: Comportamento
+group.main_folders: Cartafoles principais
+group.content_folders: Xogos, partidas gardadas e BIOS
+group.media_folders: Multimedia e extras
+group.pcgames_sync: Sincronización de xogos
+group.pcgames_sync.help: Engade os xogos instalados de cada lanzador ao seu sistema cada vez que se inicia Retrobox.
+group.steam: Steam
+group.labwc: Sesión de xogo (labwc)
+group.environ: Variables de contorno
+group.environ.help: Defínense para todos os procesos de Retrobox (claves de API, opcións de emuladores…). Se a variable xa existe no contorno, respéctase esa.
+
+core.ignore_systems: Sistemas agochados
+core.ignore_systems.help: Os sistemas marcados non se amosan en EmulationStation.
+core.autocorrect_paths: Corrixir cartafoles que non existen
+core.autocorrect_paths.help: Se o cartafol configurado de xogos, partidas gardadas ou BIOS non existe, úsase (e créase) o predeterminado.
+core.steam_sync: Steam
+core.heroic_sync: Heroic
+core.lutris_sync: Lutris
+
+paths.data_dir: Cartafol de datos
+paths.data_dir.help: "Todo o que garda Retrobox: xogos, partidas, BIOS, temas, bezels, emuladores…"
+paths.state_dir: Cartafol de estado
+paths.state_dir.help: Rexistros e información das instalacións.
+paths.roms_dir: Xogos
+paths.roms_dir.help: Un cartafol por sistema.
+paths.saves_dir: Partidas gardadas
+paths.bios_dir: BIOS
+
+environ.SCREENSHOTS_DIR: Capturas de pantalla
+environ.RECORDINGS_DIR: Gravacións
+environ.BEZELS_DIR: Os teus bezels
+environ.BEZELS_DEFAULT_DIR: Bezels predeterminados
+environ.BEZELS_DEFAULT_DIR.help: Onde se descargan os bezels de RetroBat.
+environ.SHADERS_DIR: Shaders
+environ.CHEATS_DIR: Trucos
+environ.OVERLAYS_DIR: Superposicións
+environ.STEAM_LIBRARY_DIR: Outras instalacións de Steam
+environ.STEAM_LIBRARY_DIR.help: "Búscanse ademais das habituais. Separa varios cartafoles con \":\"."
+
+advanced.labwc_tty: Terminal virtual
+advanced.labwc_tty.help: A terminal (TTY) na que se executa a sesión de xogo de labwc, se está instalada.
+
+choice.none: Non sincronizar
+choice.on-base-dir: No cartafol de datos
+choice.follow-roms-dir: No cartafol de xogos

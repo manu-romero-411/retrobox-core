@@ -4,3 +4,5 @@ fontconfig
 fonts-dejavu-core
 wl-clipboard
 xclip
+# settings window (retrobox --settings): PySide6, or PyQt6 where there is none (Debian 12)
+python3-pyside6.qtwidgets | python3-pyqt6

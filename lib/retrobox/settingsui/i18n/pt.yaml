@@ -1,0 +1,87 @@
+window.title: Definições do Retrobox
+window.saved: Definições guardadas.
+window.save_failed: "Não foi possível guardar {file}: {error}"
+window.open_failed: "Não foi possível iniciar o Retrobox: {error}"
+
+button.close: Fechar
+button.apply: Aplicar
+button.accept: Aceitar e sair
+button.accept_open: Aceitar e abrir o Retrobox
+button.reset: "Repor o valor predefinido ({value})"
+button.browse: Procurar…
+button.add: Adicionar
+button.remove: Remover
+
+value.default: "Predefinido: {value}"
+value.automatic: automático
+value.empty: nenhum
+value.on: Ligado
+value.off: Desligado
+value.locked: "Definido em {file}: altere-o lá."
+
+missing.created: Esta pasta ainda não existe. O Retrobox vai criá-la.
+missing.default: Esta pasta não existe. Será usada a pasta predefinida.
+missing.as_written: Esta pasta não existe. Será usada tal como está escrita.
+
+systems.filter: Filtrar sistemas…
+systems.hidden: "Ocultos: {count}"
+
+environ.name: Variável
+environ.value: Valor
+environ.invalid: "Nome de variável inválido, não será guardado: {names}"
+
+page.general: Geral
+page.general.help: O que o EmulationStation mostra e como o Retrobox se comporta.
+page.folders: Pastas
+page.folders.help: Onde o Retrobox guarda os seus jogos e tudo o resto. Deixe uma pasta vazia para usar a predefinida.
+page.pcgames: Jogos de PC
+page.pcgames.help: Jogos do Steam, Heroic e Lutris no EmulationStation.
+page.advanced: Avançado
+page.advanced.help: Opções para configurações especiais.
+
+group.frontend: Sistemas
+group.behaviour: Comportamento
+group.main_folders: Pastas principais
+group.content_folders: Jogos, gravações e BIOS
+group.media_folders: Multimédia e extras
+group.pcgames_sync: Sincronização de jogos
+group.pcgames_sync.help: Adiciona os jogos instalados de cada launcher ao seu sistema sempre que o Retrobox é iniciado.
+group.steam: Steam
+group.labwc: Sessão de jogo (labwc)
+group.environ: Variáveis de ambiente
+group.environ.help: Definidas para todos os processos do Retrobox (chaves de API, opções de emuladores…). Uma variável que já exista no ambiente prevalece.
+
+core.ignore_systems: Sistemas ocultos
+core.ignore_systems.help: Os sistemas marcados não são mostrados no EmulationStation.
+core.autocorrect_paths: Corrigir pastas inexistentes
+core.autocorrect_paths.help: Se a pasta configurada de jogos, gravações ou BIOS não existir, é usada (e criada) a predefinida.
+core.steam_sync: Steam
+core.heroic_sync: Heroic
+core.lutris_sync: Lutris
+
+paths.data_dir: Pasta de dados
+paths.data_dir.help: "Tudo o que o Retrobox guarda: jogos, gravações, BIOS, temas, bezels, emuladores…"
+paths.state_dir: Pasta de estado
+paths.state_dir.help: Registos e informação das instalações.
+paths.roms_dir: Jogos
+paths.roms_dir.help: Uma pasta por sistema.
+paths.saves_dir: Gravações
+paths.bios_dir: BIOS
+
+environ.SCREENSHOTS_DIR: Capturas de ecrã
+environ.RECORDINGS_DIR: Gravações de vídeo
+environ.BEZELS_DIR: Os seus bezels
+environ.BEZELS_DEFAULT_DIR: Bezels predefinidos
+environ.BEZELS_DEFAULT_DIR.help: Onde são transferidos os bezels do RetroBat.
+environ.SHADERS_DIR: Shaders
+environ.CHEATS_DIR: Batotas
+environ.OVERLAYS_DIR: Sobreposições
+environ.STEAM_LIBRARY_DIR: Outras instalações do Steam
+environ.STEAM_LIBRARY_DIR.help: "Procuradas além das habituais. Separe várias pastas com \":\"."
+
+advanced.labwc_tty: Terminal virtual
+advanced.labwc_tty.help: O terminal (TTY) em que corre a sessão de jogo do labwc, se estiver instalada.
+
+choice.none: Não sincronizar
+choice.on-base-dir: Na pasta de dados
+choice.follow-roms-dir: Na pasta de jogos

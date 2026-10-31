@@ -21,6 +21,8 @@
 #                                            under tools/music/.
 #   retrobox --setup-bezel <name>         install a bezel/decoration pack
 #   retrobox --version                    print the installed version
+#   retrobox --settings                   open the settings window (edits
+#                                            ~/.config/retrobox/retrobox.ini)
 #
 # All of the above are maintenance operations: they run and then exit,
 # they don't start the frontend afterwards. Any other argument is passed
@@ -120,6 +122,10 @@ Usage: $(basename "${BASH_SOURCE[0]}") [OPTIONS] [-- ARGS...]
                             with no name, lists every installer available
                             under tools/decorations/.
 --version                   Print the installed version and exit.
+--settings                  Open the settings window (folders, hidden
+                            systems, PC games sync...), which edits
+                            ~/.config/retrobox/retrobox.ini. Needs PySide6
+                            or PyQt6.
 -h, --help                  Show this help and exit.
 
 --update-default-theme      Download the default theme (es-theme-iconic)
@@ -198,6 +204,9 @@ case "$1" in
 --version)
     retrobox_version
     exit 0
+    ;;
+--settings)
+    exec "${RETROBOX_PYTHON}" -m retrobox.settingsui
     ;;
 -h | --help)
     usage
