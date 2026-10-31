@@ -9,6 +9,10 @@ variables, in two ways:
     process of the launcher inherits them;
   * `python3 -m retrobox.paths --shell` prints them as `export` lines, which
     is what tools/lib/paths.sh evals when no launcher is involved.
+
+A process that must resolve everything again from retrobox.ini (a Retrobox
+started after the settings window changed it) gets fresh_environment()
+instead, which leaves both of them out.
 """
 
 from __future__ import annotations
@@ -26,9 +30,14 @@ from ._base import (
     RUNTIME_DIR,
     STATE_DIR,
     SYSCONF_DIR,
+    _STARTUP_ENVIRON,
 )
 from ._configgen import _DECORATIONS_DEF_DIR, _DECORATIONS_DIR, BIOS, SAVES, SCREENSHOTS
 from ._frontend import ES_EXECUTABLE, FRONTEND_DIR, FRONTEND_HOME, MUSIC_DIR, THEMES_DIR
+
+# Set by bin/retrobox: the RETROBOX_* variables the user exported himself, as
+# opposed to the ones it resolved from retrobox.ini (tools/lib/paths.sh).
+_USER_VARS: str = "RETROBOX_USER_VARS"
 
 
 def exported_environment() -> dict[str, Path]:
@@ -55,3 +64,17 @@ def exported_environment() -> dict[str, Path]:
         "RETROBOX_FRONTEND_HOME": FRONTEND_HOME,
         "RETROBOX_ES_EXECUTABLE": ES_EXECUTABLE,
     }
+
+
+def fresh_environment() -> dict[str, str]:
+    """Return the environment for a process that must read retrobox.ini again.
+
+    It is the environment this process started with, minus the variables
+    resolved from retrobox.ini: those exported_environment() describes (unless
+    the user set them himself, see bin/retrobox) and the [environ] entries,
+    which were never in it. Without this, a child would inherit the values
+    read before the file changed, and they win over the file.
+    """
+    user_vars = set(_STARTUP_ENVIRON.get(_USER_VARS, "").split())
+    resolved = set(exported_environment()) - user_vars
+    return {key: value for key, value in _STARTUP_ENVIRON.items() if key not in resolved}

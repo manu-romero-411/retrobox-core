@@ -43,6 +43,14 @@ TOOLS_DIR="${RETROBOX_ROOTDIR}/tools"
 # The Python code lives in <root>/lib (packages `retrobox` and `gamepadly`).
 export PYTHONPATH="${RETROBOX_ROOTDIR}/lib${PYTHONPATH:+:${PYTHONPATH}}"
 
+# The RETROBOX_* variables the user exported himself, as opposed to the ones
+# resolved below from retrobox.ini (tools/lib/paths.sh). A retrobox started
+# from this one (the settings window's "Accept and open Retrobox") keeps these
+# and resolves the rest again, so it sees the changes saved to retrobox.ini.
+# Only the outermost retrobox sets it: by then the rest are resolved ones.
+: "${RETROBOX_USER_VARS=$(compgen -e -X '!RETROBOX_*' | tr '\n' ' ' || true)}"
+export RETROBOX_USER_VARS
+
 # Interpreter: the install's own virtualenv when there is one (install.sh on
 # systems where the distro packages can't be used), else the system python3.
 if [[ -x "${RETROBOX_ROOTDIR}/venv/bin/python3" ]]; then

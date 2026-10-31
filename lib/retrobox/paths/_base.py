@@ -341,6 +341,10 @@ CONFIG_DIR: Final[Path] = _resolve_dir("RETROBOX_CONFIGDIR", "XDG_CONFIG_HOME", 
 _PATHS_CONFIG: Final[CaseSensitiveConfigParser] = _load_layered_ini(
     _ini_files(SYSCONF_DIR, CONFIG_DIR)
 )
+# The environment as it was before [environ] was dumped into it: what a
+# process started afresh (see _env.fresh_environment) must inherit, so that it
+# reads retrobox.ini again instead of keeping the values loaded here.
+_STARTUP_ENVIRON: Final[dict[str, str]] = dict(os.environ)
 _bootstrap_env(_PATHS_CONFIG)
 
 DATA_DIR: Final[Path] = _resolve_dir("RETROBOX_DATADIR", "XDG_DATA_HOME", _XDG_DATA, "data_dir")

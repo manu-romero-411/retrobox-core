@@ -118,7 +118,7 @@ from ._gamepadly import (
     _GAMEPADLY_PROFILES,
     _GAMEPADLY_USER_PROFILES,
 )
-from ._env import exported_environment
+from ._env import exported_environment, fresh_environment
 
 # Child processes (emulatorlauncher, shell hooks...) inherit the very same
 # directories this process resolved.
@@ -206,6 +206,9 @@ __all__ = [
     "FRONTEND_HOME",
     "MUSIC_DIR",
     "THEMES_DIR",
+    # _env
+    "exported_environment",
+    "fresh_environment",
 ]
 
 class DirectoryCreationError(OSError):
