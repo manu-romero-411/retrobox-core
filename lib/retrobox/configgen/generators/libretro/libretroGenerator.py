@@ -23,7 +23,6 @@ from retrobox.configgen.generators.libretro.libretroPaths import (
     RETROARCH_SHADERS,
     RETROARCH_SHARE,
 )
-from retrobox.configgen.settings.unixSettings import UnixSettings
 from retrobox.configgen.utils import videoMode, vulkan
 from retrobox.configgen.utils.bezel_policy import configured_bezel
 from retrobox.paths import OVERLAYS, _SHADERS_DIR, configure_emulator, mkdir_if_not_exists
@@ -35,8 +34,13 @@ if TYPE_CHECKING:
 _logger = logging.getLogger(__name__)
 
 _GL_BACKENDS = ("gl", "glcore")
+# video drivers, best first: an unavailable one falls back to the next ones
+_BACKEND_ORDER = ("vulkan", "glcore", "gl")
+_BACKEND_ALIASES = {"opengl": "gl"}
 _MIN_GLCORE_VERSION = 3.1
 _GLCORE_VENDORS = ("nvidia", "amd")
+# cores whose hardware renderer needs an OpenGL context: without a driver
+# chosen, they start the cascade at glcore / gl instead of vulkan
 _FORCE_GLCORE_CORES = ("kronos", "mupen64plus_next", "melonds", "beetle-psx-hw")
 _FORCE_GL_CORES = ("parallel_n64", "yabasanshiro", "boom3")
 _AUTO_STATE_SUFFIX = ".auto"
@@ -87,60 +91,63 @@ def _resolve_shader(system: Emulator, rom: Path, gfx_backend: str) -> tuple[Path
     return video_shader, "noBezel" in video_shader.name
 
 
-def _gfx_backend_check(backend: str) -> str:
-    """Return the requested video backend, or "gl" if it cannot be used."""
-    if backend == "vulkan" and vulkan.is_available():
-        return "vulkan"
-    if (
-        backend == "glcore"
-        and videoMode.getGLVendor() in _GLCORE_VENDORS
-        and videoMode.getGLVersion() >= _MIN_GLCORE_VERSION
-    ):
-        return "glcore"
-    return "gl"
+def _backend_available(backend: str) -> bool:
+    """Whether RetroArch can use the video driver ``backend`` here."""
+    if backend == "vulkan":
+        return vulkan.is_available()
+    if backend == "glcore":
+        return (
+            videoMode.getGLVendor() in _GLCORE_VENDORS
+            and videoMode.getGLVersion() >= _MIN_GLCORE_VERSION
+        )
+    return True  # gl
 
 
-def _configured_backend() -> str | None:
-    """Return the video backend set in retroarch.cfg, if any."""
-    retroconfig = UnixSettings(RETROARCH_CFG, separator=" ")
-    for option in ("video_driver", "gfxbackend"):
-        backend = retroconfig.config.get("DEFAULT", option, fallback=None)
-        if backend:
-            backend = backend.strip("\"'")
-        if backend:
+def _first_available(start: str) -> str:
+    """``start`` if it is available, else the next one of _BACKEND_ORDER that is."""
+    for backend in _BACKEND_ORDER[_BACKEND_ORDER.index(start):]:
+        if _backend_available(backend):
             return backend
-    return None
+    return _BACKEND_ORDER[-1]
 
 
 def _requested_backend(system: Emulator) -> str | None:
-    """Return the video backend that was asked for, if any.
+    """The video driver chosen for the game ("gfxbackend"), if any.
 
-    The "gfxbackend" option of the game wins over the one of retroarch.cfg.
+    retroarch.cfg is not looked at: its video_driver is written by this very
+    generator on every launch, so it would only echo the previous choice.
     """
-    chosen = system.config.get_str("gfxbackend")
-    if chosen and chosen != _AUTO_BACKEND:
-        return chosen
-    return _configured_backend()
+    chosen = system.config.get_str("gfxbackend", "")
+    chosen = _BACKEND_ALIASES.get(chosen.strip().lower(), chosen.strip().lower())
+    if not chosen or chosen == _AUTO_BACKEND:
+        return None
+    if chosen not in _BACKEND_ORDER:
+        _logger.warning("unknown video driver %r, choosing one automatically", chosen)
+        return None
+    return chosen
 
 
 def gfx_backend_get(system: Emulator) -> str:
-    """Return the video backend to use: "gl", "glcore" or "vulkan".
+    """Return the video driver to use: "vulkan", "glcore" or "gl".
 
-    A backend that was asked for is used as it is (when the system supports it,
-    else "gl"); otherwise "glcore" is the default, adjusted for some cores.
+    The driver chosen for the game, or else the best one for its core
+    (vulkan, except for the cores that need OpenGL), falling back in the
+    order vulkan > glcore > gl when it isn't available. Shader presets need
+    vulkan or glcore (.slangp); gl only runs .glslp ones.
     """
-    configured = _requested_backend(system)
-    backend = _gfx_backend_check(configured or "glcore")
-    if backend == "opengl":
-        backend = "gl"
-
-    if not configured and backend in _GL_BACKENDS:
+    start = _requested_backend(system)
+    if start is None:
         core = system.config.core
-        if backend == "gl" and core in _FORCE_GLCORE_CORES:
-            backend = "glcore"
-        if backend == "glcore" and core in _FORCE_GL_CORES:
-            backend = "gl"
-
+        if core in _FORCE_GL_CORES:
+            start = "gl"
+        elif core in _FORCE_GLCORE_CORES:
+            start = "glcore"
+        else:
+            start = _BACKEND_ORDER[0]
+    backend = _first_available(start)
+    if backend != start:
+        _logger.info("video driver %s not available, using %s", start, backend)
+    _logger.debug("video driver: %s", backend)
     return backend
 
 
