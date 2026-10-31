@@ -17,6 +17,7 @@ from retrobox.paths import CONFIG_LAYERS, DEFAULTS_DIR, layered_file, ES_SETTING
 from .config import Config, SystemConfig
 from .exceptions import MissingEmulator, RetroboxException
 from .settings.unixSettings import UnixSettings
+from .utils import shadersets
 
 if TYPE_CHECKING:
     from argparse import Namespace
@@ -379,18 +380,15 @@ class Emulator:
 
         self.config = SystemConfig(system_data)
 
-        render_data: dict[str, Any] = {}
-        if (shader_set := self.config.get('shaderset')) is not self.config.MISSING:
-            if shader_set == 'none':
-                rendering_defaults = _SHADERS_DIR / 'configs' / 'rendering-defaults.yml'
-            else:
-                rendering_defaults = _SHADERS_DIR / 'configs' / shader_set / 'rendering-defaults.yml'
-                if not rendering_defaults.exists():
-                    rendering_defaults = _SHADERS_DIR / 'configs' / shader_set / 'rendering-defaults.yml'
-
-            render_data = _load_defaults(
-                args.system, rendering_defaults, rendering_defaults.with_name('rendering-defaults-arch.yml')
-            )
+        # the game's shader set; unset (AUTO) uses the default one, see shadersets
+        rendering_defaults = shadersets.rendering_defaults(
+            _SHADERS_DIR, self.config.get('shaderset', '')
+        )
+        render_data: dict[str, Any] = _load_defaults(
+            args.system,
+            rendering_defaults,
+            rendering_defaults.with_name('rendering-defaults-arch.yml'),
+        )
 
         # es only allow to update systemSettings and gameSettings in fact for the moment
 
