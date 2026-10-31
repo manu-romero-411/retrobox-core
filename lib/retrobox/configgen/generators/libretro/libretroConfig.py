@@ -71,6 +71,7 @@ class LibretroDisplay:
     bezel: str | None
     shader_bezel: bool
     gfx_backend: str
+    shader: Path | None = None  # the shader file loaded (None: no shader)
 
 
 @dataclass(frozen=True)
@@ -446,13 +447,19 @@ def _apply_input_settings(config: dict[str, object], launch: LibretroLaunch) -> 
     _apply_saturn_and_n64_inputs(config, system, controllers)
 
 
-def _apply_shader_settings(config: dict[str, object], system: Emulator) -> None:
-    """Enable or disable the video shader and the integer scaling, and the smoothing."""
+def _apply_shader_settings(config: dict[str, object], launch: LibretroLaunch) -> None:
+    """Enable or disable the video shader and the integer scaling, and the smoothing.
+
+    The shader is only enabled when the generator found its file: without a
+    rendering-defaults.yml, a shader set or an installed shader, nothing
+    about shaders is loaded and the smoothing option applies as chosen.
+    """
+    system = launch.system
     config["video_scale_integer"] = system.config.get_bool(
         "integerscale", return_values=("true", "false")
     )
     config["video_smooth"] = system.config.get_bool("smooth", return_values=("true", "false"))
-    if system.renderconfig.get("shader") not in (None, "none") and "shader" in system.renderconfig:
+    if launch.display.shader is not None:
         config["video_shader_enable"] = "true"
         config["video_smooth"] = "false"
     else:
@@ -542,7 +549,7 @@ def _apply_video_and_misc_settings(config: dict[str, object], launch: LibretroLa
         True when the ratio leaves no room for a bezel.
     """
     system = launch.system
-    _apply_shader_settings(config, system)
+    _apply_shader_settings(config, launch)
     drop_bezel = _apply_aspect_ratio(config, launch)
 
     can_rewind = system.name not in SYSTEMS_WITHOUT_REWIND and system.config.get_bool("rewind")

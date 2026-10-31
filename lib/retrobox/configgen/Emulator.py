@@ -43,33 +43,6 @@ def _dict_merge(destination: dict[str, Any], source: Mapping[str, Any]) -> None:
         else:
             destination[key] = value
 
-def _load_defaults(system_name: str, default_yml: Path, default_arch_yml: Path, /) -> dict[str, Any]:
-    try:
-        defaults = yaml.load(default_yml.read_text(), Loader=yaml.CLoader)
-    except:
-        return {}
-
-    arch_defaults: dict[str, Any] = {}
-    if default_arch_yml.exists():
-        loaded_arch_defaults = yaml.load(default_arch_yml.read_text(), Loader=yaml.CLoader)
-        if loaded_arch_defaults is not None:
-            arch_defaults = loaded_arch_defaults
-
-    config: dict[str, Any] = {}
-
-    if 'default' in defaults:
-        config = defaults['default']
-
-    if 'default' in arch_defaults:
-        _dict_merge(config, arch_defaults['default'])
-
-    if system_name in defaults:
-        _dict_merge(config, defaults[system_name])
-
-    if system_name in arch_defaults:
-        _dict_merge(config, arch_defaults[system_name])
-
-    return config
 
 def _load_system_config(system_name: str, rom: Path) -> dict[str, Any]:
     data: dict[str, Any] = {
@@ -380,14 +353,10 @@ class Emulator:
 
         self.config = SystemConfig(system_data)
 
-        # the game's shader set; unset (AUTO) uses the default one, see shadersets
-        rendering_defaults = shadersets.rendering_defaults(
-            _SHADERS_DIR, self.config.get('shaderset', '')
-        )
-        render_data: dict[str, Any] = _load_defaults(
-            args.system,
-            rendering_defaults,
-            rendering_defaults.with_name('rendering-defaults-arch.yml'),
+        # base rendering defaults + the game's shader set (AUTO: the default
+        # set), see shadersets
+        render_data: dict[str, Any] = shadersets.rendering_defaults(
+            _SHADERS_DIR, args.system, self.config.get('shaderset', '')
         )
 
         # es only allow to update systemSettings and gameSettings in fact for the moment

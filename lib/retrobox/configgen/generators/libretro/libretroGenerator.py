@@ -47,8 +47,9 @@ def _resolve_shader(system: Emulator, rom: Path, gfx_backend: str) -> tuple[Path
     """Find the video shader of the game.
 
     Returns:
-        The shader path (None if the game has no shader), and whether it is a
-        "noBezel" shader, which draws the bezel itself.
+        The shader path, and whether it is a "noBezel" shader, which draws the
+        bezel itself. (None, False) when the game has no shader, or when its
+        shader is installed nowhere: then no shader is loaded at all.
     """
     render_config = system.renderconfig
     alt_decoration = videoMode.get_alt_decoration(system.name, rom, "retroarch")
@@ -61,21 +62,28 @@ def _resolve_shader(system: Emulator, rom: Path, gfx_backend: str) -> tuple[Path
     else:
         game_shader = render_config.get("shader")
 
-    if "shader" not in render_config or game_shader is None:
+    if not isinstance(game_shader, str) or game_shader.strip() in ("", "none"):
         return None, False
 
     shader_type = "slang" if gfx_backend in ("glcore", "vulkan") else "glsl"
-    shader_filename = f"{game_shader}.{shader_type}p"
-    _logger.debug("searching shader %s", shader_filename)
-
-    if (_SHADERS_DIR / shader_filename).exists():
-        video_shader_dir = _SHADERS_DIR
-    elif (RETROARCH_SHADERS / f"shaders_{shader_type}" / shader_filename).exists():
-        video_shader_dir = RETROARCH_SHADERS / f"shaders_{shader_type}"
-    else:
-        video_shader_dir = RETROARCH_SHADERS
-
-    video_shader = video_shader_dir / shader_filename
+    shader_filename = f"{game_shader.strip()}.{shader_type}p"
+    candidates = (
+        _SHADERS_DIR,
+        RETROARCH_SHADERS / f"shaders_{shader_type}",
+        RETROARCH_SHADERS,
+    )
+    video_shader = next(
+        (directory / shader_filename for directory in candidates
+         if (directory / shader_filename).is_file()),
+        None,
+    )
+    if video_shader is None:
+        _logger.warning(
+            "Shader %s not found in %s; no shader loaded",
+            shader_filename, ", ".join(str(directory) for directory in candidates),
+        )
+        return None, False
+    _logger.debug("shader: %s", video_shader)
     return video_shader, "noBezel" in video_shader.name
 
 
@@ -209,7 +217,7 @@ class LibretroGenerator(Generator):
                 inputs=libretroConfig.LibretroInputs(playersControllers, guns, wheels),
                 # force_no_bezel and the bezel option are resolved by bezel_policy
                 display=libretroConfig.LibretroDisplay(
-                    configured_bezel(system.config), shader_bezel, gfx_backend
+                    configured_bezel(system.config), shader_bezel, gfx_backend, video_shader
                 ),
             )
             self._write_retroarch_cfg(launch)
