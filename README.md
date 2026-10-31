@@ -62,7 +62,7 @@ Other `[core]` keys: `ignore_systems` (systems hidden from the menu, e.g. `gba,p
 | `on-base-dir` | always `<data dir>/roms/<launcher>`, wherever `roms_dir` points |
 | `follow-roms-dir` | `<roms_dir>/<launcher>` (which may be `<data dir>/roms` or anywhere else) |
 
-They replace the old `--pcgames-sync` flag, which is now ignored with a warning; the `true`/`false` values of v0.0.25 still work (as `follow-roms-dir`/`none`), with a warning.
+Steam games are looked for in every library of every Steam installation found (native and Flatpak, as listed in their `libraryfolders.vdf`) and in the folders of `STEAM_LIBRARY_DIR` under `[environ]`: any number of them, `:`-separated, each one a library, a Steam installation or its `steamapps` folder. They replace the old `--pcgames-sync` flag, which is now ignored with a warning; the `true`/`false` values of v0.0.25 still work (as `follow-roms-dir`/`none`), with a warning.
 
 `lib/retrobox/paths` is the single place where all of this is resolved. Shell scripts get the result as `RETROBOX_*` variables (`PYTHONPATH=<install dir>/lib python3 -m retrobox.paths` prints them, `--get section.key` reads a merged ini value; `tools/lib/paths.sh` loads them).
 
@@ -116,6 +116,14 @@ A replacement for evmapy, now a standalone project ([`gamepadly`](https://github
 ### Settings window
 
 `retrobox --settings` (also *Settings* in the application menu entry's actions) opens a window to change, for the current user, everything `retrobox.ini` holds: hidden systems, whether missing folders are fixed, every folder (data, state, games, saves, BIOS, screenshots, recordings, bezels, shaders, cheats, overlays), the Steam / Heroic / Lutris sync, extra Steam installations, the labwc session's TTY and free environment variables. Options with a fixed set of values are menus offering only those values.
+
+It edits `~/.config/retrobox/retrobox.ini` only, keeping its comments and order, and writes nothing but what differs from the inherited value (the system-wide `/etc/retrobox` files, or the built-in default): a setting put back to that value, or reset with its button, is removed from the file. A setting that one of your own `retrobox.ini.d/*.ini` drop-ins also sets is shown read-only, since the drop-in would win. *Apply* saves, *Accept and exit* saves and closes, *Accept and open Retrobox* saves, starts Retrobox and closes, *Close* closes without saving.
+
+The window follows EmulationStation's language (or the system locale), with the same languages as the setup screen (texts in `lib/retrobox/settingsui/i18n/<language>.yaml`, English as the fallback), and runs on PySide6 or PyQt6 (`python3-pyside6.qtwidgets` / `python3-pyqt6` on Debian and Ubuntu, `python3-pyside6` on Fedora; recommended by the packages). `retrobox.settings` holds the logic (the settings as data, the layered values, the ini editing) without any Qt; `retrobox.settingsui` only displays it.
+
+### Settings window
+
+`retrobox --settings` (also *Settings* in the application menu entry's actions) opens a window to change, for the current user, everything `retrobox.ini` holds: hidden systems, whether missing folders are fixed, every folder (data, state, games, saves, BIOS, screenshots, recordings, bezels, shaders, cheats, overlays), the Steam / Heroic / Lutris sync, any number of extra Steam libraries, the labwc session's TTY and free environment variables. Options with a fixed set of values are menus offering only those values.
 
 It edits `~/.config/retrobox/retrobox.ini` only, keeping its comments and order, and writes nothing but what differs from the inherited value (the system-wide `/etc/retrobox` files, or the built-in default): a setting put back to that value, or reset with its button, is removed from the file. A setting that one of your own `retrobox.ini.d/*.ini` drop-ins also sets is shown read-only, since the drop-in would win. *Apply* saves, *Accept and exit* saves and closes, *Accept and open Retrobox* saves, starts Retrobox and closes, *Close* closes without saving.
 

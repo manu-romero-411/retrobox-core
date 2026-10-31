@@ -107,7 +107,8 @@ cat > "${DESTDIR}${SYSCONF_DIR}/retrobox.ini" <<'EOF'
 
 #[environ]
 ## Literal environment variables for every Retrobox process.
-#STEAM_LIBRARY_DIR = /srv/games/steam
+## Steam libraries besides the usual installations, ":"-separated
+#STEAM_LIBRARY_DIR = /srv/games/steam:/mnt/disk2/SteamLibrary
 EOF
 chmod 644 "${DESTDIR}${SYSCONF_DIR}/retrobox.ini"
 

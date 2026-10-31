@@ -160,16 +160,8 @@ def lutris_es_sync(target: Path) -> int:
     return total
 
 
-def _steam_libraries(steam_root: Path) -> list[Path]:
-    """
-    List the Steam library folders, the root one first and without duplicates.
-
-    Args:
-        steam_root: The Steam installation directory.
-
-    Returns:
-        The library directories (empty if libraryfolders.vdf is missing).
-    """
+def _vdf_libraries(steam_root: Path) -> list[Path]:
+    """The libraries a Steam installation lists in its libraryfolders.vdf."""
     library_vdf = next(
         (
             candidate
@@ -182,15 +174,29 @@ def _steam_libraries(steam_root: Path) -> list[Path]:
         None,
     )
     if library_vdf is None:
-        _logger.debug(
-            "Couldn't find Steam library files (libraryfolders.vdf / libraryfolder.vdf)"
-        )
         return []
-
-    _logger.debug("Steam library read from: %s", library_vdf)
+    _logger.debug("Steam libraries read from: %s", library_vdf)
     vdf_text = library_vdf.read_text(encoding="utf-8", errors="ignore")
-    paths = [steam_root, *map(Path, re.findall(r'"path"\s*"([^"]*)"', vdf_text, re.IGNORECASE))]
-    return list(dict.fromkeys(paths))
+    return [Path(p) for p in re.findall(r'"path"\s*"([^"]*)"', vdf_text, re.IGNORECASE)]
+
+
+def _steam_libraries() -> list[Path]:
+    """Every Steam library to scan, without duplicates.
+
+    The folders of STEAM_LIBRARY_DIR (any number of them, ":"-separated: a
+    library, a Steam installation or their steamapps folder), then the usual
+    Steam installations (native, Flatpak), each one followed by the libraries
+    its libraryfolders.vdf lists. Only those with a steamapps folder count.
+    """
+    found: dict[Path, Path] = {}  # resolved -> as found
+    for root in _STEAM_ROOTS:
+        root = root.parent if root.name == "steamapps" else root
+        if not (root / "steamapps").is_dir():
+            continue
+        for library in (root, *_vdf_libraries(root)):
+            if (library / "steamapps").is_dir():
+                found.setdefault(library.resolve(), library)
+    return list(found.values())
 
 
 def _sync_steam_library(steamapps_dir: Path, target: Path) -> int:
@@ -228,8 +234,9 @@ def _sync_steam_library(steamapps_dir: Path, target: Path) -> int:
 
 def steam_es_sync(target: Path) -> int:
     """
-    Scan games installed in Steam (across all libraries) and generate
-    a .steam launcher file for each one in `target`.
+    Scan games installed in Steam (across all its libraries, see
+    _steam_libraries) and generate a .steam launcher file for each one in
+    `target`.
 
     Args:
         target: Directory where .steam files will be created.
@@ -237,20 +244,13 @@ def steam_es_sync(target: Path) -> int:
     Returns:
         The number of launcher files generated.
     """
-    steam_root = next((r for r in _STEAM_ROOTS if (r / "steamapps").is_dir()), None)
-    if steam_root is None:
-        _logger.debug("Steam installation not found at: %s", _STEAM_ROOTS)
-        return 0
-
-    _logger.debug("Steam found at: %s", steam_root)
-    _clear_pcgame_links(target, "steam")
-
-    libraries = [lib / "steamapps" for lib in _steam_libraries(steam_root)]
-    libraries = [lib for lib in libraries if lib.is_dir()]
+    libraries = [library / "steamapps" for library in _steam_libraries()]
     if not libraries:
+        _logger.debug("No Steam library found at: %s", _STEAM_ROOTS)
         return 0
 
     safe_mkdir(target)
+    _clear_pcgame_links(target, "steam")
     total = 0
     for steamapps_dir in libraries:
         _logger.debug("Library: %s", steamapps_dir)

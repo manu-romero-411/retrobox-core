@@ -36,17 +36,21 @@ def _env_paths(var_name: str) -> tuple[Path, ...]:
     return tuple(Path(p).expanduser() for p in raw.split(os.pathsep) if p.strip())
 
 
+_FLATPAK_APPS = _USER_HOME / ".var" / "app"  # the data of Flatpak apps
+
 _LUTRIS_DB_CANDIDATES = (
     _XDG_DATA / "lutris" / "pga.db",
-    _USER_HOME / ".var" / "app" / "net.lutris.Lutris" / ".local" / "share" / "lutris" / "pga.db",  # Flatpak
+    _FLATPAK_APPS / "net.lutris.Lutris" / ".local" / "share" / "lutris" / "pga.db",
 )
 
 _INVALID_FILENAME_CHARS = str.maketrans({c: "-" for c in '/\\:*?"<>|'})
 
+# Where to look for Steam libraries, in this order: the STEAM_LIBRARY_DIR
+# folders (one or more, ":"-separated), then the usual installations.
 _STEAM_ROOTS = (
     *_env_paths("STEAM_LIBRARY_DIR"),
     _XDG_DATA / "Steam",
-    _USER_HOME / ".var" / "app" / "com.valvesoftware.Steam" / ".local" / "share" / "Steam",  # Flatpak
+    _FLATPAK_APPS / "com.valvesoftware.Steam" / ".local" / "share" / "Steam",
 )
 
 _SKIP_NAME_RE = re.compile(

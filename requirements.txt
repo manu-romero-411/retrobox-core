@@ -17,3 +17,5 @@ ruamel.yaml
 tomlkit
 requests
 typing_extensions
+# settings window (retrobox --settings); any Qt 6 binding works, PyQt6 too
+PySide6-Essentials
