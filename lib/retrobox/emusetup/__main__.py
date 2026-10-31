@@ -14,9 +14,9 @@ def main(argv: list[str] | None = None) -> int:
     """Parse the arguments and show the screen; returns the exit status."""
     parser = argparse.ArgumentParser(
         prog="python3 -m retrobox.emusetup",
-        description="Offer to install a missing emulator, full screen.",
+        description="Run an installer (or a download) full screen, showing its output.",
     )
-    parser.add_argument("--label", required=True, help="emulator name shown to the user")
+    parser.add_argument("--label", required=True, help="what is installed or downloaded")
     parser.add_argument(
         "--log", required=True, type=Path, help="file the installer output is saved to"
     )
@@ -37,6 +37,10 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--icon", type=Path, help="window icon (PNG)")
     parser.add_argument("--wm-class", help="X11 WM_CLASS / Wayland app_id of the window")
+    parser.add_argument(
+        "--download", action="store_true",
+        help="the command downloads LABEL: run it right away, close when it succeeds",
+    )
     parser.add_argument("command", nargs=argparse.REMAINDER, help="installer command, after --")
     args = parser.parse_args(argv)
     command = args.command[1:] if args.command[:1] == ["--"] else args.command
@@ -57,6 +61,7 @@ def main(argv: list[str] | None = None) -> int:
             language=args.lang or pick_language(),
             icon=args.icon,
             wm_class=args.wm_class,
+            download=args.download,
         )
     ).run()
 

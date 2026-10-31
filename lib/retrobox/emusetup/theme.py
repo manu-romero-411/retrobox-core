@@ -215,20 +215,24 @@ def theme_fonts(
         settings: es_settings.cfg (see read_es_settings), for the subsets.
         resource_dirs: EmulationStation's resource directories, where its
             default font lives (used for whatever the theme doesn't set).
+
+    Returns:
+        No fonts at all without a theme: the screen then uses a system font.
         language: Language code, for elements restricted with ``lang``.
     """
+    if theme is None or not (theme / _THEME_FILE).is_file():
+        return ThemeFonts()  # no theme: the screen picks a system font
     default = next(
         (d / DEFAULT_FONT for d in resource_dirs if (d / DEFAULT_FONT).is_file()), None
     )
     menu = help_font = None
-    if theme is not None and (theme / _THEME_FILE).is_file():
-        reader = _ThemeReader(theme, settings, language)
-        reader.collect_subsets(theme / _THEME_FILE)
-        # later definitions override earlier ones, as in EmulationStation
-        for views, element, source in reader.walk(theme / _THEME_FILE):
-            names = _names(element.get("name", ""))
-            if element.tag == "menuText" and "menutext" in names and "menu" in _names(views):
-                menu = reader.font_of(element, source) or menu
-            elif element.tag == "helpsystem" and "help" in names and "system" in _names(views):
-                help_font = reader.font_of(element, source) or help_font
+    reader = _ThemeReader(theme, settings, language)
+    reader.collect_subsets(theme / _THEME_FILE)
+    # later definitions override earlier ones, as in EmulationStation
+    for views, element, source in reader.walk(theme / _THEME_FILE):
+        names = _names(element.get("name", ""))
+        if element.tag == "menuText" and "menutext" in names and "menu" in _names(views):
+            menu = reader.font_of(element, source) or menu
+        elif element.tag == "helpsystem" and "help" in names and "system" in _names(views):
+            help_font = reader.font_of(element, source) or help_font
     return ThemeFonts(menu=menu or default, help=help_font or default)

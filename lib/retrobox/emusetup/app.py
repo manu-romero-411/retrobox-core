@@ -8,7 +8,12 @@ SDL_WaitEvent the rest of the time.
 
 The message and the buttons use the menu font of the EmulationStation theme
 and the hint line its help font (see ``theme``), unless they lack a glyph the
-current language needs; the texts follow the language of ``i18n``.
+current language needs or there is no theme: then the first of Noto Sans,
+Liberation Sans and DejaVu Sans that is installed. The texts follow the
+language of ``i18n``.
+
+With ``download`` (Options) there is no question: the command starts right
+away, B / Esc cancels it, and the screen closes by itself when it succeeds.
 """
 
 from __future__ import annotations
@@ -25,6 +30,7 @@ from typing import TYPE_CHECKING, NamedTuple
 import sdl2
 from PIL import Image, ImageDraw, ImageFont
 
+from . import EXIT_DECLINED, EXIT_FAILED, EXIT_INSTALLED, EXIT_UNAVAILABLE
 from .i18n import DEFAULT_LANGUAGE, Texts, texts_for
 from .keys import key_bytes
 from .pad import Action, PadInput, parse_mapping
@@ -35,11 +41,6 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
     _Font = ImageFont.FreeTypeFont | ImageFont.ImageFont
-
-EXIT_INSTALLED = 0
-EXIT_DECLINED = 10
-EXIT_FAILED = 11
-EXIT_UNAVAILABLE = 12
 
 _MAX_FPS = 30
 _CONFIRM_GUARD_MS = 300  # ignore a confirm still held from launching the game
@@ -59,6 +60,11 @@ _CLIPBOARD_TOOLS = (
     ("xsel", "--clipboard", "--input"),
 )
 
+# Without a theme font: the first of these families fontconfig really has
+# (it answers every query with *something*, hence the family check).
+_SANS_FAMILIES = ("Noto Sans", "Liberation Sans", "DejaVu Sans")
+
+# when fontconfig is missing: well-known paths (Debian, Fedora, Arch), same order
 _FONT_FALLBACKS = {
     "monospace": (
         "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf",
@@ -67,16 +73,28 @@ _FONT_FALLBACKS = {
         "/usr/share/fonts/truetype/liberation/LiberationMono-Regular.ttf",
     ),
     "sans-serif:bold": (
+        "/usr/share/fonts/truetype/noto/NotoSans-Bold.ttf",
+        "/usr/share/fonts/google-noto/NotoSans-Bold.ttf",
+        "/usr/share/fonts/noto/NotoSans-Bold.ttf",
+        "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
+        "/usr/share/fonts/liberation-sans-fonts/LiberationSans-Bold.ttf",
+        "/usr/share/fonts/liberation-sans/LiberationSans-Bold.ttf",
+        "/usr/share/fonts/TTF/LiberationSans-Bold.ttf",
         "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
         "/usr/share/fonts/dejavu-sans-fonts/DejaVuSans-Bold.ttf",
         "/usr/share/fonts/TTF/DejaVuSans-Bold.ttf",
-        "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
     ),
     "sans-serif": (
+        "/usr/share/fonts/truetype/noto/NotoSans-Regular.ttf",
+        "/usr/share/fonts/google-noto/NotoSans-Regular.ttf",
+        "/usr/share/fonts/noto/NotoSans-Regular.ttf",
+        "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+        "/usr/share/fonts/liberation-sans-fonts/LiberationSans-Regular.ttf",
+        "/usr/share/fonts/liberation-sans/LiberationSans-Regular.ttf",
+        "/usr/share/fonts/TTF/LiberationSans-Regular.ttf",
         "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
         "/usr/share/fonts/dejavu-sans-fonts/DejaVuSans.ttf",
         "/usr/share/fonts/TTF/DejaVuSans.ttf",
-        "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
     ),
 }
 
@@ -107,23 +125,40 @@ class Options:  # pylint: disable=too-many-instance-attributes
     language: str = DEFAULT_LANGUAGE
     icon: Path | None = None
     wm_class: str | None = None
+    download: bool = False
 
 
 # ---------------------------------------------------------------------- fonts
+def _fc_match(fc_match: str, pattern: str) -> tuple[str, str]:
+    """fontconfig's best match for ``pattern``: (family, file)."""
+    with contextlib.suppress(OSError, subprocess.SubprocessError):
+        output = subprocess.run(
+            [fc_match, "-f", "%{family[0]}\n%{file}", pattern],
+            capture_output=True,
+            text=True,
+            timeout=3,
+            check=False,
+        ).stdout
+        family, _, path = output.partition("\n")
+        if path and Path(path).is_file():
+            return family, path
+    return "", ""
+
+
 def _font_file(pattern: str) -> str | None:
-    """Ask fontconfig for a font file, falling back to well-known paths."""
+    """A font file for ``pattern`` (see _SANS_FAMILIES and _FONT_FALLBACKS)."""
     fc_match = shutil.which("fc-match")
     if fc_match:
-        with contextlib.suppress(OSError, subprocess.SubprocessError):
-            found = subprocess.run(
-                [fc_match, "-f", "%{file}", pattern],
-                capture_output=True,
-                text=True,
-                timeout=3,
-                check=False,
-            ).stdout.strip()
-            if found and Path(found).is_file():
-                return found
+        if pattern.startswith("sans-serif"):
+            style = pattern.partition(":")[2]
+            for family in _SANS_FAMILIES:
+                query = f"{family}:{style}" if style else family
+                found_family, path = _fc_match(fc_match, query)
+                if found_family == family:
+                    return path
+        _, path = _fc_match(fc_match, pattern)
+        if path:
+            return path
     return next((path for path in _FONT_FALLBACKS[pattern] if Path(path).is_file()), None)
 
 
@@ -303,6 +338,8 @@ class SetupScreen:  # pylint: disable=too-many-instance-attributes,too-few-publi
         try:
             if not self._open_window():
                 return EXIT_UNAVAILABLE
+            if self._options.download:
+                self._start_install()
             self._loop()
             return self._result
         finally:
@@ -412,13 +449,20 @@ class SetupScreen:  # pylint: disable=too-many-instance-attributes,too-few-publi
 
     def _layout_message(self) -> None:
         texts = self._texts
+        download = self._options.download
         message = {
             State.ASK: texts.ask,
-            State.INSTALLING: texts.installing,
-            State.FAILED: texts.failed,
+            State.INSTALLING: texts.downloading if download else texts.installing,
+            State.FAILED: texts.download_failed if download else texts.failed,
             State.DONE: texts.done,
         }[self._state].format(label=self._options.label)
-        self._message = _render_text(self._renderer, message, self._fonts.title)
+        font = self._fonts.title
+        max_width = self._width * 92 // 100
+        width = font.getlength(message)
+        if isinstance(font, ImageFont.FreeTypeFont) and width > max_width:
+            # long label or language: shrink the font until it fits the screen
+            font = font.font_variant(size=max(8, int(font.size * max_width / width)))
+        self._message = _render_text(self._renderer, message, font)
         if self._state is State.ASK:
             top = self._height * 45 // 100 - self._message.height
         else:
@@ -468,6 +512,8 @@ class SetupScreen:  # pylint: disable=too-many-instance-attributes,too-few-publi
         texts = self._texts
         if self._state is State.ASK:
             parts = (f"A / Enter: {texts.select}", f"B / Esc: {texts.cancel}")
+        elif self._state is State.INSTALLING and self._options.download:
+            parts = (f"B / Esc: {texts.cancel}", f"PgUp / PgDn: {texts.scroll}")
         elif self._state is State.INSTALLING:
             parts = (texts.type_here, f"Ctrl+Shift+C / V: {texts.copy_paste}",
                      f"PgUp / PgDn: {texts.scroll}")
@@ -593,7 +639,9 @@ class SetupScreen:  # pylint: disable=too-many-instance-attributes,too-few-publi
         the installer otherwise; PgUp/PgDn scroll and are not sent.
         """
         ctrl, shift = bool(mod & sdl2.KMOD_CTRL), bool(mod & sdl2.KMOD_SHIFT)
-        if ctrl and key == sdl2.SDLK_c and (shift or self._terminal.selection() is not None):
+        if self._options.download and key == sdl2.SDLK_ESCAPE:
+            self._cancel()
+        elif ctrl and key == sdl2.SDLK_c and (shift or self._terminal.selection() is not None):
             self._copy()
         elif (ctrl and shift and key == sdl2.SDLK_v) or (shift and key == sdl2.SDLK_INSERT):
             self._paste()
@@ -625,6 +673,8 @@ class SetupScreen:  # pylint: disable=too-many-instance-attributes,too-few-publi
         elif action is Action.BACK:
             if self._state is State.ASK:
                 self._choose("no")
+            elif self._state is State.INSTALLING and self._options.download:
+                self._cancel()
         elif action in (Action.LEFT, Action.RIGHT) and self._buttons:
             step = -1 if action is Action.LEFT else 1
             self._focus = (self._focus + step) % len(self._buttons)
@@ -641,6 +691,11 @@ class SetupScreen:  # pylint: disable=too-many-instance-attributes,too-few-publi
         elif result == "ok":
             self._result = EXIT_INSTALLED if self._state is State.DONE else EXIT_FAILED
             self._running = False
+
+    def _cancel(self) -> None:
+        """Stop a download and leave (``run`` terminates the process)."""
+        self._result = EXIT_DECLINED
+        self._running = False
 
     def _quit(self) -> None:
         """The window was closed: stop whatever is going on, without launching."""
@@ -760,6 +815,10 @@ class SetupScreen:  # pylint: disable=too-many-instance-attributes,too-few-publi
         elif status != 0:
             self._terminal.feed("\n" + self._texts.exit_status.format(status=status) + "\n")
         self._process = None
+        if status == 0 and self._options.download:
+            self._result = EXIT_INSTALLED  # nothing to confirm: go on starting
+            self._running = False
+            return
         self._set_state(State.DONE if status == 0 else State.FAILED)
 
     # -------------------------------------------------------------- drawing

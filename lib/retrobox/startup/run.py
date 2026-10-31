@@ -7,12 +7,15 @@ Installed PC games (Steam, Heroic, Lutris) are synced into their
 EmulationStation ROM directories before startup as retrobox.ini says
 ([core] steam_sync, heroic_sync, lutris_sync: none, on-base-dir or
 follow-roms-dir; none by default). If EmulationStation has no theme at all,
-the default one is installed first.
+the default one is downloaded first, and so are the default bezels on the
+very first start (see retrobox.startup.downloads), showing the progress on
+the setup screen.
 
-Accepts one flag of its own, "--update-default-theme", which downloads the
-default theme again (updating or reinstalling it) before startup. Every
-other argument is forwarded to EmulationStation untouched, except the
-retired "--pcgames-sync" flag, which is dropped with a warning.
+Accepts two flags of its own, "--update-default-theme" and
+"--update-default-bezels", which download that content again (updating or
+reinstalling it) before startup. Every other argument is forwarded to
+EmulationStation untouched, except the retired "--pcgames-sync" flag, which
+is dropped with a warning.
 """
 
 from __future__ import annotations
@@ -56,7 +59,9 @@ from retrobox.startup.frontend_conf.es_ini_generator import (
 from retrobox.startup.frontend_conf.features_list_generator import generate_es_features
 from retrobox.startup.frontend_conf.system_list_generator import generate_es_systems
 from retrobox.startup.frontend_conf.pcgames_utils import sync_pcgames
-from retrobox.startup.frontend_conf.theme_bootstrap import ensure_default_theme
+from retrobox.emusetup import EXIT_UNAVAILABLE
+from retrobox.emusetup.launch import run_screen
+from retrobox.startup.downloads import install_all, labels, mark_started, pending
 
 _logger = logging.getLogger(__name__)
 
@@ -148,13 +153,39 @@ def setup_emulationstation_config() -> None:
     generate_es_features()
 
 
-def run_emulationstation(args: list[str], update_theme: bool = False) -> int:
+def download_before_start(updates: frozenset[str]) -> None:
+    """Download the default theme / bezels if they are due (see downloads.pending).
+
+    The download runs on the setup screen, so its progress is visible (and
+    it can be cancelled); without a screen it runs here, in the log.
+
+    Args:
+        updates: Packages to download again anyway ("theme", "bezels").
+    """
+    keys = pending("theme" in updates, "bezels" in updates)
+    mark_started()
+    if not keys:
+        return
+    _logger.info("Downloading before starting: %s", labels(keys))
+    status = run_screen(
+        labels(keys),
+        LOGS / "retrobox-downloads.log",
+        [sys.executable, "-m", "retrobox.startup.downloads", *keys],
+        ["--download"],
+    )
+    if status == EXIT_UNAVAILABLE:
+        _logger.warning("No setup screen available: downloading without it")
+        install_all(keys)
+
+
+def run_emulationstation(args: list[str], updates: frozenset[str] = frozenset()) -> int:
     """
     Execute the EmulationStation binary with the provided arguments.
 
     Args:
         args: List of command-line arguments to pass to EmulationStation.
-        update_theme: Download the default theme again before starting.
+        updates: Default content to download again before starting
+            ("theme", "bezels").
 
     Returns:
         The return code of the EmulationStation process.
@@ -172,7 +203,7 @@ def run_emulationstation(args: list[str], update_theme: bool = False) -> int:
         _logger.error("EmulationStation binary not found at %s", ES_EXECUTABLE)
         return 1
 
-    ensure_default_theme(update=update_theme)
+    download_before_start(updates)
 
     # Force SDL2 to use the native Wayland backend instead of falling back
     # to XWayland/XRandR. "wayland,x11" keeps x11 as a fallback in case the
@@ -244,7 +275,11 @@ def _handle_sigterm(signum: int, frame: types.FrameType | None) -> None:
 # Replaced by the [core] *_sync keys of retrobox.ini; still dropped so that
 # old shortcuts don't pass it on to EmulationStation.
 _RETIRED_PCGAMES_SYNC_FLAG = "--pcgames-sync"
-_UPDATE_THEME_FLAG = "--update-default-theme"
+# flag -> package of retrobox.startup.downloads
+_UPDATE_FLAGS = {
+    "--update-default-theme": "theme",
+    "--update-default-bezels": "bezels",
+}
 
 
 def main() -> int:
@@ -262,8 +297,8 @@ def _main() -> int:
 
     Syncs the installed PC games as retrobox.ini says (see sync_pcgames())
     and passes every argument straight through to the "emulationstation"
-    binary, except "--update-default-theme" (consumed here) and the retired
-    "--pcgames-sync".
+    binary, except the --update-default-* flags (consumed here) and the
+    retired "--pcgames-sync".
 
     Returns:
         The exit code of the application.
@@ -272,9 +307,8 @@ def _main() -> int:
     signal.signal(signal.SIGTERM, _handle_sigterm)
 
     args = sys.argv[1:]
-    update_theme = _UPDATE_THEME_FLAG in args
-    if update_theme:
-        args = [arg for arg in args if arg != _UPDATE_THEME_FLAG]
+    updates = frozenset(_UPDATE_FLAGS[arg] for arg in args if arg in _UPDATE_FLAGS)
+    args = [arg for arg in args if arg not in _UPDATE_FLAGS]
     if _RETIRED_PCGAMES_SYNC_FLAG in args:
         args = [arg for arg in args if arg != _RETIRED_PCGAMES_SYNC_FLAG]
         _logger.warning(
@@ -299,7 +333,7 @@ def _main() -> int:
         return 1
 
     try:
-        return run_emulationstation(args, update_theme=update_theme)
+        return run_emulationstation(args, updates=updates)
     finally:
         teardown()
 

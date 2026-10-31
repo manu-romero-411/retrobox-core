@@ -104,7 +104,7 @@ def get_bezel_infos(
 
     # user-provided bezels in the bezels dir ($RETROBOX_DATADIR/decorations), then
     # the RetroBat defaults ($RETROBOX_DATADIR/decorations-default, see
-    # tools/decorations/retrobat-bezels.sh)
+    # retrobox.startup.downloads)
     candidates = _candidates_for_root(
         Path(_DECORATIONS_DIR) / bezel, rom_base, system_name, alt_decoration, True
     ) + _candidates_for_root(
@@ -446,5 +446,3 @@ def add_decorations(system: Emulator, input_png: Path, settings: BezelSettings) 
         output_png = _QRCODE_BEZEL_PNG
 
     return output_png
-
-

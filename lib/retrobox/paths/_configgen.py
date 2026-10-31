@@ -10,7 +10,14 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Final
 
-from ._base import DATA_DIR, LIBEXEC_DIR, SHARE_DIR, RUNTIME_DIR, check_env_dirs, get_configured_path
+from ._base import (
+    DATA_DIR,
+    LIBEXEC_DIR,
+    RUNTIME_DIR,
+    SHARE_DIR,
+    check_env_dirs,
+    get_configured_path,
+)
 
 EMU_FEATURES_DIR: Final = SHARE_DIR / "emu_features"
 SYSTEMS_CONF_DIR: Final = SHARE_DIR / "systems_config"
@@ -32,8 +39,8 @@ _SHADERS_DIR: Final = check_env_dirs("SHADERS_DIR", DATA_DIR / "shaders")
 _SHADERS_DEF_DIR: Final = check_env_dirs("SHADERS_DEFAULT_DIR", SHARE_DIR / "shaders")
 
 _DECORATIONS_DIR: Final = check_env_dirs("BEZELS_DIR", DATA_DIR / "decorations")
-# Default (RetroBat) bezels are not shipped: tools/decorations/retrobat-bezels.sh
-# downloads them here.
+# Default (RetroBat) bezels are not shipped: retrobox.startup.downloads
+# downloads them here on the first start (retrobox --update-default-bezels).
 _DECORATIONS_DEF_DIR: Final = check_env_dirs("BEZELS_DEFAULT_DIR", DATA_DIR / "decorations-default")
 
 _SYSTEM_SCRIPTS: Final = SHARE_DIR / "scripts"

@@ -10,40 +10,20 @@ process; the launcher just waits for its verdict.
 from __future__ import annotations
 
 import logging
-import subprocess
-import sys
 from importlib import import_module
 from pathlib import Path
 from typing import TYPE_CHECKING, Final, NamedTuple
 
 from retrobox.configgen.controller import Controller
-from retrobox.emusetup.i18n import pick_language
-from retrobox.emusetup.theme import find_theme, read_es_settings, theme_fonts
-from retrobox.paths import (
-    BIN_DIR,
-    ES_RESOURCE_DIRS,
-    ES_SETTINGS_CFG,
-    ES_WM_CLASS,
-    FRONTEND_DIR,
-    LOGS,
-    RETROBOX_ROOTDIR,
-    SHARE_DIR,
-    THEMES_DIR,
-    layered_file,
-)
+from retrobox.emusetup import EXIT_DECLINED, EXIT_FAILED
+from retrobox.emusetup.launch import run_screen
+from retrobox.paths import BIN_DIR, LOGS, RETROBOX_ROOTDIR
 
 if TYPE_CHECKING:
     from retrobox.configgen.controller import Controllers
 
 _logger = logging.getLogger(__name__)
 
-# overridable like any shared file: /etc/retrobox/<path> or ~/.config/retrobox/<path>
-BACKGROUND: Final = "emusetup/background.png"
-# the logo of the application menu entry
-ICON: Final = SHARE_DIR / "icons" / "retrobox_logo.png"
-
-_EXIT_DECLINED: Final = 10
-_EXIT_FAILED: Final = 11
 # es_input.cfg inputs the screen uses
 _PAD_INPUTS: Final = ("a", "b", "up", "down", "left", "right", "joystick1up", "joystick1left")
 
@@ -127,24 +107,6 @@ def _pad_arguments(controllers: Controllers) -> list[str]:
     return arguments
 
 
-def _look_arguments() -> list[str]:
-    """Language, fonts (from the EmulationStation theme), icon and window class."""
-    settings = read_es_settings(ES_SETTINGS_CFG)
-    language = pick_language(settings.get("Language", ""))
-    theme = find_theme((FRONTEND_DIR / "themes", THEMES_DIR), settings.get("ThemeSet", ""))
-    fonts = theme_fonts(theme, settings, ES_RESOURCE_DIRS, language)
-    _logger.debug("setup screen: language %s, theme %s, fonts %s", language, theme, fonts)
-
-    arguments = ["--lang", language, "--wm-class", ES_WM_CLASS]
-    if fonts.menu is not None:
-        arguments += ["--menu-font", str(fonts.menu)]
-    if fonts.help is not None:
-        arguments += ["--help-font", str(fonts.help)]
-    if ICON.is_file():
-        arguments += ["--icon", str(ICON)]
-    return arguments
-
-
 def ensure_emulator(emulator: str, controllers: Controllers) -> bool:
     """Offer to install ``emulator`` if it is missing.
 
@@ -164,21 +126,12 @@ def ensure_emulator(emulator: str, controllers: Controllers) -> bool:
     entry, binary = missing
     _logger.info("%s is not installed (%s): offering to install it", entry.label, binary)
 
-    command = [sys.executable, "-m", "retrobox.emusetup", "--label", entry.label,
-               "--log", str(LOGS / f"emusetup-{entry.installer}.log"), "--check", str(binary)]
-    background = layered_file(BACKGROUND)
-    if background is not None:
-        command += ["--background", str(background)]
-    command += _look_arguments()
-    command += _pad_arguments(controllers)
-    command += ["--", str(BIN_DIR / "retrobox"), "--setup-emulator", entry.installer]
-
-    try:
-        status = subprocess.run(command, check=False).returncode
-    except OSError:
-        _logger.exception("cannot start the emulator setup screen")
-        return True
-
+    status = run_screen(
+        entry.label,
+        LOGS / f"emusetup-{entry.installer}.log",
+        [str(BIN_DIR / "retrobox"), "--setup-emulator", entry.installer],
+        ["--check", str(binary), *_pad_arguments(controllers)],
+    )
     _logger.info("emulator setup screen exited with status %s", status)
     # installed, or no screen at all (any other status): go on with the launch
-    return status not in (_EXIT_DECLINED, _EXIT_FAILED)
+    return status not in (EXIT_DECLINED, EXIT_FAILED)
